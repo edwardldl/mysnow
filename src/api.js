@@ -55,6 +55,7 @@ const HOURLY_PARAMS = [
     "snowfall",
     "precipitation",
     "temperature_2m",
+    "dew_point_2m",
     "wind_speed_10m",
     "wind_direction_10m",
     "snow_depth",
@@ -63,7 +64,8 @@ const HOURLY_PARAMS = [
     "relative_humidity_2m",
     "wind_gusts_10m",
     "cloud_cover",
-    "freezing_level_height"
+    "freezing_level_height",
+    "weather_code"
 ].join(",");
 
 /**
@@ -82,6 +84,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             `&daily=sunrise,sunset` +
             `&models=best_match` +
             `&forecast_days=15` +
+            `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
         try {
@@ -106,6 +109,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
             `&forecast_days=2` +
+            `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
         // 2. Fetch ECMWF IFS (Up to 16 days, we'll fetch 15)
@@ -114,6 +118,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             `&daily=sunrise,sunset` +
             `&models=ecmwf_ifs` +
             `&forecast_days=15` +
+            `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
         try {

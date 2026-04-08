@@ -1,47 +1,132 @@
 /**
- * Calculate Dynamic SLR using the Kuchera Method with regional overrides
- * Uses 2m temperature, 10m wind speed, relative humidity, and precip rate.
- *
- * @param {number|null} temperature - 2m temperature in Celsius
- * @param {number|null} windSpeed - 10m wind speed in km/h
- * @param {number|null} relativeHumidity - 2m relative humidity in %
- * @param {number|null} liquidMM - Precipitation rate (SWE) in mm/hr
- * @returns {number} SLR ratio (0 if temp > 2°C / rain)
+ * Clamp a value between min and max
+ * @param {number} v - Value to clamp
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @returns {number} Clamped value
  */
-export function calculateKucheraSLR(temperature, windSpeed, relativeHumidity, liquidMM) {
-    // Step 1: Base SLR Calculation (Kuchera)
-    if (temperature === null || temperature > 2) return 0;
+function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+}
 
-    // Kuchera quadratic formula: SLR = 12.0 - (0.5 * T) + (0.06 * T²)
-    let slr = 12.0 - (0.5 * temperature) + (0.06 * temperature * temperature);
+/**
+ * Smooth values using 3-hour rolling average (mean3)
+ * @param {Array} arr - Array of values
+ * @param {number} i - Current index
+ * @returns {number|null} Smoothed value
+ */
+function mean3(arr, i) {
+    const vals = [arr[i - 1], arr[i], arr[i + 1]].filter(v => v != null && !isNaN(v));
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : arr[i];
+}
 
-    // Step 2: The Sierra Cement Override
-    // Apply penalty for maritime, high-moisture storms near freezing
-    if (temperature >= -3 && relativeHumidity !== null && relativeHumidity > 90) {
-        slr *= 0.65; // Riming Penalty
+/**
+ * Simple wet-bulb proxy from T, Td, RH
+ * @param {number} T - Temperature in Celsius
+ * @param {number} Td - Dew point in Celsius
+ * @param {number} RH - Relative humidity in %
+ * @returns {number} Wet-bulb temperature
+ */
+function wetBulb(T, Td, RH) {
+    return T - ((T - Td) * (1 - RH / 100) * 0.5);
+}
 
-        // Compaction Penalty: heavy precip adds additional weight
-        if (liquidMM !== null && liquidMM > 5) {
-            slr *= 0.9;
-        }
+// Snow weather codes from Open-Meteo WMO codes
+const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86]);
 
-        // Floor/Cap for Sierra Cement conditions
-        slr = Math.min(Math.max(slr, 5), 8);
+/**
+ * Check if weather code indicates snow
+ * @param {number|null} code - WMO weather code
+ * @returns {boolean}
+ */
+function isSnowWeatherCode(code) {
+    return code !== null && SNOW_CODES.has(code);
+}
+
+/**
+ * Calculate Sierra Nevada maritime SLR using Roebber 2003 with wet-bulb and maritime corrections
+ * Calibrated to avoid 14:1+ overestimates common in maritime snow.
+ *
+ * @param {Array} hourly - Array of hourly data points
+ * @returns {Array} Hourly data with calculated SLR and snowfall added
+ */
+function calculateSierraSnowfall(hourly) {
+    const n = hourly.length;
+    const out = [];
+    let prevSlr = 11.0; // Sierra typical start
+
+    // Pre-smooth drivers
+    const Tsm = [], Wsm = [], RHsm = [], Tdsm = [], Twsm = [];
+    for (let i = 0; i < n; i++) {
+        const t = mean3(hourly.map(h => h.temperature), i);
+        const w = mean3(hourly.map(h => h.windSpeed), i);
+        const rh = mean3(hourly.map(h => h.rh), i);
+        const td = mean3(hourly.map(h => h.dewPoint), i);
+        const tw = wetBulb(t, td, rh);
+        Tsm.push(t);
+        Wsm.push(w);
+        RHsm.push(rh);
+        Tdsm.push(td);
+        Twsm.push(tw);
     }
 
-    // Step 3: Wind Fracturing Adjustment
-    // Mechanical fracturing breaks dendrites and packs crystals tightly
-    if (windSpeed !== null) {
-        if (windSpeed > 80) {
-            slr = Math.min(slr, 8); // Extreme Wind Cap
-        } else if (windSpeed > 50) {
-            slr = Math.min(slr, 10); // High Wind Cap
-        } else if (windSpeed > 25) {
-            slr *= 0.85; // Moderate Wind Reduction (15%)
+    for (let i = 0; i < n; i++) {
+        const point = hourly[i];
+        const precip = point.liquidMM || 0;
+        const code = point.weatherCode;
+        const Tuse = Math.min(Twsm[i], 0);
+        const W = Wsm[i];
+        const RH = RHsm[i];
+        const Tw = Twsm[i];
+
+        let slr = null;
+        let snow = 0;
+
+        const isSnow = isSnowWeatherCode(code) && Tw < 0.5 && precip > 0;
+
+        if (isSnow) {
+            // 1. Roebber base
+            let rho = 0.0122 * Tuse * Tuse + 0.159 * Tuse + 0.141 + 0.00316 * W;
+            // 2. Sierra maritime correction
+            rho = rho * 1.18 + 0.004 * precip;
+            rho = clamp(rho, 0.05, 0.20);
+
+            const slr0 = 1 / rho;
+            const slrMaritime = slr0 * 0.85;
+
+            // 3. Ramps, not steps
+            const windPen = 3.0 * clamp((W - 3) / 6, 0, 1);
+            const rimePen = 1.5 * clamp((RH - 70) / 20, 0, 1) * clamp(precip / 3, 0, 1);
+            const coldBon = 1.0 * clamp((-10 - Tuse) / 5, 0, 1) * (RH / 100);
+
+            let slrAdj = slrMaritime - windPen - rimePen + coldBon;
+
+            // 4. Warm nose cap using wet-bulb
+            if (Tw > -2.5) {
+                const warmCap = 11 - (Tw + 2.5) * 1.2;
+                slrAdj = Math.min(slrAdj, warmCap);
+            }
+
+            // 5. Temporal stability
+            slrAdj = clamp(slrAdj, prevSlr - 1.5, prevSlr + 1.5);
+            slr = clamp(slrAdj, 6, 16);
+            prevSlr = slr;
+
+            snow = precip * slr / 10;
+        } else {
+            // Carry previous for stability but do not accumulate
+            prevSlr = clamp(prevSlr, 6, 16);
         }
+
+        out.push({
+            ...point,
+            slr: slr ? +slr.toFixed(1) : null,
+            snowfall: +snow.toFixed(1),
+            method: slr ? 'sierra_maritime' : null
+        });
     }
 
-    return slr;
+    return out;
 }
 
 export function getSLRCategory(slr, liquidMM) {
@@ -54,28 +139,28 @@ export function getSLRCategory(slr, liquidMM) {
 
 /**
  * Blend HRRR (0-48h) with ECMWF (48h+)
+ * Uses Sierra Nevada maritime SLR with wet-bulb temperature and temporal smoothing
  */
 export function blendForecasts(hrrr, ecmwf) {
-    const blended = [];
-
-    // Process hourly
+    // First pass: collect raw hourly data
+    const rawHourly = [];
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
 
     for (let i = 0; i < ecmwfTimes.length; i++) {
         const time = ecmwfTimes[i];
         const dateObj = new Date(time);
-
         const hrrrIdx = hrrrTimes.indexOf(time);
 
         let point = { time, dateObj };
 
         // Use HRRR if available, else ECMWF (or Best Match data which is passed as ecmwf)
-        if (hrrr && hrrrIdx !== -1 && hrrr.hourly.snowfall[hrrrIdx] !== null) {
+        if (hrrr && hrrrIdx !== -1) {
             point.model = 'HRRR';
             point.precipitation = hrrr.hourly.precipitation[hrrrIdx];
             point.liquidMM = point.precipitation || 0;
             point.temperature = hrrr.hourly.temperature_2m[hrrrIdx];
+            point.dewPoint = hrrr.hourly.dew_point_2m ? hrrr.hourly.dew_point_2m[hrrrIdx] : null;
             point.windSpeed = hrrr.hourly.wind_speed_10m ? hrrr.hourly.wind_speed_10m[hrrrIdx] : null;
             point.windDir = hrrr.hourly.wind_direction_10m ? hrrr.hourly.wind_direction_10m[hrrrIdx] : null;
             point.snowDepth = hrrr.hourly.snow_depth ? hrrr.hourly.snow_depth[hrrrIdx] : null;
@@ -85,47 +170,43 @@ export function blendForecasts(hrrr, ecmwf) {
             point.gusts = hrrr.hourly.wind_gusts_10m ? hrrr.hourly.wind_gusts_10m[hrrrIdx] : null;
             point.clouds = hrrr.hourly.cloud_cover ? hrrr.hourly.cloud_cover[hrrrIdx] : null;
             point.snowLevel = hrrr.hourly.freezing_level_height ? hrrr.hourly.freezing_level_height[hrrrIdx] : null;
+            point.weatherCode = hrrr.hourly.weather_code ? hrrr.hourly.weather_code[hrrrIdx] : null;
         } else {
-            point.model = hrrr ? 'ECMWF' : 'BEST'; // If hrrr is null, we are in best_match mode
+            point.model = hrrr ? 'ECMWF' : 'BEST';
             point.precipitation = ecmwf.hourly.precipitation[i];
-            // ECMWF / Best Match: prefer snowfall_water_equivalent (snow-specific liquid), fall back to precipitation
             point.liquidMM = (ecmwf.hourly.snowfall_water_equivalent && ecmwf.hourly.snowfall_water_equivalent[i] != null)
                 ? ecmwf.hourly.snowfall_water_equivalent[i]
                 : (point.precipitation || 0);
             point.temperature = ecmwf.hourly.temperature_2m[i];
+            point.dewPoint = ecmwf.hourly.dew_point_2m ? ecmwf.hourly.dew_point_2m[i] : null;
             point.windSpeed = ecmwf.hourly.wind_speed_10m ? ecmwf.hourly.wind_speed_10m[i] : null;
             point.windDir = ecmwf.hourly.wind_direction_10m ? ecmwf.hourly.wind_direction_10m[i] : null;
             point.snowDepth = ecmwf.hourly.snow_depth ? ecmwf.hourly.snow_depth[i] : null;
-            point.precipChance = ecmwf.hourly.precipitation_probability ? ecmwf.hourly.precipitation_probability[i] : null;
+            point.precipChance = ecmwf.hourly.precitation_probability ? ecmwf.hourly.precitation_probability[i] : null;
             point.feelsLike = ecmwf.hourly.apparent_temperature ? ecmwf.hourly.apparent_temperature[i] : null;
             point.rh = ecmwf.hourly.relative_humidity_2m ? ecmwf.hourly.relative_humidity_2m[i] : null;
             point.gusts = ecmwf.hourly.wind_gusts_10m ? ecmwf.hourly.wind_gusts_10m[i] : null;
             point.clouds = ecmwf.hourly.cloud_cover ? ecmwf.hourly.cloud_cover[i] : null;
             point.snowLevel = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
+            point.weatherCode = ecmwf.hourly.weather_code ? ecmwf.hourly.weather_code[i] : null;
         }
 
-        // Compute dynamic SLR and snowfall depth using Kuchera Method
-        if (point.liquidMM > 0) {
-            point.slr = calculateKucheraSLR(point.temperature, point.windSpeed, point.rh, point.liquidMM);
-            if (point.slr > 0) {
-                point.snowfall = (point.liquidMM * point.slr) / 10;
-                point.slrCategory = getSLRCategory(point.slr, point.liquidMM);
-            } else {
-                point.snowfall = 0;
-                point.slrCategory = 'rain';
-            }
+        rawHourly.push(point);
+    }
+
+    // Second pass: calculate Sierra Nevada maritime SLR with temporal smoothing
+    const blended = calculateSierraSnowfall(rawHourly);
+
+    // Apply SLR categories
+    blended.forEach(point => {
+        if (point.slr) {
+            point.slrCategory = getSLRCategory(point.slr, point.liquidMM);
         } else if (point.precipitation > 0) {
-            point.slr = null;
-            point.snowfall = 0;
             point.slrCategory = 'rain';
         } else {
-            point.slr = null;
-            point.snowfall = 0;
             point.slrCategory = null;
         }
-
-        blended.push(point);
-    }
+    });
 
     return {
         hourly: blended,
