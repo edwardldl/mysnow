@@ -1,27 +1,44 @@
 /**
- * Calculate Dynamic SLR using the Kuchera Method
- * Uses 2m temperature and 10m wind speed to derive snow fluffiness.
- * Ignores the API's pre-calculated snowfall field (which uses a fixed ~7:1 ratio).
- *
- * Formula: SLR = 12.0 - (0.5 * T) + (0.06 * T²)
- * Validation: T=-10°C → SLR ≈ 23:1, T=0°C → SLR = 12:1
+ * Calculate Dynamic SLR using the Kuchera Method with regional overrides
+ * Uses 2m temperature, 10m wind speed, relative humidity, and precip rate.
  *
  * @param {number|null} temperature - 2m temperature in Celsius
  * @param {number|null} windSpeed - 10m wind speed in km/h
+ * @param {number|null} relativeHumidity - 2m relative humidity in %
+ * @param {number|null} liquidMM - Precipitation rate (SWE) in mm/hr
  * @returns {number} SLR ratio (0 if temp > 2°C / rain)
  */
-export function calculateKucheraSLR(temperature, windSpeed) {
-    // Rain threshold
+export function calculateKucheraSLR(temperature, windSpeed, relativeHumidity, liquidMM) {
+    // Step 1: Base SLR Calculation (Kuchera)
     if (temperature === null || temperature > 2) return 0;
 
-    // Kuchera quadratic formula
+    // Kuchera quadratic formula: SLR = 12.0 - (0.5 * T) + (0.06 * T²)
     let slr = 12.0 - (0.5 * temperature) + (0.06 * temperature * temperature);
 
-    // Wind adjustment: mechanical fracturing of snow crystals
-    if (windSpeed !== null && windSpeed > 50) {
-        slr = Math.min(slr, 10); // Cap at 10:1 in extreme wind
-    } else if (windSpeed !== null && windSpeed > 25) {
-        slr *= 0.85; // 15% reduction for moderate wind
+    // Step 2: The Sierra Cement Override
+    // Apply penalty for maritime, high-moisture storms near freezing
+    if (temperature >= -3 && relativeHumidity !== null && relativeHumidity > 90) {
+        slr *= 0.65; // Riming Penalty
+
+        // Compaction Penalty: heavy precip adds additional weight
+        if (liquidMM !== null && liquidMM > 5) {
+            slr *= 0.9;
+        }
+
+        // Floor/Cap for Sierra Cement conditions
+        slr = Math.min(Math.max(slr, 5), 8);
+    }
+
+    // Step 3: Wind Fracturing Adjustment
+    // Mechanical fracturing breaks dendrites and packs crystals tightly
+    if (windSpeed !== null) {
+        if (windSpeed > 80) {
+            slr = Math.min(slr, 8); // Extreme Wind Cap
+        } else if (windSpeed > 50) {
+            slr = Math.min(slr, 10); // High Wind Cap
+        } else if (windSpeed > 25) {
+            slr *= 0.85; // Moderate Wind Reduction (15%)
+        }
     }
 
     return slr;
@@ -89,7 +106,7 @@ export function blendForecasts(hrrr, ecmwf) {
 
         // Compute dynamic SLR and snowfall depth using Kuchera Method
         if (point.liquidMM > 0) {
-            point.slr = calculateKucheraSLR(point.temperature, point.windSpeed);
+            point.slr = calculateKucheraSLR(point.temperature, point.windSpeed, point.rh, point.liquidMM);
             if (point.slr > 0) {
                 point.snowfall = (point.liquidMM * point.slr) / 10;
                 point.slrCategory = getSLRCategory(point.slr, point.liquidMM);

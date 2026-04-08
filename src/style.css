@@ -717,11 +717,11 @@ h3 {
     transform: translateX(138px);
 }
 
-#model-toggle:checked+.toggle-label .toggle-text:first-child {
-    color: var(--text-secondary);
+#model-toggle:checked+.toggle-label [data-mode="hrrr_ecmwf"] {
+    color: var(--snow-white);
 }
 
-#model-toggle:checked+.toggle-label [data-mode="best_match"] {
+#model-toggle:not(:checked)+.toggle-label [data-mode="best_match"] {
     color: var(--snow-white);
 }
 

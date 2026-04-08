@@ -12,7 +12,7 @@ import {
 import { initSnowEngine } from './utils.js';
 
 let currentLocation = 'palisades';
-let currentModelMode = 'hrrr_ecmwf';
+let currentModelMode = 'best_match';
 let currentDaysData = [];
 
 async function loadForecast() {
@@ -106,7 +106,7 @@ function initLocListeners() {
     const toggleTexts = document.querySelectorAll('.toggle-text');
 
     modelToggle.addEventListener('change', () => {
-        currentModelMode = modelToggle.checked ? 'best_match' : 'hrrr_ecmwf';
+        currentModelMode = modelToggle.checked ? 'hrrr_ecmwf' : 'best_match';
 
         // Update active class for texts
         toggleTexts.forEach(txt => {
