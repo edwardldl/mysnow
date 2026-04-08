@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySnow - My Ski Snow Forecast</title>
+    <meta name="description" content="High-resolution snow forecasts for ski resorts using HRRR and ECMWF models.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="header-content">
+                <h1>MySnow</h1>
+                <div id="location-switcher" class="location-switcher">
+                    <!-- Dynamic location buttons -->
+                </div>
+
+                <div class="add-location-container">
+                    <button id="toggle-add-form" class="btn btn-small">Add Custom Location</button>
+                    <form id="add-location-form" class="add-location-form hidden">
+                        <input type="text" id="loc-name" placeholder="Name (e.g. Mammoth)" required>
+                        <input type="number" id="loc-lat" step="any" placeholder="Lat (e.g. 37.63)" required>
+                        <input type="number" id="loc-lon" step="any" placeholder="Lon (e.g. -119.03)" required>
+                        <button type="submit" class="btn btn-small btn-primary">Save</button>
+                    </form>
+                </div>
+
+                <div class="model-toggle-container">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="model-toggle">
+                        <label for="model-toggle" class="toggle-label">
+                            <span class="toggle-text active" data-mode="hrrr_ecmwf">HRRR+ECMWF</span>
+                            <span class="toggle-text" data-mode="best_match">Best Match</span>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="location-info" class="location-info">
+                    <!-- Location info goes here -->
+                </div>
+                <div id="current-conditions" class="current-conditions">
+                    <!-- Current conditions go here -->
+                </div>
+            </div>
+            <div class="snow-particles"></div>
+        </header>
+
+        <main class="main-content">
+            <section id="loading-state" class="state-container">
+                <div class="spinner"></div>
+                <p>Fetching latest forecasts...</p>
+            </section>
+
+            <section id="error-state" class="state-container hidden">
+                <p class="error-message"></p>
+                <button id="retry-btn" class="btn">Retry</button>
+            </section>
+
+            <section id="forecast-content" class="hidden">
+                <h2 class="section-title">Upcoming Snowfall</h2>
+                <div id="day-summary-container" class="day-scroll-container">
+                    <!-- Day summary cards go here -->
+                </div>
+
+                <div id="day-detail-container" class="day-detail-container hidden">
+                    <!-- Detailed view for selected day goes here -->
+                </div>
+
+                <div class="model-info">
+                    <h3>Model Sources</h3>
+                    <div class="model-legend">
+                        <span class="badge model-hrrr">HRRR</span> 0-48 hours (3km resolution)
+                        <br>
+                        <span class="badge model-ecmwf">ECMWF</span> 3-16 days (9km resolution)
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
