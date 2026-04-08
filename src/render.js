@@ -96,6 +96,9 @@ export function renderHeader(location, currentData) {
             <span class="condition-label">Wind</span>
             <span class="condition-value chart-wind">${windStr}</span>
         </div>
+        <div style="width: 100%; margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-secondary);">
+            <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: underline;">Weather by Open-Meteo.com</a>
+        </div>
     `;
 }
 

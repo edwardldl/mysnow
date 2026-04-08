@@ -112,6 +112,118 @@ h3 {
     margin-bottom: 1rem;
 }
 
+/* Location Management & Search */
+.location-management {
+    margin-bottom: 1.5rem;
+}
+
+.location-form-consolidated {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.location-form-consolidated .search-container {
+    flex: 1;
+}
+
+#loc-coords {
+    flex: 1;
+    min-width: 0;
+}
+
+#ski-area-search, #loc-coords, .location-form-consolidated input[type="number"] {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--snow-white);
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+#ski-area-search:focus, #loc-coords:focus, .location-form-consolidated input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.search-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+    text-align: left;
+}
+
+.search-item:last-child {
+    border-bottom: none;
+}
+
+.search-item:hover {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.search-item-name {
+    font-weight: 600;
+    color: var(--snow-white);
+    display: block;
+}
+
+.search-item-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Credits Section */
+.credits-section {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.credits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+    text-align: left;
+}
+
+.credit-item h4 {
+    font-size: 0.9rem;
+    color: var(--accent-blue);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.credit-item p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
 .current-conditions {
     display: flex;
     flex-wrap: wrap;
@@ -596,7 +708,7 @@ h3 {
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-top: 0.5rem;
-    padding: 1rem;
+    padding: 0.75rem;
     background: var(--bg-element);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -611,7 +723,8 @@ h3 {
     border-radius: 4px;
     font-family: inherit;
     font-size: 0.875rem;
-    flex: 1 1 120px;
+    flex: 1;
+    margin: 0;
 }
 
 .add-location-form input:focus {

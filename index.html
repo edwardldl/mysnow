@@ -21,14 +21,15 @@
                     <!-- Dynamic location buttons -->
                 </div>
 
-                <div class="add-location-container">
-                    <button id="toggle-add-form" class="btn btn-small">Add Custom Location</button>
-                    <form id="add-location-form" class="add-location-form hidden">
-                        <input type="text" id="loc-name" placeholder="Name (e.g. Mammoth)" required>
-                        <input type="number" id="loc-lat" step="any" placeholder="Lat (e.g. 37.63)" required>
-                        <input type="number" id="loc-lon" step="any" placeholder="Lon (e.g. -119.03)" required>
-                        <button type="submit" class="btn btn-small btn-primary">Save</button>
-                    </form>
+                <div class="location-management">
+                    <div class="location-form-consolidated">
+                        <div class="search-container">
+                            <input type="text" id="ski-area-search" placeholder="Search area..." autocomplete="off">
+                            <div id="search-results" class="search-results hidden"></div>
+                        </div>
+                        <input type="text" id="loc-coords" placeholder="lat, lon">
+                        <button id="add-location-btn" class="btn btn-small btn-primary">Add</button>
+                    </div>
                 </div>
 
                 <div class="model-toggle-container">
@@ -79,6 +80,39 @@
                         <span class="badge model-hrrr">HRRR</span> 0-48 hours (3km resolution)
                         <br>
                         <span class="badge model-ecmwf">ECMWF</span> 3-16 days (9km resolution)
+                        <br>
+                        <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--accent-blue); text-decoration: none; font-weight: 500; display: inline-block; margin-top: 8px;">
+                            Weather data by Open-Meteo.com
+                        </a>
+                    </div>
+                </div>
+
+                <div class="credits-section">
+                    <h3>Credits & Legal</h3>
+                    <div class="credits-grid">
+                        <div class="credit-item">
+                            <h4>Weather Data</h4>
+                            <p>Forecast models and atmospheric data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Open-Meteo.com</a>. Licensed under CC BY 4.0.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Map Data</h4>
+                            <p>© OpenStreetMap contributors and OpenSkiMap.org.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Place Data</h4>
+                            <p>Data from Who's On First. License.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Base Map</h4>
+                            <p>Graciously provided by OpenFreeMap and © OpenMapTiles.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Terrain Data</h4>
+                            <p>High-resolution elevation data from multiple providers. Compilation by TechIdiots.net.</p>
+                            <p style="font-size: 0.7rem; opacity: 0.8; margin-top: 4px;">
+                                JAXA AW3D30 (Global), Sonny DTM (Europe), IGN RGE Alti (France), TINITALY (Italy), SwissAlti3D, BEV Austria, OpenDEM.info, and various German regional providers.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>

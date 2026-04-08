@@ -1,20 +1,11 @@
 const DEFAULT_LOCATIONS = {
     palisades: {
         id: 'palisades',
-        name: "Palisades Tahoe Area",
-        latitude: 39.1947,
-        longitude: -120.2617,
+        name: "Palisades Tahoe",
+        latitude: 39.193416,
+        longitude: -120.245402,
         elevationFt: 8100,
         elevationM: 2470,
-        isCustom: false
-    },
-    kirkwood: {
-        id: 'kirkwood',
-        name: "Kirkwood Area",
-        latitude: 38.6761,
-        longitude: -120.0685,
-        elevationFt: 8000,
-        elevationM: 2440,
         isCustom: false
     }
 };

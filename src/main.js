@@ -14,6 +14,58 @@ import { initSnowEngine } from './utils.js';
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
 let currentDaysData = [];
+let allSkiAreas = [];
+
+async function loadSkiAreas() {
+    try {
+        const response = await fetch('./ski_areas.csv');
+        const csvText = await response.text();
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',');
+
+        const nameIdx = headers.indexOf('name');
+        const countryIdx = headers.indexOf('countries');
+        const regionIdx = headers.indexOf('regions');
+        const latIdx = headers.indexOf('lat');
+        const lonIdx = headers.indexOf('lng');
+
+        // Robust CSV line parser that handles quoted commas
+        const parseCSVLine = (line) => {
+            const result = [];
+            let cell = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(cell.trim());
+                    cell = '';
+                } else {
+                    cell += char;
+                }
+            }
+            result.push(cell.trim());
+            return result;
+        };
+
+        allSkiAreas = lines.slice(1).map(line => {
+            if (!line.trim()) return null;
+            const cells = parseCSVLine(line);
+            if (cells.length < headers.length) return null;
+
+            return {
+                name: cells[nameIdx].replace(/^"|"$/g, ''),
+                country: cells[countryIdx].replace(/^"|"$/g, ''),
+                region: cells[regionIdx].replace(/^"|"$/g, ''),
+                lat: cells[latIdx],
+                lon: cells[lonIdx]
+            };
+        }).filter(area => area && area.name && area.lat && area.lon);
+    } catch (err) {
+        console.error("Failed to load ski areas CSV:", err);
+    }
+}
 
 async function loadForecast() {
     showLoading();
@@ -75,29 +127,82 @@ function updateSwitcher() {
 function initLocListeners() {
     updateSwitcher();
 
-    const toggleBtn = document.getElementById('toggle-add-form');
-    const form = document.getElementById('add-location-form');
+    const searchInput = document.getElementById('ski-area-search');
+    const searchResults = document.getElementById('search-results');
+    const coordsInput = document.getElementById('loc-coords');
+    const addBtn = document.getElementById('add-location-btn');
 
-    toggleBtn.addEventListener('click', () => {
-        form.classList.toggle('hidden');
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+
+        if (query.length < 2) {
+            searchResults.innerHTML = '';
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        const matches = allSkiAreas
+            .filter(area => area.name.toLowerCase().includes(query))
+            .slice(0, 10);
+
+        if (matches.length > 0) {
+            searchResults.innerHTML = matches.map(area => `
+                <div class="search-item" data-name="${area.name}" data-lat="${area.lat}" data-lon="${area.lon}">
+                    <span class="search-item-name">${area.name}</span>
+                    <span class="search-item-meta">${area.region ? area.region + ', ' : ''}${area.country}</span>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+        } else {
+            searchResults.innerHTML = '<div class="search-item">No matches found</div>';
+            searchResults.classList.remove('hidden');
+        }
     });
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('loc-name').value.trim();
-        const lat = document.getElementById('loc-lat').value;
-        const lon = document.getElementById('loc-lon').value;
+    searchResults.addEventListener('click', (e) => {
+        const item = e.target.closest('.search-item');
+        if (!item || !item.dataset.lat) return;
 
-        if (name && lat && lon) {
-            const id = 'custom-' + Date.now();
-            saveLocation(id, name, lat, lon);
+        const { name, lat, lon } = item.dataset;
+        
+        searchInput.value = name;
+        coordsInput.value = `${lat}, ${lon}`;
+        
+        searchResults.innerHTML = '';
+        searchResults.classList.add('hidden');
+    });
+
+    addBtn.addEventListener('click', () => {
+        const name = searchInput.value.trim();
+        const coordsRaw = coordsInput.value.trim();
+
+        let lat, lon;
+        const coords = coordsRaw.split(/[\s,]+/);
+        if (coords.length >= 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            lat = coords[0];
+            lon = coords[1];
+        }
+
+        if (lat && lon) {
+            const displayName = name || `${parseFloat(lat).toFixed(2)}, ${parseFloat(lon).toFixed(2)}`;
+            const id = 'loc-' + Date.now();
+            saveLocation(id, displayName, lat, lon);
             currentLocation = id;
+            
+            searchInput.value = '';
+            coordsInput.value = '';
+            
             updateSwitcher();
             loadForecast();
+        } else {
+            alert('Please provide valid coordinates (lat, lon).');
+        }
+    });
 
-            // reset form
-            form.reset();
-            form.classList.add('hidden');
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
         }
     });
 
@@ -123,6 +228,7 @@ function initLocListeners() {
 
 function init() {
     initSnowEngine();
+    loadSkiAreas();
     initLocListeners();
 
     document.getElementById('retry-btn').addEventListener('click', loadForecast);
