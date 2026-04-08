@@ -35,6 +35,38 @@ function wetBulb(T, Td, RH) {
 const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86]);
 
 /**
+ * Calculate ECMWF snow level using IFS-specific melting physics
+ * @param {Object} hourly - Hourly data from ECMWF
+ * @param {number} elevationM - Location elevation in meters
+ * @returns {Array} Array of snow level objects keyed by time
+ */
+function ecmwfSnowLevel(hourly, elevationM) {
+    return hourly.time.map((_, i) => {
+        const FL = hourly.freezing_level_height[i];
+        const T2 = hourly.temperature_2m[i];
+        const RH = hourly.relative_humidity_2m[i];
+        const precip = hourly.precipitation[i] || 0;
+
+        // base offset from ECMWF melting physics
+        let offset = 200; // default for IFS
+        if (RH > 80 && precip > 0.5) offset = 280;
+        else if (RH < 50) offset = 120;
+
+        // wet snow allowance from ECMWF table
+        if (T2 > 0 && T2 < 2 && precip > 0) offset += 100;
+
+        const snowLevel = FL - offset;
+        // If snowLevel is negative, add location elevation to get the "right" snow level
+        const adjustedSnowLevel = snowLevel < 0 ? snowLevel + elevationM : snowLevel;
+
+        return {
+            time: hourly.time[i],
+            snowLevel: Math.round(adjustedSnowLevel)
+        };
+    });
+}
+
+/**
  * Check if weather code indicates snow
  * @param {number|null} code - WMO weather code
  * @returns {boolean}
@@ -140,8 +172,19 @@ export function getSLRCategory(slr, liquidMM) {
 /**
  * Blend HRRR (0-48h) with ECMWF (48h+)
  * Uses Sierra Nevada maritime SLR with wet-bulb temperature and temporal smoothing
+ * @param {Object} hrrr - HRRR forecast data
+ * @param {Object} ecmwf - ECMWF/Best Match forecast data
+ * @param {Object} location - Location object with elevationM
+ * @returns {Object} Blended hourly and daily data
  */
-export function blendForecasts(hrrr, ecmwf) {
+export function blendForecasts(hrrr, ecmwf, location) {
+    // Calculate ECMWF-specific snow levels if elevation available
+    let ecmwfSnowLevels = null;
+    if (location && location.elevationM && typeof location.elevationM === 'number' && ecmwf && ecmwf.hourly) {
+        const snowLevelData = ecmwfSnowLevel(ecmwf.hourly, location.elevationM);
+        ecmwfSnowLevels = new Map(snowLevelData.map(item => [item.time, item.snowLevel]));
+    }
+
     // First pass: collect raw hourly data
     const rawHourly = [];
     const ecmwfTimes = ecmwf.hourly.time;
@@ -182,12 +225,17 @@ export function blendForecasts(hrrr, ecmwf) {
             point.windSpeed = ecmwf.hourly.wind_speed_10m ? ecmwf.hourly.wind_speed_10m[i] : null;
             point.windDir = ecmwf.hourly.wind_direction_10m ? ecmwf.hourly.wind_direction_10m[i] : null;
             point.snowDepth = ecmwf.hourly.snow_depth ? ecmwf.hourly.snow_depth[i] : null;
-            point.precipChance = ecmwf.hourly.precitation_probability ? ecmwf.hourly.precitation_probability[i] : null;
+            point.precipChance = ecmwf.hourly.precipitation_probability ? ecmwf.hourly.precipitation_probability[i] : null;
             point.feelsLike = ecmwf.hourly.apparent_temperature ? ecmwf.hourly.apparent_temperature[i] : null;
             point.rh = ecmwf.hourly.relative_humidity_2m ? ecmwf.hourly.relative_humidity_2m[i] : null;
             point.gusts = ecmwf.hourly.wind_gusts_10m ? ecmwf.hourly.wind_gusts_10m[i] : null;
             point.clouds = ecmwf.hourly.cloud_cover ? ecmwf.hourly.cloud_cover[i] : null;
-            point.snowLevel = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
+            // Use ECMWF-specific snow level calculation if available, else fall back to freezing level
+            if (ecmwfSnowLevels && ecmwfSnowLevels.has(time)) {
+                point.snowLevel = ecmwfSnowLevels.get(time);
+            } else {
+                point.snowLevel = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
+            }
             point.weatherCode = ecmwf.hourly.weather_code ? ecmwf.hourly.weather_code[i] : null;
         }
 

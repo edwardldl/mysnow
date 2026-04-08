@@ -72,7 +72,7 @@ async function loadForecast() {
     try {
         const { hrrrData, ecmwfData, location } = await fetchWeatherData(currentLocation, currentModelMode);
 
-        const blendedData = blendForecasts(hrrrData, ecmwfData);
+        const blendedData = blendForecasts(hrrrData, ecmwfData, location);
         currentDaysData = groupData(blendedData).slice(0, 14);
 
         // Find current conditions (first hour in the data)

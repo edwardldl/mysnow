@@ -114,7 +114,7 @@ export function renderDaySummaries(daysData, onSelectDay) {
 
     daysData.forEach((day, index) => {
         const card = document.createElement('div');
-        const isBigStorm = day.totalSnowfall >= 20;
+        const isBigStorm = day.totalSnowfall >= 15;
 
         // Calculate average SLR for the day to determine highlight color
         let stormHue = 210; // Default Blue
