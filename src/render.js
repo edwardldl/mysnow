@@ -274,9 +274,17 @@ export function renderDayDetail(day) {
         let tColor = h.temperature > 0 ? '#f43f5e' : '#38bdf8';
         tempStops += `<stop offset="${(index / 23) * 100}%" stop-color="${tColor}" />`;
 
+        const hour = parseInt(hrLabel.split(':')[0]);
+        let hourStyle = '';
+        if (hour >= 9 && hour <= 16) {
+            const progress = hour <= 12 ? (hour - 9) / 3.5 : 1 - ((hour - 12.5) / 3.5);
+            const hue = 45 - (progress * 15);
+            hourStyle = ` style="color: hsl(${hue}, 100%, 50%);"`;
+        }
+
         snowCols += `
             <div class="chart-col-group" style="z-index: 1;">
-                <div class="chart-time label-top">${hrLabel}${astroIcon}</div>
+                <div class="chart-time label-top"${hourStyle}>${hrLabel}${astroIcon}</div>
                 ${slrBadge}
                 <div class="chart-bar-wrapper">
                     <div class="chart-bar" style="height: ${height}px; background: ${barColor}; opacity: ${h.precipitation > 0 ? 1 : 0}"></div>
@@ -288,7 +296,7 @@ export function renderDayDetail(day) {
 
         tempCols += `
             <div class="chart-col-group" style="z-index: 1;">
-                <div class="chart-time label-top">${hrLabel}${astroIcon}</div>
+                <div class="chart-time label-top"${hourStyle}>${hrLabel}${astroIcon}</div>
                 <div class="chart-metrics" style="margin-top: 125px;">
                     <div class="metric-row" style="border: none;">
                         <span class="metric-val ${h.temperature > 0 ? 'val-hot' : 'val-cold'}" style="font-size: 1rem; font-weight: 700;">${h.temperature !== null ? h.temperature.toFixed(1) + '°C' : '--'}</span>
@@ -298,7 +306,7 @@ export function renderDayDetail(day) {
 
         metricCols += `
             <div class="chart-col-group" style="z-index: 1;">
-                <div class="chart-time label-top">${hrLabel}${astroIcon}</div>
+                <div class="chart-time label-top"${hourStyle}>${hrLabel}${astroIcon}</div>
                 <div class="chart-metrics" style="margin-top: 10px; width: 100%;">
                     ${windStr}
                     <div class="metric-row" style="width: 100%;"><span class="metric-label">Precip</span><span class="metric-val" style="color:var(--snow-white);">${h.precipitation > 0 ? h.precipitation.toFixed(1) + ' mm' : '--'}</span></div>
