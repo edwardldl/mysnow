@@ -11,6 +11,7 @@ import {
 } from './render';
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
+import skiAreasJson from './assets/ski-areas.json?raw';
 
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
@@ -27,13 +28,11 @@ interface WeatherCache {
 }
 const weatherCache = new Map<string, WeatherCache>();
 
-async function loadSkiAreas() {
+function loadSkiAreas() {
     try {
-        const baseUrl = import.meta.env.DEV ? '' : '/mysnow';
-        const response = await fetch(`${baseUrl}/ski-areas.json`);
-        allSkiAreas = await response.json();
+        allSkiAreas = JSON.parse(skiAreasJson);
     } catch (err) {
-        console.error("Failed to load ski areas data:", err);
+        console.error("Failed to parse ski areas JSON:", err);
         allSkiAreas = [];
     }
 }
@@ -344,7 +343,7 @@ async function init() {
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
-            .register('./sw.js', { scope: '/mysnow/' })
+            .register('./sw.js')
             .then((reg) => console.log('[SW] Registered:', reg.scope))
             .catch((err) => console.warn('[SW] Registration failed:', err));
     }

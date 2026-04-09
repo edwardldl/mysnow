@@ -1,9 +1,9 @@
 const CACHE_NAME = 'mysnow-v2';
 const STATIC_ASSETS = [
-  '/mysnow/',
-  '/mysnow/index.html',
-  '/mysnow/icon-192.png',
-  '/mysnow/icon-512.png',
+  './',
+  './index.html',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 // Install — pre-cache shell

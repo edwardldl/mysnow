@@ -26,7 +26,11 @@ const skiAreas = lines.slice(1).map(line => {
 });
 
 // Generate JSON for public folder
-const jsonPath = path.join(__dirname, 'public/ski-areas.json');
-fs.writeFileSync(jsonPath, JSON.stringify(skiAreas, null, 2), 'utf8');
+const publicJsonPath = path.join(__dirname, 'public/ski-areas.json');
+fs.writeFileSync(publicJsonPath, JSON.stringify(skiAreas, null, 2), 'utf8');
 
-console.log('Generated public/ski-areas.json with', skiAreas.length, 'ski areas');
+// Also generate JSON under src/assets so it can be imported as raw text by Vite
+const srcJsonPath = path.join(__dirname, 'src/assets/ski-areas.json');
+fs.writeFileSync(srcJsonPath, JSON.stringify(skiAreas, null, 2), 'utf8');
+
+console.log('Generated public/ski-areas.json and src/assets/ski-areas.json with', skiAreas.length, 'ski areas');
