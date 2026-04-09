@@ -376,6 +376,18 @@ function init() {
     const retryBtn = document.getElementById('retry-btn');
     if (retryBtn) retryBtn.addEventListener('click', loadForecast);
     loadForecast();
+    registerServiceWorker();
+}
+
+// ── PWA Service Worker Registration ──────────────────────────────────────────
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register('./sw.js', { scope: '/mysnow/' })
+            .then((reg) => console.log('[SW] Registered:', reg.scope))
+            .catch((err) => console.warn('[SW] Registration failed:', err));
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);
+

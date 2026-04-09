@@ -212,13 +212,7 @@ export function renderDayDetail(day: DayData) {
     const totalColWidth = colWidth + colGap;
     const svgWidth = 24 * totalColWidth;
 
-    const boxLeft = 9 * totalColWidth;
-    const boxWidth = 8 * totalColWidth - colGap;
-
-    const skiBoxHtml = `
-        <div class="ski-line-marker" style="left: ${boxLeft}px;"></div>
-        <div class="ski-line-marker" style="left: ${boxLeft + boxWidth + colGap}px;"></div>
-    `;
+    const skiBoxHtml = '';
 
     let snowCols = '';
     let tempCols = '';
