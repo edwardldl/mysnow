@@ -11,7 +11,6 @@ import {
 } from './render';
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
-import skiAreasCsv from './assets/ski_areas.csv?raw';
 
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
@@ -28,52 +27,14 @@ interface WeatherCache {
 }
 const weatherCache = new Map<string, WeatherCache>();
 
-function loadSkiAreas() {
+async function loadSkiAreas() {
     try {
-        const csvText = skiAreasCsv;
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',');
-
-        const nameIdx = headers.indexOf('name');
-        const countryIdx = headers.indexOf('countries');
-        const regionIdx = headers.indexOf('regions');
-        const latIdx = headers.indexOf('lat');
-        const lonIdx = headers.indexOf('lng');
-
-        const parseCSVLine = (line: string) => {
-            const result: string[] = [];
-            let cell = '';
-            let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(cell.trim());
-                    cell = '';
-                } else {
-                    cell += char;
-                }
-            }
-            result.push(cell.trim());
-            return result;
-        };
-
-        allSkiAreas = lines.slice(1).map(line => {
-            if (!line.trim()) return null;
-            const cells = parseCSVLine(line);
-            if (cells.length < headers.length) return null;
-
-            return {
-                name: cells[nameIdx].replace(/^"|"$/g, ''),
-                country: cells[countryIdx].replace(/^"|"$/g, ''),
-                region: cells[regionIdx].replace(/^"|"$/g, ''),
-                lat: cells[latIdx],
-                lon: cells[lonIdx]
-            };
-        }).filter(area => area && area.name && area.lat && area.lon);
+        const baseUrl = import.meta.env.DEV ? '' : '/mysnow';
+        const response = await fetch(`${baseUrl}/ski-areas.json`);
+        allSkiAreas = await response.json();
     } catch (err) {
-        console.error("Failed to load ski areas CSV:", err);
+        console.error("Failed to load ski areas data:", err);
+        allSkiAreas = [];
     }
 }
 
