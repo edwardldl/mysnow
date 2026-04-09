@@ -11,8 +11,8 @@ import {
 } from './render';
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
-import skiAreasUrl from './ski_areas.csv?url';
 
+const skiAreasUrl = '/ski_areas.csv';
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
 let currentSlrMode = 'kinematic';
