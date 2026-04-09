@@ -330,9 +330,9 @@ function initLocListeners() {
     });
 }
 
-function init() {
+async function init() {
     initSnowEngine();
-    loadSkiAreas();
+    await loadSkiAreas();
     initLocListeners();
     const retryBtn = document.getElementById('retry-btn');
     if (retryBtn) retryBtn.addEventListener('click', loadForecast);
