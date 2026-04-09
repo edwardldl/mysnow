@@ -12,7 +12,6 @@ import {
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
 
-const skiAreasUrl = '/ski_areas.csv';
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
 let currentSlrMode = 'kinematic';
@@ -30,51 +29,15 @@ const weatherCache = new Map<string, WeatherCache>();
 
 async function loadSkiAreas() {
     try {
-        const response = await fetch(skiAreasUrl);
-        const csvText = await response.text();
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',');
-
-        const nameIdx = headers.indexOf('name');
-        const countryIdx = headers.indexOf('countries');
-        const regionIdx = headers.indexOf('regions');
-        const latIdx = headers.indexOf('lat');
-        const lonIdx = headers.indexOf('lng');
-
-        const parseCSVLine = (line: string) => {
-            const result: string[] = [];
-            let cell = '';
-            let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(cell.trim());
-                    cell = '';
-                } else {
-                    cell += char;
-                }
-            }
-            result.push(cell.trim());
-            return result;
-        };
-
-        allSkiAreas = lines.slice(1).map(line => {
-            if (!line.trim()) return null;
-            const cells = parseCSVLine(line);
-            if (cells.length < headers.length) return null;
-
-            return {
-                name: cells[nameIdx].replace(/^"|"$/g, ''),
-                country: cells[countryIdx].replace(/^"|"$/g, ''),
-                region: cells[regionIdx].replace(/^"|"$/g, ''),
-                lat: cells[latIdx],
-                lon: cells[lonIdx]
-            };
-        }).filter(area => area && area.name && area.lat && area.lon);
+        const response = await fetch('./ski-areas.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        allSkiAreas = await response.json();
+        console.log('Loaded ski areas:', allSkiAreas.length);
     } catch (err) {
-        console.error("Failed to load ski areas CSV:", err);
+        console.error("Failed to load ski areas JSON:", err);
+        allSkiAreas = [];
     }
 }
 
@@ -370,9 +333,9 @@ function initLocListeners() {
     });
 }
 
-function init() {
+async function init() {
     initSnowEngine();
-    loadSkiAreas();
+    await loadSkiAreas();
     initLocListeners();
     const retryBtn = document.getElementById('retry-btn');
     if (retryBtn) retryBtn.addEventListener('click', loadForecast);
@@ -384,7 +347,7 @@ function init() {
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
-            .register('./sw.js', { scope: '/mysnow/' })
+            .register('./sw.js')
             .then((reg) => console.log('[SW] Registered:', reg.scope))
             .catch((err) => console.warn('[SW] Registration failed:', err));
     }
