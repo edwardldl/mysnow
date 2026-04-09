@@ -4,6 +4,7 @@ const STATIC_ASSETS = [
   './index.html',
   './icon-192.png',
   './icon-512.png',
+  './ski-areas.json',
 ];
 
 // Install — pre-cache shell

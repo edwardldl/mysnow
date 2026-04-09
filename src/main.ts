@@ -11,7 +11,6 @@ import {
 } from './render';
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
-import skiAreasJson from './assets/ski-areas.json?raw';
 
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
@@ -28,11 +27,16 @@ interface WeatherCache {
 }
 const weatherCache = new Map<string, WeatherCache>();
 
-function loadSkiAreas() {
+async function loadSkiAreas() {
     try {
-        allSkiAreas = JSON.parse(skiAreasJson);
+        const response = await fetch('./ski-areas.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        allSkiAreas = await response.json();
+        console.log('Loaded ski areas:', allSkiAreas.length);
     } catch (err) {
-        console.error("Failed to parse ski areas JSON:", err);
+        console.error("Failed to load ski areas JSON:", err);
         allSkiAreas = [];
     }
 }
