@@ -1,53 +1,50 @@
 # MySnow ❄️
 
-**MySnow** is a premium, high-resolution ski forecast web application designed specifically for California resorts. It provides a data-dense, intuitive interface for skiers and snowboarders to track upcoming storms with professional-grade accuracy.
+**MySnow** is a premium, high-resolution ski forecast engine. It provides a data-dense, physics-backed interface for trackers who need professional-grade accuracy in their snowfall predictions.
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
-To run the app automatically (Mac only):
+### Prerequisites
+- Node.js (Latest LTS)
+- npm or yarn
 
-1. **Open your Terminal.**
-2. **Navigate to the project folder:**
-   ```bash
-   cd /Users/edw4rdldl/Documents/calisnow
-   ```
-3. **Run the start script:**
-   ```bash
-   ./start.sh
-   ```
+### Installation
+1.  **Clone the repository.**
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Start Dev Server**:
+    ```bash
+    npm run dev
+    ```
+4.  **Production Build**:
+    ```bash
+    npm run build
+    ```
 
-Or start it manually:
-```bash
-python3 -m http.server 8080
-```
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
+## ✨ Core Technology
 
-## ✨ Key Features
+- **TypeScript Engine**: Fully type-safe data pipeline for robust meteorological calculations.
+- **Physics-Based Snow Level**: Dynamic estimations accounting for evaporative and diabatic cooling during heavy storms.
+- **Multi-Algorithm SLR**: Choose between Sierra Custom, Kuchera, Roebber, and Cobb models for ground-truth snow quality.
+- **Dual-Model Blending**: Fuses high-res **HRRR** (3km) with global **ECMWF** (9km).
 
-- **Dual-Model Blending**: Combines high-res **HRRR** (0-48h) for short-term precision with **ECMWF IFS** for long-range planning.
-- **Advanced Visualizations**:
-  - **Snow Activity Bars**: Color-coded by Snow-to-Liquid Ratio (SLR) using a continuous gradient (Green for Rain → Blue for Slush → Orange for Powder).
-  - **Temperature Trends**: Dynamic SVG line charts showing hourly temperature fluctuations.
-  - **9am - 4pm Markers**: Vertical laser lines highlighting the core ski day.
-- **Custom Locations**: Add your favorite secret stashes or specific coordinates. Data is persisted locally in your browser.
-- **Telemetry Grid**: Comprehensive breakdown of wind speeds (km/h), gusts, feels-like temp, snow level (meters), humidity, and cloud cover.
-- **Astro Tracking**: Integrated sunrise (🌅) and sunset (🌇) indicators for dawn patrol and après planning.
+## 📊 Key Interface Features
 
-## 📊 How to Read the Charts
+- **Segmented Toggles**: Modern UI for switching between "Best Match" models and "Snow Physics" algorithms.
+- **Triple-Layer Synchronized Charts**:
+  - **Snow Intensity**: Bar chart for accumulation.
+  - **Temperature SVG**: Fluid line graph with dynamic scaling.
+  - **Telemetry Grid**: Humidity, Precip %, Snow Level, Wind Gusts, and Cloud Cover.
+- **Premium Aesthetics**: Glassmorphism design with responsive support for tablets and mobile.
+- **Local Stash Management**: Add and persist your own secret ski spots via coordinates.
 
-- **Snow Bars**: The length represents snowfall amount (maxed at 3cm/hr for consistent scaling).
-- **SLR Gradient**: 
-  - **Green**: Rain (0-1:1)
-  - **Blue**: Wet/Heavy Snow (~5:1)
-  - **Orange**: Ultra-Light Powder (>20:1)
-- **Lines**: The glowing lines show the trend of **Temperature** and across the 24-hour cycle.
-- **Blue Laser Lines**: These mark the standard lift operating window (09:00 - 16:00).
-
-## 🛠 Technology Stack
-
-- **Frontend**: Vanilla HTML5, CSS3, JavaScript (ES6 Modules).
-- **API**: [Open-Meteo](https://open-meteo.com/) for high-resolution weather model data.
-- **Styling**: Pure CSS with Glassmorphism aesthetics and responsive design.
+## 🛠 Tech Stack
+- **Build Tool**: Vite
+- **Logic**: TypeScript ES6
+- **Styling**: Vanilla CSS3
+- **Data**: [Open-Meteo](https://open-meteo.com/)
 
 ---
 *Stay stoked and track the deep days!* 🎿🏔️

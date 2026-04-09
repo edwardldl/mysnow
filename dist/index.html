@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySnow - My Ski Snow Forecast</title>
+    <meta name="description" content="High-resolution snow forecasts for ski resorts using HRRR and ECMWF models.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/mysnow/assets/index-BAFINL8Q.js"></script>
+  <link rel="stylesheet" crossorigin href="/mysnow/assets/index-C1u5gBLa.css">
+</head>
+
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="header-content">
+                <h1>MySnow</h1>
+                <div id="location-switcher" class="location-switcher">
+                    <!-- Dynamic location buttons -->
+                </div>
+
+                <div class="location-management">
+                    <div class="location-form-consolidated">
+                        <div class="search-container">
+                            <input type="text" id="ski-area-search" placeholder="Search area..." autocomplete="off">
+                            <div id="search-results" class="search-results hidden"></div>
+                        </div>
+                        <input type="text" id="loc-coords" placeholder="lat, lon">
+                        <button id="add-location-btn" class="btn btn-small btn-primary">Add</button>
+                    </div>
+                </div>
+
+                <div class="model-toggle-container">
+                    <div class="segmented-control-container">
+                        <span class="segmented-control-label">Weather Models</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="model-toggle">
+                            <label for="model-toggle" class="toggle-label">
+                                <span class="toggle-text active" data-mode="best_match">Best Match</span>
+                                <span class="toggle-text" data-mode="hrrr_ecmwf">HRRR+ECMWF</span>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="segmented-control-container">
+                        <span class="segmented-control-label">Snow Physics Algorithm</span>
+                        <div class="segmented-control" id="slr-algorithm-group">
+                            <input type="radio" name="slr-alg" id="alg-kinematic" value="kinematic" checked>
+                            <label for="alg-kinematic">Kinematic</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-kuchera" value="kuchera">
+                            <label for="alg-kuchera">Kuchera</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-roebber" value="roebber">
+                            <label for="alg-roebber">Roebber</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-cobb" value="cobb_approx">
+                            <label for="alg-cobb">Cobb</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-std" value="standard">
+                            <label for="alg-std">10:1</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-native" value="model_native">
+                            <label for="alg-native">Native</label>
+                            
+                            <span class="selection-slider"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-data-bar">
+                    <div id="location-info" class="location-info">
+                        <!-- Location info -->
+                    </div>
+                    <div id="current-conditions" class="current-conditions">
+                        <!-- Current conditions -->
+                    </div>
+                </div>
+            </div>
+            <div class="snow-particles"></div>
+        </header>
+
+        <main class="main-content">
+            <section id="loading-state" class="state-container">
+                <div class="spinner"></div>
+                <p>Fetching latest forecasts...</p>
+            </section>
+
+            <section id="error-state" class="state-container hidden">
+                <p class="error-message"></p>
+                <button id="retry-btn" class="btn">Retry</button>
+            </section>
+
+            <section id="forecast-content" class="hidden">
+                <h2 class="section-title">Upcoming Snowfall</h2>
+                <div id="day-summary-container" class="day-scroll-container">
+                    <!-- Day summary cards go here -->
+                </div>
+
+                <div id="day-detail-container" class="day-detail-container hidden">
+                    <!-- Detailed view for selected day goes here -->
+                </div>
+
+                <div class="model-info">
+                    <h3>Model Sources</h3>
+                    <div class="model-legend">
+                        <span class="badge model-hrrr">HRRR</span> 0-48 hours (3km resolution)
+                        <br>
+                        <span class="badge model-ecmwf">ECMWF</span> 3-16 days (9km resolution)
+                        <br>
+                        <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--accent-blue); text-decoration: none; font-weight: 500; display: inline-block; margin-top: 8px;">
+                            Weather data by Open-Meteo.com
+                        </a>
+                    </div>
+                </div>
+
+                <div class="credits-section">
+                    <h3>Credits & Legal</h3>
+                    <div class="credits-grid">
+                        <div class="credit-item">
+                            <h4>Weather Data</h4>
+                            <p>Forecast models and atmospheric data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Open-Meteo.com</a>. Licensed under CC BY 4.0.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Map Data</h4>
+                            <p>© OpenStreetMap contributors and OpenSkiMap.org.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Place Data</h4>
+                            <p>Data from Who's On First. License.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Base Map</h4>
+                            <p>Graciously provided by OpenFreeMap and © OpenMapTiles.</p>
+                        </div>
+                        <div class="credit-item">
+                            <h4>Terrain Data</h4>
+                            <p>High-resolution elevation data from multiple providers. Compilation by TechIdiots.net.</p>
+                            <p style="font-size: 0.7rem; opacity: 0.8; margin-top: 4px;">
+                                JAXA AW3D30 (Global), Sonny DTM (Europe), IGN RGE Alti (France), TINITALY (Italy), SwissAlti3D, BEV Austria, OpenDEM.info, and various German regional providers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

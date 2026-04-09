@@ -1,65 +1,103 @@
 # MySnow Design Document ❄️
 
 ## 1. Overview
-**MySnow** is a premium weather visualization platform specifically tailored for winter sports enthusiasts in California. It emphasizes high-resolution snowfall data, snow quality (SLR), and detailed atmospheric telemetry to help users plan "powder days" with professional accuracy.
+**MySnow** is a professional-grade weather visualization platform tailored for winter sports enthusiasts. It focuses on high-precision snowfall physics, multi-model data blending, and advanced data density.
 
 ## 2. Goals
-- Provide localized, high-resolution snow forecasts for specific mountain coordinates.
-- Visualize snow quality using the **Kuchera Method** for dynamic SLR calculation.
-- Offer a **triple-layer synchronized view** of weather metrics (Snow, Temperature, Wind, etc.).
-- Combine multiple meteorological models (HRRR and ECMWF) for both short-term precision and long-term outlook.
+- Provide localized, high-resolution snow forecasts with professional accuracy.
+- Implement a **Multi-Algorithm Physics Engine** for Snow-to-Liquid Ratio (SLR) estimation.
+- Deploy a **Thermodynamic Snow Level Engine** accounting for atmospheric cooling.
+- Offer a **triple-layer synchronized view** of weather telemetry across 16 days.
+- Combine HRRR (high-res short-term) and ECMWF (long-range) models into a unified data stream.
 
 ## 3. Architecture
 
-### 3.1. Frontend Stack
-- **Languages**: HTML5, CSS3, JavaScript (ES6 Modules).
-- **Framework**: None (Vanilla implementation for maximum performance and control).
-- **Icons/Fonts**: Google Fonts (Inter).
-- **Visuals**: SVG for line graphs, Glassmorphism for UI elements.
-- **Data Persistence**: `localStorage` for user-defined stashes.
+### 3.1. Technical Stack
+- **Language**: TypeScript (Strict Mode).
+- **Build System**: Vite.
+- **Framework**: Vanilla (Optimized for performance).
+- **Styling**: Pure CSS with Glassmorphism and responsive design.
+- **Deployment**: GitHub Pages.
 
-### 3.2. Data Pipeline
-The application uses a "Blend & Group" strategy:
-1.  **API Fetching (`api.js`)**:
+### 3.2. Physics Engines
+
+### 3.2. Physics Engines
+
+#### 3.2.1. Precipitation Phase Determination
+Before accumulation is calculated, a phase check is performed in `src/slr.ts`:
+- **Wet-Bulb Criterion**: `If (Tw > 1.5°C) → Rain (No Snowfall)`.
+- **Soil Melting**: If `T_soil > 1.0°C`, the SLR is linearly penalized: `SLR = SLR * max(0.2, 1 - (T_soil / 5))`.
+
+#### 3.2.2. Advanced Kinematic Physical Snow Model & Densification (Default)
+The entire `sierra_custom` engine was upgraded using an 8-step thermodynamic profile integration, driven by the extraction of specific atmospheric variables directly from the 1000hPa through 300hPa layers. 
+
+**Step 1: Isolate the Snow Production Zone (SPZ)**
+- A layer $i$ is active if Relative Humidity $\ge 90\%$ AND Vertical Velocity ($\omega$) $< 0$.
+
+**Step 2: Calculate Kinematic Base Ratio ($SLR_{base}$)**
+- Assign a Layer Snow Ratio ($LSR_i$) based on Cobb-Waldstreicher mapping (interpolated): 
+  (-20°C: 18.0 | -18°C: 23.0 | -12°C: 17.5 | -4°C: 8.5 | 0°C: 3.0).
+- Kinematic Weight: $W_i = (|\omega_i| \cdot \Delta Z_i) / \sum(|\omega| \cdot \Delta Z)$.
+- Baseline SLR: $SLR_{base} = \sum (W_i \cdot LSR_i)$.
+
+**Step 3: Dynamic Riming Penalty ($F_{rime}$)**
+- In active layers between $-10^\circ\text{C}$ and $0^\circ\text{C}$, find $\omega_{warm\_max}$.
+- $F_{rime} = 1.0 - (0.50 \cdot (|\omega_{warm\_max}| / |\omega_{max}|))$.
+
+**Step 4: Wind Compaction Penalty ($F_{wind}$)**
+- Peak wind $U_{max}$ derived from 700hPa and 10m surface winds.
+- If $U_{max} > 8$ m/s, $F_{wind} = 1.0 - 0.15 \cdot \ln(U_{max} - 7)$.
+
+**Step 5: Boundary Layer Melt Penalty ($F_{melt}$)**
+- Using Wet-Bulb Temp ($T_w$): $F_{melt} = \exp(-0.5 \cdot \max(0, T_w))$ if $T_{2m} > 0^\circ\text{C}$.
+- Hard boundary constraint: SLR halves if average surface temperature $\ge 1.6^\circ\text{C}$.
+
+**Step 6: Final Kinematic SLR**
+- $SLR_{Final} = SLR_{base} \times F_{rime} \times F_{wind} \times F_{melt}$ (Capped between 1 and 30).
+
+**Step 7: Snow Accumulation (Hourly)**
+- $Snowfall_{hourly} = Precipitation \times SLR_{Final}$.
+
+**Step 8: Multilayer Densification Model**
+Instead of simple summation, the physics engine maintains a continuous state of discrete hourly snow layers over the entire storm duration:
+- **Creation**: Hourly layer $k$ initializes with $SWE_k$ and $\rho_{init} = 1000 / SLR_{Final}$.
+- **Overburden & Settling**: Older layers pack down as new layers fall on top. Density increases: $\rho_k += \rho_k \cdot (C_1 \cdot T_{factor} + C_2 \cdot SWE_{above})$.
+- **Final Depth Validation**: $HS = \sum (SWE_k / 10 \cdot (1000 / \rho_k))$.
+
+#### 3.2.3. Thermodynamic Snow Level Engine
+Located in `src/data.ts`, `calcSnowLevel` implements a physics-based approach:
+- **Baseline**: Native Freezing Level Height (FL).
+- **Evaporative Offset**: `If RH < 100: Offset += (100 - RH) * 2.5m`.
+- **Diabatic Offset**: `If P > 1.0mm/hr: Offset += min(P * 15, 200)m`.
+- **Final Result**: `SnowLevel = max(0, FL - Offset)`.
+
+#### 3.2.4. Lapse Rate Fallback
+If the model omits the 0°C isotherm (e.g., ECMWF), we derive the Freezing Level (FL):
+- `FL = Elevation + (T_2m * (1000 / 6.5))` 
+- (Based on the ICAO Standard Environmental Lapse Rate of $ 6.5^\circ\text{C} / \text{km}$).
+
+### 3.3. Data Pipeline
+1.  **API Fetching (`src/api.ts`)**:
     - Calls [Open-Meteo API](https://open-meteo.com/).
-    - Fetches **HRRR (0-48h)** for high-resolution short-term data (3km resolution).
-    - Fetches **ECMWF IFS (0-15 days)** for global coverage and long-range planning.
-2.  **Model Blending (`data.js`)**:
-    - Prioritizes HRRR data for overlapping timestamps (the first 48 hours).
-    - Falls back to ECMWF for extended forecasts.
-    - Logic: `if (hrrrDataAvailable) use HRRR else use ECMWF`.
-3.  **Data Processing (`data.js`)**:
-    - **Dynamic SLR Calculation**: Using the **Kuchera Method** quadratic formula: `SLR = 12.0 - (0.5 * T) + (0.06 * T²)`.
-    - **Wind Adjustment**: Significant wind gusts ( > 50 km/h) cap the SLR to account for mechanical fracturing of snow crystals.
-    - **Grouping**: Hourly data is grouped into daily objects and 3-hourly "windows" for summarized views.
+    - Fetches **HRRR (0-48h)** for high-resolution short-term data (3km).
+    - Fetches **ECMWF IFS (48h - 16 days)** for long-range planning (9km).
+2.  **Blending & Grouping (`src/data.ts`)**:
+    - Prioritizes HRRR for the first 48 hours.
+    - Synchronizes timestamps and fills missing data gaps.
+    - Groups hourly telemetry into daily buckets and 3-hourly analytical windows.
 
-### 3.3. UI/UX Design System
-- **Layout**: Single-page application (SPA) with Glassmorphism aesthetics (`backdrop-filter: blur()`).
-- **Triple-Layer Synchronized Charts**: Three horizontal scroll containers linked by a custom sync-scroll engine:
-    1.  **Precipitation Activity**: Bar chart showing liquid equivalent with snowfall labels.
-    2.  **Temperature Trend**: SVG line graph with dynamic scaling and colorful linear gradients (Red for hot, Blue for cold).
-    3.  **Weather Telemetry**: A dense grid of metrics including Feels Like, Snow Level, Precip %, Humidity, and Cloud Cover.
-- **Ski Day Markers**: Semi-transparent blue vertical regions highlighting the 09:00 - 16:00 window for optimal skiing hours.
+## 4. UI/UX Design System
+- **Segmented Control Toggles**: Multi-state UI for selecting physics algorithms and weather models.
+- **Unified Header Data Bar**: High-density row merging location metadata with real-time conditions (Temp, Wind, Snow Rate).
+- **Triple-Layer Synchronized Charts**: Linked horizontal scrollers for Snowfall, Temperature (SVG line), and Telemetry (dense grid).
+- **Dynamic Snow Hue**: Card colors shift from Blue (Wet) to Purple (Powder) based on the day's average SLR.
 
-## 4. Key Components (`render.js`)
-- **Location Switcher**: Interactive pills to switch between default and custom stashes.
-- **Day Summary Cards**: Scrollable list with "Big Storm" highlights for totals over 20cm, involving dynamic hue shifting based on snow quality.
-- **Sync-Scroll Engine**: A custom event handler synchronizes `scrollLeft` across all three charts, ensuring time-axis alignment.
-- **Continuous SLR Legend**: A gradient legend showing the transition from Wet (5:1) to Dry (>20:1) snow quality.
-
-## 5. Metadata and Algorithms
-### 5.1. Snow-to-Liquid Ratio (SLR) Categories
-- **Rain**: Temperature > 2°C or snowfall = 0 while precip > 0.
-- **Wet (Sierra Cement)**: SLR < 10:1.
-- **Standard**: SLR 10:1 - 15:1.
-- **Powder (Cold Smoke)**: SLR > 15:1.
-
-### 5.2. Visual Color Mapping
-- **Snow Bars**: Dynamic HSL gradient from 180° (Light Blue) through 210° (Blue) to 30° (Gold) based on SLR.
-- **Temperature SVG**: Dynamic range scaling centered on the day's median temperature with a minimum 5°C window to prevent over-scaling of minor fluctuations.
+## 5. Deployment & Development
+- **Dev Server**: `npm run dev`
+- **Build**: `npm run build`
+- **Type Checking**: `npx tsc --noEmit`
 
 ## 6. Future Roadmap
-- **UV Index Integration**: Adding solar radiation data to the telemetry layer.
-- **Map Integration**: Visualizing snowfall accumulation across the Sierra Nevada range.
-- **Alert System**: Browser notifications for high-confidence powder alerts.
-- **Historical Comparison**: Benchmarking current totals against historical storm averages.
+- **UV Index Integration**: Completed.
+- **Alert System**: Notifications for powder dump detection.
+- **Map Integration**: Sierra-wide accumulation maps.

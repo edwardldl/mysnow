@@ -82,3 +82,16 @@
 ::1 - - [08/Apr/2026 12:14:06] "GET /ski_areas.csv HTTP/1.1" 200 -
 ::1 - - [08/Apr/2026 12:14:06] code 404, message File not found
 ::1 - - [08/Apr/2026 12:14:06] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [08/Apr/2026 19:57:50] "GET / HTTP/1.1" 200 -
+::1 - - [08/Apr/2026 19:57:50] "GET /src/main.ts HTTP/1.1" 200 -
+::1 - - [08/Apr/2026 19:57:50] "GET /src/style.css HTTP/1.1" 304 -
+::1 - - [08/Apr/2026 19:58:21] "GET / HTTP/1.1" 200 -
+::1 - - [08/Apr/2026 19:58:21] "GET /src/main.ts HTTP/1.1" 200 -
+::1 - - [08/Apr/2026 19:58:21] "GET /src/style.css HTTP/1.1" 200 -
+::1 - - [08/Apr/2026 19:58:21] code 404, message File not found
+::1 - - [08/Apr/2026 19:58:21] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [08/Apr/2026 19:58:28] "GET / HTTP/1.1" 304 -
+::1 - - [08/Apr/2026 19:58:29] "GET / HTTP/1.1" 304 -
+::1 - - [08/Apr/2026 19:58:29] "GET / HTTP/1.1" 304 -
+::1 - - [08/Apr/2026 19:58:29] "GET / HTTP/1.1" 304 -
+::1 - - [08/Apr/2026 19:58:29] "GET / HTTP/1.1" 304 -

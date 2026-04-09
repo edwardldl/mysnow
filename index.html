@@ -33,21 +33,51 @@
                 </div>
 
                 <div class="model-toggle-container">
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="model-toggle">
-                        <label for="model-toggle" class="toggle-label">
-                            <span class="toggle-text active" data-mode="best_match">Best Match</span>
-                            <span class="toggle-text" data-mode="hrrr_ecmwf">HRRR+ECMWF</span>
-                            <span class="toggle-slider"></span>
-                        </label>
+                    <div class="segmented-control-container">
+                        <span class="segmented-control-label">Weather Models</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="model-toggle">
+                            <label for="model-toggle" class="toggle-label">
+                                <span class="toggle-text active" data-mode="best_match">Best Match</span>
+                                <span class="toggle-text" data-mode="hrrr_ecmwf">HRRR+ECMWF</span>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="segmented-control-container">
+                        <span class="segmented-control-label">Snow Physics Algorithm</span>
+                        <div class="segmented-control" id="slr-algorithm-group">
+                            <input type="radio" name="slr-alg" id="alg-kinematic" value="kinematic" checked>
+                            <label for="alg-kinematic">Kinematic</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-kuchera" value="kuchera">
+                            <label for="alg-kuchera">Kuchera</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-roebber" value="roebber">
+                            <label for="alg-roebber">Roebber</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-cobb" value="cobb_approx">
+                            <label for="alg-cobb">Cobb</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-std" value="standard">
+                            <label for="alg-std">10:1</label>
+                            
+                            <input type="radio" name="slr-alg" id="alg-native" value="model_native">
+                            <label for="alg-native">Native</label>
+                            
+                            <span class="selection-slider"></span>
+                        </div>
                     </div>
                 </div>
 
-                <div id="location-info" class="location-info">
-                    <!-- Location info goes here -->
-                </div>
-                <div id="current-conditions" class="current-conditions">
-                    <!-- Current conditions go here -->
+                <div class="header-data-bar">
+                    <div id="location-info" class="location-info">
+                        <!-- Location info -->
+                    </div>
+                    <div id="current-conditions" class="current-conditions">
+                        <!-- Current conditions -->
+                    </div>
                 </div>
             </div>
             <div class="snow-particles"></div>
@@ -118,7 +148,7 @@
             </section>
         </main>
     </div>
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>
