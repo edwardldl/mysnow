@@ -78,12 +78,13 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
             totalSWEAbove += layer.SWE_mm;
         }
 
-        const P = point.precipitation || 0;
+        const qpf_corrected = result.qpf_corrected !== undefined ? result.qpf_corrected : (point.precipitation || 0);
+
         // Create new layer if accumulating
-        if (result.isSnow && P > 0 && result.slr) {
+        if (result.isSnow && qpf_corrected > 0 && result.slr) {
             const rho_init = RHO_WATER / result.slr;
             snowLayersOnGround.push({
-                SWE_mm: P,
+                SWE_mm: qpf_corrected,
                 density: rho_init,
                 ageInHours: 0
             });
@@ -135,7 +136,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
 
-    const LEVELS = [1000, 925, 850, 700, 500, 300];
+    const LEVELS = [1000, 925, 850, 700, 600, 500, 400, 300];
 
     const extractLayers = (dataSource: any, index: number) => {
         if (!dataSource || !dataSource.hourly) return [];

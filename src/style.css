@@ -905,7 +905,7 @@ h3 {
     top: 4px;
     bottom: 4px;
     left: 4px;
-    width: calc((100% - 8px) / 6);
+    width: calc((100% - 8px) / 5);
     background: var(--accent-blue-dim);
     border: 1px solid var(--accent-blue);
     border-radius: 9999px;
@@ -913,13 +913,12 @@ h3 {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Slider position based on checked radio */
-.segmented-control input[value="kinematic"]:checked ~ .selection-slider { transform: translateX(0); }
-.segmented-control input[value="kuchera"]:checked ~ .selection-slider { transform: translateX(100%); }
-.segmented-control input[value="roebber"]:checked ~ .selection-slider { transform: translateX(200%); }
-.segmented-control input[value="cobb_approx"]:checked ~ .selection-slider { transform: translateX(300%); }
-.segmented-control input[value="standard"]:checked ~ .selection-slider { transform: translateX(400%); }
-.segmented-control input[value="model_native"]:checked ~ .selection-slider { transform: translateX(500%); }
+/* Slider position based on checked radio — 5 options */
+.segmented-control input[value="kinematic"]:checked ~ .selection-slider   { transform: translateX(0%); }
+.segmented-control input[value="complex"]:checked ~ .selection-slider      { transform: translateX(100%); }
+.segmented-control input[value="simple"]:checked ~ .selection-slider       { transform: translateX(200%); }
+.segmented-control input[value="standard"]:checked ~ .selection-slider     { transform: translateX(300%); }
+.segmented-control input[value="model_native"]:checked ~ .selection-slider { transform: translateX(400%); }
 
 @media (max-width: 900px) {
     .model-toggle-container {

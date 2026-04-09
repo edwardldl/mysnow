@@ -51,6 +51,8 @@ export function removeLocation(id) {
 
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 
+const PRESSURE_LEVELS = ["1000hPa", "925hPa", "850hPa", "700hPa", "600hPa", "500hPa", "400hPa", "300hPa"];
+
 const HOURLY_PARAMS = [
     "snowfall",
     "precipitation",
@@ -68,13 +70,11 @@ const HOURLY_PARAMS = [
     "weather_code",
     "wet_bulb_temperature_2m",
     "pressure_msl",
-    "temperature_850hPa",
-    "temperature_700hPa",
     "soil_temperature_0cm",
-    "temperature_1000hPa,temperature_925hPa,temperature_500hPa,temperature_300hPa",
-    "relative_humidity_1000hPa,relative_humidity_925hPa,relative_humidity_850hPa,relative_humidity_700hPa,relative_humidity_500hPa,relative_humidity_300hPa",
-    "geopotential_height_1000hPa,geopotential_height_925hPa,geopotential_height_850hPa,geopotential_height_700hPa,geopotential_height_500hPa,geopotential_height_300hPa",
-    "vertical_velocity_1000hPa,vertical_velocity_925hPa,vertical_velocity_850hPa,vertical_velocity_700hPa,vertical_velocity_500hPa,vertical_velocity_300hPa",
+    PRESSURE_LEVELS.map(l => `temperature_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `relative_humidity_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `geopotential_height_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `vertical_velocity_${l}`).join(','),
     "wind_speed_700hPa"
 ].join(",");
 
@@ -123,10 +123,9 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             `&timezone=${timezone}`;
 
         // 2. Fetch ECMWF IFS (Up to 16 days, we'll fetch 15)
-        const ecmwfUrl = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
-            `&models=ecmwf_ifs` +
             `&forecast_days=15` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;

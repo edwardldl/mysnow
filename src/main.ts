@@ -18,6 +18,15 @@ let currentSlrMode = 'kinematic';
 let currentDaysData: DayData[] = [];
 let allSkiAreas: any[] = [];
 
+// ── In-memory cache ───────────────────────────────────────────────────────────
+// Keyed by "locationKey|modelMode" so only location/model changes trigger a fetch.
+interface WeatherCache {
+    hrrrData: any;
+    ecmwfData: any;
+    location: any;
+}
+const weatherCache = new Map<string, WeatherCache>();
+
 async function loadSkiAreas() {
     try {
         const response = await fetch('./ski_areas.csv');
@@ -69,9 +78,23 @@ async function loadSkiAreas() {
 }
 
 async function loadForecast() {
-    showLoading();
+    const cacheKey = `${currentLocation}|${currentModelMode}`;
+    const isCacheHit = weatherCache.has(cacheKey);
+
+    // Only show the spinner when we actually need to hit the network
+    if (!isCacheHit) showLoading();
+
     try {
-        const { hrrrData, ecmwfData, location } = await fetchWeatherData(currentLocation, currentModelMode);
+        let cached = weatherCache.get(cacheKey);
+
+        if (!cached) {
+            // First time for this location+model — hit the network
+            const result = await fetchWeatherData(currentLocation, currentModelMode);
+            cached = { hrrrData: result.hrrrData, ecmwfData: result.ecmwfData, location: result.location };
+            weatherCache.set(cacheKey, cached);
+        }
+
+        const { hrrrData, ecmwfData, location } = cached;
 
         const blendedData = blendForecasts(hrrrData, ecmwfData, location, currentSlrMode);
         currentDaysData = groupData(blendedData).slice(0, 14);
