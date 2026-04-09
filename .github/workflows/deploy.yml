@@ -2,7 +2,7 @@ name: Deploy Vite Native Site to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "prod"]
   workflow_dispatch:
 
 # Allow only one concurrent deployment
