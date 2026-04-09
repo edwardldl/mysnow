@@ -1,4 +1,4 @@
-import { getLocations, saveLocation, removeLocation, fetchWeatherData } from './api';
+import { getLocations, saveLocation, removeLocation, fetchWeatherData, fetchHistoricalWeatherData } from './api';
 import { blendForecasts, groupData } from './data';
 import {
     showLoading,
@@ -128,6 +128,49 @@ async function loadForecast() {
     }
 }
 
+async function loadHistoricalForecast(startDate: string, model: string) {
+    // End date is 5 days after start date for a good backtest window
+    const startObj = new Date(startDate);
+    const endObj = new Date(startObj.getTime() + 5 * 24 * 60 * 60 * 1000);
+    const endDate = endObj.toISOString().split('T')[0];
+
+    showLoading();
+
+    try {
+        const result = await fetchHistoricalWeatherData(currentLocation, startDate, endDate, model);
+        const { hrrrData, ecmwfData, location } = result;
+
+        const blendedData = blendForecasts(hrrrData, ecmwfData, location, currentSlrMode);
+        currentDaysData = groupData(blendedData);
+
+        const currentData = currentDaysData.length > 0 && currentDaysData[0].hourly.length > 0
+            ? currentDaysData[0].hourly[0]
+            : null;
+
+        renderHeader(location, currentData);
+        renderDaySummaries(currentDaysData, (day) => {
+            renderDayDetail(day);
+        });
+
+        const modelLegend = document.querySelector('.model-legend');
+        if (modelLegend) {
+            const modelName = model === 'best_match' ? 'Best Match' : model === 'gfs_hrrr' ? 'HRRR' : 'ECMWF IFS';
+            modelLegend.innerHTML = `
+                <span class="badge model-best">HISTORICAL ARCHIVE (${modelName})</span> 
+                Showing archived high-resolution forecasts from <b>${startDate}</b> to <b>${endDate}</b>.
+            `;
+        }
+
+        const resetBtn = document.getElementById('hist-reset-btn');
+        if (resetBtn) resetBtn.classList.remove('hidden');
+
+        showContent();
+    } catch (err) {
+        console.error(err);
+        showError('Failed to load historical data. Ensure the date is between 2022 and yesterday.');
+    }
+}
+
 function updateSwitcher() {
     renderLocationSwitcher(
         getLocations(),
@@ -135,7 +178,17 @@ function updateSwitcher() {
         (id) => {
             currentLocation = id;
             updateSwitcher();
-            loadForecast();
+            
+            const mode = (document.querySelector('input[name="app-mode"]:checked') as HTMLInputElement)?.value;
+            if (mode === 'history') {
+                const startDate = (document.getElementById('hist-start') as HTMLInputElement)?.value;
+                const model = (document.getElementById('hist-model') as HTMLSelectElement)?.value;
+                if (startDate && model) {
+                    loadHistoricalForecast(startDate, model);
+                }
+            } else {
+                loadForecast();
+            }
         },
         (id) => {
             if (currentLocation === id) currentLocation = 'palisades';
@@ -259,10 +312,61 @@ function initLocListeners() {
             const target = e.target as HTMLInputElement;
             if (target.name === 'slr-alg') {
                 currentSlrMode = target.value;
-                loadForecast();
+                const startDate = (document.getElementById('hist-start') as HTMLInputElement)?.value;
+                const model = (document.getElementById('hist-model') as HTMLSelectElement)?.value;
+                const isHistorical = !(document.getElementById('hist-reset-btn')?.classList.contains('hidden'));
+                if (isHistorical && startDate && model) {
+                    loadHistoricalForecast(startDate, model);
+                } else {
+                    loadForecast();
+                }
             }
         });
     }
+
+    const histBtn = document.getElementById('hist-backtest-btn');
+    const histResetBtn = document.getElementById('hist-reset-btn');
+    const histDateInput = document.getElementById('hist-start') as HTMLInputElement;
+    const histModelSelect = document.getElementById('hist-model') as HTMLSelectElement;
+
+    if (histBtn) {
+        histBtn.addEventListener('click', () => {
+            const startDate = histDateInput?.value;
+            const model = histModelSelect?.value;
+            if (startDate && model) {
+                loadHistoricalForecast(startDate, model);
+            } else {
+                alert('Please select a start date and model for the backtest.');
+            }
+        });
+    }
+
+    const appModeRadios = document.querySelectorAll('input[name="app-mode"]');
+    const forecastControls = document.getElementById('forecast-controls');
+    const historyControls = document.getElementById('history-controls');
+
+    appModeRadios.forEach(radio => {
+        radio.addEventListener('change', (e: Event) => {
+            const mode = (e.target as HTMLInputElement).value;
+            if (mode === 'history') {
+                document.body.classList.add('mode-history');
+                forecastControls?.classList.add('hidden');
+                historyControls?.classList.remove('hidden');
+                
+                // If a date is already picked, load it, otherwise show a default or stay loading
+                const startDate = histDateInput?.value;
+                const model = histModelSelect?.value;
+                if (startDate && model) {
+                    loadHistoricalForecast(startDate, model);
+                }
+            } else {
+                document.body.classList.remove('mode-history');
+                forecastControls?.classList.remove('hidden');
+                historyControls?.classList.add('hidden');
+                loadForecast();
+            }
+        });
+    });
 }
 
 function init() {

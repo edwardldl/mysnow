@@ -982,3 +982,127 @@ h3 {
 .val-cold {
     color: var(--accent-blue)
 }
+/* Historical Backtest UI */
+.historical-container {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.historical-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.date-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--snow-white);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* App Mode Switcher (Forecast vs History) */
+.app-mode-switcher {
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.mode-segmented-control {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    padding: 2px;
+    position: relative;
+    width: 400px;
+    max-width: 100%;
+}
+
+.mode-segmented-control input {
+    display: none;
+}
+
+.mode-segmented-control label {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mode-segmented-control input:checked + label {
+    color: var(--snow-white);
+}
+
+.mode-slider {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+    border-radius: 9999px;
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.mode-segmented-control input[id="mode-history"]:checked ~ .mode-slider {
+    transform: translateX(100%);
+}
+
+.controls-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.mode-section {
+    transition: opacity 0.3s ease;
+}
+
+/* History specific theme */
+body.mode-history {
+    background-image: radial-gradient(circle at top left, #1e1b4b 0%, #0f172a 100%);
+}
+
+body.mode-history .mode-slider {
+    background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+}
+
+.historical-container {
+    border-color: rgba(244, 63, 94, 0.3);
+}

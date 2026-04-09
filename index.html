@@ -17,6 +17,16 @@
         <header class="header">
             <div class="header-content">
                 <h1>MySnow</h1>
+                <div class="app-mode-switcher">
+                    <div class="mode-segmented-control">
+                        <input type="radio" name="app-mode" id="mode-forecast" value="forecast" checked>
+                        <label for="mode-forecast">Forecast</label>
+                        <input type="radio" name="app-mode" id="mode-history" value="history">
+                        <label for="mode-history">History Backtest</label>
+                        <span class="mode-slider"></span>
+                    </div>
+                </div>
+
                 <div id="location-switcher" class="location-switcher">
                     <!-- Dynamic location buttons -->
                 </div>
@@ -32,16 +42,33 @@
                     </div>
                 </div>
 
-                <div class="model-toggle-container">
-                    <div class="segmented-control-container">
-                        <span class="segmented-control-label">Weather Models</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="model-toggle">
-                            <label for="model-toggle" class="toggle-label">
-                                <span class="toggle-text active" data-mode="best_match">Best Match</span>
-                                <span class="toggle-text" data-mode="hrrr_ecmwf">HRRR+ECMWF</span>
-                                <span class="toggle-slider"></span>
-                            </label>
+                <div class="controls-container">
+                    <div id="forecast-controls" class="mode-section">
+                        <div class="segmented-control-container">
+                            <span class="segmented-control-label">Weather Models</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="model-toggle">
+                                <label for="model-toggle" class="toggle-label">
+                                    <span class="toggle-text active" data-mode="best_match">Best Match</span>
+                                    <span class="toggle-text" data-mode="hrrr_ecmwf">HRRR+ECMWF</span>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="history-controls" class="mode-section hidden">
+                        <div class="segmented-control-container historical-container">
+                            <span class="segmented-control-label">Backtest Parameters</span>
+                            <div class="historical-form">
+                                <select id="hist-model" class="date-input">
+                                    <option value="best_match">Best Match</option>
+                                    <option value="ecmwf_ifs">ECMWF IFS (9km)</option>
+                                    <option value="gfs_hrrr">HRRR (3km)</option>
+                                </select>
+                                <input type="date" id="hist-start" class="date-input">
+                                <button id="hist-backtest-btn" class="btn btn-small">Run Backtest</button>
+                            </div>
                         </div>
                     </div>
 

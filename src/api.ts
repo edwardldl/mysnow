@@ -50,6 +50,7 @@ export function removeLocation(id) {
 }
 
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
+const HISTORICAL_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast";
 
 const PRESSURE_LEVELS = ["1000hPa", "925hPa", "850hPa", "700hPa", "600hPa", "500hPa", "400hPa", "300hPa"];
 
@@ -153,5 +154,40 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             console.error("Error fetching weather data:", error);
             throw error;
         }
+    }
+}
+
+/**
+ * Fetch historical data from Open-Meteo Historical Forecast API
+ */
+export async function fetchHistoricalWeatherData(locationKey, startDate, endDate, model = 'best_match') {
+    const locs = getLocations();
+    const loc = locs[locationKey];
+    if (!loc) throw new Error("Invalid location");
+
+    const timezone = "America/Los_Angeles";
+
+    const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        `&start_date=${startDate}&end_date=${endDate}` +
+        `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+        `&daily=sunrise,sunset` +
+        `&models=${model}` +
+        `&wind_speed_unit=ms` +
+        `&timezone=${timezone}`;
+
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Historical fetch failed: ${res.status}`);
+        const data = await res.json();
+
+        if (loc.isCustom && data.elevation) {
+            loc.elevationM = Math.round(data.elevation);
+            loc.elevationFt = Math.round(data.elevation * 3.28084);
+        }
+
+        return { hrrrData: null, ecmwfData: data, location: loc, mode: 'historical', model };
+    } catch (error) {
+        console.error("Error fetching historical data:", error);
+        throw error;
     }
 }
