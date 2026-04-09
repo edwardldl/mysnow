@@ -915,7 +915,7 @@ h3 {
     top: 4px;
     bottom: 4px;
     left: 4px;
-    width: calc((100% - 8px) / 5);
+    width: calc((100% - 8px) / 6);
     background: var(--accent-blue-dim);
     border: 1px solid var(--accent-blue);
     border-radius: 9999px;
@@ -936,12 +936,16 @@ h3 {
     transform: translateX(200%);
 }
 
-.segmented-control input[value="standard"]:checked~.selection-slider {
+.segmented-control input[value="legacy"]:checked~.selection-slider {
     transform: translateX(300%);
 }
 
-.segmented-control input[value="model_native"]:checked~.selection-slider {
+.segmented-control input[value="standard"]:checked~.selection-slider {
     transform: translateX(400%);
+}
+
+.segmented-control input[value="model_native"]:checked~.selection-slider {
+    transform: translateX(500%);
 }
 
 /* Extended Chart Metrics */

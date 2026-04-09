@@ -192,6 +192,38 @@ function advancedSLR(hour: OpenMeteoHour, QPF: number): { slr: number; isSnow: b
     return { slr: SLR_Base * C_wind * M_sfc, isSnow: true };
 }
 
+// ── Legacy algorithm (Kuchera quadratic formula from prod branch) ───────────
+//
+// Reference: Kuchera (2000). "Snow-to-Liquid Ratio Forecasting."
+// Formula: SLR = 12.0 - (0.5 * T) + (0.06 * T²)
+// Adjustments: Mechanical fracturing (wind compaction).
+
+/**
+ * Legacy SLR — Kuchera empirical quadratic curve + basic wind penalty.
+ * Used in the 'legacy' method from the original prod/src/data.js.
+ */
+function legacySLR(hour: OpenMeteoHour, QPF: number): { slr: number; isSnow: boolean } {
+    if (QPF <= 0) return { slr: 0, isSnow: false };
+
+    const T = hour.temperature_2m;
+    const windSpeed = hour.wind_speed_10m ?? 0;
+
+    // Rain threshold
+    if (T > 2) return { slr: 0, isSnow: false };
+
+    // Kuchera quadratic formula
+    let slr = 12.0 - (0.5 * T) + (0.06 * T * T);
+
+    // Wind adjustment: mechanical fracturing of snow crystals
+    if (windSpeed > 50) {
+        slr = Math.min(slr, 10); // Cap at 10:1 in extreme wind
+    } else if (windSpeed > 25) {
+        slr *= 0.85; // 15% reduction for moderate wind
+    }
+
+    return { slr: Math.round(clamp(slr, 1, 30) * 10) / 10, isSnow: true };
+}
+
 // ── Simple algorithm (Roebber climatological piecewise curve) ─────────────────
 //
 // Reference: Roebber et al. (2003). "Improving Snowfall Forecasting by
@@ -471,6 +503,11 @@ export function calcSLR(hour: OpenMeteoHour, method: string = 'kinematic', prevS
     } else if (method === 'complex') {
         out.qpf_corrected = P;
         const result = sophisticatedSLR(hour, P);
+        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
+
+    } else if (method === 'legacy') {
+        out.qpf_corrected = P;
+        const result = legacySLR(hour, P);
         if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
 
     } else {
