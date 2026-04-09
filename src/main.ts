@@ -11,13 +11,13 @@ import {
 } from './render';
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
-import skiAreasUrl from './ski_areas.csv?url';
 
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
 let currentSlrMode = 'kinematic';
 let currentDaysData: DayData[] = [];
 let allSkiAreas: any[] = [];
+const skiAreasUrl = '/ski_areas.csv';
 
 // ── In-memory cache ───────────────────────────────────────────────────────────
 // Keyed by "locationKey|modelMode" so only location/model changes trigger a fetch.
