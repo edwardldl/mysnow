@@ -11,7 +11,7 @@ import {
 } from './render';
 import { initSnowEngine } from './utils';
 import { DayData } from './types';
-import skiAreasUrl from './assets/ski_areas.csv?url';
+import skiAreasCsv from './assets/ski_areas.csv?raw';
 
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
@@ -28,10 +28,9 @@ interface WeatherCache {
 }
 const weatherCache = new Map<string, WeatherCache>();
 
-async function loadSkiAreas() {
+function loadSkiAreas() {
     try {
-        const response = await fetch(skiAreasUrl);
-        const csvText = await response.text();
+        const csvText = skiAreasCsv;
         const lines = csvText.split('\n');
         const headers = lines[0].split(',');
 
