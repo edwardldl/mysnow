@@ -178,7 +178,7 @@ function updateSwitcher() {
         (id) => {
             currentLocation = id;
             updateSwitcher();
-            
+
             const mode = (document.querySelector('input[name="app-mode"]:checked') as HTMLInputElement)?.value;
             if (mode === 'history') {
                 const startDate = (document.getElementById('hist-start') as HTMLInputElement)?.value;
@@ -244,10 +244,10 @@ function initLocListeners() {
             if (!item || !item.dataset.lat) return;
 
             const { name, lat, lon } = item.dataset;
-            
+
             if (searchInput) searchInput.value = name || '';
             if (coordsInput) coordsInput.value = `${lat}, ${lon}`;
-            
+
             searchResults.innerHTML = '';
             searchResults.classList.add('hidden');
         });
@@ -270,10 +270,10 @@ function initLocListeners() {
                 const id = 'loc-' + Date.now();
                 saveLocation(id, displayName, lat, lon);
                 currentLocation = id;
-                
+
                 if (searchInput) searchInput.value = '';
                 if (coordsInput) coordsInput.value = '';
-                
+
                 updateSwitcher();
                 loadForecast();
             } else {
@@ -352,7 +352,7 @@ function initLocListeners() {
                 document.body.classList.add('mode-history');
                 forecastControls?.classList.add('hidden');
                 historyControls?.classList.remove('hidden');
-                
+
                 // If a date is already picked, load it, otherwise show a default or stay loading
                 const startDate = histDateInput?.value;
                 const model = histModelSelect?.value;

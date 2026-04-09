@@ -12,7 +12,7 @@
 
     --slr-wet: #3b82f6;
     --slr-std: #e2e8f0;
-    --slr-powder: #67e8f9;
+    --slr-powder: #fb923c;
 
     --font-sans: 'Inter', sans-serif;
 }
@@ -139,7 +139,9 @@ h3 {
     min-width: 0;
 }
 
-#ski-area-search, #loc-coords, .location-form-consolidated input[type="number"] {
+#ski-area-search,
+#loc-coords,
+.location-form-consolidated input[type="number"] {
     width: 100%;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -151,7 +153,9 @@ h3 {
     transition: all 0.2s ease;
 }
 
-#ski-area-search:focus, #loc-coords:focus, .location-form-consolidated input[type="number"]:focus {
+#ski-area-search:focus,
+#loc-coords:focus,
+.location-form-consolidated input[type="number"]:focus {
     outline: none;
     border-color: var(--accent-blue);
     background: rgba(0, 0, 0, 0.4);
@@ -362,8 +366,13 @@ h3 {
 }
 
 .day-card.selected {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    border-color: var(--day-color, var(--accent-blue));
+    box-shadow: 0 0 20px rgba(var(--day-color-rgb, 56, 189, 248), 0.3);
+}
+
+.day-card.powder-day {
+    position: relative;
+    border-color: var(--day-color, #fb923c);
 }
 
 .day-card.big-storm {
@@ -378,10 +387,12 @@ h3 {
         box-shadow: 0 0 0 0 rgba(var(--storm-color-rgb, 56, 189, 248), 0.7);
         filter: brightness(1);
     }
+
     70% {
         box-shadow: 0 0 0 15px rgba(var(--storm-color-rgb, 56, 189, 248), 0);
         filter: brightness(1.1);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(var(--storm-color-rgb, 56, 189, 248), 0);
         filter: brightness(1);
@@ -393,11 +404,13 @@ h3 {
         transform: scale(1);
         filter: brightness(1);
     }
+
     50% {
         transform: scale(1.01);
         filter: brightness(1.1);
         text-shadow: 0 0 8px var(--storm-color, rgba(56, 189, 248, 0.4));
     }
+
     100% {
         transform: scale(1);
         filter: brightness(1);
@@ -413,6 +426,12 @@ h3 {
 
 .storm-badge {
     background: var(--storm-color, var(--accent-blue)) !important;
+    color: #000 !important;
+    border: none !important;
+}
+
+.powder-badge {
+    background: var(--day-color, #fb923c) !important;
     color: #000 !important;
     border: none !important;
 }
@@ -887,7 +906,7 @@ h3 {
     min-width: 80px;
 }
 
-.segmented-control input:checked + label {
+.segmented-control input:checked+label {
     color: var(--snow-white);
 }
 
@@ -905,11 +924,25 @@ h3 {
 }
 
 /* Slider position based on checked radio — 5 options */
-.segmented-control input[value="kinematic"]:checked ~ .selection-slider   { transform: translateX(0%); }
-.segmented-control input[value="complex"]:checked ~ .selection-slider      { transform: translateX(100%); }
-.segmented-control input[value="simple"]:checked ~ .selection-slider       { transform: translateX(200%); }
-.segmented-control input[value="standard"]:checked ~ .selection-slider     { transform: translateX(300%); }
-.segmented-control input[value="model_native"]:checked ~ .selection-slider { transform: translateX(400%); }
+.segmented-control input[value="kinematic"]:checked~.selection-slider {
+    transform: translateX(0%);
+}
+
+.segmented-control input[value="complex"]:checked~.selection-slider {
+    transform: translateX(100%);
+}
+
+.segmented-control input[value="simple"]:checked~.selection-slider {
+    transform: translateX(200%);
+}
+
+.segmented-control input[value="standard"]:checked~.selection-slider {
+    transform: translateX(300%);
+}
+
+.segmented-control input[value="model_native"]:checked~.selection-slider {
+    transform: translateX(400%);
+}
 
 /* Extended Chart Metrics */
 
@@ -955,6 +988,7 @@ h3 {
 .val-cold {
     color: var(--accent-blue)
 }
+
 /* Historical Backtest UI */
 .historical-container {
     background: rgba(255, 255, 255, 0.03);
@@ -1033,7 +1067,7 @@ h3 {
     letter-spacing: 0.05em;
 }
 
-.mode-segmented-control input:checked + label {
+.mode-segmented-control input:checked+label {
     color: var(--snow-white);
 }
 
@@ -1050,7 +1084,7 @@ h3 {
     box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
 }
 
-.mode-segmented-control input[id="mode-history"]:checked ~ .mode-slider {
+.mode-segmented-control input[id="mode-history"]:checked~.mode-slider {
     transform: translateX(100%);
 }
 
@@ -1155,6 +1189,7 @@ body.mode-history .mode-slider {
    ══════════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 600px) {
+
     /* ── Global Mobile Adjustments ── */
     body {
         -webkit-tap-highlight-color: transparent;
@@ -1466,7 +1501,7 @@ body.mode-history .mode-slider {
     }
 
     /* SLR Legend — stack on mobile */
-    .day-detail-container > div:first-child + div {
+    .day-detail-container>div:first-child+div {
         flex-wrap: wrap;
         gap: 6px;
         font-size: 0.7rem;
@@ -1561,8 +1596,10 @@ body.mode-history .mode-slider {
    ══════════════════════════════════════════════════════════════════════════════ */
 
 @media (hover: none) and (pointer: coarse) {
+
     /* Larger tap targets on touch devices */
-    .btn, .btn-small {
+    .btn,
+    .btn-small {
         min-height: 44px;
         min-width: 44px;
         display: inline-flex;
@@ -1653,4 +1690,3 @@ body.mode-history .mode-slider {
         overscroll-behavior-y: contain;
     }
 }
-

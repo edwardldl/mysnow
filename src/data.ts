@@ -127,7 +127,7 @@ export function getSLRCategory(slr: number | null, liquidMM: number): string | n
     if ((!slr || slr <= 0) && liquidMM > 0) return 'rain';
     if (!slr || slr <= 0) return null;
     if (slr < 10) return 'wet';
-    if (slr <= 15) return 'std';
+    if (slr < 15) return 'std';
     return 'powder';
 }
 

@@ -79,7 +79,7 @@ export function renderHeader(location: Location, currentData: BlendedHour | null
 
     let slrBadge = '';
     if (slr) {
-        const type = slr < 10 ? 'Wet' : (slr > 15 ? 'Powder' : 'Standard');
+        const type = slr < 10 ? 'Wet' : (slr >= 15 ? 'Powder' : 'Standard');
         slrBadge = `<span class="badge slr-badge slr-${type.toLowerCase()}">${slr.toFixed(1)}:1 ${type}</span>`;
     }
 
@@ -118,38 +118,40 @@ export function renderDaySummaries(daysData: DayData[], onSelectDay: (day: DayDa
     daysData.forEach((day, index) => {
         const card = document.createElement('div');
         const isBigStorm = day.totalSnowfall >= 15;
-
-        // Calculate average SLR for the day to determine highlight color
-        let stormHue = 210; // Default Blue
-        if (isBigStorm && day.totalPrecipitation > 0) {
-            const avgSlr = (day.totalSnowfall * 10) / day.totalPrecipitation;
-            const mappedSlr = Math.min(Math.max(avgSlr, 5), 20);
-            if (mappedSlr <= 10) {
-                stormHue = 180 + ((mappedSlr - 5) / 5) * 30;
-            } else {
-                stormHue = (210 + ((mappedSlr - 10) / 10) * 180) % 360;
-            }
+        const avgSlr = day.totalPrecipitation > 0 ? (day.totalSnowfall * 10) / day.totalPrecipitation : 0;
+        
+        // Calculate SLR-based color for this day
+        const mappedSlr = Math.min(Math.max(avgSlr, 5), 15);
+        let slrHue;
+        if (mappedSlr <= 10) {
+            slrHue = 180 + ((mappedSlr - 5) / 5) * 30; // Cyan to Blue
+        } else {
+            slrHue = (210 + ((mappedSlr - 10) / 5) * 180) % 360; // Blue to Orange (via Purple/Red)
         }
 
-        card.className = `day-card ${index === 0 ? 'selected' : ''} ${isBigStorm ? 'big-storm' : ''}`;
+        const s = 1, l = 0.6;
+        const c = (1 - Math.abs(2 * l - 1)) * s;
+        const x = c * (1 - Math.abs((slrHue / 60) % 2 - 1));
+        const m = l - c / 2;
+        let r, g, b;
+        if (slrHue < 60) { r = c; g = x; b = 0; }
+        else if (slrHue < 120) { r = x; g = c; b = 0; }
+        else if (slrHue < 180) { r = 0; g = c; b = x; }
+        else if (slrHue < 240) { r = 0; g = x; b = c; }
+        else if (slrHue < 300) { r = x; g = 0; b = c; }
+        else { r = c; g = 0; b = x; }
+        
+        const rgbStr = `${Math.round((r + m) * 255)}, ${Math.round((g + m) * 255)}, ${Math.round((b + m) * 255)}`;
+        
+        card.className = `day-card ${index === 0 ? 'selected' : ''} ${isBigStorm ? 'big-storm' : ''} ${avgSlr >= 15 ? 'powder-day' : ''}`;
+        card.style.setProperty('--day-color', `hsl(${slrHue}, 100%, 60%)`);
+        card.style.setProperty('--day-color-rgb', rgbStr);
+
+        // Keep --storm-color for backward compatibility with existing styles if needed, 
+        // though we're transitioning to --day-color
         if (isBigStorm) {
-            card.style.setProperty('--storm-color', `hsl(${stormHue}, 100%, 60%)`);
-            card.style.setProperty('--storm-color-rgb', stormHue === 210 ? '56, 189, 248' : ''); 
-            if (stormHue !== 210) {
-                const s = 1;
-                const l = 0.6;
-                const c = (1 - Math.abs(2 * l - 1)) * s;
-                const x = c * (1 - Math.abs((stormHue / 60) % 2 - 1));
-                const m = l - c / 2;
-                let r, g, b;
-                if (stormHue < 60) { r = c; g = x; b = 0; }
-                else if (stormHue < 120) { r = x; g = c; b = 0; }
-                else if (stormHue < 180) { r = 0; g = c; b = x; }
-                else if (stormHue < 240) { r = 0; g = x; b = c; }
-                else if (stormHue < 300) { r = x; g = 0; b = c; }
-                else { r = c; g = 0; b = x; }
-                card.style.setProperty('--storm-color-rgb', `${Math.round((r + m) * 255)}, ${Math.round((g + m) * 255)}, ${Math.round((b + m) * 255)}`);
-            }
+            card.style.setProperty('--storm-color', `hsl(${slrHue}, 100%, 60%)`);
+            card.style.setProperty('--storm-color-rgb', rgbStr);
         }
 
         const modelClass = day.modelString === 'HRRR' ? 'model-hrrr' :
@@ -166,6 +168,7 @@ export function renderDaySummaries(daysData: DayData[], onSelectDay: (day: DayDa
             <div class="badge-container">
                 <span class="badge ${modelClass}">${modelLabel}</span>
                 ${isBigStorm ? '<span class="badge storm-badge">STORM</span>' : ''}
+                ${avgSlr >= 15 ? '<span class="badge powder-badge">POWDER</span>' : ''}
             </div>
         `;
 
@@ -235,15 +238,15 @@ export function renderDayDetail(day: DayData) {
 
         if (h.slrCategory === 'rain') {
             slrText = 'Rain';
-            barColor = 'hsl(120, 70%, 50%)'; 
+            barColor = 'hsl(120, 70%, 50%)';
         } else if (h.slr !== null) {
             slrText = h.slr.toFixed(1) + ':1';
-            let mappedSlr = Math.min(Math.max(h.slr, 5), 20);
+            let mappedSlr = Math.min(Math.max(h.slr, 5), 15);
             let hue;
             if (mappedSlr <= 10) {
                 hue = 180 + ((mappedSlr - 5) / 5) * 30;
             } else {
-                hue = (210 + ((mappedSlr - 10) / 10) * 180) % 360;
+                hue = (210 + ((mappedSlr - 10) / 5) * 180) % 360;
             }
             barColor = `hsl(${hue}, 100%, 60%)`;
         }
@@ -347,7 +350,7 @@ export function renderDayDetail(day: DayData) {
             <div style="font-weight: 600;">SLR Quality:</div>
             <div>Wet (5:1)</div>
             <div style="width: 150px; height: 12px; background: linear-gradient(to right, hsl(180, 100%, 60%), hsl(210, 100%, 60%), hsl(300, 100%, 60%), hsl(30, 100%, 60%)); border-radius: 6px;"></div>
-            <div>Dry (>20:1)</div>
+            <div>Dry (≥15:1)</div>
         </div>
     `;
 
