@@ -76,18 +76,29 @@ export function showContent() {
 }
 
 export function renderHeader(location: Location, currentData: BlendedHour | null) {
+    const elevFt = location.elevationFt !== undefined ? location.elevationFt : '--';
+    const elevM = location.elevationM !== undefined ? location.elevationM : '--';
+    
     els.locationInfo.innerHTML = `
-        ${location.latitude}°N, ${Math.abs(location.longitude)}°W | Elev: ${location.elevationFt.toLocaleString()}ft (${location.elevationM.toLocaleString()}m)
+        ${location.latitude}°N, ${Math.abs(location.longitude)}°W | Elev: ${typeof elevFt === 'number' ? elevFt.toLocaleString() : elevFt}ft (${typeof elevM === 'number' ? elevM.toLocaleString() : elevM}m)
         <br>
         <span style="opacity: 0.7; font-size: 0.75rem;">Last updated: ${new Date().toLocaleTimeString()}</span>
     `;
 
     if (!currentData) {
-        els.currentConditions.innerHTML = '';
+        els.currentConditions.innerHTML = `
+            <div style="opacity: 0.6; font-size: 0.8rem; padding: 1rem;">Current weather data temporarily unavailable</div>
+        `;
         return;
     }
 
-    const { temperature, snowfall, slr, windSpeed, windDir, weatherCode } = currentData;
+    const temperature = currentData.temperature;
+    const snowfall = currentData.snowfall;
+    const slr = currentData.slr;
+    const windSpeed = currentData.windSpeed;
+    const windDir = currentData.windDir;
+    const weatherCode = currentData.weatherCode;
+    
     const weather = getWeatherDescription(weatherCode);
 
     let slrBadge = '';
@@ -108,18 +119,18 @@ export function renderHeader(location: Location, currentData: BlendedHour | null
         </div>
         <div class="condition-item">
             <span class="condition-label">Temp</span>
-            <span class="condition-value">${temperature.toFixed(1)}°C</span>
+            <span class="condition-value">${temperature !== null ? temperature.toFixed(1) : '--'}°C</span>
         </div>
         <div class="condition-item">
             <span class="condition-label">Snow Rate</span>
-            <span class="condition-value">${snowfall.toFixed(1)} cm/hr</span>
+            <span class="condition-value">${snowfall !== null ? snowfall.toFixed(1) : '0.0'} cm/hr</span>
             ${slrBadge}
         </div>
         <div class="condition-item">
             <span class="condition-label">Wind</span>
             <span class="condition-value chart-wind">${windStr}</span>
         </div>
-        <div style="width: 100%; margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-secondary);">
+        <div class="attribution-container" style="width: 100%; text-align: center; margin-top: 0.5rem; opacity: 0.7; font-size: 0.7rem;">
             <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: underline;">Weather by Open-Meteo.com</a>
         </div>
     `;
