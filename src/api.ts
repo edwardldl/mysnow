@@ -91,7 +91,7 @@ const HOURLY_PARAMS = [
 /**
  * Fetch data from Open-Meteo API
  */
-export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
+export async function fetchWeatherData(locationKey, modelMode = 'best_match') {
     const locs = getLocations();
     const loc = locs[locationKey];
     if (!loc) throw new Error("Invalid location");
@@ -122,7 +122,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             console.error("Error fetching Best Match data:", error);
             throw error;
         }
-    } else {
+    } else if (modelMode === 'hrrr_ecmwf') {
         // 1. Fetch HRRR (0-48 hours)
         const hrrrUrl = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
             `&hourly=${HOURLY_PARAMS}` +
@@ -152,7 +152,6 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             const hrrrData = await hrrrRes.json();
             const ecmwfData = await ecmwfRes.json();
 
-            // Sometimes the elevation comes back from the API! Let's optionally overwrite missing ones
             if (loc.isCustom && ecmwfData.elevation) {
                 loc.elevationM = Math.round(ecmwfData.elevation);
                 loc.elevationFt = Math.round(ecmwfData.elevation * 3.28084);
@@ -161,6 +160,57 @@ export async function fetchWeatherData(locationKey, modelMode = 'hrrr_ecmwf') {
             return { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' };
         } catch (error) {
             console.error("Error fetching weather data:", error);
+            throw error;
+        }
+    } else {
+        // Specific model mode
+        // Mapping internal simplified keys to Open-Meteo model keys
+        const modelMap = {
+            'hrrr': 'gfs_hrrr',
+            'gem_hrdps_west': 'gem_hrdps_west',
+            'nbm': 'ncep_nbm_conus',
+            'nam': 'ncep_nam_conus',
+            'gem_regional': 'gem_regional',
+            'ecmwf': 'ecmwf_ifs',
+            'gfs': 'gfs_global'
+        };
+        const omModel = modelMap[modelMode] || modelMode;
+        
+        // Models like HRRR or NAM might have shorter leads. 
+        // We'll ask for 15 days, but Open-Meteo returns what it has.
+        const days = (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') ? 2 : 15;
+
+        const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+            `&daily=sunrise,sunset` +
+            `&models=${omModel}` +
+            `&forecast_days=${days}` +
+            `&wind_speed_unit=ms` +
+            `&timezone=${timezone}`;
+
+        try {
+            const res = await fetch(url);
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.reason && errData.reason.includes("geographic")) {
+                    throw new Error(`Location outside ${omModel} coverage area.`);
+                }
+                if (errData.reason && errData.reason.includes("data is available")) {
+                    throw new Error(`No data available for this location in ${omModel}.`);
+                }
+                throw new Error(`${omModel} fetch failed: ${res.status}`);
+            }
+            const data = await res.json();
+
+            if (loc.isCustom && data.elevation) {
+                loc.elevationM = Math.round(data.elevation);
+                loc.elevationFt = Math.round(data.elevation * 3.28084);
+            }
+
+            // For single models, we return them in ecmwfData slot and leave hrrrData null
+            return { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode };
+        } catch (error) {
+            console.error(`Error fetching ${omModel} data:`, error);
             throw error;
         }
     }

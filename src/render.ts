@@ -162,10 +162,22 @@ export function renderDaySummaries(daysData: DayData[], onSelectDay: (day: DayDa
             card.style.setProperty('--storm-color-rgb', rgbStr);
         }
 
-        const modelClass = day.modelString === 'HRRR' ? 'model-hrrr' :
-            (day.modelString === 'ECMWF' ? 'model-ecmwf' :
-                (day.modelString === 'BEST' ? 'model-best' : 'model-mixed'));
-        const modelLabel = day.modelString === 'BEST' ? 'Best Match' : day.modelString;
+        let modelClass = 'model-mixed';
+        let modelLabel = day.modelString;
+
+        if (day.modelString === 'HRRR') modelClass = 'model-hrrr';
+        else if (day.modelString === 'ECMWF') modelClass = 'model-ecmwf';
+        else if (day.modelString === 'BEST') {
+            modelClass = 'model-best';
+            modelLabel = 'Best Match';
+        } else if (day.modelString === 'GFS') modelClass = 'model-gfs';
+        else if (day.modelString.includes('GEM')) modelClass = 'model-gem';
+        else if (day.modelString === 'NBM') modelClass = 'model-nbm';
+        else if (day.modelString === 'NAM') modelClass = 'model-nam';
+        else if (day.modelString === 'HRRR_ECMWF') {
+            modelClass = 'model-mixed';
+            modelLabel = 'Blended';
+        }
 
         card.innerHTML = `
             <div class="card-date">${getDayTitle(day.dateObj)}</div>

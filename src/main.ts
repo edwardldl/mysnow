@@ -18,6 +18,63 @@ let currentSlrMode = 'hybrid';
 let currentDaysData: DayData[] = [];
 let allSkiAreas: any[] = [];
 
+const MODEL_METADATA = {
+    'best_match': {
+        name: 'Best Match (Ensemble)',
+        badge: 'model-best',
+        timeframe: '7-15 Days',
+        strengths: 'Automatically selects the best local models for your location.'
+    },
+    'hrrr_ecmwf': {
+        name: 'Blended (HRRR+ECMWF)',
+        badge: 'model-mixed',
+        timeframe: '0-15 Days',
+        strengths: 'HRRR (0-48h) for precision + ECMWF for long-range synoptic tracking.'
+    },
+    'hrrr': {
+        name: 'NCEP HRRR U.S. Conus',
+        badge: 'model-hrrr',
+        timeframe: '0-48 Hours',
+        strengths: 'Standard for US orographic lift, shadowing, and hourly snow totals.'
+    },
+    'gem_hrdps_west': {
+        name: 'GEM HRDPS West',
+        badge: 'model-gem',
+        timeframe: '0-48 Hours',
+        strengths: 'Highly detailed for the Western Cordillera. Excellent at capturing deep mountain valleys.'
+    },
+    'nbm': {
+        name: 'NCEP NBM U.S. Conus',
+        badge: 'model-nbm',
+        timeframe: '0-7 Days',
+        strengths: 'Calibrated consensus blend. Smoothes out extreme biases to provide a reliable baseline.'
+    },
+    'nam': {
+        name: 'NCEP NAM U.S. Conus',
+        badge: 'model-nam',
+        timeframe: '0-84 Hours',
+        strengths: 'Solid high-resolution option for tracking mesoscale snow bands.'
+    },
+    'gem_regional': {
+        name: 'GEM Regional',
+        badge: 'model-gem',
+        timeframe: '1-3 Days',
+        strengths: 'Reliable bridge between global and high-res models, especially for landfall storms.'
+    },
+    'ecmwf': {
+        name: 'ECMWF IFS HRES',
+        badge: 'model-ecmwf',
+        timeframe: '3-10 Days',
+        strengths: 'The premier medium-range model. Unmatched for major synoptic winter storms.'
+    },
+    'gfs': {
+        name: 'NCEP GFS Global',
+        badge: 'model-gfs',
+        timeframe: '3-14+ Days',
+        strengths: 'Standard US global model. Useful for long-range pattern recognition.'
+    }
+};
+
 // ── In-memory cache ───────────────────────────────────────────────────────────
 // Keyed by "locationKey|modelMode" so only location/model changes trigger a fetch.
 interface WeatherCache {
@@ -60,8 +117,12 @@ async function loadForecast() {
 
         const { hrrrData, ecmwfData, location } = cached;
 
-        const blendedData = blendForecasts(hrrrData, ecmwfData, location, currentSlrMode);
-        currentDaysData = groupData(blendedData).slice(0, 14);
+        const blendedData = blendForecasts(hrrrData, ecmwfData, location, currentSlrMode, currentModelMode);
+        currentDaysData = groupData(blendedData);
+        
+        // If a specific limited-time model is selected, the data might already be short.
+        // We slice to 14 days max for the UI.
+        currentDaysData = currentDaysData.slice(0, 14);
 
         const currentData = currentDaysData.length > 0 && currentDaysData[0].hourly.length > 0
             ? currentDaysData[0].hourly[0]
@@ -74,15 +135,16 @@ async function loadForecast() {
 
         const modelLegend = document.querySelector('.model-legend');
         if (modelLegend) {
-            if (currentModelMode === 'best_match') {
-                modelLegend.innerHTML = `<span class="badge model-mixed">BEST MATCH</span> Automatically selects the best available local models.`;
-            } else {
-                modelLegend.innerHTML = `
-                    <span class="badge model-hrrr">HRRR</span> 0-48 hours (3km resolution)
-                    <br>
-                    <span class="badge model-ecmwf">ECMWF</span> 3-16 days (9km resolution)
-                `;
-            }
+            const meta = MODEL_METADATA[currentModelMode] || MODEL_METADATA['best_match'];
+            modelLegend.innerHTML = `
+                <span class="badge ${meta.badge}">${meta.name}</span> 
+                <span style="font-weight: 600; color: var(--accent-blue); margin-left: 8px;">${meta.timeframe}</span>
+                <p style="margin-top: 6px; opacity: 0.8; font-size: 0.8rem;">${meta.strengths}</p>
+                <a href="https://open-meteo.com/" target="_blank" rel="noopener"
+                    style="color: var(--accent-blue); text-decoration: none; font-weight: 500; display: inline-block; margin-top: 8px;">
+                    Weather data by Open-Meteo.com
+                </a>
+            `;
         }
 
         showContent();
@@ -106,6 +168,8 @@ async function loadHistoricalForecast(startDate: string, model: string) {
 
         const blendedData = blendForecasts(hrrrData, ecmwfData, location, currentSlrMode);
         currentDaysData = groupData(blendedData);
+        // Only show days that have actual data points
+        currentDaysData = currentDaysData.filter(day => day.hourly.length > 0).slice(0, 14);
 
         const currentData = currentDaysData.length > 0 && currentDaysData[0].hourly.length > 0
             ? currentDaysData[0].hourly[0]
@@ -252,21 +316,36 @@ function initLocListeners() {
         }
     });
 
-    const modelToggle = document.getElementById('model-toggle') as HTMLInputElement;
-    const toggleTexts = document.querySelectorAll('.toggle-text');
+    const modelSelect = document.getElementById('model-select');
+    const modelTrigger = modelSelect?.querySelector('.select-trigger');
+    const modelOptions = modelSelect?.querySelectorAll('.select-option');
+    const modelSelectedText = modelSelect?.querySelector('.selected-text');
 
-    if (modelToggle) {
-        modelToggle.addEventListener('change', () => {
-            currentModelMode = modelToggle.checked ? 'hrrr_ecmwf' : 'best_match';
-            toggleTexts.forEach(txt => {
-                const el = txt as HTMLElement;
-                if (el.dataset.mode === currentModelMode) {
-                    el.classList.add('active');
-                } else {
-                    el.classList.remove('active');
-                }
+    if (modelSelect && modelTrigger && modelOptions && modelSelectedText) {
+        modelTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modelSelect.classList.toggle('open');
+            // Close other selects if open
+            document.getElementById('slr-select')?.classList.remove('open');
+        });
+
+        modelOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const val = (opt as HTMLElement).dataset.value;
+                if (!val) return;
+
+                currentModelMode = val;
+                
+                modelOptions.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                
+                const title = opt.querySelector('.option-title')?.textContent;
+                if (title) modelSelectedText.textContent = title;
+                
+                modelSelect.classList.remove('open');
+                loadForecast();
             });
-            loadForecast();
         });
     }
 

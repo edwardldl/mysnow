@@ -143,7 +143,7 @@ export function getSLRCategory(slr: number | null, liquidMM: number): string | n
     return 'powder';
 }
 
-export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoResponse, location: Location, slrAlgorithm = 'kinematic'): { hourly: BlendedHour[], daily: any } {
+export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoResponse, location: Location, slrAlgorithm = 'kinematic', modelMode = 'best_match'): { hourly: BlendedHour[], daily: any } {
     const rawHourly: Partial<BlendedHour>[] = [];
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
@@ -164,6 +164,8 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
             };
         });
     };
+
+    const modelLabel = modelMode === 'best_match' ? 'BEST' : modelMode.toUpperCase();
 
     for (let i = 0; i < ecmwfTimes.length; i++) {
         const time = ecmwfTimes[i];
@@ -217,7 +219,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
             
             point.layers = extractLayers(hrrr, hrrrIdx);
         } else {
-            point.model = hrrr ? 'ECMWF' : 'BEST';
+            point.model = hrrr ? 'ECMWF' : modelLabel;
             point.precipitation = ecmwf.hourly.precipitation ? ecmwf.hourly.precipitation[i] : 0;
             point.liquidMM = (ecmwf.hourly.snowfall_water_equivalent && ecmwf.hourly.snowfall_water_equivalent[i] != null)
                 ? ecmwf.hourly.snowfall_water_equivalent[i]
@@ -294,6 +296,9 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: any }): D
     const { hourly, daily } = blendedData;
 
     hourly.forEach(point => {
+        // Skip points with no data (end of model lead time)
+        if (point.temperature === null && point.snowfall === null) return;
+
         const dateStr = point.time.split('T')[0];
 
         if (!days[dateStr]) {

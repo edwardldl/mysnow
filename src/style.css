@@ -852,70 +852,6 @@ h3 {
     margin-bottom: 2px;
 }
 
-.toggle-switch {
-    position: relative;
-    width: 280px;
-    height: 40px;
-}
-
-.toggle-switch input {
-    display: none;
-}
-
-.toggle-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    background: var(--bg-element);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 9999px;
-    height: 100%;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-}
-
-.toggle-text {
-    flex: 1;
-    z-index: 2;
-    text-align: center;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    transition: color 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.toggle-text.active {
-    color: var(--snow-white);
-}
-
-.toggle-slider {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 134px;
-    height: calc(100% - 8px);
-    background: var(--accent-blue-dim);
-    border: 1px solid var(--accent-blue);
-    border-radius: 9999px;
-    z-index: 1;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#model-toggle:checked+.toggle-label .toggle-slider {
-    transform: translateX(138px);
-}
-
-#model-toggle:checked+.toggle-label [data-mode="hrrr_ecmwf"] {
-    color: var(--snow-white);
-}
-
-#model-toggle:not(:checked)+.toggle-label [data-mode="best_match"] {
-    color: var(--snow-white);
-}
 
 /* Custom Dropdown Select */
 .custom-select-container {
@@ -1040,6 +976,21 @@ h3 {
     color: var(--snow-white);
     margin-bottom: 2px;
 }
+
+.select-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 6px 0;
+}
+
+.badge.model-best { background: linear-gradient(135deg, #10b981, #059669); }
+.badge.model-hrrr { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.badge.model-ecmwf { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.badge.model-gfs { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.badge.model-gem { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.badge.model-nbm { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+.badge.model-nam { background: linear-gradient(135deg, #ec4899, #db2777); }
+.badge.model-mixed { background: linear-gradient(135deg, #64748b, #475569); }
 
 .option-desc {
     font-size: 0.65rem;
@@ -1268,17 +1219,6 @@ body.mode-history .mode-slider {
         font-size: 0.65rem;
     }
 
-    .toggle-switch {
-        width: 260px;
-    }
-
-    .toggle-slider {
-        width: 124px;
-    }
-
-    #model-toggle:checked+.toggle-label .toggle-slider {
-        transform: translateX(128px);
-    }
 
     .historical-form {
         flex-wrap: wrap;
@@ -1407,22 +1347,6 @@ body.mode-history .mode-slider {
     }
 
     /* Model toggle */
-    .toggle-switch {
-        width: 100%;
-        height: 44px;
-    }
-
-    .toggle-slider {
-        width: calc(50% - 8px);
-    }
-
-    #model-toggle:checked+.toggle-label .toggle-slider {
-        transform: translateX(calc(100% + 8px));
-    }
-
-    .toggle-text {
-        font-size: 0.7rem;
-    }
 
     /* Custom Select Optimization */
     .custom-select-container {
