@@ -52,7 +52,7 @@ export function removeLocation(id) {
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 const HISTORICAL_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast";
 
-const PRESSURE_LEVELS = ["1000hPa", "925hPa", "850hPa", "700hPa", "600hPa", "500hPa", "400hPa", "300hPa"];
+const PRESSURE_LEVELS = ["1000hPa", "975hPa", "950hPa", "925hPa", "900hPa", "850hPa", "800hPa", "700hPa", "600hPa", "500hPa", "400hPa", "300hPa"];
 
 const HOURLY_PARAMS = [
     "snowfall",
@@ -71,12 +71,21 @@ const HOURLY_PARAMS = [
     "weather_code",
     "wet_bulb_temperature_2m",
     "pressure_msl",
+    "surface_pressure",
     "soil_temperature_0cm",
+    "shortwave_radiation",
+    "cape",
+    "visibility",
+    "boundary_layer_height",
+    "total_column_integrated_water_vapour",
+    "lifted_index",
+    "convective_inhibition",
     PRESSURE_LEVELS.map(l => `temperature_${l}`).join(','),
     PRESSURE_LEVELS.map(l => `relative_humidity_${l}`).join(','),
     PRESSURE_LEVELS.map(l => `geopotential_height_${l}`).join(','),
     PRESSURE_LEVELS.map(l => `vertical_velocity_${l}`).join(','),
-    "wind_speed_700hPa"
+    PRESSURE_LEVELS.map(l => `cloud_cover_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `wind_speed_${l}`).join(',')
 ].join(",");
 
 /**

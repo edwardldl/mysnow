@@ -1,5 +1,5 @@
 import { getSLRCategory } from './data';
-import { isToday, isTomorrow, initSnowEngine, formatHour, formatTemp } from './utils';
+import { isToday, isTomorrow, initSnowEngine, formatHour, formatTemp, getWeatherDescription } from './utils';
 import { Location, BlendedHour, DayData } from './types';
 
 const els = {
@@ -75,17 +75,25 @@ export function renderHeader(location: Location, currentData: BlendedHour | null
         return;
     }
 
-    const { temperature, snowfall, slr, windSpeed, windDir } = currentData;
+    const { temperature, snowfall, slr, windSpeed, windDir, weatherCode } = currentData;
+    const weather = getWeatherDescription(weatherCode);
 
     let slrBadge = '';
     if (slr) {
         const type = slr < 10 ? 'Wet' : (slr >= 15 ? 'Powder' : 'Standard');
-        slrBadge = `<span class="badge slr-badge slr-${type.toLowerCase()}">${slr.toFixed(1)}:1 ${type}</span>`;
+        slrBadge = `<span class="badge slr-badge slr-${type.toLowerCase()}" style="margin-top: 4px;">${slr.toFixed(1)}:1 ${type}</span>`;
     }
 
     const windStr = windSpeed !== null ? `${windSpeed.toFixed(0)} km/h <span class="wind-arrow" style="transform: rotate(${windDir}deg)">↓</span>` : '--';
 
     els.currentConditions.innerHTML = `
+        <div class="condition-item weather-main">
+            <span class="condition-icon">${weather.icon}</span>
+            <div class="condition-details">
+                <span class="condition-label">Current</span>
+                <span class="condition-value">${weather.label}</span>
+            </div>
+        </div>
         <div class="condition-item">
             <span class="condition-label">Temp</span>
             <span class="condition-value">${temperature.toFixed(1)}°C</span>
@@ -258,14 +266,6 @@ export function renderDayDetail(day: DayData) {
             windStr = `<div class="chart-wind" style="font-size: 0.8rem; font-weight: 600; height: 1.2rem; display: flex; align-items: center; justify-content: center; width: 100%;">${h.windSpeed.toFixed(0)} km/h <span class="wind-arrow" style="transform: rotate(${h.windDir}deg); font-weight: bold; margin-left: 2px;">↓</span></div>`;
         }
 
-        const colCenter = (index * totalColWidth) + (colWidth / 2);
-        const tempY = h.temperature !== null ? 90 - ((h.temperature - chartMin) / chartRange) * 80 : 90;
-
-        tempPath += `${index === 0 ? '' : ' L'}${colCenter},${tempY}`;
-
-        const tColor = h.temperature > 0 ? '#f43f5e' : '#38bdf8';
-        tempStops += `<stop offset="${(index / 23) * 100}%" stop-color="${tColor}" />`;
-
         const hour = parseInt(hrLabel.split(':')[0]);
         let hourStyle = '';
         if (hour >= 9 && hour <= 16) {
@@ -277,7 +277,7 @@ export function renderDayDetail(day: DayData) {
         snowCols += `
             <div class="chart-col-group" style="z-index: 1;">
                 <div class="chart-time label-top"${hourStyle}>${hrLabel}${astroIcon}</div>
-                ${slrBadge}
+                ${h.slr !== null ? `<div class="slr-label-group-top" style="color: ${barColor}">${h.slr.toFixed(0)}:1</div>` : '<div class="slr-label-group-top">&nbsp;</div>'}
                 <div class="chart-bar-wrapper">
                     <div class="chart-bar" style="height: ${height}px; background: ${barColor}; opacity: ${h.precipitation > 0 ? 1 : 0}"></div>
                 </div>
@@ -286,12 +286,24 @@ export function renderDayDetail(day: DayData) {
                 </div>
             </div>`;
 
+        // Temperature Bar Logic
+        const tempHeight = h.temperature !== null ? ((h.temperature - chartMin) / chartRange) * 100 : 0;
+        
+        // Calculate dynamic hue: -20C (240 deg Blue) to +20C (0 deg Red)
+        const clampedTemp = Math.max(-20, Math.min(20, h.temperature ?? 0));
+        const tempHue = 240 - ((clampedTemp + 20) / 40) * 240;
+        const tempColor = `hsl(${tempHue}, 80%, 60%)`;
+        const tempGradient = `linear-gradient(to top, hsl(${tempHue}, 80%, 40%), hsl(${tempHue}, 80%, 70%))`;
+
         tempCols += `
             <div class="chart-col-group" style="z-index: 1;">
                 <div class="chart-time label-top"${hourStyle}>${hrLabel}${astroIcon}</div>
-                <div class="chart-metrics" style="margin-top: 125px;">
+                <div class="chart-bar-wrapper" style="height: 100px;">
+                    <div class="chart-bar" style="height: ${tempHeight}px; background: ${tempGradient}; border-radius: 4px;"></div>
+                </div>
+                <div class="chart-metrics" style="margin-top: 10px;">
                     <div class="metric-row" style="border: none;">
-                        <span class="metric-val ${h.temperature > 0 ? 'val-hot' : 'val-cold'}" style="font-size: 1rem; font-weight: 700;">${formatTemp(h.temperature)}</span>
+                        <span class="metric-val" style="font-size: 1rem; font-weight: 700; color: ${tempColor};">${formatTemp(h.temperature)}</span>
                     </div>
                 </div>
             </div>`;
@@ -322,14 +334,6 @@ export function renderDayDetail(day: DayData) {
     const tempHtml = `
         <div class="temp-chart-scroll chart-wrapper-relative" id="temp-chart-scroll">
             ${skiBoxHtml}
-            <svg width="${svgWidth}" height="100" style="position:absolute; top:35px; left:0; pointer-events:none; z-index:10; overflow:visible;">
-                <defs>
-                    <linearGradient id="temp-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        ${tempStops}
-                    </linearGradient>
-                </defs>
-                <path fill="none" stroke="url(#temp-grad)" stroke-width="4" stroke-linejoin="round" d="${tempPath}" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.5))" />
-            </svg>
             ${tempCols}
         </div>
     `;
@@ -341,16 +345,25 @@ export function renderDayDetail(day: DayData) {
         </div>
     `;
 
-    const slrLegendHtml = `
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 0.8rem; justify-content: center;">
-            <div style="font-weight: 600;">Precip Type:</div>
-            <div style="display: flex; align-items: center; gap: 4px; margin-right: 15px;">
-                <div style="width: 12px; height: 12px; background: hsl(120, 70%, 50%); border-radius: 2px;"></div> Rain
+    const snowLegend = `
+        <div style="display: flex; align-items: center; gap: 15px; font-size: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 10px; height: 10px; background: hsl(120, 70%, 50%); border-radius: 2px;"></div>
+                <span style="color: var(--text-secondary);">Rain</span>
             </div>
-            <div style="font-weight: 600;">SLR Quality:</div>
-            <div>Wet (5:1)</div>
-            <div style="width: 150px; height: 12px; background: linear-gradient(to right, hsl(180, 100%, 60%), hsl(210, 100%, 60%), hsl(300, 100%, 60%), hsl(30, 100%, 60%)); border-radius: 6px;"></div>
-            <div>Dry (≥15:1)</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--text-secondary);">Wet</span>
+                <div style="width: 100px; height: 8px; background: linear-gradient(to right, hsl(180, 100%, 60%), hsl(210, 100%, 60%), hsl(300, 100%, 60%), hsl(30, 100%, 60%)); border-radius: 4px;"></div>
+                <span style="color: var(--text-secondary);">Powder</span>
+            </div>
+        </div>
+    `;
+
+    const tempLegend = `
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;">
+            <span style="color: var(--text-secondary);">-20°C</span>
+            <div style="width: 120px; height: 8px; background: linear-gradient(to right, hsl(240, 100%, 60%), hsl(120, 100%, 60%), hsl(0, 100%, 60%)); border-radius: 4px;"></div>
+            <span style="color: var(--text-secondary);">+20°C</span>
         </div>
     `;
 
@@ -362,12 +375,19 @@ export function renderDayDetail(day: DayData) {
                 <div style="font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px;">Est. Snow Depth: ${day.snowDepth}</div>
             </div>
         </div>
-        ${slrLegendHtml}
-        <h4 style="margin-bottom: 0.5rem; font-size:1rem;">Snowfall Intensity (Scaled up to 10cm/hr)</h4>
+        <div class="chart-section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <h4 style="margin: 0; font-size:1rem;">Snowfall Intensity</h4>
+            ${snowLegend}
+        </div>
         ${snowHtml}
-        <h4 style="margin-bottom: 0.5rem; font-size:1rem;">Temperature Trend</h4>
+        
+        <div class="chart-section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; margin-top: 1.5rem;">
+            <h4 style="margin: 0; font-size:1rem;">Temperature Trend</h4>
+            ${tempLegend}
+        </div>
         ${tempHtml}
-        <h4 style="margin-bottom: 0.5rem; font-size:1rem;">Weather Telemetry</h4>
+        
+        <h4 style="margin-bottom: 0.5rem; margin-top: 1.5rem; font-size:1rem;">Weather Telemetry</h4>
         ${metricsHtml}
     `;
 

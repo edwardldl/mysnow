@@ -14,7 +14,7 @@ import { DayData } from './types';
 
 let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
-let currentSlrMode = 'kinematic';
+let currentSlrMode = 'hybrid';
 let currentDaysData: DayData[] = [];
 let allSkiAreas: any[] = [];
 
@@ -270,20 +270,58 @@ function initLocListeners() {
         });
     }
 
-    const slrGroup = document.getElementById('slr-algorithm-group');
-    if (slrGroup) {
-        slrGroup.addEventListener('change', (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            if (target.name === 'slr-alg') {
-                currentSlrMode = target.value;
+    const select = document.getElementById('slr-select');
+    const trigger = select?.querySelector('.select-trigger');
+    const options = select?.querySelectorAll('.select-option');
+    const selectedText = select?.querySelector('.selected-text');
+
+    if (select && trigger && options && selectedText) {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            select.classList.toggle('open');
+        });
+
+        options.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const val = (opt as HTMLElement).dataset.value;
+                if (!val) return;
+
+                currentSlrMode = val;
+                
+                // Update UI state
+                options.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                
+                const title = opt.querySelector('.option-title')?.textContent;
+                if (title) selectedText.textContent = title;
+                
+                select.classList.remove('open');
+
+                // Trigger reload
                 const startDate = (document.getElementById('hist-start') as HTMLInputElement)?.value;
                 const model = (document.getElementById('hist-model') as HTMLSelectElement)?.value;
                 const isHistorical = !(document.getElementById('hist-reset-btn')?.classList.contains('hidden'));
+                
                 if (isHistorical && startDate && model) {
                     loadHistoricalForecast(startDate, model);
                 } else {
                     loadForecast();
                 }
+            });
+        });
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+            if (!select.contains(e.target as Node)) {
+                select.classList.remove('open');
+            }
+        });
+
+        // Keyboard support: Escape to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                select.classList.remove('open');
             }
         });
     }

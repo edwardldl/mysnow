@@ -64,7 +64,6 @@ h3 {
     padding: 2rem 1rem;
     background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(11, 17, 32, 0));
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
 }
 
 .header-content {
@@ -108,20 +107,32 @@ h3 {
 /* Location Info & Conditions */
 .header-data-bar {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 1.5rem;
     margin-top: 1rem;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.header-data-bar::-webkit-scrollbar {
+    display: none;
 }
 
 .location-info {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
+    white-space: nowrap;
+    line-height: 1.4;
+    flex: 0 0 auto;
 }
 
 /* Location Management & Search */
 .location-management {
     margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 100;
 }
 
 .location-form-consolidated {
@@ -175,7 +186,7 @@ h3 {
     border-radius: 8px;
     max-height: 350px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 1000;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
@@ -237,8 +248,9 @@ h3 {
 
 .current-conditions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    align-items: center;
 }
 
 .condition-item {
@@ -246,15 +258,44 @@ h3 {
     align-items: center;
     gap: 0.5rem;
     background: var(--bg-element);
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 8px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.condition-item:hover {
+    background: var(--bg-element-hover);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.weather-main {
+    gap: 0.5rem;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(37, 99, 235, 0.15));
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+.condition-icon {
+    font-size: 1.25rem;
+}
+
+.condition-details {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.condition-details .condition-label {
+    display: none; /* Hide 'Current' label in small mode */
 }
 
 .condition-value {
     font-weight: 600;
     color: var(--snow-white);
+    font-size: 0.9rem;
 }
 
 .condition-label {
@@ -568,6 +609,7 @@ h3 {
     align-items: flex-end;
     gap: 0.5rem;
     overflow-x: auto;
+    overflow-y: visible;
     scrollbar-width: none;
     /* Firefox */
     width: 100%;
@@ -580,8 +622,8 @@ h3 {
 
 
 .snow-chart-scroll {
-    height: 180px;
-    padding-top: 2rem;
+    height: 280px;
+    padding-top: 1rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 1rem;
@@ -590,6 +632,7 @@ h3 {
 }
 
 .temp-chart-scroll {
+    height: 200px;
     align-items: flex-start;
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
@@ -625,7 +668,7 @@ h3 {
 
 .chart-bar-wrapper {
     width: 40px;
-    height: 180px;
+    height: 150px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -641,6 +684,16 @@ h3 {
     transition: height 0.3s ease;
     min-height: 2px;
     /* Always show a sliver so it's not invisible if 0 but hovered */
+    position: relative;
+}
+
+.slr-label-group-top {
+    font-size: 0.85rem;
+    font-weight: 800;
+    margin-bottom: 2px;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .chart-value {
@@ -783,13 +836,20 @@ h3 {
 }
 
 /* Model Toggle */
-.model-toggle-container {
-    margin: 1.5rem 0;
+.segmented-control-container {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 2rem;
-    justify-content: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 280px;
+}
+
+.segmented-control-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
 }
 
 .toggle-switch {
@@ -857,95 +917,135 @@ h3 {
     color: var(--snow-white);
 }
 
-/* Segmented Control (Multi-state toggle) */
-.segmented-control-container {
+/* Custom Dropdown Select */
+.custom-select-container {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    position: relative;
+    width: 280px;
 }
 
-.segmented-control-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-left: 0.5rem;
+.custom-select {
+    position: relative;
+    user-select: none;
+    z-index: 50;
 }
 
-.segmented-control {
+.custom-select.open {
+    z-index: 1100;
+}
+
+.select-trigger {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 16px;
     background: var(--bg-element);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 9999px;
-    padding: 4px;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    width: fit-content;
-    max-width: 100%;
-}
-
-.segmented-control input {
-    display: none;
-}
-
-.segmented-control label {
-    flex: 1;
-    text-align: center;
-    padding: 8px 14px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    border-radius: 12px;
     cursor: pointer;
-    z-index: 2;
-    transition: color 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    min-width: 80px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
-.segmented-control input:checked+label {
+.select-trigger:hover {
+    background: var(--bg-element-hover);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.selected-text {
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--snow-white);
+    letter-spacing: 0.02em;
 }
 
-.segmented-control .selection-slider {
+.select-arrow {
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-secondary);
+    border-bottom: 2px solid var(--text-secondary);
+    transform: rotate(45deg);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s;
+    margin-bottom: 2px;
+}
+
+.custom-select.open .select-arrow {
+    transform: rotate(-135deg);
+    margin-bottom: -4px;
+}
+
+.select-options {
     position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    width: calc((100% - 8px) / 6);
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+    max-height: 450px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.98);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(25px);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-blue-dim) transparent;
+}
+
+.select-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.select-options::-webkit-scrollbar-thumb {
+    background-color: var(--accent-blue-dim);
+    border-radius: 10px;
+}
+
+.custom-select.open .select-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.select-option {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.select-option:last-child {
+    border-bottom: none;
+}
+
+.select-option:hover {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.select-option.active {
     background: var(--accent-blue-dim);
-    border: 1px solid var(--accent-blue);
-    border-radius: 9999px;
-    z-index: 1;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 3px solid var(--accent-blue);
+    padding-left: 13px;
 }
 
-/* Slider position based on checked radio — 5 options */
-.segmented-control input[value="kinematic"]:checked~.selection-slider {
-    transform: translateX(0%);
+.option-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--snow-white);
+    margin-bottom: 2px;
 }
 
-.segmented-control input[value="complex"]:checked~.selection-slider {
-    transform: translateX(100%);
-}
-
-.segmented-control input[value="simple"]:checked~.selection-slider {
-    transform: translateX(200%);
-}
-
-.segmented-control input[value="legacy"]:checked~.selection-slider {
-    transform: translateX(300%);
-}
-
-.segmented-control input[value="standard"]:checked~.selection-slider {
-    transform: translateX(400%);
-}
-
-.segmented-control input[value="model_native"]:checked~.selection-slider {
-    transform: translateX(500%);
+.option-desc {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    line-height: 1.3;
+    opacity: 0.8;
 }
 
 /* Extended Chart Metrics */
@@ -1095,9 +1195,11 @@ h3 {
 .controls-container {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
     gap: 2rem;
     margin-bottom: 2rem;
+    position: relative;
+    z-index: 50;
 }
 
 .mode-section {
@@ -1322,19 +1424,17 @@ body.mode-history .mode-slider {
         font-size: 0.7rem;
     }
 
-    /* SLR Algorithm segmented control */
-    .segmented-control {
+    /* Custom Select Optimization */
+    .custom-select-container {
         width: 100%;
-        border-radius: 12px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
     }
 
-    .segmented-control label {
-        min-width: 60px;
-        padding: 10px 8px;
-        font-size: 0.6rem;
-        letter-spacing: 0.02em;
+    .select-trigger {
+        padding: 12px 16px;
+    }
+
+    .selected-text {
+        font-size: 0.85rem;
     }
 
     /* ── Historical Backtest ── */
@@ -1380,7 +1480,7 @@ body.mode-history .mode-slider {
     }
 
     .condition-value {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     .condition-label {
@@ -1460,6 +1560,10 @@ body.mode-history .mode-slider {
         height: 140px;
         padding-top: 1.5rem;
         margin-bottom: 1rem;
+    }
+
+    .temp-chart-scroll {
+        height: 160px;
     }
 
     .chart-col-group {

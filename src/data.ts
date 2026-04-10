@@ -21,7 +21,7 @@ function calcSnowLevel(FL: number, RH: number, precip: number): number {
 /**
  * Applies the selected SLR algorithm to the hourly unified points
  */
-function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: string): BlendedHour[] {
+function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: string, elevation: number): BlendedHour[] {
     const out: BlendedHour[] = [];
     let prevSlr: number | null = null;
     
@@ -38,14 +38,26 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
             temperature_2m: point.temperature ?? 0,
             dew_point_2m: point.dewPoint ?? null,
             wind_speed_10m: point.windSpeed ?? null,
+            wind_gusts_10m: point.gusts ?? null,
             precipitation: point.liquidMM ?? 0,
             snowfall: point.snowfall_raw ?? null,
             relative_humidity_2m: point.rh ?? null,
             wet_bulb_temperature_2m: point.wet_bulb_temperature_2m ?? null,
             specific_humidity_2m: point.specific_humidity_2m ?? null,
             pressure_msl: point.pressure_msl ?? null,
+            surface_pressure: point.surface_pressure ?? null,
             soil_temperature_0cm: point.soil_temperature_0cm ?? null,
+            shortwave_radiation: point.shortwave_radiation ?? null,
+            cape: point.cape ?? null,
+            lifted_index: point.lifted_index ?? null,
+            convective_inhibition: point.convective_inhibition ?? null,
+            visibility: point.visibility ?? null,
+            boundary_layer_height: point.boundary_layer_height ?? null,
+            total_column_integrated_water_vapour: point.total_column_integrated_water_vapour ?? null,
             snow_depth: point.snowDepth ?? null,
+            freezing_level_height: point.freezing_level_height ?? null,
+            elevation: elevation,
+            weather_code: point.weatherCode ?? 0,
             layers: point.layers || []
         };
 
@@ -136,7 +148,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
 
-    const LEVELS = [1000, 925, 850, 700, 600, 500, 400, 300];
+    const LEVELS = [1000, 975, 950, 925, 900, 850, 800, 700, 600, 500, 400, 300];
 
     const extractLayers = (dataSource: any, index: number) => {
         if (!dataSource || !dataSource.hourly) return [];
@@ -147,7 +159,8 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
                 rh: dataSource.hourly[`relative_humidity_${level}hPa`] ? dataSource.hourly[`relative_humidity_${level}hPa`][index] : 0,
                 gz: dataSource.hourly[`geopotential_height_${level}hPa`] ? dataSource.hourly[`geopotential_height_${level}hPa`][index] : 0,
                 omega: dataSource.hourly[`vertical_velocity_${level}hPa`] ? dataSource.hourly[`vertical_velocity_${level}hPa`][index] : 0,
-                wind_speed: (dataSource.hourly[`wind_speed_${level}hPa`] || dataSource.hourly.wind_speed_10m || [])[index] || 0
+                wind_speed: (dataSource.hourly[`wind_speed_${level}hPa`] || dataSource.hourly.wind_speed_10m || [])[index] || 0,
+                cloud_cover: dataSource.hourly[`cloud_cover_${level}hPa`] ? dataSource.hourly[`cloud_cover_${level}hPa`][index] : 0
             };
         });
     };
@@ -191,8 +204,17 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
             point.wet_bulb_temperature_2m = hrrr.hourly.wet_bulb_temperature_2m ? hrrr.hourly.wet_bulb_temperature_2m[hrrrIdx] : null;
             point.specific_humidity_2m = hrrr.hourly.specific_humidity_2m ? hrrr.hourly.specific_humidity_2m[hrrrIdx] : null;
             point.pressure_msl = hrrr.hourly.pressure_msl ? hrrr.hourly.pressure_msl[hrrrIdx] : null;
+            point.surface_pressure = hrrr.hourly.surface_pressure ? hrrr.hourly.surface_pressure[hrrrIdx] : null;
             point.soil_temperature_0cm = hrrr.hourly.soil_temperature_0cm ? hrrr.hourly.soil_temperature_0cm[hrrrIdx] : null;
+            point.shortwave_radiation = hrrr.hourly.shortwave_radiation ? hrrr.hourly.shortwave_radiation[hrrrIdx] : null;
+            point.cape = hrrr.hourly.cape ? hrrr.hourly.cape[hrrrIdx] : null;
+            point.lifted_index = hrrr.hourly.lifted_index ? hrrr.hourly.lifted_index[hrrrIdx] : null;
+            point.convective_inhibition = hrrr.hourly.convective_inhibition ? hrrr.hourly.convective_inhibition[hrrrIdx] : null;
+            point.visibility = hrrr.hourly.visibility ? hrrr.hourly.visibility[hrrrIdx] : null;
+            point.total_column_integrated_water_vapour = hrrr.hourly.total_column_integrated_water_vapour ? hrrr.hourly.total_column_integrated_water_vapour[hrrrIdx] : null;
+            point.freezing_level_height = hrrr.hourly.freezing_level_height ? hrrr.hourly.freezing_level_height[hrrrIdx] : null;
             point.snowfall_raw = hrrr.hourly.snowfall ? hrrr.hourly.snowfall[hrrrIdx] : null;
+            
             point.layers = extractLayers(hrrr, hrrrIdx);
         } else {
             point.model = hrrr ? 'ECMWF' : 'BEST';
@@ -227,15 +249,25 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
             point.wet_bulb_temperature_2m = ecmwf.hourly.wet_bulb_temperature_2m ? ecmwf.hourly.wet_bulb_temperature_2m[i] : null;
             point.specific_humidity_2m = ecmwf.hourly.specific_humidity_2m ? ecmwf.hourly.specific_humidity_2m[i] : null;
             point.pressure_msl = ecmwf.hourly.pressure_msl ? ecmwf.hourly.pressure_msl[i] : null;
+            point.surface_pressure = ecmwf.hourly.surface_pressure ? ecmwf.hourly.surface_pressure[i] : null;
             point.soil_temperature_0cm = ecmwf.hourly.soil_temperature_0cm ? ecmwf.hourly.soil_temperature_0cm[i] : null;
+            point.shortwave_radiation = ecmwf.hourly.shortwave_radiation ? ecmwf.hourly.shortwave_radiation[i] : null;
+            point.cape = ecmwf.hourly.cape ? ecmwf.hourly.cape[i] : null;
+            point.lifted_index = ecmwf.hourly.lifted_index ? ecmwf.hourly.lifted_index[i] : null;
+            point.convective_inhibition = ecmwf.hourly.convective_inhibition ? ecmwf.hourly.convective_inhibition[i] : null;
+            point.visibility = ecmwf.hourly.visibility ? ecmwf.hourly.visibility[i] : null;
+            point.total_column_integrated_water_vapour = ecmwf.hourly.total_column_integrated_water_vapour ? ecmwf.hourly.total_column_integrated_water_vapour[i] : null;
+            point.freezing_level_height = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
             point.snowfall_raw = ecmwf.hourly.snowfall ? ecmwf.hourly.snowfall[i] : null;
+
             point.layers = extractLayers(ecmwf, i);
         }
 
         rawHourly.push(point);
     }
 
-    const blended = processSnowfallVariables(rawHourly, slrAlgorithm);
+    const elevation = location.elevationM || 1000;
+    const blended = processSnowfallVariables(rawHourly, slrAlgorithm, elevation);
 
     blended.forEach(p => {
         if (p.slr) {
