@@ -110,10 +110,17 @@ h3 {
     flex-wrap: nowrap;
     align-items: center;
     gap: 1.5rem;
-    margin-top: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
+    position: relative;
+    z-index: 150; /* Above location management and controls */
+    background: rgba(15, 23, 42, 0.4);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header-data-bar::-webkit-scrollbar {
@@ -248,7 +255,7 @@ h3 {
 
 .current-conditions {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap; /* Changed from nowrap to allow items to wrap on small screens */
     gap: 0.75rem;
     align-items: center;
 }
@@ -265,6 +272,7 @@ h3 {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
     white-space: nowrap;
+    flex-shrink: 0; /* Prevent items from being crushed in flex containers */
 }
 
 .condition-item:hover {
@@ -1330,6 +1338,26 @@ body.mode-history .mode-slider {
         font-size: 0.85rem;
     }
 
+    .header-data-bar {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem 0.75rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.25rem;
+        width: 100%;
+        position: relative;
+        z-index: 150;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+    }
+
+    .location-info {
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
     .search-results {
         max-height: 250px;
     }
@@ -1381,21 +1409,11 @@ body.mode-history .mode-slider {
         font-size: 0.9rem;
     }
 
-    /* ── Header Data Bar (conditions) ── */
-    .header-data-bar {
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-top: 0.75rem;
-    }
-
-    .location-info {
-        font-size: 0.8rem;
-        text-align: center;
-    }
-
     .current-conditions {
         justify-content: center;
         gap: 0.5rem;
+        flex-wrap: wrap; /* Ensure it wraps on mobile */
+        width: 100%;
     }
 
     .condition-item {
