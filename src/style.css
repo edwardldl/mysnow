@@ -632,9 +632,9 @@ h3 {
 }
 
 .temp-chart-scroll {
-    height: 200px;
+    height: 220px;
     align-items: flex-start;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -653,8 +653,7 @@ h3 {
 }
 
 .chart-col-group {
-    flex: 0 0 60px;
-    /* Fixed width to array columns equally */
+    flex: 0 0 64px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -668,7 +667,7 @@ h3 {
 
 .chart-bar-wrapper {
     width: 40px;
-    height: 150px;
+    height: 140px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -1019,7 +1018,9 @@ h3 {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 0.25rem;
     min-height: 32px;
-    /* Enforce uniform row height */
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .metric-label {
@@ -1480,18 +1481,18 @@ body.mode-history .mode-slider {
     }
 
     /* ── Hourly Charts ── */
+    .chart-col-group {
+        flex: 0 0 64px;
+    }
+
     .snow-chart-scroll {
-        height: 140px;
+        height: 250px;
         padding-top: 1.5rem;
         margin-bottom: 1rem;
     }
 
     .temp-chart-scroll {
-        height: 160px;
-    }
-
-    .chart-col-group {
-        flex: 0 0 48px;
+        height: 240px;
     }
 
     .chart-bar-wrapper {

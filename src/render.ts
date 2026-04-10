@@ -216,7 +216,7 @@ export function renderDayDetail(day: DayData) {
     els.dayDetailContainer.innerHTML = '';
     els.dayDetailContainer.classList.remove('hidden');
 
-    const maxBarHeight = 150; // px
+    const maxBarHeight = 140; // px (Matches mobile height in CSS)
     const scaleMax = 10.0; // cm of snowfall (max scale)
 
     let maxTemp = -Infinity; let minTemp = Infinity;
@@ -236,7 +236,7 @@ export function renderDayDetail(day: DayData) {
     const chartMax = midTemp + (targetRange / 2) + tempPadding;
     const chartRange = chartMax - chartMin;
 
-    const colWidth = 60;
+    const colWidth = 64;
     const colGap = 8;
     const totalColWidth = colWidth + colGap;
     const svgWidth = 24 * totalColWidth;
@@ -296,7 +296,7 @@ export function renderDayDetail(day: DayData) {
             </div>`;
 
         // Temperature Bar Logic
-        const tempHeight = h.temperature !== null ? ((h.temperature - chartMin) / chartRange) * 100 : 0;
+        const tempHeight = h.temperature !== null ? ((h.temperature - chartMin) / chartRange) * maxBarHeight : 0;
         
         // Calculate dynamic hue: -20C (240 deg Blue) to +20C (0 deg Red)
         const clampedTemp = Math.max(-20, Math.min(20, h.temperature ?? 0));
@@ -307,13 +307,11 @@ export function renderDayDetail(day: DayData) {
         tempCols += `
             <div class="chart-col-group" style="z-index: 1;">
                 <div class="chart-time label-top"${hourStyle}>${hrLabel}${astroIcon}</div>
-                <div class="chart-bar-wrapper" style="height: 100px;">
+                <div class="chart-bar-wrapper">
                     <div class="chart-bar" style="height: ${tempHeight}px; background: ${tempGradient}; border-radius: 4px;"></div>
                 </div>
-                <div class="chart-metrics" style="margin-top: 10px;">
-                    <div class="metric-row" style="border: none;">
-                        <span class="metric-val" style="font-size: 1rem; font-weight: 700; color: ${tempColor};">${formatTemp(h.temperature)}</span>
-                    </div>
+                <div class="chart-temp-bottom" style="font-size: 0.70rem; font-weight: bold; margin-top: 4px; color: var(--snow-white); white-space: nowrap;">
+                    ${formatTemp(h.temperature)}
                 </div>
             </div>`;
 
