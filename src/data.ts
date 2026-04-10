@@ -117,10 +117,9 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
             }
         }
 
-        const hs = snowLayersOnGround.reduce((sum, l) => sum + (l.SWE_mm / 10) * (RHO_WATER / l.density), 0);
-        point.snowDepth = Math.round(hs / 100); // cm to meters or strictly use cm? Variable handles it. The UI expects cm.
-        
-        let hs_cm = snowLayersOnGround.reduce((sum, l) => sum + (l.SWE_mm / 10) * (RHO_WATER / l.density), 0);
+        const hs_cm = snowLayersOnGround.reduce((sum, l) => sum + (l.SWE_mm / 10) * (RHO_WATER / l.density), 0);
+        // snowDepth is stored in metres (UI multiplies by 100 to display as cm)
+        point.snowDepth = hs_cm / 100;
 
         out.push({
             ...point,
@@ -190,7 +189,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
             point.clouds = hrrr.hourly.cloud_cover ? hrrr.hourly.cloud_cover[hrrrIdx] : null;
             
             let FL = hrrr.hourly.freezing_level_height ? hrrr.hourly.freezing_level_height[hrrrIdx] : null;
-            if (FL == null && location && location.elevationM && point.temperature != null) {
+            if (FL == null && location && typeof location.elevationM === 'number' && point.temperature != null) {
                 FL = location.elevationM + (point.temperature * (1000 / 6.5));
             }
 
@@ -236,7 +235,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
             point.clouds = ecmwf.hourly.cloud_cover ? ecmwf.hourly.cloud_cover[i] : null;
             
             let ecmwfFL = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
-            if (ecmwfFL == null && location && location.elevationM && point.temperature != null) {
+            if (ecmwfFL == null && location && typeof location.elevationM === 'number' && point.temperature != null) {
                 ecmwfFL = location.elevationM + (point.temperature * (1000 / 6.5));
             }
 
@@ -268,7 +267,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
         rawHourly.push(point);
     }
 
-    const elevation = location.elevationM || 1000;
+    const elevation = typeof location.elevationM === 'number' ? location.elevationM : 1000;
     const blended = processSnowfallVariables(rawHourly, slrAlgorithm, elevation);
 
     blended.forEach(p => {

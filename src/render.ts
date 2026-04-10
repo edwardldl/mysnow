@@ -2,6 +2,18 @@ import { getSLRCategory } from './data';
 import { isToday, isTomorrow, initSnowEngine, formatHour, formatTemp, getWeatherDescription } from './utils';
 import { Location, BlendedHour, DayData } from './types';
 
+/**
+ * Map a snow-to-liquid ratio to an HSL hue.
+ * SLR 5 (wet) → cyan (180°), SLR 10 (standard) → blue (210°), SLR 15+ (powder) → orange (30°).
+ */
+function slrToHsl(slr: number): string {
+    const mapped = Math.min(Math.max(slr, 5), 15);
+    const hue = mapped <= 10
+        ? 180 + ((mapped - 5) / 5) * 30      // cyan → blue
+        : (210 + ((mapped - 10) / 5) * 180) % 360; // blue → orange
+    return `hsl(${hue}, 100%, 60%)`;
+}
+
 const els = {
     locationInfo: document.getElementById('location-info') as HTMLElement,
     currentConditions: document.getElementById('current-conditions') as HTMLElement,
@@ -127,38 +139,32 @@ export function renderDaySummaries(daysData: DayData[], onSelectDay: (day: DayDa
         const card = document.createElement('div');
         const isBigStorm = day.totalSnowfall >= 15;
         const avgSlr = day.totalPrecipitation > 0 ? (day.totalSnowfall * 10) / day.totalPrecipitation : 0;
-        
-        // Calculate SLR-based color for this day
-        const mappedSlr = Math.min(Math.max(avgSlr, 5), 15);
-        let slrHue;
-        if (mappedSlr <= 10) {
-            slrHue = 180 + ((mappedSlr - 5) / 5) * 30; // Cyan to Blue
-        } else {
-            slrHue = (210 + ((mappedSlr - 10) / 5) * 180) % 360; // Blue to Orange (via Purple/Red)
-        }
 
+        const dayColor = slrToHsl(avgSlr);
+        // Derive CSS-variable RGB string from the HSL colour for box-shadow / overlay use
+        const mapped = Math.min(Math.max(avgSlr, 5), 15);
+        const hue = mapped <= 10
+            ? 180 + ((mapped - 5) / 5) * 30
+            : (210 + ((mapped - 10) / 5) * 180) % 360;
         const s = 1, l = 0.6;
         const c = (1 - Math.abs(2 * l - 1)) * s;
-        const x = c * (1 - Math.abs((slrHue / 60) % 2 - 1));
+        const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
         const m = l - c / 2;
         let r, g, b;
-        if (slrHue < 60) { r = c; g = x; b = 0; }
-        else if (slrHue < 120) { r = x; g = c; b = 0; }
-        else if (slrHue < 180) { r = 0; g = c; b = x; }
-        else if (slrHue < 240) { r = 0; g = x; b = c; }
-        else if (slrHue < 300) { r = x; g = 0; b = c; }
+        if (hue < 60) { r = c; g = x; b = 0; }
+        else if (hue < 120) { r = x; g = c; b = 0; }
+        else if (hue < 180) { r = 0; g = c; b = x; }
+        else if (hue < 240) { r = 0; g = x; b = c; }
+        else if (hue < 300) { r = x; g = 0; b = c; }
         else { r = c; g = 0; b = x; }
-        
         const rgbStr = `${Math.round((r + m) * 255)}, ${Math.round((g + m) * 255)}, ${Math.round((b + m) * 255)}`;
-        
+
         card.className = `day-card ${index === 0 ? 'selected' : ''} ${isBigStorm ? 'big-storm' : ''} ${avgSlr >= 15 ? 'powder-day' : ''}`;
-        card.style.setProperty('--day-color', `hsl(${slrHue}, 100%, 60%)`);
+        card.style.setProperty('--day-color', dayColor);
         card.style.setProperty('--day-color-rgb', rgbStr);
 
-        // Keep --storm-color for backward compatibility with existing styles if needed, 
-        // though we're transitioning to --day-color
         if (isBigStorm) {
-            card.style.setProperty('--storm-color', `hsl(${slrHue}, 100%, 60%)`);
+            card.style.setProperty('--storm-color', dayColor);
             card.style.setProperty('--storm-color-rgb', rgbStr);
         }
 
@@ -235,8 +241,6 @@ export function renderDayDetail(day: DayData) {
     const totalColWidth = colWidth + colGap;
     const svgWidth = 24 * totalColWidth;
 
-    const skiBoxHtml = '';
-
     let snowCols = '';
     let tempCols = '';
     let metricCols = '';
@@ -261,14 +265,7 @@ export function renderDayDetail(day: DayData) {
             barColor = 'hsl(120, 70%, 50%)';
         } else if (h.slr !== null) {
             slrText = h.slr.toFixed(1) + ':1';
-            let mappedSlr = Math.min(Math.max(h.slr, 5), 15);
-            let hue;
-            if (mappedSlr <= 10) {
-                hue = 180 + ((mappedSlr - 5) / 5) * 30;
-            } else {
-                hue = (210 + ((mappedSlr - 10) / 5) * 180) % 360;
-            }
-            barColor = `hsl(${hue}, 100%, 60%)`;
+            barColor = slrToHsl(h.slr);
         }
 
         const slrBadge = h.slr !== null ? `<div class="badge slr-badge chart-slr" style="margin-bottom:2px;">${slrText}</div>` : '';
@@ -338,21 +335,18 @@ export function renderDayDetail(day: DayData) {
 
     const snowHtml = `
         <div class="snow-chart-scroll chart-wrapper-relative" id="snow-chart-scroll">
-            ${skiBoxHtml}
             ${snowCols}
         </div>
     `;
 
     const tempHtml = `
         <div class="temp-chart-scroll chart-wrapper-relative" id="temp-chart-scroll">
-            ${skiBoxHtml}
             ${tempCols}
         </div>
     `;
 
     const metricsHtml = `
         <div class="metrics-chart-scroll chart-wrapper-relative" id="metrics-chart-scroll">
-            ${skiBoxHtml}
             ${metricCols}
         </div>
     `;

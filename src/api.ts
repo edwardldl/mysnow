@@ -1,7 +1,9 @@
-const DEFAULT_LOCATIONS = {
+import type { Location } from './types';
+
+const DEFAULT_LOCATIONS: Record<string, Location> = {
     palisades: {
         id: 'palisades',
-        name: "Palisades Tahoe",
+        name: 'Palisades Tahoe',
         latitude: 39.193416,
         longitude: -120.245402,
         elevationFt: 8100,
@@ -16,12 +18,11 @@ export function getLocations() {
     return { ...DEFAULT_LOCATIONS, ...customLocs };
 }
 
-export function saveLocation(id, name, lat, lon) {
+export function saveLocation(id: string, name: string, lat: string, lon: string): Record<string, Location> {
     const customLocsJson = localStorage.getItem('calisnow_locations');
-    const customLocs = customLocsJson ? JSON.parse(customLocsJson) : {};
+    const customLocs: Record<string, Location> = customLocsJson ? JSON.parse(customLocsJson) : {};
 
-    // Rough estimate of elevation based on location or just set to 0 for simplicity
-    // User isn't inputting elevation
+    // Elevation is populated on first successful API fetch for custom locations.
     customLocs[id] = {
         id,
         name,
@@ -36,7 +37,7 @@ export function saveLocation(id, name, lat, lon) {
     return getLocations();
 }
 
-export function removeLocation(id) {
+export function removeLocation(id: string): Record<string, Location> {
     if (DEFAULT_LOCATIONS[id]) return getLocations(); // Can't delete defaults
 
     const customLocsJson = localStorage.getItem('calisnow_locations');
@@ -49,8 +50,16 @@ export function removeLocation(id) {
     return getLocations();
 }
 
-const BASE_URL = "https://api.open-meteo.com/v1/forecast";
-const HISTORICAL_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast";
+const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
+const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/forecast';
+
+/** Backfill elevation fields for custom locations once the API response is available. */
+function updateCustomElevation(loc: Location, apiElevation: number | undefined): void {
+    if (loc.isCustom && apiElevation != null) {
+        loc.elevationM = Math.round(apiElevation);
+        loc.elevationFt = Math.round(apiElevation * 3.28084);
+    }
+}
 
 const PRESSURE_LEVELS = ["1000hPa", "975hPa", "950hPa", "925hPa", "900hPa", "850hPa", "800hPa", "700hPa", "600hPa", "500hPa", "400hPa", "300hPa"];
 
@@ -112,10 +121,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'best_match') {
             if (!res.ok) throw new Error(`Best Match fetch failed: ${res.status}`);
             const data = await res.json();
 
-            if (loc.isCustom && data.elevation) {
-                loc.elevationM = Math.round(data.elevation);
-                loc.elevationFt = Math.round(data.elevation * 3.28084);
-            }
+            updateCustomElevation(loc, data.elevation);
 
             return { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' };
         } catch (error) {
@@ -152,10 +158,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'best_match') {
             const hrrrData = await hrrrRes.json();
             const ecmwfData = await ecmwfRes.json();
 
-            if (loc.isCustom && ecmwfData.elevation) {
-                loc.elevationM = Math.round(ecmwfData.elevation);
-                loc.elevationFt = Math.round(ecmwfData.elevation * 3.28084);
-            }
+            updateCustomElevation(loc, ecmwfData.elevation);
 
             return { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' };
         } catch (error) {
@@ -202,10 +205,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'best_match') {
             }
             const data = await res.json();
 
-            if (loc.isCustom && data.elevation) {
-                loc.elevationM = Math.round(data.elevation);
-                loc.elevationFt = Math.round(data.elevation * 3.28084);
-            }
+            updateCustomElevation(loc, data.elevation);
 
             // For single models, we return them in ecmwfData slot and leave hrrrData null
             return { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode };
@@ -239,10 +239,7 @@ export async function fetchHistoricalWeatherData(locationKey, startDate, endDate
         if (!res.ok) throw new Error(`Historical fetch failed: ${res.status}`);
         const data = await res.json();
 
-        if (loc.isCustom && data.elevation) {
-            loc.elevationM = Math.round(data.elevation);
-            loc.elevationFt = Math.round(data.elevation * 3.28084);
-        }
+        updateCustomElevation(loc, data.elevation);
 
         return { hrrrData: null, ecmwfData: data, location: loc, mode: 'historical', model };
     } catch (error) {

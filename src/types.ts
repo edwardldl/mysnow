@@ -1,3 +1,5 @@
+import type { PressureLayer } from './slr';
+
 export interface OpenMeteoHourly {
     time: string[];
     temperature_2m: number[];
@@ -47,8 +49,10 @@ export interface Location {
     name: string;
     latitude: number;
     longitude: number;
-    elevationM: number;
-    elevationFt: number;
+    /** Metres above sea level. '--' for custom locations before the first API fetch. */
+    elevationM: number | string;
+    /** Feet above sea level. '--' for custom locations before the first API fetch. */
+    elevationFt: number | string;
     isCustom?: boolean;
 }
 
@@ -90,7 +94,7 @@ export interface BlendedHour {
     snowfall: number;
     method: string | null;
     slrCategory: string | null;
-    layers?: any[];
+    layers?: PressureLayer[];
 }
 
 export interface WindowData {

@@ -16,7 +16,15 @@ let currentLocation = 'palisades';
 let currentModelMode = 'best_match';
 let currentSlrMode = 'hybrid';
 let currentDaysData: DayData[] = [];
-let allSkiAreas: any[] = [];
+
+interface SkiArea {
+    name: string;
+    lat: number;
+    lon: number;
+    region?: string;
+    country: string;
+}
+let allSkiAreas: SkiArea[] = [];
 
 const MODEL_METADATA = {
     'best_match': {
@@ -78,9 +86,9 @@ const MODEL_METADATA = {
 // ── In-memory cache ───────────────────────────────────────────────────────────
 // Keyed by "locationKey|modelMode" so only location/model changes trigger a fetch.
 interface WeatherCache {
-    hrrrData: any;
-    ecmwfData: any;
-    location: any;
+    hrrrData: import('./types').OpenMeteoResponse | null;
+    ecmwfData: import('./types').OpenMeteoResponse;
+    location: import('./types').Location;
 }
 const weatherCache = new Map<string, WeatherCache>();
 
@@ -190,7 +198,13 @@ async function loadHistoricalForecast(startDate: string, model: string) {
         }
 
         const resetBtn = document.getElementById('hist-reset-btn');
-        if (resetBtn) resetBtn.classList.remove('hidden');
+        if (resetBtn) {
+            resetBtn.classList.remove('hidden');
+            resetBtn.addEventListener('click', () => {
+                resetBtn.classList.add('hidden');
+                loadForecast();
+            }, { once: true });
+        }
 
         showContent();
     } catch (err) {

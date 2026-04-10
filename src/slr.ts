@@ -67,6 +67,19 @@ function clamp(v: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, v));
 }
 
+/**
+ * Kuchera piecewise fallback used when no valid atmospheric profile is available.
+ * Falls back to the 2m temperature as a proxy for column max temp.
+ */
+function kucheraFallback(temperature_2m: number): { slr: number; isSnow: boolean } {
+    const maxTempK = temperature_2m + 273.15;
+    const KUCHERA_PIVOT = 271.16;
+    const rawSlr = maxTempK > KUCHERA_PIVOT
+        ? 12 + 2 * (KUCHERA_PIVOT - maxTempK)
+        : 12 + (KUCHERA_PIVOT - maxTempK);
+    return { slr: Math.round(Math.max(1.0, rawSlr) * 10) / 10, isSnow: true };
+}
+
 /** Resolve surface RH and wet-bulb from an hourly point. */
 function surfaceWetBulb(hour: OpenMeteoHour): { RH: number; Tw: number } {
     let RH = hour.relative_humidity_2m;
@@ -224,14 +237,7 @@ function simpleSLR(hour: OpenMeteoHour, QPF: number): { slr: number; isSnow: boo
     );
 
     if (aboveGroundProfile.length === 0) {
-        // Fallback to surface temp if data is missing or highly anomalous
-        const maxTempC = hour.temperature_2m;
-        const maxTempK = maxTempC + 273.15;
-        const KUCHERA_PIVOT = 271.16;
-        let slr = (maxTempK > KUCHERA_PIVOT)
-            ? 12 + 2 * (KUCHERA_PIVOT - maxTempK)
-            : 12 + (KUCHERA_PIVOT - maxTempK);
-        return { slr: Math.round(Math.max(1.0, slr) * 10) / 10, isSnow: true };
+        return kucheraFallback(hour.temperature_2m);
     }
 
     // 2. Find the maximum temperature in the valid, above-ground atmospheric column
@@ -272,14 +278,7 @@ function kucheraDgzSLR(hour: OpenMeteoHour, QPF: number): { slr: number; isSnow:
     );
 
     if (aboveGroundProfile.length === 0) {
-        // Fallback to surface temp
-        const maxTempC = hour.temperature_2m;
-        const maxTempK = maxTempC + 273.15;
-        const KUCHERA_PIVOT = 271.16;
-        let slr = (maxTempK > KUCHERA_PIVOT)
-            ? 12 + 2 * (KUCHERA_PIVOT - maxTempK)
-            : 12 + (KUCHERA_PIVOT - maxTempK);
-        return { slr: Math.round(Math.max(1.0, slr) * 10) / 10, isSnow: true };
+        return kucheraFallback(hour.temperature_2m);
     }
 
     // 2. Sort profile from ground up (highest hPa to lowest hPa)
@@ -336,14 +335,7 @@ function kucheraDgzPlusSLR(hour: OpenMeteoHour, QPF: number): { slr: number; isS
     );
 
     if (aboveGroundProfile.length === 0) {
-        // Fallback to surface temp
-        const maxTempC = hour.temperature_2m;
-        const maxTempK = maxTempC + 273.15;
-        const KUCHERA_PIVOT = 271.16;
-        let slr = (maxTempK > KUCHERA_PIVOT)
-            ? 12 + 2 * (KUCHERA_PIVOT - maxTempK)
-            : 12 + (KUCHERA_PIVOT - maxTempK);
-        return { slr: Math.round(Math.max(1.0, slr) * 10) / 10, isSnow: true };
+        return kucheraFallback(hour.temperature_2m);
     }
 
     // 2. Sort profile from ground up (highest hPa to lowest hPa)
@@ -709,14 +701,7 @@ function hybridSLR(hour: OpenMeteoHour, QPF: number): { slr: number; isSnow: boo
     );
 
     if (validProfile.length === 0) {
-        // Fallback to surface temp
-        const maxTempC = hour.temperature_2m;
-        const maxTempK = maxTempC + 273.15;
-        const KUCHERA_PIVOT = 271.16;
-        let slr = (maxTempK > KUCHERA_PIVOT)
-            ? 12 + 2 * (KUCHERA_PIVOT - maxTempK)
-            : 12 + (KUCHERA_PIVOT - maxTempK);
-        return { slr: Math.round(Math.max(1.0, slr) * 10) / 10, isSnow: true };
+        return kucheraFallback(hour.temperature_2m);
     }
 
     // Sort from the ground up (highest pressure to lowest)
@@ -835,6 +820,21 @@ export function calcSLR(hour: OpenMeteoHour, method: string = 'hybrid', prevSlr:
     out.isSnow = true;
     let slr = 10;
 
+    // ── Dispatch table ────────────────────────────────────────────────────────
+    // Each entry is [qpfMultiplier, algorithmFn].
+    // The 'kinematic' method applies a QPF orographic correction; all others use raw QPF.
+    type AlgoFn = (h: OpenMeteoHour, qpf: number) => { slr: number; isSnow: boolean };
+    const dispatch: Record<string, [number, AlgoFn]> = {
+        kinematic:    [1.43,  advancedSLR],
+        simple:       [1,     simpleSLR],
+        dendro:       [1,     dendroSLR],
+        krc:          [1,     krcCompSLR],
+        kuchera_dgz:  [1,     kucheraDgzSLR],
+        kuchera_plus: [1,     kucheraDgzPlusSLR],
+        cobb:         [1,     cobbSLR],
+        hybrid:       [1,     hybridSLR],
+    };
+
     if (method === 'model_native') {
         const h_snowfall_cm = hour.snowfall ?? 0;
         slr = (P > 0 && h_snowfall_cm > 0) ? (h_snowfall_cm * 10) / P : 10;
@@ -844,47 +844,14 @@ export function calcSLR(hour: OpenMeteoHour, method: string = 'hybrid', prevSlr:
         slr = 10;
         out.qpf_corrected = P;
 
-    } else if (method === 'simple') {
-        out.qpf_corrected = P;
-        const result = simpleSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
-    } else if (method === 'dendro') {
-        out.qpf_corrected = P;
-        const result = dendroSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
-    } else if (method === 'krc') {
-        out.qpf_corrected = P;
-        const result = krcCompSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
-    } else if (method === 'kuchera_dgz') {
-        out.qpf_corrected = P;
-        const result = kucheraDgzSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
-    } else if (method === 'kuchera_plus') {
-        out.qpf_corrected = P;
-        const result = kucheraDgzPlusSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
-    } else if (method === 'cobb') {
-        out.qpf_corrected = P;
-        const result = cobbSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
-    } else if (method === 'hybrid') {
-        out.qpf_corrected = P;
-        const result = hybridSLR(hour, P);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
-
     } else {
-        // 'kinematic' (default) — physics-based with orographic QPF bump
-        const qpf_corrected = P * 1.43;
-        out.qpf_corrected = qpf_corrected;
-        const result = advancedSLR(hour, qpf_corrected);
-        if (result.isSnow) { slr = result.slr; } else { out.isSnow = false; return out; }
+        const entry = dispatch[method] ?? dispatch['kinematic'];
+        const [qpfMult, fn] = entry;
+        const qpf = P * qpfMult;
+        out.qpf_corrected = qpf;
+        const result = fn(hour, qpf);
+        if (!result.isSnow) { out.isSnow = false; return out; }
+        slr = result.slr;
     }
 
     slr = Math.max(1, Math.min(slr, 30));

@@ -68,6 +68,8 @@ export function initSnowEngine() {
         document.head.appendChild(style);
     }
 }
+
+/** Map a WMO weather interpretation code to a human-readable label and emoji icon. */
 export function getWeatherDescription(code: number | null): { label: string; icon: string } {
     if (code === null) return { label: 'Unknown', icon: '' };
     
