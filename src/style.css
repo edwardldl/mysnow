@@ -166,7 +166,7 @@ h3 {
     overflow-x: auto;
     scrollbar-width: none;
     position: relative;
-    z-index: 150; /* Above location management and controls */
+    z-index: 10;
     background: rgba(15, 23, 42, 0.4);
     padding: 0.75rem 1rem;
     border-radius: 12px;
@@ -189,7 +189,7 @@ h3 {
 .location-management {
     margin-bottom: 1.5rem;
     position: relative;
-    z-index: 100;
+    z-index: 50;
 }
 
 .location-form-consolidated {
@@ -1209,7 +1209,7 @@ h3 {
     gap: 2rem;
     margin-bottom: 2rem;
     position: relative;
-    z-index: 50;
+    z-index: 60;
 }
 
 .mode-section {
@@ -1397,7 +1397,7 @@ body.mode-history .mode-slider {
         margin-bottom: 0.25rem;
         width: 100%;
         position: relative;
-        z-index: 150;
+        z-index: 10;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
