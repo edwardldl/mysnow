@@ -134,7 +134,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'best_match') {
             `&hourly=${HOURLY_PARAMS}` +
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
-            `&forecast_days=2` +
+            `&forecast_days=3` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
@@ -181,7 +181,7 @@ export async function fetchWeatherData(locationKey, modelMode = 'best_match') {
         
         // Models like HRRR or NAM might have shorter leads. 
         // We'll ask for 15 days, but Open-Meteo returns what it has.
-        const days = (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') ? 2 : 15;
+        const days = (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') ? 3 : 15;
 
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
