@@ -462,6 +462,33 @@ function initLocListeners() {
             }
         });
     });
+
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            refreshBtn.classList.add('loading');
+            
+            // Clear current cache entry to force fresh fetch
+            const cacheKey = `${currentLocation}|${currentModelMode}`;
+            weatherCache.delete(cacheKey);
+
+            // Reload data
+            try {
+                const mode = (document.querySelector('input[name="app-mode"]:checked') as HTMLInputElement)?.value;
+                if (mode === 'history') {
+                    const startDate = (document.getElementById('hist-start') as HTMLInputElement)?.value;
+                    const model = (document.getElementById('hist-model') as HTMLSelectElement)?.value;
+                    if (startDate && model) {
+                        await loadHistoricalForecast(startDate, model);
+                    }
+                } else {
+                    await loadForecast();
+                }
+            } finally {
+                refreshBtn.classList.remove('loading');
+            }
+        });
+    }
 }
 
 async function init() {

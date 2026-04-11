@@ -73,6 +73,56 @@ h3 {
     z-index: 10;
 }
 
+.header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.header-title-row h1 {
+    margin-bottom: 0;
+}
+
+.refresh-btn {
+    background: var(--bg-element);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+    margin-top: 4px;
+}
+
+.refresh-btn:hover {
+    background: var(--bg-element-hover);
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    transform: rotate(30deg) scale(1.1);
+}
+
+.refresh-btn:active {
+    transform: scale(0.95);
+}
+
+.refresh-btn.loading {
+    animation: btn-spin 1s linear infinite;
+    pointer-events: none;
+    color: var(--accent-blue);
+    border-color: var(--accent-blue-dim);
+}
+
+@keyframes btn-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Location Switcher */
 .location-switcher {
     display: flex;
