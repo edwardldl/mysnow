@@ -137,10 +137,11 @@ export function renderHeader(location: Location, currentData: BlendedHour | null
 }
 
 function getDayTitle(dateObj: Date) {
-    if (isToday(dateObj)) return "Today";
-    if (isTomorrow(dateObj)) return "Tomorrow";
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return `${days[dateObj.getDay()]} ${dateObj.getDate()}`;
+    const dateNum = dateObj.getDate();
+    if (isToday(dateObj)) return `Today ${dateNum}`;
+    if (isTomorrow(dateObj)) return `Tomorrow ${dateNum}`;
+    return `${days[dateObj.getDay()]} ${dateNum}`;
 }
 
 export function renderDaySummaries(daysData: DayData[], onSelectDay: (day: DayData) => void) {
