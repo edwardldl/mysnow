@@ -68,7 +68,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <StatBox label="Total Snowfall" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Model Correction Applied" />
             <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
-            <StatBox label="Snow Depth" value={selectedDay.snowDepth} trend="Estimated Settling" />
+            <StatBox label="Snow Depth" value={selectedDay.snowDepth || "--"} trend="Estimated Settling" />
             <StatBox label="Solar Events" value={selectedDay.sunrise ? `${selectedDay.sunrise.split('T')[1].substring(0, 5)} / ${selectedDay.sunset?.split('T')[1].substring(0, 5)}` : '--'} trend="Sunrise / Sunset" />
           </div>
 
@@ -126,6 +126,7 @@ function HourlySnowChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
           <Snowflake className="w-5 h-5 text-accent-cyan" />
           <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Snowfall Intensity (cm)</h3>
         </div>
+        <SlrLegend />
       </div>
 
       <div className="relative">
@@ -346,6 +347,27 @@ function MetricPill({ label, value, color }: { label: string, value: string, col
     <div className="flex flex-col items-center">
       <span className="text-[7px] font-black uppercase tracking-tighter text-slate-600 mb-0.5">{label}</span>
       <span className={cn("text-[10px] md:text-[11px] font-black tabular-nums", colorMap)}>{value}</span>
+    </div>
+  );
+}
+
+function SlrLegend() {
+  const stops = [5, 7.5, 10, 12.5, 15];
+  const gradientStops = stops.map(s => getSlrColor(s)).join(', ');
+  
+  return (
+    <div className="flex flex-col gap-1.5 items-end px-1">
+      <div 
+        style={{ background: `linear-gradient(to right, ${gradientStops})` }}
+        className="h-1.5 w-28 md:w-36 rounded-full relative shadow-[0_0_10px_rgba(255,255,255,0.05)]"
+      >
+        <div className="absolute inset-0 rounded-full border border-white/10" />
+      </div>
+      <div className="flex justify-between w-28 md:w-36 px-0.5">
+        <span className="text-[8px] md:text-[9px] font-black uppercase text-slate-500 tracking-tighter">Wet</span>
+        <span className="text-[8px] md:text-[9px] font-black uppercase text-slate-500 tracking-tighter">Norm</span>
+        <span className="text-[8px] md:text-[9px] font-black uppercase text-slate-500 tracking-tighter text-right">Pow</span>
+      </div>
     </div>
   );
 }
