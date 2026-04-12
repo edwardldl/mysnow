@@ -87,6 +87,7 @@ const HOURLY_PARAMS = [
     "shortwave_radiation",
     "cape",
     "visibility",
+    "uv_index",
     "boundary_layer_height",
     "total_column_integrated_water_vapour",
     "lifted_index",

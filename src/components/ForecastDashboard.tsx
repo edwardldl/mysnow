@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Snowflake, Thermometer, Info, Wind, Navigation2 } from "lucide-react";
+import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
@@ -145,11 +145,17 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
               scrollRef={(el) => (scrollRefs.current[2] = el)}
               onScroll={(e) => handleScroll(e, 2)}
             />
-            <TelemetryRows
+            <HourlyUVChartFromScratch
               day={selectedDay}
               currentHourISO={currentHourISO}
               scrollRef={(el) => (scrollRefs.current[3] = el)}
               onScroll={(e) => handleScroll(e, 3)}
+            />
+            <TelemetryRows
+              day={selectedDay}
+              currentHourISO={currentHourISO}
+              scrollRef={(el) => (scrollRefs.current[4] = el)}
+              onScroll={(e) => handleScroll(e, 4)}
             />
           </div>
         </motion.div>
@@ -488,6 +494,113 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${speedHeight + 38}px` }}>
                     <span className="text-[10px] md:text-[11px] font-black text-white/80 tabular-nums drop-shadow-md">
                       {speed.toFixed(0)}<span className="text-[8px] opacity-60 ml-0.5">km/h</span>
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute bottom-2 flex flex-col items-center">
+                  <span
+                    className={cn(
+                      "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
+                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                    )}
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+  const chartHeight = 100;
+  const safeMax = 12; // Standard UV scale usually goes up to 11+
+
+  const getUvColor = (uv: number) => {
+    if (uv <= 2) return "bg-green-500/40 border-green-400/30";
+    if (uv <= 5) return "bg-yellow-400/40 border-yellow-300/30";
+    if (uv <= 7) return "bg-orange-500/40 border-orange-400/30";
+    if (uv <= 10) return "bg-red-500/40 border-red-400/30";
+    return "bg-violet-500/40 border-violet-400/30";
+  };
+
+  const getUvTextClass = (uv: number) => {
+    if (uv <= 2) return "text-green-300";
+    if (uv <= 5) return "text-yellow-300";
+    if (uv <= 7) return "text-orange-300";
+    if (uv <= 10) return "text-red-300";
+    return "text-violet-300";
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Sun className="w-5 h-5 text-yellow-400" />
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">UV Index</h3>
+        </div>
+      </div>
+
+      <div className="relative">
+        {/* Y-Axis Labels */}
+        <div
+          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
+          style={{ bottom: "46px", height: `${chartHeight}px` }}
+        >
+          <span className="flex items-center h-4">12</span>
+          <span className="flex items-center h-4 mt-auto">0</span>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+        >
+          {day.hourly.map((h, i) => {
+            const uv = h.uvIndex ?? 0;
+            const height = (Math.min(uv, safeMax) / safeMax) * chartHeight;
+
+            const hour = parseInt(h.time.split('T')[1].split(':')[0]);
+            const isMidnight = hour === 0;
+            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "min-w-[48px] md:min-w-[60px] flex flex-col items-center h-full justify-end relative group",
+                  isCurrent && "bg-yellow-400/[0.03] border-x border-yellow-400/10"
+                )}
+              >
+                {isCurrent && (
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-yellow-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(250,204,21,0.4)] whitespace-nowrap">
+                    NOW
+                  </div>
+                )}
+
+                {/* UV Bar */}
+                <div
+                  style={{
+                    height: `${Math.max(height, uv > 0 ? 3 : 0)}px`,
+                    width: '100%',
+                    bottom: '36px'
+                  }}
+                  className={cn(
+                    "absolute rounded-t-lg z-10 border-t transition-all",
+                    getUvColor(uv)
+                  )}
+                />
+
+                {/* Label */}
+                {uv > 0 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${height + 38}px` }}>
+                    <span className={cn("text-[12px] md:text-[14px] font-black tabular-nums drop-shadow-lg", getUvTextClass(uv))}>
+                      {uv.toFixed(1)}
                     </span>
                   </div>
                 )}

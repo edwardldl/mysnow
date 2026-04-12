@@ -228,6 +228,7 @@ export function blendForecasts(
             point.total_column_integrated_water_vapour = hrrr.hourly.total_column_integrated_water_vapour ? hrrr.hourly.total_column_integrated_water_vapour[hrrrIdx] : null;
             point.freezing_level_height = hrrr.hourly.freezing_level_height ? hrrr.hourly.freezing_level_height[hrrrIdx] : null;
             point.snowfall_raw = hrrr.hourly.snowfall ? hrrr.hourly.snowfall[hrrrIdx] : null;
+            point.uvIndex = hrrr.hourly.uv_index ? hrrr.hourly.uv_index[hrrrIdx] : null;
             
             point.layers = extractLayers(hrrr, hrrrIdx);
         } else {
@@ -273,6 +274,7 @@ export function blendForecasts(
             point.total_column_integrated_water_vapour = ecmwf.hourly.total_column_integrated_water_vapour ? ecmwf.hourly.total_column_integrated_water_vapour[i] : null;
             point.freezing_level_height = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
             point.snowfall_raw = ecmwf.hourly.snowfall ? ecmwf.hourly.snowfall[i] : null;
+            point.uvIndex = ecmwf.hourly.uv_index ? ecmwf.hourly.uv_index[i] : null;
 
             point.layers = extractLayers(ecmwf, i);
         }
@@ -373,7 +375,8 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
                 rhs: [],
                 gusts: [],
                 clouds: [],
-                snowLevels: []
+                snowLevels: [],
+                uvIndices: []
             });
         }
 
@@ -394,6 +397,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             if (point.gusts != null) window.gusts.push(point.gusts);
             if (point.clouds != null) window.clouds.push(point.clouds);
             if (point.snowLevel != null) window.snowLevels.push(point.snowLevel);
+            if (point.uvIndex != null) window.uvIndices.push(point.uvIndex);
         });
 
         let dayMaxSnowfall = 0;
@@ -409,6 +413,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             w.maxGust = w.gusts.length ? Math.max(...w.gusts) : null;
             w.avgCloud = w.clouds.length ? w.clouds.reduce((a, b) => a + b) / w.clouds.length : null;
             w.avgSnowLevel = w.snowLevels.length ? w.snowLevels.reduce((a, b) => a + b) / w.snowLevels.length : null;
+            w.avgUvIndex = w.uvIndices.length ? w.uvIndices.reduce((a, b) => a + b) / w.uvIndices.length : null;
             if (w.snowfall > dayMaxSnowfall) dayMaxSnowfall = w.snowfall;
         });
 
