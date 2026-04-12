@@ -8,6 +8,7 @@ import ControlSection from "@/components/ControlSection";
 import { cn } from "@/lib/utils_tailwind";
 import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
+import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import { fetchWeatherData, getLocations, saveLocation, removeLocation } from "@/lib/api";
 import { blendForecasts, groupData } from "@/lib/data";
@@ -103,8 +104,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header 
-        mode={mode} 
-        setMode={setMode} 
         onRefresh={() => loadData(currentLocationId, modelId, algoId)}
         isLoading={isLoading}
         currentData={currentHourData}
@@ -182,6 +181,8 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
+        
+        <ModeToggle mode={mode} setMode={setMode} />
         
         <CreditsFooter />
       </main>

@@ -7,14 +7,12 @@ import { BlendedHour } from "@/lib/types";
 import { getWeatherDescription } from "@/lib/utils";
 
 interface HeaderProps {
-  mode: "forecast" | "history";
-  setMode: (mode: "forecast" | "history") => void;
   onRefresh: () => void;
   isLoading?: boolean;
   currentData?: BlendedHour | null;
 }
 
-export default function Header({ mode, setMode, onRefresh, isLoading, currentData }: HeaderProps) {
+export default function Header({ onRefresh, isLoading, currentData }: HeaderProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
 
   return (
@@ -33,8 +31,8 @@ export default function Header({ mode, setMode, onRefresh, isLoading, currentDat
               Advanced Ski Forecasting
             </p>
           </div>
-          
-          <button 
+
+          <button
             onClick={onRefresh}
             disabled={isLoading}
             className={cn(
@@ -48,82 +46,62 @@ export default function Header({ mode, setMode, onRefresh, isLoading, currentDat
 
         {/* Current Metrics - Scrollable on mobile */}
         <div className="flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar py-2 max-w-[40%] sm:max-w-[50%] md:max-w-none">
-           {weather && (
-             <div className="flex flex-col items-center shrink-0 min-w-[40px]">
-               <span className="text-lg md:text-xl leading-none">{weather.icon}</span>
-               <span className="text-[9px] font-black text-slate-500 uppercase">{weather.label}</span>
-             </div>
-           )}
-           
-           <HeaderMetric 
-             icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-400" />}
-             label="TEMP"
-             value={currentData?.temperature != null ? `${currentData.temperature.toFixed(1)}°` : "--"}
-           />
+          {weather && (
+            <div className="flex flex-col items-center shrink-0 min-w-[40px]">
+              <span className="text-lg md:text-xl leading-none">{weather.icon}</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase">{weather.label}</span>
+            </div>
+          )}
 
-           <HeaderMetric 
-             icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-300 opacity-60" />}
-             label="FEELS"
-             value={currentData?.feelsLike != null ? `${currentData.feelsLike.toFixed(1)}°` : "--"}
-           />
+          <HeaderMetric
+            icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-400" />}
+            label="TEMP"
+            value={currentData?.temperature != null ? `${currentData.temperature.toFixed(1)}°` : "--"}
+          />
 
-           <HeaderMetric 
-             icon={<Snowflake className="w-3 md:w-3.5 h-3 md:h-3.5 text-accent-cyan" />}
-             label="RATE"
-             value={currentData?.snowfall != null ? `${currentData.snowfall.toFixed(1)}` : "0.0"}
-             unit="cm/h"
-           />
+          <HeaderMetric
+            icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-300 opacity-60" />}
+            label="FEELS"
+            value={currentData?.feelsLike != null ? `${currentData.feelsLike.toFixed(1)}°` : "--"}
+          />
 
-           <HeaderMetric 
-             icon={<Wind className="w-3 md:w-3.5 h-3 md:h-3.5 text-emerald-400" />}
-             label="WIND"
-             value={currentData?.windSpeed != null ? `${(currentData.windSpeed * 3.6).toFixed(0)}` : "--"}
-             unit="km/h"
-             extra={
-               <div className="flex items-center gap-1 ml-1.5">
-                 {currentData?.windDir != null && (
-                   <Navigation2 
-                     className="w-2.5 h-2.5 text-emerald-300" 
-                     style={{ transform: `rotate(${(currentData.windDir || 0) + 180}deg)`, fill: 'currentColor' }} 
-                   />
-                 )}
-                 {currentData?.gusts != null && currentData.gusts > (currentData.windSpeed || 0) && (
-                   <span className="text-[9px] font-black text-emerald-400 opacity-60">
-                     G:{(currentData.gusts * 3.6).toFixed(0)}
-                   </span>
-                 )}
-               </div>
-             }
-           />
+          <HeaderMetric
+            icon={<Snowflake className="w-3 md:w-3.5 h-3 md:h-3.5 text-accent-cyan" />}
+            label="RATE"
+            value={currentData?.snowfall != null ? `${currentData.snowfall.toFixed(1)}` : "0.0"}
+            unit="cm/h"
+          />
 
-           <HeaderMetric 
-              icon={<Sun className="w-3 md:w-3.5 h-3 md:h-3.5 text-yellow-400" />}
-              label="UV"
-              value={currentData?.uvIndex != null ? currentData.uvIndex.toFixed(1) : "--"}
-           />
+          <HeaderMetric
+            icon={<Wind className="w-3 md:w-3.5 h-3 md:h-3.5 text-emerald-400" />}
+            label="WIND"
+            value={currentData?.windSpeed != null ? `${(currentData.windSpeed * 3.6).toFixed(0)}` : "--"}
+            unit="km/h"
+            extra={
+              <div className="flex items-center gap-1 ml-1.5">
+                {currentData?.windDir != null && (
+                  <Navigation2
+                    className="w-2.5 h-2.5 text-emerald-300"
+                    style={{ transform: `rotate(${(currentData.windDir || 0) + 180}deg)`, fill: 'currentColor' }}
+                  />
+                )}
+                {currentData?.gusts != null && currentData.gusts > (currentData.windSpeed || 0) && (
+                  <span className="text-[9px] font-black text-emerald-400 opacity-60">
+                    G:{(currentData.gusts * 3.6).toFixed(0)}
+                  </span>
+                )}
+              </div>
+            }
+          />
+
+          <HeaderMetric
+            icon={<Sun className="w-3 md:w-3.5 h-3 md:h-3.5 text-yellow-400" />}
+            label="UV"
+            value={currentData?.uvIndex != null ? currentData.uvIndex.toFixed(1) : "--"}
+          />
         </div>
 
-        {/* Mode Switcher */}
-        <div className="flex bg-slate-900 pr-1 rounded-full border border-white/5 scale-90 md:scale-100 shrink-0">
-          <button
-            onClick={() => setMode("forecast")}
-            className={cn(
-              "px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-black transition-all",
-              mode === "forecast" ? "bg-accent-blue text-white" : "text-slate-500 hover:text-slate-300"
-            )}
-          >
-            FORECAST
-          </button>
-          <button
-            onClick={() => setMode("history")}
-            className={cn(
-              "px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-black transition-all",
-              mode === "history" ? "bg-accent-rose text-white" : "text-slate-500 hover:text-slate-300"
-            )}
-          >
-            HISTORY
-          </button>
-        </div>
+        <div className="md:w-[200px]" /> {/* Spacer to keep metrics centered */}
       </div>
     </header>
   );
