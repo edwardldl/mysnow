@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye } from "lucide-react";
+import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
@@ -29,6 +29,38 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
 
   const [currentHourISO, setCurrentHourISO] = React.useState<string | null>(null);
   const [todayStr, setTodayStr] = React.useState<string | null>(null);
+  const [showDisplaySettings, setShowDisplaySettings] = React.useState(false);
+
+  // Chart Visibility State
+  const [visibleCharts, setVisibleCharts] = React.useState<Record<string, boolean>>({
+    snow: true,
+    temp: true,
+    wind: true,
+    uv: true,
+    vis: true,
+    telemetry: true,
+  });
+
+  // Load preferences
+  React.useEffect(() => {
+    const saved = localStorage.getItem("mysnow_visible_charts");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setVisibleCharts(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error("Failed to parse chart preferences", e);
+      }
+    }
+  }, []);
+
+  // Save preferences
+  const toggleChart = (id: string) => {
+    const newVal = !visibleCharts[id];
+    const newState = { ...visibleCharts, [id]: newVal };
+    setVisibleCharts(newState);
+    localStorage.setItem("mysnow_visible_charts", JSON.stringify(newState));
+  };
 
   React.useEffect(() => {
     const now = new Date();
@@ -103,15 +135,47 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="flex flex-col">
               <span className="text-[10px] md:text-xs uppercase font-black tracking-[0.2em] text-accent-cyan/60 mb-1">Detailed Outlook</span>
-              <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-                {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+                  {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
+                </h2>
+                <button 
+                  onClick={() => setShowDisplaySettings(!showDisplaySettings)}
+                  className={cn(
+                    "p-2 rounded-xl border border-white/5 transition-all hover:bg-white/5",
+                    showDisplaySettings ? "text-accent-cyan bg-accent-cyan/10 border-accent-cyan/20" : "text-slate-500"
+                  )}
+                  title="Display Settings"
+                >
+                  <Settings2 className="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+              </div>
             </div>
             <div className="glass-panel px-4 py-2 rounded-xl border-white/5 bg-white/2 self-start md:self-end">
               <span className="text-[10px] uppercase font-black text-slate-500 mr-2">Core Engine</span>
               <span className="text-xs font-bold text-accent-cyan">{selectedDay.modelString}</span>
             </div>
           </div>
+
+          <AnimatePresence>
+            {showDisplaySettings && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-wrap gap-2 pb-4">
+                  <ChartToggle label="Snowfall" icon={<Snowflake className="w-3 h-3" />} active={visibleCharts.snow} onClick={() => toggleChart('snow')} color="cyan" />
+                  <ChartToggle label="Temp" icon={<Thermometer className="w-3 h-3" />} active={visibleCharts.temp} onClick={() => toggleChart('temp')} color="rose" />
+                  <ChartToggle label="Wind" icon={<Wind className="w-3 h-3" />} active={visibleCharts.wind} onClick={() => toggleChart('wind')} color="emerald" />
+                  <ChartToggle label="UV Index" icon={<Sun className="w-3 h-3" />} active={visibleCharts.uv} onClick={() => toggleChart('uv')} color="yellow" />
+                  <ChartToggle label="Visibility" icon={<Eye className="w-3 h-3" />} active={visibleCharts.vis} onClick={() => toggleChart('vis')} color="indigo" />
+                  <ChartToggle label="Advanced" icon={<Info className="w-3 h-3" />} active={visibleCharts.telemetry} onClick={() => toggleChart('telemetry')} color="slate" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Redone Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -123,46 +187,72 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
 
           {/* Redone Chart Matrix */}
           <div className="glass-panel rounded-3xl p-3 md:p-5 border border-white/5 relative overflow-hidden flex flex-col gap-2 md:gap-3">
-            <HourlySnowChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              nowRef={nowRef}
-              scrollRef={(el) => {
-                scrollRefs.current[0] = el;
-                setPrimaryContainer(el);
-              }}
-              onScroll={(e) => handleScroll(e, 0)}
-            />
-            <HourlyTempChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[1] = el)}
-              onScroll={(e) => handleScroll(e, 1)}
-            />
-            <HourlyWindChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[2] = el)}
-              onScroll={(e) => handleScroll(e, 2)}
-            />
-            <HourlyUVChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[3] = el)}
-              onScroll={(e) => handleScroll(e, 3)}
-            />
-            <HourlyVisibilityChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[4] = el)}
-              onScroll={(e) => handleScroll(e, 4)}
-            />
-            <TelemetryRows
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[5] = el)}
-              onScroll={(e) => handleScroll(e, 5)}
-            />
+            <AnimatePresence initial={false}>
+              {visibleCharts.snow && (
+                <motion.div key="snow" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlySnowChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    nowRef={nowRef}
+                    scrollRef={(el) => {
+                      scrollRefs.current[0] = el;
+                      setPrimaryContainer(el);
+                    }}
+                    onScroll={(e) => handleScroll(e, 0)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.temp && (
+                <motion.div key="temp" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyTempChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[1] = el)}
+                    onScroll={(e) => handleScroll(e, 1)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.wind && (
+                <motion.div key="wind" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyWindChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[2] = el)}
+                    onScroll={(e) => handleScroll(e, 2)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.uv && (
+                <motion.div key="uv" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyUVChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[3] = el)}
+                    onScroll={(e) => handleScroll(e, 3)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.vis && (
+                <motion.div key="vis" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyVisibilityChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[4] = el)}
+                    onScroll={(e) => handleScroll(e, 4)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.telemetry && (
+                <motion.div key="telemetry" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <TelemetryRows
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[5] = el)}
+                    onScroll={(e) => handleScroll(e, 5)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -837,5 +927,33 @@ function SlrLegend() {
         <span className="text-[8px] md:text-[9px] font-black uppercase text-slate-500 tracking-tighter text-right">Pow</span>
       </div>
     </div>
+  );
+}
+
+function ChartToggle({ label, icon, active, onClick, color }: { label: string, icon: React.ReactNode, active: boolean, onClick: () => void, color: string }) {
+  const colorMap: Record<string, string> = {
+    cyan: "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30",
+    rose: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    yellow: "bg-yellow-400/10 text-yellow-400 border-yellow-400/30",
+    indigo: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
+    slate: "bg-white/10 text-white border-white/20",
+  };
+
+  const activeClass = colorMap[color] || colorMap.slate;
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tighter transition-all",
+        active 
+          ? activeClass 
+          : "bg-white/[0.02] text-slate-500 border-white/5 hover:bg-white/5"
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
