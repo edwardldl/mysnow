@@ -18,7 +18,7 @@ export default function Header({ mode, setMode, onRefresh, isLoading, currentDat
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full h-[72px] md:h-[88px] glass-panel border-b border-white/5 shadow-2xl overflow-hidden">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(72px+var(--sat,0px))] md:h-[calc(88px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
         {/* Title & Branding */}
         <div className="flex items-center gap-2 md:gap-3 shrink-0">

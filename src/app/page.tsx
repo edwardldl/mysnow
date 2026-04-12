@@ -84,7 +84,7 @@ export default function Home() {
       />
 
       {mode === "forecast" && (
-        <div className="fixed top-[72px] md:top-[88px] left-0 right-0 z-40">
+        <div className="fixed top-[calc(72px+var(--sat,0px))] md:top-[calc(88px+var(--sat,0px))] left-0 right-0 z-40">
           <DateRibbon 
             days={forecastDays} 
             selectedDate={selectedDate} 
@@ -95,7 +95,7 @@ export default function Home() {
 
       <main className={cn(
         "flex-1 overflow-y-auto no-scrollbar scroll-smooth text-slate-50",
-        mode === "forecast" ? "pt-[136px] md:pt-[160px]" : "pt-[72px] md:pt-[88px]"
+        mode === "forecast" ? "pt-[calc(136px+var(--sat,0px))] md:pt-[calc(160px+var(--sat,0px))]" : "pt-[calc(72px+var(--sat,0px))] md:pt-[calc(88px+var(--sat,0px))]"
       )}>
         <AnimatePresence mode="wait">
           {mode === "forecast" ? (
