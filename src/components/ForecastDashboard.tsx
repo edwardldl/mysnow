@@ -525,7 +525,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 {gust > 0 && (
                   <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
                     <span className="text-[11px] md:text-[13px] font-black text-emerald-300 tabular-nums drop-shadow-lg">
-                      {gust.toFixed(0)}<span className="text-[8px] opacity-60 ml-0.5">km/h</span>
+                      {gust.toFixed(0)}
                     </span>
                   </div>
                 )}
@@ -533,7 +533,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 {speed > 0 && Math.abs(gustHeight - speedHeight) > 16 && (
                   <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${speedHeight + 38}px` }}>
                     <span className="text-[10px] md:text-[11px] font-black text-white/80 tabular-nums drop-shadow-md">
-                      {speed.toFixed(0)}<span className="text-[8px] opacity-60 ml-0.5">km/h</span>
+                      {speed.toFixed(0)}
                     </span>
                   </div>
                 )}
