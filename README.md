@@ -1,50 +1,36 @@
-# MySnow ❄️
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-**MySnow** is a premium, high-resolution ski forecast engine. It provides a data-dense, physics-backed interface for trackers who need professional-grade accuracy in their snowfall predictions.
+## Getting Started
 
-## 🚀 Getting Started
+First, run the development server:
 
-### Prerequisites
-- Node.js (Latest LTS)
-- npm or yarn
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-### Installation
-1.  **Clone the repository.**
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
-3.  **Start Dev Server**:
-    ```bash
-    npm run dev
-    ```
-4.  **Production Build**:
-    ```bash
-    npm run build
-    ```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## ✨ Core Technology
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- **TypeScript Engine**: Fully type-safe data pipeline for robust meteorological calculations.
-- **Physics-Based Snow Level**: Dynamic estimations accounting for evaporative and diabatic cooling during heavy storms.
-- **Multi-Algorithm SLR**: Choose between Sierra Custom, Kuchera, Roebber, and Cobb models for ground-truth snow quality.
-- **Dual-Model Blending**: Fuses high-res **HRRR** (3km) with global **ECMWF** (9km).
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## 📊 Key Interface Features
+## Learn More
 
-- **Segmented Toggles**: Modern UI for switching between "Best Match" models and "Snow Physics" algorithms.
-- **Triple-Layer Synchronized Charts**:
-  - **Snow Intensity**: Bar chart for accumulation.
-  - **Temperature SVG**: Fluid line graph with dynamic scaling.
-  - **Telemetry Grid**: Humidity, Precip %, Snow Level, Wind Gusts, and Cloud Cover.
-- **Premium Aesthetics**: Glassmorphism design with responsive support for tablets and mobile.
-- **Local Stash Management**: Add and persist your own secret ski spots via coordinates.
+To learn more about Next.js, take a look at the following resources:
 
-## 🛠 Tech Stack
-- **Build Tool**: Vite
-- **Logic**: TypeScript ES6
-- **Styling**: Vanilla CSS3
-- **Data**: [Open-Meteo](https://open-meteo.com/)
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
----
-*Stay stoked and track the deep days!* 🎿🏔️
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
