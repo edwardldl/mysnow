@@ -197,7 +197,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[340px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-20 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
         >
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
@@ -280,10 +280,13 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
 
 function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
   const temps = day.hourly.map(h => h.temperature).filter(t => t !== null) as number[];
-  const minTemp = Math.min(...temps, 0) - 2;
-  const maxTemp = Math.max(...temps, 0) + 2;
+  const rawMin = Math.min(...temps, 0);
+  const rawMax = Math.max(...temps, 0);
+  const rawRange = rawMax - rawMin;
+  const minTemp = rawMin - 2;
+  const maxTemp = rawMax + Math.max(6, rawRange * 0.25);
   const range = maxTemp - minTemp;
-  const chartHeight = 180;
+  const chartHeight = 160;
 
   return (
     <div className="flex flex-col gap-1">
@@ -310,7 +313,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[340px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-20 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
         >
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
@@ -415,7 +418,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[260px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-16 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
         >
           {day.hourly.map((h, i) => {
             const speed = getSpeedKmH(h.windSpeed);
@@ -445,7 +448,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 <div
                   className="absolute z-20 transition-transform duration-500"
                   style={{
-                    bottom: `${Math.max(gustHeight, speedHeight) + 48}px`,
+                    bottom: `${Math.max(gustHeight, speedHeight) + 68}px`,
                     transform: `rotate(${(h.windDir || 0) + 180}deg)`
                   }}
                 >
@@ -472,10 +475,20 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   className="absolute bg-emerald-500/40 rounded-t-md z-10 border-t border-emerald-400/30"
                 />
 
-                {/* Values on hover or if significant */}
-                {(speed > 0 || gust > 0) && (
-                  <div className="absolute invisible group-hover:visible z-30 bg-slate-900/90 px-1.5 py-0.5 rounded text-[9px] font-bold text-white whitespace-nowrap -translate-y-8" style={{ bottom: `${Math.max(speedHeight, gustHeight) + 36}px` }}>
-                    {speed.toFixed(0)} <span className="opacity-50">/</span> {gust.toFixed(0)}
+                {/* Permanent Labels */}
+                {gust > 0 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
+                    <span className="text-[11px] md:text-[13px] font-black text-emerald-300 tabular-nums drop-shadow-lg">
+                      {gust.toFixed(0)}<span className="text-[8px] opacity-60 ml-0.5">km/h</span>
+                    </span>
+                  </div>
+                )}
+
+                {speed > 0 && Math.abs(gustHeight - speedHeight) > 16 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${speedHeight + 38}px` }}>
+                    <span className="text-[10px] md:text-[11px] font-black text-white/80 tabular-nums drop-shadow-md">
+                      {speed.toFixed(0)}<span className="text-[8px] opacity-60 ml-0.5">km/h</span>
+                    </span>
                   </div>
                 )}
 
