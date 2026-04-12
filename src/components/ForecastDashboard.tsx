@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Snowflake, Thermometer, Info, Wind, Navigation2 } from "lucide-react";
+import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
@@ -29,6 +29,38 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
 
   const [currentHourISO, setCurrentHourISO] = React.useState<string | null>(null);
   const [todayStr, setTodayStr] = React.useState<string | null>(null);
+  const [showDisplaySettings, setShowDisplaySettings] = React.useState(false);
+
+  // Chart Visibility State
+  const [visibleCharts, setVisibleCharts] = React.useState<Record<string, boolean>>({
+    snow: true,
+    temp: true,
+    wind: true,
+    uv: true,
+    vis: true,
+    telemetry: true,
+  });
+
+  // Load preferences
+  React.useEffect(() => {
+    const saved = localStorage.getItem("mysnow_visible_charts");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setVisibleCharts(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error("Failed to parse chart preferences", e);
+      }
+    }
+  }, []);
+
+  // Save preferences
+  const toggleChart = (id: string) => {
+    const newVal = !visibleCharts[id];
+    const newState = { ...visibleCharts, [id]: newVal };
+    setVisibleCharts(newState);
+    localStorage.setItem("mysnow_visible_charts", JSON.stringify(newState));
+  };
 
   React.useEffect(() => {
     const now = new Date();
@@ -103,15 +135,47 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="flex flex-col">
               <span className="text-[10px] md:text-xs uppercase font-black tracking-[0.2em] text-accent-cyan/60 mb-1">Detailed Outlook</span>
-              <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-                {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+                  {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
+                </h2>
+                <button 
+                  onClick={() => setShowDisplaySettings(!showDisplaySettings)}
+                  className={cn(
+                    "p-2 rounded-xl border border-white/5 transition-all hover:bg-white/5",
+                    showDisplaySettings ? "text-accent-cyan bg-accent-cyan/10 border-accent-cyan/20" : "text-slate-500"
+                  )}
+                  title="Display Settings"
+                >
+                  <Settings2 className="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+              </div>
             </div>
             <div className="glass-panel px-4 py-2 rounded-xl border-white/5 bg-white/2 self-start md:self-end">
               <span className="text-[10px] uppercase font-black text-slate-500 mr-2">Core Engine</span>
               <span className="text-xs font-bold text-accent-cyan">{selectedDay.modelString}</span>
             </div>
           </div>
+
+          <AnimatePresence>
+            {showDisplaySettings && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-wrap gap-2 pb-4">
+                  <ChartToggle label="Snowfall" icon={<Snowflake className="w-3 h-3" />} active={visibleCharts.snow} onClick={() => toggleChart('snow')} color="cyan" />
+                  <ChartToggle label="Temp" icon={<Thermometer className="w-3 h-3" />} active={visibleCharts.temp} onClick={() => toggleChart('temp')} color="rose" />
+                  <ChartToggle label="Wind" icon={<Wind className="w-3 h-3" />} active={visibleCharts.wind} onClick={() => toggleChart('wind')} color="emerald" />
+                  <ChartToggle label="UV Index" icon={<Sun className="w-3 h-3" />} active={visibleCharts.uv} onClick={() => toggleChart('uv')} color="yellow" />
+                  <ChartToggle label="Visibility" icon={<Eye className="w-3 h-3" />} active={visibleCharts.vis} onClick={() => toggleChart('vis')} color="indigo" />
+                  <ChartToggle label="Advanced" icon={<Info className="w-3 h-3" />} active={visibleCharts.telemetry} onClick={() => toggleChart('telemetry')} color="slate" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Redone Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -123,34 +187,72 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
 
           {/* Redone Chart Matrix */}
           <div className="glass-panel rounded-3xl p-3 md:p-5 border border-white/5 relative overflow-hidden flex flex-col gap-2 md:gap-3">
-            <HourlySnowChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              nowRef={nowRef}
-              scrollRef={(el) => {
-                scrollRefs.current[0] = el;
-                setPrimaryContainer(el);
-              }}
-              onScroll={(e) => handleScroll(e, 0)}
-            />
-            <HourlyTempChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[1] = el)}
-              onScroll={(e) => handleScroll(e, 1)}
-            />
-            <HourlyWindChartFromScratch
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[2] = el)}
-              onScroll={(e) => handleScroll(e, 2)}
-            />
-            <TelemetryRows
-              day={selectedDay}
-              currentHourISO={currentHourISO}
-              scrollRef={(el) => (scrollRefs.current[3] = el)}
-              onScroll={(e) => handleScroll(e, 3)}
-            />
+            <AnimatePresence initial={false}>
+              {visibleCharts.snow && (
+                <motion.div key="snow" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlySnowChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    nowRef={nowRef}
+                    scrollRef={(el) => {
+                      scrollRefs.current[0] = el;
+                      setPrimaryContainer(el);
+                    }}
+                    onScroll={(e) => handleScroll(e, 0)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.temp && (
+                <motion.div key="temp" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyTempChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[1] = el)}
+                    onScroll={(e) => handleScroll(e, 1)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.wind && (
+                <motion.div key="wind" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyWindChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[2] = el)}
+                    onScroll={(e) => handleScroll(e, 2)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.uv && (
+                <motion.div key="uv" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyUVChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[3] = el)}
+                    onScroll={(e) => handleScroll(e, 3)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.vis && (
+                <motion.div key="vis" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <HourlyVisibilityChartFromScratch
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[4] = el)}
+                    onScroll={(e) => handleScroll(e, 4)}
+                  />
+                </motion.div>
+              )}
+              {visibleCharts.telemetry && (
+                <motion.div key="telemetry" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <TelemetryRows
+                    day={selectedDay}
+                    currentHourISO={currentHourISO}
+                    scrollRef={(el) => (scrollRefs.current[5] = el)}
+                    onScroll={(e) => handleScroll(e, 5)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -197,7 +299,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[340px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-20 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
         >
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
@@ -280,10 +382,15 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
 
 function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
   const temps = day.hourly.map(h => h.temperature).filter(t => t !== null) as number[];
-  const minTemp = Math.min(...temps, 0) - 2;
-  const maxTemp = Math.max(...temps, 0) + 2;
+  const feels = day.hourly.map(h => h.feelsLike).filter(t => t !== null) as number[];
+  const allTemps = [...temps, ...feels];
+  const rawMin = Math.min(...allTemps, 0);
+  const rawMax = Math.max(...allTemps, 0);
+  const rawRange = rawMax - rawMin;
+  const minTemp = rawMin - 2;
+  const maxTemp = rawMax + Math.max(6, rawRange * 0.25);
   const range = maxTemp - minTemp;
-  const chartHeight = 180;
+  const chartHeight = 160;
 
   return (
     <div className="flex flex-col gap-1">
@@ -310,12 +417,16 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[340px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-20 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
         >
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
             const pos = ((temp - minTemp) / range) * chartHeight;
+            const feelsLike = h.feelsLike ?? temp;
+            const feelsPos = ((feelsLike - minTemp) / range) * chartHeight;
+            
             const isFreezing = temp <= 0;
+            const isFeelsFreezing = feelsLike <= 0;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
 
@@ -343,6 +454,30 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                     NOW
                   </div>
                 )}
+
+                {/* Connecting Line if different */}
+                {Math.abs(pos - feelsPos) > 4 && (
+                   <div 
+                    style={{ 
+                      bottom: `${Math.min(pos, feelsPos) + 36 + 15}px`, 
+                      height: `${Math.abs(pos - feelsPos)}px` 
+                    }}
+                    className="absolute w-[1px] bg-white/10 z-0"
+                   />
+                )}
+
+                {/* Feels Like Dot (Ghost/Secondary) */}
+                {Math.abs(pos - feelsPos) > 4 && (
+                  <div
+                    style={{ bottom: `${feelsPos + 36 + 10}px` }}
+                    className={cn(
+                      "absolute w-1.5 h-1.5 rounded-full transition-all duration-500 z-10",
+                      isFeelsFreezing ? "bg-blue-400/30 border border-blue-400/50" : "bg-rose-400/30 border border-rose-400/50"
+                    )}
+                  />
+                )}
+
+                {/* Primary Temp Dot */}
                 <div
                   style={{ bottom: `${pos + 36 + 10}px` }}
                   className={cn(
@@ -351,15 +486,25 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   )}
                 />
 
-                <span
-                  style={{ bottom: `${pos + 36 + 28}px` }}
-                  className={cn(
-                    "absolute text-[12px] md:text-[14px] font-black tabular-nums transition-opacity",
-                    isFreezing ? "text-blue-300" : "text-rose-300"
-                  )}
+                {/* Labels */}
+                <div 
+                  className="absolute flex flex-col items-center gap-0 pointer-events-none"
+                  style={{ bottom: `${Math.max(pos, feelsPos) + 36 + 28}px` }}
                 >
-                  {temp.toFixed(0)}°
-                </span>
+                  <span
+                    className={cn(
+                      "text-[12px] md:text-[14px] font-black tabular-nums leading-none",
+                      isFreezing ? "text-blue-300" : "text-rose-300"
+                    )}
+                  >
+                    {temp.toFixed(0)}°
+                  </span>
+                  {Math.abs(temp - feelsLike) >= 1 && (
+                    <span className="text-[9px] font-black text-slate-500 tabular-nums leading-none mt-1">
+                      {feelsLike.toFixed(0)}°
+                    </span>
+                  )}
+                </div>
 
                 <div className="w-[1px] h-full bg-white/[0.03] z-0" />
                 <div className="absolute w-full h-[1px] bg-white/10 z-0" style={{ bottom: `${((0 - minTemp) / range) * chartHeight + 36 + 10}px` }} />
@@ -415,7 +560,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[260px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-16 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
         >
           {day.hourly.map((h, i) => {
             const speed = getSpeedKmH(h.windSpeed);
@@ -445,7 +590,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 <div
                   className="absolute z-20 transition-transform duration-500"
                   style={{
-                    bottom: `${Math.max(gustHeight, speedHeight) + 48}px`,
+                    bottom: `${Math.max(gustHeight, speedHeight) + 68}px`,
                     transform: `rotate(${(h.windDir || 0) + 180}deg)`
                   }}
                 >
@@ -472,10 +617,215 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   className="absolute bg-emerald-500/40 rounded-t-md z-10 border-t border-emerald-400/30"
                 />
 
-                {/* Values on hover or if significant */}
-                {(speed > 0 || gust > 0) && (
-                  <div className="absolute invisible group-hover:visible z-30 bg-slate-900/90 px-1.5 py-0.5 rounded text-[9px] font-bold text-white whitespace-nowrap -translate-y-8" style={{ bottom: `${Math.max(speedHeight, gustHeight) + 36}px` }}>
-                    {speed.toFixed(0)} <span className="opacity-50">/</span> {gust.toFixed(0)}
+                {/* Permanent Labels */}
+                {gust > 0 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
+                    <span className="text-[11px] md:text-[13px] font-black text-emerald-300 tabular-nums drop-shadow-lg">
+                      {gust.toFixed(0)}
+                    </span>
+                  </div>
+                )}
+
+                {speed > 0 && Math.abs(gustHeight - speedHeight) > 16 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${speedHeight + 38}px` }}>
+                    <span className="text-[10px] md:text-[11px] font-black text-white/80 tabular-nums drop-shadow-md">
+                      {speed.toFixed(0)}
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute bottom-2 flex flex-col items-center">
+                  <span
+                    className={cn(
+                      "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
+                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                    )}
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+  const chartHeight = 100;
+  const safeMax = 12; // Standard UV scale usually goes up to 11+
+
+  const getUvColor = (uv: number) => {
+    if (uv <= 2) return "bg-green-500/40 border-green-400/30";
+    if (uv <= 5) return "bg-yellow-400/40 border-yellow-300/30";
+    if (uv <= 7) return "bg-orange-500/40 border-orange-400/30";
+    if (uv <= 10) return "bg-red-500/40 border-red-400/30";
+    return "bg-violet-500/40 border-violet-400/30";
+  };
+
+  const getUvTextClass = (uv: number) => {
+    if (uv <= 2) return "text-green-300";
+    if (uv <= 5) return "text-yellow-300";
+    if (uv <= 7) return "text-orange-300";
+    if (uv <= 10) return "text-red-300";
+    return "text-violet-300";
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Sun className="w-5 h-5 text-yellow-400" />
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">UV Index</h3>
+        </div>
+      </div>
+
+      <div className="relative">
+        {/* Y-Axis Labels */}
+        <div
+          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
+          style={{ bottom: "46px", height: `${chartHeight}px` }}
+        >
+          <span className="flex items-center h-4">12</span>
+          <span className="flex items-center h-4 mt-auto">0</span>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+        >
+          {day.hourly.map((h, i) => {
+            const uv = h.uvIndex ?? 0;
+            const height = (Math.min(uv, safeMax) / safeMax) * chartHeight;
+
+            const hour = parseInt(h.time.split('T')[1].split(':')[0]);
+            const isMidnight = hour === 0;
+            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "min-w-[48px] md:min-w-[60px] flex flex-col items-center h-full justify-end relative group",
+                  isCurrent && "bg-yellow-400/[0.03] border-x border-yellow-400/10"
+                )}
+              >
+                {isCurrent && (
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-yellow-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(250,204,21,0.4)] whitespace-nowrap">
+                    NOW
+                  </div>
+                )}
+
+                {/* UV Bar */}
+                <div
+                  style={{
+                    height: `${Math.max(height, uv > 0 ? 3 : 0)}px`,
+                    width: '100%',
+                    bottom: '36px'
+                  }}
+                  className={cn(
+                    "absolute rounded-t-lg z-10 border-t transition-all",
+                    getUvColor(uv)
+                  )}
+                />
+
+                {/* Label */}
+                {uv > 0 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${height + 38}px` }}>
+                    <span className={cn("text-[12px] md:text-[14px] font-black tabular-nums drop-shadow-lg", getUvTextClass(uv))}>
+                      {uv.toFixed(1)}
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute bottom-2 flex flex-col items-center">
+                  <span
+                    className={cn(
+                      "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
+                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                    )}
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+  const chartHeight = 100;
+  const safeMax = 25; // Max visibility usually around 24km (15 miles)
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Eye className="w-5 h-5 text-indigo-400" />
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Visibility (km)</h3>
+        </div>
+      </div>
+
+      <div className="relative">
+        {/* Y-Axis Labels */}
+        <div
+          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
+          style={{ bottom: "46px", height: `${chartHeight}px` }}
+        >
+          <span className="flex items-center h-4">25</span>
+          <span className="flex items-center h-4 mt-auto">0</span>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+        >
+          {day.hourly.map((h, i) => {
+            const visKm = (h.visibility ?? 0) / 1000;
+            const height = (Math.min(visKm, safeMax) / safeMax) * chartHeight;
+
+            const hour = parseInt(h.time.split('T')[1].split(':')[0]);
+            const isMidnight = hour === 0;
+            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "min-w-[48px] md:min-w-[60px] flex flex-col items-center h-full justify-end relative group",
+                  isCurrent && "bg-indigo-400/[0.03] border-x border-indigo-400/10"
+                )}
+              >
+                {isCurrent && (
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-indigo-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(129,140,248,0.4)] whitespace-nowrap">
+                    NOW
+                  </div>
+                )}
+
+                {/* Visibility Bar */}
+                <div
+                  style={{
+                    height: `${Math.max(height, visKm > 0 ? 3 : 0)}px`,
+                    width: '100%',
+                    bottom: '36px'
+                  }}
+                  className="absolute bg-indigo-500/30 rounded-t-lg z-10 border-t border-indigo-400/20 transition-all"
+                />
+
+                {/* Label */}
+                {visKm > 0 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${height + 38}px` }}>
+                    <span className="text-[11px] md:text-[13px] font-black text-indigo-300 tabular-nums drop-shadow-lg">
+                      {visKm.toFixed(0)}
+                    </span>
                   </div>
                 )}
 
@@ -499,6 +849,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
 }
 
 function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayData, currentHourISO: string | null, scrollRef: (el: HTMLDivElement | null) => void, onScroll: (e: React.UIEvent<HTMLDivElement>) => void }) {
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2 px-1">
@@ -531,6 +882,7 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
               <MetricPill label="RH" value={h.rh != null ? `${h.rh.toFixed(0)}%` : '--'} color="cyan" />
               <MetricPill label="CLD" value={h.clouds != null ? `${h.clouds.toFixed(0)}%` : '--'} color="slate" />
               <MetricPill label="LVL" value={h.snowLevel != null ? `${(h.snowLevel / 1000).toFixed(1)}k` : '--'} color="blue" />
+              <MetricPill label="VIS" value={h.visibility != null ? `${(h.visibility / 1000).toFixed(0)}k` : '--'} color="indigo" />
               <MetricPill label="FLS" value={h.feelsLike != null ? `${h.feelsLike.toFixed(0)}°` : '--'} color="rose" />
             </div>
           );
@@ -545,7 +897,8 @@ function MetricPill({ label, value, color }: { label: string, value: string, col
     cyan: "text-cyan-400",
     slate: "text-slate-400",
     blue: "text-blue-400",
-    rose: "text-rose-400"
+    rose: "text-rose-400",
+    indigo: "text-indigo-400"
   }[color];
 
   return (
@@ -574,5 +927,33 @@ function SlrLegend() {
         <span className="text-[8px] md:text-[9px] font-black uppercase text-slate-500 tracking-tighter text-right">Pow</span>
       </div>
     </div>
+  );
+}
+
+function ChartToggle({ label, icon, active, onClick, color }: { label: string, icon: React.ReactNode, active: boolean, onClick: () => void, color: string }) {
+  const colorMap: Record<string, string> = {
+    cyan: "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30",
+    rose: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    yellow: "bg-yellow-400/10 text-yellow-400 border-yellow-400/30",
+    indigo: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
+    slate: "bg-white/10 text-white border-white/20",
+  };
+
+  const activeClass = colorMap[color] || colorMap.slate;
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tighter transition-all",
+        active 
+          ? activeClass 
+          : "bg-white/[0.02] text-slate-500 border-white/5 hover:bg-white/5"
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }

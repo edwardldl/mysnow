@@ -31,6 +31,7 @@ export interface OpenMeteoHourly {
     snowfall_water_equivalent?: number[];
     lifted_index?: number[];
     convective_inhibition?: number[];
+    uv_index?: number[];
     [key: string]: number[] | string[] | undefined | number; // Allows dynamic pressure level keys
 }
 
@@ -96,6 +97,7 @@ export interface BlendedHour {
     snowfall: number;
     method: string | null;
     slrCategory: string | null;
+    uvIndex: number | null;
     layers?: PressureLayer[];
 }
 
@@ -114,6 +116,8 @@ export interface WindowData {
     gusts: number[];
     clouds: number[];
     snowLevels: number[];
+    uvIndices: number[];
+    visibilities: number[];
     avgTemp?: number | null;
     avgWindSpeed?: number | null;
     dominantWindDir?: number | null;
@@ -125,6 +129,8 @@ export interface WindowData {
     maxGust?: number | null;
     avgCloud?: number | null;
     avgSnowLevel?: number | null;
+    avgUvIndex?: number | null;
+    avgVisibility?: number | null;
 }
 
 export interface DayData {
