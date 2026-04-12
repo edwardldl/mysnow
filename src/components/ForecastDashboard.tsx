@@ -166,7 +166,7 @@ function HourlySnowChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
                 {/* Labels */}
                 {h.snowfall > 0 && (
                   <div className="absolute z-20 flex flex-col items-center gap-0.5" style={{ bottom: `${height + 52}px` }}>
-                    {h.slr && <span className="text-[10px] font-black text-accent-cyan tabular-nums opacity-60">{h.slr.toFixed(0)}</span>}
+                    {h.slr && <span className="text-[10px] font-black text-accent-cyan tabular-nums opacity-60">{h.slr.toFixed(0)}:1</span>}
                     <span className="text-[14px] md:text-[16px] font-black text-white tabular-nums drop-shadow-lg">{h.snowfall.toFixed(1)}</span>
                   </div>
                 )}
