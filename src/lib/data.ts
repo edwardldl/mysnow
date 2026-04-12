@@ -376,7 +376,8 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
                 gusts: [],
                 clouds: [],
                 snowLevels: [],
-                uvIndices: []
+                uvIndices: [],
+                visibilities: []
             });
         }
 
@@ -398,6 +399,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             if (point.clouds != null) window.clouds.push(point.clouds);
             if (point.snowLevel != null) window.snowLevels.push(point.snowLevel);
             if (point.uvIndex != null) window.uvIndices.push(point.uvIndex);
+            if (point.visibility != null) window.visibilities.push(point.visibility);
         });
 
         let dayMaxSnowfall = 0;
@@ -414,6 +416,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             w.avgCloud = w.clouds.length ? w.clouds.reduce((a, b) => a + b) / w.clouds.length : null;
             w.avgSnowLevel = w.snowLevels.length ? w.snowLevels.reduce((a, b) => a + b) / w.snowLevels.length : null;
             w.avgUvIndex = w.uvIndices.length ? w.uvIndices.reduce((a, b) => a + b) / w.uvIndices.length : null;
+            w.avgVisibility = w.visibilities.length ? w.visibilities.reduce((a, b) => a + b) / w.visibilities.length : null;
             if (w.snowfall > dayMaxSnowfall) dayMaxSnowfall = w.snowfall;
         });
 

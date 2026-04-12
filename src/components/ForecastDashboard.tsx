@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun } from "lucide-react";
+import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
@@ -151,11 +151,17 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
               scrollRef={(el) => (scrollRefs.current[3] = el)}
               onScroll={(e) => handleScroll(e, 3)}
             />
-            <TelemetryRows
+            <HourlyVisibilityChartFromScratch
               day={selectedDay}
               currentHourISO={currentHourISO}
               scrollRef={(el) => (scrollRefs.current[4] = el)}
               onScroll={(e) => handleScroll(e, 4)}
+            />
+            <TelemetryRows
+              day={selectedDay}
+              currentHourISO={currentHourISO}
+              scrollRef={(el) => (scrollRefs.current[5] = el)}
+              onScroll={(e) => handleScroll(e, 5)}
             />
           </div>
         </motion.div>
@@ -664,7 +670,96 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
   );
 }
 
+function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+  const chartHeight = 100;
+  const safeMax = 25; // Max visibility usually around 24km (15 miles)
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Eye className="w-5 h-5 text-indigo-400" />
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Visibility (km)</h3>
+        </div>
+      </div>
+
+      <div className="relative">
+        {/* Y-Axis Labels */}
+        <div
+          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
+          style={{ bottom: "46px", height: `${chartHeight}px` }}
+        >
+          <span className="flex items-center h-4">25</span>
+          <span className="flex items-center h-4 mt-auto">0</span>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+        >
+          {day.hourly.map((h, i) => {
+            const visKm = (h.visibility ?? 0) / 1000;
+            const height = (Math.min(visKm, safeMax) / safeMax) * chartHeight;
+
+            const hour = parseInt(h.time.split('T')[1].split(':')[0]);
+            const isMidnight = hour === 0;
+            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "min-w-[48px] md:min-w-[60px] flex flex-col items-center h-full justify-end relative group",
+                  isCurrent && "bg-indigo-400/[0.03] border-x border-indigo-400/10"
+                )}
+              >
+                {isCurrent && (
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-indigo-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(129,140,248,0.4)] whitespace-nowrap">
+                    NOW
+                  </div>
+                )}
+
+                {/* Visibility Bar */}
+                <div
+                  style={{
+                    height: `${Math.max(height, visKm > 0 ? 3 : 0)}px`,
+                    width: '100%',
+                    bottom: '36px'
+                  }}
+                  className="absolute bg-indigo-500/30 rounded-t-lg z-10 border-t border-indigo-400/20 transition-all"
+                />
+
+                {/* Label */}
+                {visKm > 0 && (
+                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${height + 38}px` }}>
+                    <span className="text-[11px] md:text-[13px] font-black text-indigo-300 tabular-nums drop-shadow-lg">
+                      {visKm.toFixed(0)}
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute bottom-2 flex flex-col items-center">
+                  <span
+                    className={cn(
+                      "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
+                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                    )}
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayData, currentHourISO: string | null, scrollRef: (el: HTMLDivElement | null) => void, onScroll: (e: React.UIEvent<HTMLDivElement>) => void }) {
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2 px-1">
@@ -697,6 +792,7 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
               <MetricPill label="RH" value={h.rh != null ? `${h.rh.toFixed(0)}%` : '--'} color="cyan" />
               <MetricPill label="CLD" value={h.clouds != null ? `${h.clouds.toFixed(0)}%` : '--'} color="slate" />
               <MetricPill label="LVL" value={h.snowLevel != null ? `${(h.snowLevel / 1000).toFixed(1)}k` : '--'} color="blue" />
+              <MetricPill label="VIS" value={h.visibility != null ? `${(h.visibility / 1000).toFixed(0)}k` : '--'} color="indigo" />
               <MetricPill label="FLS" value={h.feelsLike != null ? `${h.feelsLike.toFixed(0)}°` : '--'} color="rose" />
             </div>
           );
@@ -711,7 +807,8 @@ function MetricPill({ label, value, color }: { label: string, value: string, col
     cyan: "text-cyan-400",
     slate: "text-slate-400",
     blue: "text-blue-400",
-    rose: "text-rose-400"
+    rose: "text-rose-400",
+    indigo: "text-indigo-400"
   }[color];
 
   return (

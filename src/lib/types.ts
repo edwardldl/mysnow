@@ -117,6 +117,7 @@ export interface WindowData {
     clouds: number[];
     snowLevels: number[];
     uvIndices: number[];
+    visibilities: number[];
     avgTemp?: number | null;
     avgWindSpeed?: number | null;
     dominantWindDir?: number | null;
@@ -129,6 +130,7 @@ export interface WindowData {
     avgCloud?: number | null;
     avgSnowLevel?: number | null;
     avgUvIndex?: number | null;
+    avgVisibility?: number | null;
 }
 
 export interface DayData {
