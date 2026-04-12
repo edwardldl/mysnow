@@ -1,9 +1,15 @@
 "use client";
 
 import React from "react";
-import { Snowflake, Wind, Thermometer, Cloud } from "lucide-react";
+import { DayData } from "@/lib/types";
 import { cn } from "@/lib/utils_tailwind";
 import { getSlrColor } from "@/lib/utils";
+
+interface DayCardProps {
+  day: DayData;
+  isSelected: boolean;
+  onClick: () => void;
+}
 
 export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
   const isStorm = day.totalSnowfall >= 15;
@@ -12,16 +18,6 @@ export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
 
   const dynamicColor = getSlrColor(avgSlr);
   
-  // Calculate a "vibe color" based on total snowfall
-  const getVibeColor = (snow: number) => {
-    if (snow === 0) return "bg-slate-500/10 border-slate-500/20 text-slate-400";
-    if (snow < 10) return "bg-blue-500/10 border-blue-500/30 text-blue-400";
-    if (snow < 25) return "bg-accent-cyan/10 border-accent-cyan/40 text-accent-cyan";
-    return "bg-accent-violet/10 border-accent-violet/50 text-accent-violet";
-  };
-
-  const vibeClass = getVibeColor(day.totalSnowfall);
-
   return (
     <div
       onClick={onClick}

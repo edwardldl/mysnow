@@ -24,8 +24,6 @@ type ForecastData = {
 
 function calcSLRForHour(data: ForecastData, idx: number): number {
     // Extract variables for this hour
-    const T2m = data.hourly.temperature_2m[idx];
-    const RH2m = data.hourly.relative_humidity_2m[idx];
     const wind10 = data.hourly.wind_speed_10m[idx];
     const elev = data.elevation;
     const t850 = data.hourly.temperature_850hPa ? data.hourly.temperature_850hPa[idx] : undefined;
@@ -33,9 +31,6 @@ function calcSLRForHour(data: ForecastData, idx: number): number {
     const t500 = data.hourly.temperature_500hPa ? data.hourly.temperature_500hPa[idx] : undefined;
     const rh700 = data.hourly.relative_humidity_700hPa ? data.hourly.relative_humidity_700hPa[idx] : undefined;
     const tcwv = data.hourly.total_column_integrated_water_vapour ? data.hourly.total_column_integrated_water_vapour[idx] : undefined;
-    const cape = data.hourly.cape ? data.hourly.cape[idx] : undefined;
-    const precip = data.hourly.precipitation[idx];
-    const snowfall = data.hourly.snowfall[idx];
     const freezeH = data.hourly.freezing_level_height[idx];
 
     // Helper: Estimate missing 700 hPa temp if needed

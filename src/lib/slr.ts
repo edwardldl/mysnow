@@ -131,7 +131,7 @@ function getTheoreticalMeltRate(Tw: number): number {
 function advancedSLR(hour: OpenMeteoHour, QPF: number): { slr: number; isSnow: boolean } {
     if (QPF <= 0.0) return { slr: 0.0, isSnow: false };
 
-    const { RH: RH_sfc, Tw: Tw_sfc } = surfaceWetBulb(hour);
+    const { Tw: Tw_sfc } = surfaceWetBulb(hour);
     if (Tw_sfc >= 4.4) return { slr: 0.0, isSnow: false };
 
     const Rd = 287.058; // J kg⁻¹ K⁻¹
@@ -813,8 +813,7 @@ export function calcSLR(hour: OpenMeteoHour, method: string = 'hybrid', prevSlr:
     if (P <= 0) return out;
 
     // Shared pre-flight rain check
-    const rh_sfc = hour.relative_humidity_2m ?? 70;
-    const Tw_sfc = hour.wet_bulb_temperature_2m ?? calculateWetBulb(hour.temperature_2m, rh_sfc);
+    const Tw_sfc = hour.wet_bulb_temperature_2m ?? calculateWetBulb(hour.temperature_2m, hour.relative_humidity_2m ?? 70);
     if (Tw_sfc >= 4.4) return out;
 
     out.isSnow = true;

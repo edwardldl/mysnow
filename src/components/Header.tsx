@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Snowflake, MapPin, Wind, Thermometer, ArrowDown } from "lucide-react";
+import { RefreshCw, Snowflake, Thermometer } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
-import { Location, BlendedHour } from "@/lib/types";
+import { BlendedHour } from "@/lib/types";
 import { getWeatherDescription } from "@/lib/utils";
 
 interface HeaderProps {
@@ -12,12 +12,10 @@ interface HeaderProps {
   onRefresh: () => void;
   isLoading?: boolean;
   currentData?: BlendedHour | null;
-  location?: Location;
 }
 
-export default function Header({ mode, setMode, onRefresh, isLoading, currentData, location }: HeaderProps) {
+export default function Header({ mode, setMode, onRefresh, isLoading, currentData }: HeaderProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
-  const lastUpdated = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full h-[72px] md:h-[88px] glass-panel border-b border-white/5 shadow-2xl overflow-hidden">

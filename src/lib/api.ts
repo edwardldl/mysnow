@@ -1,4 +1,4 @@
-import type { Location } from './types';
+import type { Location, OpenMeteoResponse } from './types';
 
 const DEFAULT_LOCATIONS: Record<string, Location> = {
     palisades: {
@@ -53,7 +53,7 @@ export function removeLocation(id: string): Record<string, Location> {
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/forecast';
 
-const weatherCache = new Map<string, { hrrrData: any, ecmwfData: any, location: Location, mode: string }>();
+const weatherCache = new Map<string, { hrrrData: OpenMeteoResponse | null, ecmwfData: OpenMeteoResponse, location: Location, mode: string }>();
 
 /** Backfill elevation fields for custom locations once the API response is available. */
 function updateCustomElevation(loc: Location, apiElevation: number | undefined): void {
@@ -234,7 +234,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 /**
  * Fetch historical data from Open-Meteo Historical Forecast API
  */
-export async function fetchHistoricalWeatherData(locationKey, startDate, endDate, model = 'best_match') {
+export async function fetchHistoricalWeatherData(locationKey: string, startDate: string, endDate: string, model = 'best_match') {
     const locs = getLocations();
     const loc = locs[locationKey];
     if (!loc) throw new Error("Invalid location");

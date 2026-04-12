@@ -44,8 +44,8 @@ export default function Home() {
       if (grouped.length > 0) {
         setSelectedDate(grouped[0].dateStr);
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch weather data");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fetch weather data");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -81,7 +81,6 @@ export default function Home() {
         onRefresh={() => loadData(currentLocationId, modelId, algoId)}
         isLoading={isLoading}
         currentData={forecastDays.length > 0 && forecastDays[0].hourly.length > 0 ? forecastDays[0].hourly[0] : null}
-        location={locations[currentLocationId]}
       />
 
       {mode === "forecast" && (
@@ -140,7 +139,6 @@ export default function Home() {
                   days={forecastDays} 
                   isLoading={isLoading}
                   selectedDate={selectedDate}
-                  setSelectedDate={setSelectedDate}
                 />
               )}
             </motion.div>

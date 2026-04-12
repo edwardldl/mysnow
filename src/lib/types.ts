@@ -29,7 +29,7 @@ export interface OpenMeteoHourly {
     precipitation?: number[];
     snowfall?: number[];
     snowfall_water_equivalent?: number[];
-    [key: string]: any; // Allows dynamic pressure level keys
+    [key: string]: number[] | string[] | undefined | number; // Allows dynamic pressure level keys
 }
 
 export interface OpenMeteoDaily {

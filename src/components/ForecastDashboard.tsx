@@ -14,7 +14,7 @@ interface ForecastDashboardProps {
   setSelectedDate: (date: string) => void;
 }
 
-export default function ForecastDashboard({ days, isLoading, selectedDate, setSelectedDate }: ForecastDashboardProps) {
+export default function ForecastDashboard({ days, isLoading, selectedDate }: ForecastDashboardProps) {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Synchronize scrolling across multiple chart containers
@@ -43,7 +43,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, setSe
     <div className="max-w-7xl mx-auto w-full px-4 md:px-8 flex flex-col gap-8 md:gap-10 pb-20 mt-6 md:mt-12">
       {/* Detail View */}
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.div
           key={selectedDate}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -66,25 +66,29 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, setSe
 
           {/* Redone Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-             <StatBox label="Total Snowfall" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Model Correction Applied" />
-             <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
-             <StatBox label="Snow Depth" value={selectedDay.snowDepth} trend="Estimated Settling" />
-             <StatBox label="Solar Events" value={selectedDay.sunrise ? `${selectedDay.sunrise.split('T')[1].substring(0,5)} / ${selectedDay.sunset?.split('T')[1].substring(0,5)}` : '--'} trend="Sunrise / Sunset" />
+            <StatBox label="Total Snowfall" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Model Correction Applied" />
+            <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
+            <StatBox label="Snow Depth" value={selectedDay.snowDepth} trend="Estimated Settling" />
+            <StatBox label="Solar Events" value={selectedDay.sunrise ? `${selectedDay.sunrise.split('T')[1].substring(0, 5)} / ${selectedDay.sunset?.split('T')[1].substring(0, 5)}` : '--'} trend="Sunrise / Sunset" />
           </div>
 
           {/* Redone Chart Matrix */}
-          <div className="glass-panel rounded-3xl p-4 md:p-10 border border-white/5 relative overflow-hidden flex flex-col gap-16 md:gap-24">
-            <HourlySnowChartFromScratch 
-              day={selectedDay} 
+          <div className="glass-panel rounded-3xl p-4 md:p-10 border border-white/5 relative overflow-hidden flex flex-col gap-10 md:gap-14">
+            <HourlySnowChartFromScratch
+              day={selectedDay}
               scrollRef={(el) => (scrollRefs.current[0] = el)}
               onScroll={(e) => handleScroll(e, 0)}
             />
-            <HourlyTempChartFromScratch 
+            <HourlyTempChartFromScratch
               day={selectedDay}
               scrollRef={(el) => (scrollRefs.current[1] = el)}
               onScroll={(e) => handleScroll(e, 1)}
             />
-            <TelemetryRows day={selectedDay} />
+            <TelemetryRows 
+              day={selectedDay} 
+              scrollRef={(el) => (scrollRefs.current[2] = el)}
+              onScroll={(e) => handleScroll(e, 2)}
+            />
           </div>
         </motion.div>
       </AnimatePresence>
@@ -112,7 +116,8 @@ interface ChartRowProps {
 
 function HourlySnowChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps) {
   const chartHeight = 160;
-  const safeMax = Math.max(day.maxHourlySnowfall || 0, 1);
+  // USER: snow bar should max out at 10cm of snowfall
+  const safeMax = 10; 
 
   return (
     <div className="flex flex-col gap-8">
@@ -124,36 +129,49 @@ function HourlySnowChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
       </div>
 
       <div className="relative">
-        <div 
+        <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-16"
+          className="flex items-end h-[320px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-16 pt-10"
         >
           {day.hourly.map((h, i) => {
-            const height = (h.snowfall / safeMax) * chartHeight;
+            const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
             const isSunrise = day.sunrise && h.time.substring(0, 13) === day.sunrise.substring(0, 13);
             const isSunset = day.sunset && h.time.substring(0, 13) === day.sunset.substring(0, 13);
             const barColor = h.slr ? getSlrColor(h.slr) : "rgba(255, 255, 255, 0.05)";
 
+            const getPeakHue = (h: number) => {
+              if (h === 9 || h === 16) return 45; // Yellow
+              if (h === 10 || h === 15) return 38; // Golden-Yellow
+              if (h === 11 || h === 14) return 32; // Golden-Orange
+              if (h === 12 || h === 13) return 25; // Orange
+              return null;
+            };
+            const peakHue = getPeakHue(hour);
+            const peakText = peakHue !== null ? `hsl(${peakHue}, 100%, 65%)` : undefined;
+
             return (
-              <div key={i} className="min-w-[48px] md:min-w-[60px] flex flex-col items-center relative h-full justify-end group/bar">
+              <div 
+                key={i} 
+                className="min-w-[48px] md:min-w-[60px] flex flex-col items-center relative h-full justify-end group/bar"
+              >
                 {/* Solar Indicator Lines */}
                 {(isSunrise || isSunset) && (
                   <div className="absolute inset-y-0 left-0 w-[1px] border-l border-dashed border-amber-500/20 z-0 h-full" />
                 )}
-                
+
                 {/* Labels */}
                 {h.snowfall > 0 && (
                   <div className="absolute z-20 flex flex-col items-center gap-0.5" style={{ bottom: `${height + 72}px` }}>
-                     {h.slr && <span className="text-[10px] font-black text-accent-cyan tabular-nums opacity-60">{h.slr.toFixed(0)}</span>}
-                     <span className="text-[14px] md:text-[16px] font-black text-white tabular-nums drop-shadow-lg">{h.snowfall.toFixed(1)}</span>
+                    {h.slr && <span className="text-[10px] font-black text-accent-cyan tabular-nums opacity-60">{h.slr.toFixed(0)}</span>}
+                    <span className="text-[14px] md:text-[16px] font-black text-white tabular-nums drop-shadow-lg">{h.snowfall.toFixed(1)}</span>
                   </div>
                 )}
-                
-                <div 
-                  style={{ 
+
+                <div
+                  style={{
                     height: `${Math.max(height, h.precipitation > 0 ? 3 : 0)}px`,
                     backgroundColor: h.snowfall > 0 ? barColor : undefined,
                     marginBottom: "56px"
@@ -165,12 +183,15 @@ function HourlySnowChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
                 />
 
                 <div className="absolute bottom-4 flex flex-col items-center">
-                   <span className={cn(
-                     "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                     isMidnight ? "bg-white text-slate-950" : "text-slate-500"
-                   )}>
-                     {hour.toString().padStart(2, '0')}
-                   </span>
+                  <span 
+                    style={{ color: peakText }}
+                    className={cn(
+                      "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
+                      isMidnight ? "bg-white text-slate-950" : (peakText ? "" : "text-slate-500")
+                    )}
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </span>
                 </div>
               </div>
             );
@@ -200,15 +221,15 @@ function HourlyTempChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
       <div className="relative">
         {/* Y-Axis Labels */}
         <div className="absolute -left-2 md:-left-4 top-0 h-[220px] flex flex-col justify-between text-[9px] font-black text-slate-700 pointer-events-none z-0">
-           <span>{maxTemp.toFixed(0)}°</span>
-           <span>0°</span>
-           <span>{minTemp.toFixed(0)}°</span>
+          <span>{maxTemp.toFixed(0)}°</span>
+          <span>0°</span>
+          <span>{minTemp.toFixed(0)}°</span>
         </div>
 
-        <div 
+        <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-16 pl-6 md:pl-0"
+          className="flex items-end h-[320px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-16 pl-6 md:pl-0 pt-10"
         >
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
@@ -217,17 +238,30 @@ function HourlyTempChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
 
+            const getPeakHue = (h: number) => {
+              if (h === 9 || h === 16) return 45; // Yellow
+              if (h === 10 || h === 15) return 38; // Golden-Yellow
+              if (h === 11 || h === 14) return 32; // Golden-Orange
+              if (h === 12 || h === 13) return 25; // Orange
+              return null;
+            };
+            const peakHue = getPeakHue(hour);
+            const peakText = peakHue !== null ? `hsl(${peakHue}, 100%, 65%)` : undefined;
+
             return (
-              <div key={i} className="min-w-[48px] md:min-w-[60px] flex flex-col items-center h-full justify-end relative group">
-                <div 
+              <div 
+                key={i} 
+                className="min-w-[48px] md:min-w-[60px] flex flex-col items-center h-full justify-end relative group"
+              >
+                <div
                   style={{ bottom: `${pos + 56 + 10}px` }}
                   className={cn(
                     "absolute w-2.5 h-2.5 rounded-full transition-transform duration-500 group-hover:scale-125 z-10 shadow-lg",
                     isFreezing ? "bg-blue-400 shadow-blue-500/40" : "bg-rose-400 shadow-rose-500/40"
                   )}
                 />
-                
-                <span 
+
+                <span
                   style={{ bottom: `${pos + 56 + 28}px` }}
                   className={cn(
                     "absolute text-[12px] md:text-[14px] font-black tabular-nums transition-opacity",
@@ -236,17 +270,20 @@ function HourlyTempChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
                 >
                   {temp.toFixed(0)}°
                 </span>
-                
+
                 <div className="w-[1px] h-full bg-white/[0.03] z-0" />
                 <div className="absolute w-full h-[1px] bg-white/10 z-0" style={{ bottom: `${((0 - minTemp) / range) * chartHeight + 56 + 10}px` }} />
 
                 <div className="absolute bottom-4 flex flex-col items-center">
-                   <span className={cn(
-                     "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                     isMidnight ? "bg-white text-slate-950" : "text-slate-500"
-                   )}>
-                     {hour.toString().padStart(2, '0')}
-                   </span>
+                  <span 
+                    style={{ color: peakText }}
+                    className={cn(
+                      "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
+                      isMidnight ? "bg-white text-slate-950" : (peakText ? "" : "text-slate-500")
+                    )}
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </span>
                 </div>
               </div>
             );
@@ -257,19 +294,23 @@ function HourlyTempChartFromScratch({ day, scrollRef, onScroll }: ChartRowProps)
   );
 }
 
-function TelemetryRows({ day }: { day: DayData }) {
+function TelemetryRows({ day, scrollRef, onScroll }: { day: DayData, scrollRef: (el: HTMLDivElement | null) => void, onScroll: (e: React.UIEvent<HTMLDivElement>) => void }) {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center gap-2 px-1">
         <Info className="w-5 h-5 text-slate-500" />
         <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Advanced Telemetry</h3>
       </div>
-      <div className="flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4">
+      <div 
+        ref={scrollRef}
+        onScroll={onScroll}
+        className="flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4"
+      >
         {day.hourly.map((h, i) => (
           <div key={i} className="min-w-[48px] md:min-w-[60px] flex flex-col gap-4 items-center bg-white/[0.02] py-4 rounded-xl">
             <MetricPill label="RH" value={h.rh != null ? `${h.rh.toFixed(0)}%` : '--'} color="cyan" />
             <MetricPill label="CLD" value={h.clouds != null ? `${h.clouds.toFixed(0)}%` : '--'} color="slate" />
-            <MetricPill label="LVL" value={h.snowLevel != null ? `${(h.snowLevel/1000).toFixed(1)}k` : '--'} color="blue" />
+            <MetricPill label="LVL" value={h.snowLevel != null ? `${(h.snowLevel / 1000).toFixed(1)}k` : '--'} color="blue" />
             <MetricPill label="FLS" value={h.feelsLike != null ? `${h.feelsLike.toFixed(0)}°` : '--'} color="rose" />
           </div>
         ))}

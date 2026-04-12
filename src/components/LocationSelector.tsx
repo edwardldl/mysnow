@@ -6,6 +6,14 @@ import { cn } from "@/lib/utils_tailwind";
 import skiAreasData from "@/data/ski-areas.json";
 import { Location } from "@/lib/types";
 
+interface SkiArea {
+  name: string;
+  lat: number;
+  lon: number;
+  region: string;
+  country: string;
+}
+
 interface LocationSelectorProps {
   locations: Record<string, Location>;
   currentLocationId: string;
@@ -22,24 +30,25 @@ export default function LocationSelector({
   onRemove,
 }: LocationSelectorProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<SkiArea[]>([]);
   const [coords, setCoords] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   const searchRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (searchQuery.length < 2) {
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.length < 2) {
       setSearchResults([]);
       return;
     }
-    const matches = skiAreasData
-      .filter((area: any) => 
-        area.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matches = (skiAreasData as SkiArea[])
+      .filter((area) => 
+        area.name.toLowerCase().includes(query.toLowerCase())
       )
       .slice(0, 8);
     setSearchResults(matches);
-  }, [searchQuery]);
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -51,7 +60,7 @@ export default function LocationSelector({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelectArea = (area: any) => {
+  const handleSelectArea = (area: SkiArea) => {
     setSearchQuery(area.name);
     setCoords(`${area.lat}, ${area.lon}`);
     setIsSearchOpen(false);
@@ -108,7 +117,7 @@ export default function LocationSelector({
               placeholder="Search ski area (e.g. Whistler, Vail)"
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                handleSearch(e.target.value);
                 setIsSearchOpen(true);
               }}
               onFocus={() => setIsSearchOpen(true)}

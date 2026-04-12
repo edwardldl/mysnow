@@ -75,7 +75,7 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
         // Densification Model - Compaction of existing layers
         let totalSWEAbove = 0;
         for (let j = snowLayersOnGround.length - 1; j >= 0; j--) {
-            let layer = snowLayersOnGround[j];
+            const layer = snowLayersOnGround[j];
             layer.ageInHours += 1;
             
             // Metamorphism and Overburden constants
@@ -106,7 +106,7 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
         if ((point.temperature || 0) > 1.0 && snowLayersOnGround.length > 0) {
             let meltAmountMM = ((point.temperature || 0) - 1.0) * 1.5;
             while(meltAmountMM > 0 && snowLayersOnGround.length > 0) {
-                let topLayer = snowLayersOnGround[snowLayersOnGround.length - 1];
+                const topLayer = snowLayersOnGround[snowLayersOnGround.length - 1];
                 if (topLayer.SWE_mm > meltAmountMM) {
                      topLayer.SWE_mm -= meltAmountMM;
                      meltAmountMM = 0;
@@ -142,14 +142,20 @@ export function getSLRCategory(slr: number | null, liquidMM: number): string | n
     return 'powder';
 }
 
-export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoResponse, location: Location, slrAlgorithm = 'kinematic', modelMode = 'best_match'): { hourly: BlendedHour[], daily: any } {
+export function blendForecasts(
+  hrrr: OpenMeteoResponse | null, 
+  ecmwf: OpenMeteoResponse, 
+  location: Location, 
+  slrAlgorithm = 'kinematic', 
+  modelMode = 'best_match'
+): { hourly: BlendedHour[], daily: OpenMeteoDaily } {
     const rawHourly: Partial<BlendedHour>[] = [];
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
 
     const LEVELS = [1000, 975, 950, 925, 900, 850, 800, 700, 600, 500, 400, 300];
 
-    const extractLayers = (dataSource: any, index: number) => {
+    const extractLayers = (dataSource: OpenMeteoResponse | null, index: number) => {
         if (!dataSource || !dataSource.hourly) return [];
         return LEVELS.map(level => {
             return {
@@ -159,7 +165,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
                 gz: dataSource.hourly[`geopotential_height_${level}hPa`] ? dataSource.hourly[`geopotential_height_${level}hPa`][index] : 0,
                 omega: dataSource.hourly[`vertical_velocity_${level}hPa`] ? dataSource.hourly[`vertical_velocity_${level}hPa`][index] : 0,
                 wind_speed: (dataSource.hourly[`wind_speed_${level}hPa`] || dataSource.hourly.wind_speed_10m || [])[index] || 0,
-                cloud_cover: dataSource.hourly[`cloud_cover_${level}hPa`] ? dataSource.hourly[`cloud_cover_${level}hPa`][index] : 0
+                cloud_cover: dataSource.hourly[`cloud_cover_${level}hPa`] ? (dataSource.hourly[`cloud_cover_${level}hPa`] as number[])[index] : 0
             };
         });
     };
@@ -171,7 +177,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
         const dateObj = new Date(time);
         const hrrrIdx = hrrrTimes.indexOf(time);
 
-        let point: Partial<BlendedHour> = { time, dateObj };
+        const point: Partial<BlendedHour> = { time, dateObj };
 
         if (hrrr && hrrrIdx !== -1) {
             point.model = 'HRRR';
@@ -290,7 +296,7 @@ export function blendForecasts(hrrr: OpenMeteoResponse | null, ecmwf: OpenMeteoR
     };
 }
 
-export function groupData(blendedData: { hourly: BlendedHour[], daily: any }): DayData[] {
+export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteoDaily }): DayData[] {
     const days: Record<string, DayData> = {};
     const { hourly, daily } = blendedData;
 

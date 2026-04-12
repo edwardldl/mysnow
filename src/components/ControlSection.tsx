@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Info, Cpu, Zap } from "lucide-react";
+import { ChevronDown, Cpu, Zap } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 
 interface Option {

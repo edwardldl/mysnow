@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Calendar, Search, History, Trash2, ArrowRight } from "lucide-react";
+import { Calendar, History } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { fetchHistoricalWeatherData } from "@/lib/api";
 import { blendForecasts, groupData } from "@/lib/data";
-import { Location, DayData } from "@/lib/types";
+import { DayData } from "@/lib/types";
 
 interface HistorySectionProps {
   currentLocationId: string;
@@ -26,8 +26,8 @@ export default function HistorySection({ currentLocationId }: HistorySectionProp
       const blended = blendForecasts(null, data.ecmwfData, data.location, "hybrid", "historical");
       const grouped = groupData(blended);
       setHistoryData(grouped);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch historical data");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fetch historical data");
     } finally {
       setIsLoading(false);
     }
