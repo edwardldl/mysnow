@@ -80,7 +80,8 @@ export function getSlrColor(slr: number): string {
 
 /** Map a WMO weather interpretation code to a human-readable label and emoji icon. */
 export function getWeatherDescription(code: number | null): { label: string; icon: string } {
-    if (code === null) return { label: 'Unknown', icon: '' };
+    const placeholder = { label: '--', icon: '—' };
+    if (code === null) return placeholder;
     
     const descriptions: { [key: number]: { label: string; icon: string } } = {
         0: { label: 'Clear', icon: '☀️' },
@@ -113,5 +114,5 @@ export function getWeatherDescription(code: number | null): { label: string; ico
         99: { label: 'Thunderstorm with Heavy Hail', icon: '⛈️' }
     };
     
-    return descriptions[code] || { label: 'Unknown', icon: '' };
+    return descriptions[code] || { label: 'Unknown', icon: '—' };
 }
