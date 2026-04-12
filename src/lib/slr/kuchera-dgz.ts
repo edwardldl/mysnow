@@ -76,6 +76,7 @@ export function calculateDGZEnhancedSLR(
 }
 
 
+/*
 // Assume `weatherData` is the parsed JSON response from the Open-Meteo API.
 const hourIndex = 0;
 const surfacePressure = weatherData.hourly.surface_pressure[hourIndex];
@@ -104,3 +105,4 @@ const enhancedSLR = calculateDGZEnhancedSLR(atmosphericProfile, surfacePressure)
 
 console.log(`Surface Pressure: ${surfacePressure} hPa`);
 console.log(`DGZ-Enhanced SLR: ${enhancedSLR.toFixed(1)}:1`);
+*/

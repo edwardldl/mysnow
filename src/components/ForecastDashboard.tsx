@@ -11,7 +11,6 @@ interface ForecastDashboardProps {
   days: DayData[];
   isLoading: boolean;
   selectedDate: string | null;
-  setSelectedDate: (date: string) => void;
 }
 
 export default function ForecastDashboard({ days, isLoading, selectedDate }: ForecastDashboardProps) {

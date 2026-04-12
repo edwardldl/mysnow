@@ -8,9 +8,9 @@
  *   npx ts-node index.ts
  */
 
-import { FullColumnInputs, PressureLevel, PressureHPa } from "./types";
-import { calculateSimpleSLR } from "./simple-algorithm";
-import { calculateSophisticatedSLR } from "./sophisticated-algorithm";
+import { ColumnInputs, PressureLevel, PressureHPa } from "./types";
+import { calculateSimple } from "./simple-algorithm";
+import { calculateSophisticated } from "./sophisticated-algorithm";
 
 const ECMWF_ENDPOINT = "https://api.open-meteo.com/v1/ecmwf";
 const PRESSURE_LEVELS: PressureHPa[] = [1000, 925, 850, 700, 600, 500, 400, 300];
@@ -29,7 +29,7 @@ function buildApiUrl(lat: number, lon: number): string {
 
 interface OpenMeteoResponse { hourly: Record<string, number[]>; }
 
-function parseApiResponse(data: OpenMeteoResponse, hourIndex: number): FullColumnInputs {
+function parseApiResponse(data: OpenMeteoResponse, hourIndex: number): ColumnInputs {
   const h = data.hourly;
   const i = hourIndex;
   const levels: PressureLevel[] = PRESSURE_LEVELS.map((p) => ({
@@ -38,7 +38,7 @@ function parseApiResponse(data: OpenMeteoResponse, hourIndex: number): FullColum
     rh:     h[`relative_humidity_${p}hPa`][i],
     height: h[`geopotential_height_${p}hPa`][i],
     omega:  h[`vertical_velocity_${p}hPa`][i],
-    wind700: p === 700 ? h[`wind_speed_700hPa`][i] : null,
+    wind700: p === 700 ? h[`wind_speed_700hPa`][i] : undefined,
   }));
   return {
     T2m: h["temperature_2m"][i], Td2m: h["dewpoint_2m"][i],
@@ -63,11 +63,11 @@ async function main(): Promise<void> {
     console.log(`\n─── Hour ${i} ─────────────────────────────────────────`);
     console.log(`  T2m:${inputs.T2m}°C  Td2m:${inputs.Td2m}°C  Precip:${inputs.precip_mm.toFixed(2)}mm  Wind:${inputs.wind_speed_10m.toFixed(1)}m/s`);
 
-    const simple = calculateSimpleSLR(inputs);
+    const simple = calculateSimple(inputs);
     console.log(`  [① Simple]  SLR:${simple.slr.toFixed(1)}:1  Snow:${(simple.snowfall_mm/10).toFixed(1)}cm  Type:${simple.snowType}`);
     if (simple.warning) console.log(`     ⚠  ${simple.warning}`);
 
-    const sophis = calculateSophisticatedSLR(inputs);
+    const sophis = calculateSophisticated(inputs);
     console.log(`  [② Sophisticated]  SLR:${sophis.slr.toFixed(1)}:1  Snow:${(sophis.snowfall_mm/10).toFixed(1)}cm  Type:${sophis.snowType}`);
     for (const s of sophis.steps) console.log(`     ${s.label.padEnd(42)} ${s.value}`);
   }

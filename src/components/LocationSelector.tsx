@@ -8,8 +8,8 @@ import { Location } from "@/lib/types";
 
 interface SkiArea {
   name: string;
-  lat: number;
-  lon: number;
+  lat: string;
+  lon: string;
   region: string;
   country: string;
 }

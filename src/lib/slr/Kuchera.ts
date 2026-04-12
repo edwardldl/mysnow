@@ -60,6 +60,7 @@ export function calculateKucheraSLR(
 // Example Usage with Open-Meteo variables
 // ==========================================
 
+/*
 // Assume `weatherData` is the parsed JSON response from the Open-Meteo API.
 const hourIndex = 0; // Example: evaluating the current hour
 
@@ -84,3 +85,4 @@ const currentSLR = calculateKucheraSLR(atmosphericProfile, currentSurfacePressur
 
 console.log(`Surface Pressure: ${currentSurfacePressure} hPa`);
 console.log(`Estimated Kuchera SLR: ${currentSLR.toFixed(1)}:1`);
+*/

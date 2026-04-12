@@ -1,5 +1,5 @@
 import { calcSLR, OpenMeteoHour } from './slr';
-import { OpenMeteoResponse, Location, BlendedHour, DayData } from './types';
+import { OpenMeteoResponse, OpenMeteoDaily, Location, BlendedHour, DayData } from './types';
 
 // Snow weather codes from Open-Meteo WMO codes
 const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86]);
@@ -157,15 +157,22 @@ export function blendForecasts(
 
     const extractLayers = (dataSource: OpenMeteoResponse | null, index: number) => {
         if (!dataSource || !dataSource.hourly) return [];
+        const hourly = dataSource.hourly;
+        
         return LEVELS.map(level => {
+            const getHourlyVal = (key: string) => {
+                const val = hourly[key];
+                return Array.isArray(val) ? val[index] : 0;
+            };
+
             return {
                 pressure: level,
-                temp: dataSource.hourly[`temperature_${level}hPa`] ? dataSource.hourly[`temperature_${level}hPa`][index] : 0,
-                rh: dataSource.hourly[`relative_humidity_${level}hPa`] ? dataSource.hourly[`relative_humidity_${level}hPa`][index] : 0,
-                gz: dataSource.hourly[`geopotential_height_${level}hPa`] ? dataSource.hourly[`geopotential_height_${level}hPa`][index] : 0,
-                omega: dataSource.hourly[`vertical_velocity_${level}hPa`] ? dataSource.hourly[`vertical_velocity_${level}hPa`][index] : 0,
-                wind_speed: (dataSource.hourly[`wind_speed_${level}hPa`] || dataSource.hourly.wind_speed_10m || [])[index] || 0,
-                cloud_cover: dataSource.hourly[`cloud_cover_${level}hPa`] ? (dataSource.hourly[`cloud_cover_${level}hPa`] as number[])[index] : 0
+                temp: getHourlyVal(`temperature_${level}hPa`) as number || 0,
+                rh: getHourlyVal(`relative_humidity_${level}hPa`) as number || 0,
+                gz: getHourlyVal(`geopotential_height_${level}hPa`) as number || 0,
+                omega: getHourlyVal(`vertical_velocity_${level}hPa`) as number || 0,
+                wind_speed: (getHourlyVal(`wind_speed_${level}hPa`) || getHourlyVal('wind_speed_10m') || 0) as number,
+                cloud_cover: getHourlyVal(`cloud_cover_${level}hPa`) as number || 0
             };
         });
     };
@@ -317,7 +324,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             let sunsetStr = null;
             if (daily && daily.time) {
                 const dIdx = daily.time.indexOf(dateStr);
-                if (dIdx !== -1) {
+                if (dIdx !== -1 && daily.sunrise && daily.sunset) {
                     sunriseStr = daily.sunrise[dIdx];
                     sunsetStr = daily.sunset[dIdx];
                 }

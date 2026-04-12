@@ -29,6 +29,8 @@ export interface OpenMeteoHourly {
     precipitation?: number[];
     snowfall?: number[];
     snowfall_water_equivalent?: number[];
+    lifted_index?: number[];
+    convective_inhibition?: number[];
     [key: string]: number[] | string[] | undefined | number; // Allows dynamic pressure level keys
 }
 
