@@ -73,6 +73,33 @@ export default function Home() {
     }
   };
 
+  // Find current hour data for the header
+  const currentHourData = React.useMemo(() => {
+    if (forecastDays.length === 0) return null;
+    
+    // Find the current local hour in America/Los_Angeles
+    const now = new Date();
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      hourCycle: 'h23',
+      timeZone: 'America/Los_Angeles'
+    });
+    
+    const parts = fmt.formatToParts(now);
+    const y = parts.find(p => p.type === 'year')?.value;
+    const m = parts.find(p => p.type === 'month')?.value;
+    const d = parts.find(p => p.type === 'day')?.value;
+    const h = parts.find(p => p.type === 'hour')?.value;
+    const currentHourISO = `${y}-${m}-${d}T${h}:00`;
+    
+    // Search for this hour in the first day's forecast
+    const found = forecastDays[0].hourly.find(pt => pt.time.startsWith(currentHourISO));
+    return found || forecastDays[0].hourly[0];
+  }, [forecastDays]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header 
@@ -80,7 +107,7 @@ export default function Home() {
         setMode={setMode} 
         onRefresh={() => loadData(currentLocationId, modelId, algoId)}
         isLoading={isLoading}
-        currentData={forecastDays.length > 0 && forecastDays[0].hourly.length > 0 ? forecastDays[0].hourly[0] : null}
+        currentData={currentHourData}
       />
 
       {mode === "forecast" && (

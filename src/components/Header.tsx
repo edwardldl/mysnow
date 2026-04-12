@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Snowflake, Thermometer } from "lucide-react";
+import { RefreshCw, Snowflake, Thermometer, Wind, Sun, Navigation2 } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { BlendedHour } from "@/lib/types";
 import { getWeatherDescription } from "@/lib/utils";
@@ -46,26 +46,61 @@ export default function Header({ mode, setMode, onRefresh, isLoading, currentDat
           </button>
         </div>
 
-        {/* Current Metrics - Compact */}
-        <div className="flex items-center gap-3 md:gap-6 overflow-hidden">
+        {/* Current Metrics - Scrollable on mobile */}
+        <div className="flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar py-2 max-w-[40%] sm:max-w-[50%] md:max-w-none">
            {weather && (
-             <div className="flex flex-col items-center shrink-0">
+             <div className="flex flex-col items-center shrink-0 min-w-[40px]">
                <span className="text-lg md:text-xl leading-none">{weather.icon}</span>
                <span className="text-[9px] font-black text-slate-500 uppercase">{weather.label}</span>
              </div>
            )}
-           <div className="hidden md:flex gap-6">
-             <HeaderMetric 
-               icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-400" />}
-               label="TEMP"
-               value={currentData?.temperature != null ? `${currentData.temperature.toFixed(1)}°` : "--"}
-             />
-             <HeaderMetric 
-               icon={<Snowflake className="w-3 md:w-3.5 h-3 md:h-3.5 text-accent-cyan" />}
-               label="RATE"
-               value={currentData?.snowfall != null ? `${currentData.snowfall.toFixed(1)}` : "0.0"}
-             />
-           </div>
+           
+           <HeaderMetric 
+             icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-400" />}
+             label="TEMP"
+             value={currentData?.temperature != null ? `${currentData.temperature.toFixed(1)}°` : "--"}
+           />
+
+           <HeaderMetric 
+             icon={<Thermometer className="w-3 md:w-3.5 h-3 md:h-3.5 text-rose-300 opacity-60" />}
+             label="FEELS"
+             value={currentData?.feelsLike != null ? `${currentData.feelsLike.toFixed(1)}°` : "--"}
+           />
+
+           <HeaderMetric 
+             icon={<Snowflake className="w-3 md:w-3.5 h-3 md:h-3.5 text-accent-cyan" />}
+             label="RATE"
+             value={currentData?.snowfall != null ? `${currentData.snowfall.toFixed(1)}` : "0.0"}
+             unit="cm/h"
+           />
+
+           <HeaderMetric 
+             icon={<Wind className="w-3 md:w-3.5 h-3 md:h-3.5 text-emerald-400" />}
+             label="WIND"
+             value={currentData?.windSpeed != null ? `${(currentData.windSpeed * 3.6).toFixed(0)}` : "--"}
+             unit="km/h"
+             extra={
+               <div className="flex items-center gap-1 ml-1.5">
+                 {currentData?.windDir != null && (
+                   <Navigation2 
+                     className="w-2.5 h-2.5 text-emerald-300" 
+                     style={{ transform: `rotate(${(currentData.windDir || 0) + 180}deg)`, fill: 'currentColor' }} 
+                   />
+                 )}
+                 {currentData?.gusts != null && currentData.gusts > (currentData.windSpeed || 0) && (
+                   <span className="text-[9px] font-black text-emerald-400 opacity-60">
+                     G:{(currentData.gusts * 3.6).toFixed(0)}
+                   </span>
+                 )}
+               </div>
+             }
+           />
+
+           <HeaderMetric 
+              icon={<Sun className="w-3 md:w-3.5 h-3 md:h-3.5 text-yellow-400" />}
+              label="UV"
+              value={currentData?.uvIndex != null ? currentData.uvIndex.toFixed(1) : "--"}
+           />
         </div>
 
         {/* Mode Switcher */}
@@ -94,15 +129,16 @@ export default function Header({ mode, setMode, onRefresh, isLoading, currentDat
   );
 }
 
-function HeaderMetric({ icon, label, value, extra }: { icon: React.ReactNode, label: string, value: string, extra?: React.ReactNode }) {
+function HeaderMetric({ icon, label, value, unit, extra }: { icon: React.ReactNode, label: string, value: string, unit?: string, extra?: React.ReactNode }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col shrink-0">
       <div className="flex items-center gap-1.5 mb-0.5">
         {icon}
         <span className="text-[10px] uppercase font-black text-slate-500 tracking-tighter">{label}</span>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center gap-0.5">
         <span className="text-xs font-bold text-white tracking-tight">{value}</span>
+        {unit && <span className="text-[9px] font-black text-slate-500 ml-0.5">{unit}</span>}
         {extra}
       </div>
     </div>
