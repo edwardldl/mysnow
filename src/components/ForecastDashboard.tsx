@@ -286,8 +286,10 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
 
 function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
   const temps = day.hourly.map(h => h.temperature).filter(t => t !== null) as number[];
-  const rawMin = Math.min(...temps, 0);
-  const rawMax = Math.max(...temps, 0);
+  const feels = day.hourly.map(h => h.feelsLike).filter(t => t !== null) as number[];
+  const allTemps = [...temps, ...feels];
+  const rawMin = Math.min(...allTemps, 0);
+  const rawMax = Math.max(...allTemps, 0);
   const rawRange = rawMax - rawMin;
   const minTemp = rawMin - 2;
   const maxTemp = rawMax + Math.max(6, rawRange * 0.25);
@@ -324,7 +326,11 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
             const pos = ((temp - minTemp) / range) * chartHeight;
+            const feelsLike = h.feelsLike ?? temp;
+            const feelsPos = ((feelsLike - minTemp) / range) * chartHeight;
+            
             const isFreezing = temp <= 0;
+            const isFeelsFreezing = feelsLike <= 0;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
 
@@ -352,6 +358,30 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                     NOW
                   </div>
                 )}
+
+                {/* Connecting Line if different */}
+                {Math.abs(pos - feelsPos) > 4 && (
+                   <div 
+                    style={{ 
+                      bottom: `${Math.min(pos, feelsPos) + 36 + 15}px`, 
+                      height: `${Math.abs(pos - feelsPos)}px` 
+                    }}
+                    className="absolute w-[1px] bg-white/10 z-0"
+                   />
+                )}
+
+                {/* Feels Like Dot (Ghost/Secondary) */}
+                {Math.abs(pos - feelsPos) > 4 && (
+                  <div
+                    style={{ bottom: `${feelsPos + 36 + 10}px` }}
+                    className={cn(
+                      "absolute w-1.5 h-1.5 rounded-full transition-all duration-500 z-10",
+                      isFeelsFreezing ? "bg-blue-400/30 border border-blue-400/50" : "bg-rose-400/30 border border-rose-400/50"
+                    )}
+                  />
+                )}
+
+                {/* Primary Temp Dot */}
                 <div
                   style={{ bottom: `${pos + 36 + 10}px` }}
                   className={cn(
@@ -360,15 +390,25 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   )}
                 />
 
-                <span
-                  style={{ bottom: `${pos + 36 + 28}px` }}
-                  className={cn(
-                    "absolute text-[12px] md:text-[14px] font-black tabular-nums transition-opacity",
-                    isFreezing ? "text-blue-300" : "text-rose-300"
-                  )}
+                {/* Labels */}
+                <div 
+                  className="absolute flex flex-col items-center gap-0 pointer-events-none"
+                  style={{ bottom: `${Math.max(pos, feelsPos) + 36 + 28}px` }}
                 >
-                  {temp.toFixed(0)}°
-                </span>
+                  <span
+                    className={cn(
+                      "text-[12px] md:text-[14px] font-black tabular-nums leading-none",
+                      isFreezing ? "text-blue-300" : "text-rose-300"
+                    )}
+                  >
+                    {temp.toFixed(0)}°
+                  </span>
+                  {Math.abs(temp - feelsLike) >= 1 && (
+                    <span className="text-[9px] font-black text-slate-500 tabular-nums leading-none mt-1">
+                      {feelsLike.toFixed(0)}°
+                    </span>
+                  )}
+                </div>
 
                 <div className="w-[1px] h-full bg-white/[0.03] z-0" />
                 <div className="absolute w-full h-[1px] bg-white/10 z-0" style={{ bottom: `${((0 - minTemp) / range) * chartHeight + 36 + 10}px` }} />
