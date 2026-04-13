@@ -3,28 +3,43 @@
 import React from "react";
 import { RefreshCw, Snowflake } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
-import { BlendedHour } from "@/lib/types";
+import { BlendedHour, Location } from "@/lib/types";
 import { getWeatherDescription } from "@/lib/utils";
+import LocationDropdown from "./LocationDropdown";
 
 interface HeaderProps {
   onRefresh: () => void;
   isLoading?: boolean;
   currentData?: BlendedHour | null;
+  locations: Record<string, Location>;
+  currentLocationId: string;
+  onSelectLocation: (id: string) => void;
+  onAddLocation: (name: string, lat: string, lon: string) => void;
+  onRemoveLocation: (id: string) => void;
 }
 
-export default function Header({ onRefresh, isLoading, currentData }: HeaderProps) {
+export default function Header({
+  onRefresh,
+  isLoading,
+  currentData,
+  locations,
+  currentLocationId,
+  onSelectLocation,
+  onAddLocation,
+  onRemoveLocation,
+}: HeaderProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(60px+var(--sat,0px))] md:h-[calc(72px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl overflow-hidden transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(60px+var(--sat,0px))] md:h-[calc(72px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
         {/* Left Column: Branding */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-1.5 md:p-2 bg-accent-blue rounded-lg md:rounded-xl neon-glow-cyan text-white">
               <Snowflake className="w-4 h-4 md:w-5 md:h-5 animate-pulse-soft" />
             </div>
-            <div>
+            <div className="hidden sm:block">
               <h1 className="text-base md:text-lg font-bold tracking-tight text-white m-0 leading-tight">
                 MySnow
               </h1>
@@ -36,14 +51,24 @@ export default function Header({ onRefresh, isLoading, currentData }: HeaderProp
         </div>
 
         {/* Right Column: Actions */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0 ml-auto">
+          <LocationDropdown
+            locations={locations}
+            currentLocationId={currentLocationId}
+            onSelect={onSelectLocation}
+            onAdd={onAddLocation}
+            onRemove={onRemoveLocation}
+          />
+
           {currentData && (
-            <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+            <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
               <span className="text-sm md:text-base">{weather?.icon}</span>
-              <span className="text-xs md:text-sm font-bold text-white">{currentData.temperature.toFixed(1)}°</span>
+              <span className="text-xs md:text-sm font-bold text-white">
+                {currentData.temperature.toFixed(1)}°
+              </span>
             </div>
           )}
-          
+
           <button
             onClick={onRefresh}
             disabled={isLoading}
