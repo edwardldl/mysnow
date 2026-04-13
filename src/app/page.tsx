@@ -10,6 +10,7 @@ import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
 import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
+import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import { fetchWeatherData, getLocations, saveLocation, removeLocation } from "@/lib/api";
 import { blendForecasts, groupData } from "@/lib/data";
 import { Location, DayData } from "@/lib/types";
@@ -110,7 +111,7 @@ export default function Home() {
       />
 
       {mode === "forecast" && (
-        <div className="fixed top-[calc(72px+var(--sat,0px))] md:top-[calc(88px+var(--sat,0px))] left-0 right-0 z-40">
+        <div className="fixed top-[calc(60px+var(--sat,0px))] md:top-[calc(72px+var(--sat,0px))] left-0 right-0 z-40 transition-all duration-300">
           <DateRibbon 
             days={forecastDays} 
             selectedDate={selectedDate} 
@@ -121,7 +122,7 @@ export default function Home() {
 
       <main className={cn(
         "flex-1 overflow-y-auto no-scrollbar scroll-smooth text-slate-50",
-        mode === "forecast" ? "pt-[calc(136px+var(--sat,0px))] md:pt-[calc(160px+var(--sat,0px))]" : "pt-[calc(72px+var(--sat,0px))] md:pt-[calc(88px+var(--sat,0px))]"
+        mode === "forecast" ? "pt-[calc(124px+var(--sat,0px))] md:pt-[calc(144px+var(--sat,0px))]" : "pt-[calc(60px+var(--sat,0px))] md:pt-[calc(72px+var(--sat,0px))]"
       )}>
         <AnimatePresence mode="wait">
           {mode === "forecast" ? (
@@ -132,6 +133,12 @@ export default function Home() {
               exit={{ opacity: 0, scale: 1.02 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
+              <CurrentWeatherCard 
+                currentData={currentHourData} 
+                locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
+                className="mt-4 md:mt-8"
+              />
+
               <LocationSelector 
                 locations={locations}
                 currentLocationId={currentLocationId}
