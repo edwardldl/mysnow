@@ -49,6 +49,8 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     try {
+      // Add a small delay to ensure the animation is visible
+      await new Promise(resolve => setTimeout(resolve, 800));
       const data = await fetchWeatherData(locId, model);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
       const grouped = groupData(blended);
@@ -189,12 +191,14 @@ export default function Home() {
                   <div className="glass-panel p-8 rounded-3xl border-accent-rose/20 text-center">
                     <h3 className="text-xl font-bold text-accent-rose mb-2">Error Loading Data</h3>
                     <p className="text-slate-400">{error}</p>
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => loadData(currentLocationId, modelId, algoId)}
                       className="mt-6 px-6 py-2 bg-accent-rose text-white rounded-full font-bold text-sm shadow-lg shadow-rose-500/20"
                     >
                       Retry
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               ) : (

@@ -30,6 +30,9 @@ export default function Header({
 }: HeaderProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
 
+  // Debug: log isLoading changes
+  // console.log("Header isLoading:", isLoading);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(60px+var(--sat,0px))] md:h-[calc(72px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
@@ -73,15 +76,22 @@ export default function Header({
             onClick={onRefresh}
             disabled={isLoading}
             className={cn(
-              "p-2 md:p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-accent-blue/50",
-              isLoading && "animate-spin text-accent-cyan"
+              "p-2 md:p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-accent-blue/50 active:scale-95 group shadow-sm disabled:opacity-50 disabled:cursor-not-allowed",
+              isLoading && "text-accent-cyan ring-1 ring-accent-cyan/30 bg-accent-cyan/5"
             )}
             aria-label="Refresh data"
           >
-            <RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
+            <div className={cn(
+              "flex items-center justify-center transition-all duration-500",
+              isLoading ? "animate-spin" : "group-hover:rotate-12 group-active:-rotate-45"
+            )}>
+              <RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
+            </div>
           </button>
         </div>
       </div>
     </header>
+
+
   );
 }
