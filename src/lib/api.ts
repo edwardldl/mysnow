@@ -50,6 +50,16 @@ export function removeLocation(id: string): Record<string, Location> {
     return getLocations();
 }
 
+export function getLastLocationId(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('calisnow_last_location_id');
+}
+
+export function setLastLocationId(id: string): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('calisnow_last_location_id', id);
+}
+
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/forecast';
 

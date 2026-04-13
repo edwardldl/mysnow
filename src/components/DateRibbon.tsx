@@ -15,7 +15,7 @@ interface DateRibbonProps {
 
 export default function DateRibbon({ days, selectedDate, onSelect }: DateRibbonProps) {
   return (
-    <div className="w-full bg-slate-950/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 md:px-8 overflow-x-auto no-scrollbar shadow-xl">
+    <div className="w-full py-3 px-4 md:px-8 overflow-x-auto no-scrollbar">
       <div className="max-w-7xl mx-auto flex gap-3 md:gap-4">
         {days.map((day) => {
           const isSelected = day.dateStr === selectedDate;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import DateRibbon from "@/components/DateRibbon";
 import LocationSelector from "@/components/LocationSelector";
@@ -11,7 +11,7 @@ import HistorySection from "@/components/HistorySection";
 import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
-import { fetchWeatherData, getLocations, saveLocation, removeLocation } from "@/lib/api";
+import { fetchWeatherData, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData } from "@/lib/data";
 import { Location, DayData } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,16 +22,30 @@ export default function Home() {
   const [currentLocationId, setCurrentLocationId] = useState("palisades");
   const [modelId, setModelId] = useState("best_match");
   const [algoId, setAlgoId] = useState("hybrid");
+  const [isLocationSelectorExpanded, setIsLocationSelectorExpanded] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(180); // Default fallback
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
   
   const [forecastDays, setForecastDays] = useState<DayData[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize locations
+  // Initialize locations and current location from persistence
   useEffect(() => {
     setLocations(getLocations());
+    const lastLocId = getLastLocationId();
+    if (lastLocId && getLocations()[lastLocId]) {
+      setCurrentLocationId(lastLocId);
+    }
   }, []);
+
+  // Persist location selection
+  useEffect(() => {
+    if (currentLocationId) {
+      setLastLocationId(currentLocationId);
+    }
+  }, [currentLocationId]);
 
   const loadData = useCallback(async (locId: string, model: string, algo: string) => {
     setIsLoading(true);
@@ -59,6 +73,23 @@ export default function Home() {
       loadData(currentLocationId, modelId, algoId);
     }
   }, [currentLocationId, modelId, algoId, locations, loadData]);
+
+  // Dynamic header height measurement
+  useEffect(() => {
+    if (!stickyHeaderRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // Height of the sticky container + height of the main fixed header (60 or 72px)
+        const isMobile = window.innerWidth < 768;
+        const mainHeaderHeight = isMobile ? 60 : 72;
+        setHeaderHeight(entry.contentRect.height + mainHeaderHeight);
+      }
+    });
+
+    observer.observe(stickyHeaderRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleAddLocation = (name: string, lat: string, lon: string) => {
     const id = name.toLowerCase().replace(/\s+/g, '-');
@@ -110,20 +141,31 @@ export default function Home() {
         currentData={currentHourData}
       />
 
-      {mode === "forecast" && (
-        <div className="fixed top-[calc(60px+var(--sat,0px))] md:top-[calc(72px+var(--sat,0px))] left-0 right-0 z-40 transition-all duration-300">
+      <div 
+        ref={stickyHeaderRef}
+        className="fixed top-[calc(60px+var(--sat,0px))] md:top-[calc(72px+var(--sat,0px))] left-0 right-0 z-40 transition-all duration-300 bg-slate-950/80 backdrop-blur-xl border-b border-white/5"
+      >
+        <LocationSelector 
+          locations={locations}
+          currentLocationId={currentLocationId}
+          onSelect={setCurrentLocationId}
+          onAdd={handleAddLocation}
+          onRemove={handleRemoveLocation}
+          onToggleExpand={setIsLocationSelectorExpanded}
+        />
+        {mode === "forecast" && (
           <DateRibbon 
             days={forecastDays} 
             selectedDate={selectedDate} 
             onSelect={setSelectedDate} 
           />
-        </div>
-      )}
+        )}
+      </div>
 
-      <main className={cn(
-        "flex-1 overflow-y-auto no-scrollbar scroll-smooth text-slate-50",
-        mode === "forecast" ? "pt-[calc(124px+var(--sat,0px))] md:pt-[calc(144px+var(--sat,0px))]" : "pt-[calc(60px+var(--sat,0px))] md:pt-[calc(72px+var(--sat,0px))]"
-      )}>
+      <main 
+        className="flex-1 overflow-y-auto no-scrollbar scroll-smooth text-slate-50"
+        style={{ paddingTop: `calc(${headerHeight}px + var(--sat, 0px))` }}
+      >
         <AnimatePresence mode="wait">
           {mode === "forecast" ? (
             <motion.div 
@@ -139,13 +181,6 @@ export default function Home() {
                 className="mt-4 md:mt-8"
               />
 
-              <LocationSelector 
-                locations={locations}
-                currentLocationId={currentLocationId}
-                onSelect={setCurrentLocationId}
-                onAdd={handleAddLocation}
-                onRemove={handleRemoveLocation}
-              />
               
               <ControlSection 
                 modelId={modelId}
