@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
 import { Snowflake } from "lucide-react";
-import { getSlrColor } from "@/lib/utils";
+import { getSlrColor, getWeatherDescription } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface DateRibbonProps {
@@ -54,32 +54,43 @@ export default function DateRibbon({ days, selectedDate, onSelect }: DateRibbonP
                 />
               )}
 
-              <div className="relative z-10 flex flex-col items-center">
+              <div className="relative z-10 flex flex-col items-center w-full px-1">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <span className={cn(
+                    "text-[9px] font-black uppercase tracking-tighter opacity-80",
+                    isStorm && !isSelected && "text-white/90"
+                  )}>
+                    {dayName}
+                  </span>
+                  <span className="text-xs">{getWeatherDescription(day.weatherCode).icon}</span>
+                </div>
+                
                 <span className={cn(
-                  "text-[10px] font-black uppercase tracking-tighter opacity-80 mb-0.5",
-                  isStorm && !isSelected && "text-white/90"
-                )}>
-                  {dayName}
-                </span>
-                <span className={cn(
-                  "text-sm font-black",
+                  "text-lg font-black leading-none mb-1",
                   isStorm && !isSelected && "text-white"
                 )}>
                   {dayNum}
                 </span>
-                
-                {day.totalSnowfall > 0 && (
-                  <div className="mt-1 flex items-center gap-0.5">
-                    <Snowflake className={cn(
-                      "w-2 h-2", 
-                      isSelected ? "text-white" : (isStorm ? "text-white" : "text-accent-cyan")
-                    )} />
-                    <span className={cn(
-                      "text-[9px] font-black",
-                      isStorm && !isSelected ? "text-white" : ""
-                    )}>{day.totalSnowfall.toFixed(0)}</span>
+
+                <div className="flex flex-col items-center gap-0.5 mt-auto">
+                  <div className="flex items-center gap-1.5 text-[9px] font-black tabular-nums">
+                    <span className="text-rose-400">{day.maxTemp.toFixed(0)}°</span>
+                    <span className="text-blue-400">{day.minTemp.toFixed(0)}°</span>
                   </div>
-                )}
+                  
+                  {day.totalSnowfall > 0 && (
+                    <div className="flex items-center gap-0.5 bg-accent-blue/20 px-1 rounded-sm">
+                      <Snowflake className={cn(
+                        "w-2 h-2", 
+                        isSelected ? "text-white" : (isStorm ? "text-white" : "text-accent-cyan")
+                      )} />
+                      <span className={cn(
+                        "text-[9px] font-black",
+                        isStorm && !isSelected ? "text-white" : "text-accent-cyan"
+                      )}>{day.totalSnowfall.toFixed(0)}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {isSelected && (

@@ -149,4 +149,7 @@ export interface DayData {
     snowLayersOnGround: Array<{ SWE_mm: number; density: number; ageInHours: number }>;
     maxHourlySnowfall?: number;
     maxWindowSnowfall?: number;
+    minTemp: number;
+    maxTemp: number;
+    weatherCode: number | null;
 }

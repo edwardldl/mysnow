@@ -3,7 +3,7 @@
 import React from "react";
 import { DayData } from "@/lib/types";
 import { cn } from "@/lib/utils_tailwind";
-import { getSlrColor } from "@/lib/utils";
+import { getSlrColor, getWeatherDescription } from "@/lib/utils";
 
 interface DayCardProps {
   day: DayData;
@@ -45,8 +45,28 @@ export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
           {new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(new Date(day.dateStr))}
         </span>
         <span className="text-sm font-bold text-white whitespace-nowrap">
-          {new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(day.dateStr))}
+          {new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(day.dateStr + 'T12:00:00'))}
         </span>
+      </div>
+
+      {/* Weather Condition */}
+      <div className="flex items-center gap-2 -mt-1">
+        <span className="text-xl drop-shadow-md">{getWeatherDescription(day.weatherCode).icon}</span>
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+          {getWeatherDescription(day.weatherCode).label}
+        </span>
+      </div>
+
+      {/* Temps */}
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col">
+          <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">High</span>
+          <span className="text-sm font-bold text-rose-400">{day.maxTemp.toFixed(0)}°</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Low</span>
+          <span className="text-sm font-bold text-blue-400">{day.minTemp.toFixed(0)}°</span>
+        </div>
       </div>
 
       {/* Snow Value */}

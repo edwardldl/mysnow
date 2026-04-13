@@ -8,6 +8,22 @@ function isSnowWeatherCode(code: number | null): boolean {
     return code !== null && SNOW_CODES.has(code);
 }
 
+const SEVERITY_WEIGHTS: Record<number, number> = {
+    // Thunderstorm
+    99: 100, 96: 99, 95: 98,
+    // Snow
+    75: 90, 86: 89, 73: 88, 85: 87, 71: 86, 77: 85,
+    // Rain
+    65: 80, 82: 79, 63: 78, 81: 77, 61: 76, 80: 75,
+    67: 74, 66: 73,
+    // Drizzle
+    55: 60, 53: 59, 51: 58, 57: 57, 56: 56,
+    // Fog
+    48: 50, 45: 49,
+    // Cloudy/Clear
+    3: 40, 2: 39, 1: 38, 0: 37
+};
+
 /**
  * Calculate absolute snow level based on evaporative and diabatic cooling
  */
@@ -341,18 +357,32 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
                 totalPrecipitation: 0,
                 models: new Set(),
                 hourly: [],
-                windows: [],
-                snowDepthValues: [],
-                snowLayersOnGround: []
-            };
-        }
-
-        days[dateStr].hourly.push(point);
-        days[dateStr].models.add(point.model);
-        if (point.snowfall > 0) days[dateStr].totalSnowfall += point.snowfall;
-        if (point.precipitation > 0) days[dateStr].totalPrecipitation += point.precipitation;
-        if (point.snowDepth != null) days[dateStr].snowDepthValues.push(point.snowDepth);
-    });
+                 windows: [],
+                 snowDepthValues: [],
+                 snowLayersOnGround: [],
+                 minTemp: 100,
+                 maxTemp: -100,
+                 weatherCode: null
+             };
+             // Using hidden property to collect codes for heuristic
+             (days[dateStr] as any)._allWeatherCodes = [];
+         }
+ 
+         days[dateStr].hourly.push(point);
+         days[dateStr].models.add(point.model);
+         if (point.snowfall > 0) days[dateStr].totalSnowfall += point.snowfall;
+         if (point.precipitation > 0) days[dateStr].totalPrecipitation += point.precipitation;
+         if (point.snowDepth != null) days[dateStr].snowDepthValues.push(point.snowDepth);
+         
+         if (point.temperature != null) {
+             if (point.temperature < days[dateStr].minTemp) days[dateStr].minTemp = point.temperature;
+             if (point.temperature > days[dateStr].maxTemp) days[dateStr].maxTemp = point.temperature;
+         }
+         
+         if (point.weatherCode !== null) {
+             (days[dateStr] as any)._allWeatherCodes.push(point.weatherCode);
+         }
+     });
 
     const result = Object.values(days).sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
     
@@ -440,6 +470,23 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
         day.modelString = Array.from(day.models)
             .map(m => modelDisplayMap[m] || m)
             .join('-');
+
+        // Finalize weather code based on severity
+        const codes = (day as any)._allWeatherCodes as number[];
+        if (codes && codes.length > 0) {
+            let topCode = codes[0];
+            let topWeight = -1;
+            
+            codes.forEach(c => {
+                const w = SEVERITY_WEIGHTS[c] || 0;
+                if (w > topWeight) {
+                    topWeight = w;
+                    topCode = c;
+                }
+            });
+            day.weatherCode = topCode;
+        }
+        delete (day as any)._allWeatherCodes;
     });
 
     return result;
