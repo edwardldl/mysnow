@@ -136,11 +136,18 @@ export default function LocationSelector({
       <AnimatePresence>
         {isAdding && (
           <motion.div 
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+            animate={{ 
+              height: "auto", 
+              opacity: 1,
+              transitionEnd: { overflow: "visible" }
+            }}
+            exit={{ 
+              height: 0, 
+              opacity: 0,
+              overflow: "hidden"
+            }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center py-2">
               <div className="md:col-span-5 relative" ref={searchRef}>

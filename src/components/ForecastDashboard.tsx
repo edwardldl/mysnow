@@ -617,20 +617,14 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   className="absolute bg-emerald-500/40 rounded-t-md z-10 border-t border-emerald-400/30"
                 />
 
-                {/* Permanent Labels */}
-                {gust > 0 && (
+                {/* Combined Gust/Wind Label */}
+                {(gust > 0 || speed > 0) && (
                   <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
-                    <span className="text-[11px] md:text-[13px] font-black text-emerald-300 tabular-nums drop-shadow-lg">
-                      {gust.toFixed(0)}
-                    </span>
-                  </div>
-                )}
-
-                {speed > 0 && Math.abs(gustHeight - speedHeight) > 16 && (
-                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${speedHeight + 38}px` }}>
-                    <span className="text-[10px] md:text-[11px] font-black text-white/80 tabular-nums drop-shadow-md">
-                      {speed.toFixed(0)}
-                    </span>
+                    <div className="flex items-center gap-0.5 font-black tabular-nums drop-shadow-lg leading-none">
+                      <span className="text-[11px] md:text-[13px] text-emerald-300">{gust.toFixed(0)}</span>
+                      <span className="text-[9px] text-white/30 mx-0.5 italic">/</span>
+                      <span className="text-[9px] md:text-[10px] text-white/70">{speed.toFixed(0)}</span>
+                    </div>
                   </div>
                 )}
 
