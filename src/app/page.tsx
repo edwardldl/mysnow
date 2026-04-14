@@ -11,8 +11,8 @@ import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import { fetchWeatherData, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
-import { blendForecasts, groupData } from "@/lib/data";
-import { Location, DayData } from "@/lib/types";
+import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
+import { Location, DayData, RollingStats } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -56,9 +56,11 @@ export default function Home() {
       const grouped = groupData(blended);
       setForecastDays(grouped);
 
-      // Ensure the initial selection is the first day of the new dataset
+      // Ensure the initial selection is "today" if available, otherwise the first day
       if (grouped.length > 0) {
-        setSelectedDate(grouped[0].dateStr);
+        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+        const todayExists = grouped.find(d => d.dateStr === todayStr);
+        setSelectedDate(todayExists ? todayStr : grouped[0].dateStr);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to fetch weather data");
@@ -127,11 +129,29 @@ export default function Home() {
     const d = parts.find(p => p.type === 'day')?.value;
     const h = parts.find(p => p.type === 'hour')?.value;
     const currentHourISO = `${y}-${m}-${d}T${h}:00`;
+    const todayStr = `${y}-${m}-${d}`;
 
-    // Search for this hour in the first day's forecast
-    const found = forecastDays[0].hourly.find(pt => pt.time.startsWith(currentHourISO));
-    return found || forecastDays[0].hourly[0];
+    // Search across all days for the current hour
+    let found = null;
+    for (const day of forecastDays) {
+        found = day.hourly.find(pt => pt.time.startsWith(currentHourISO));
+        if (found) break;
+    }
+    
+    // Fallback: If not found, try to find the start of today, otherwise just the first day's first hour.
+    if (!found) {
+        const todayDay = forecastDays.find(d => d.dateStr === todayStr);
+        found = todayDay ? todayDay.hourly[0] : forecastDays[0].hourly[0];
+    }
+
+    return found;
   }, [forecastDays]);
+
+  const rollingStats = React.useMemo(() => {
+    if (forecastDays.length === 0 || !currentHourData) return null;
+    const allHourly = forecastDays.flatMap(d => d.hourly);
+    return calculateRollingStats(allHourly, currentHourData.time);
+  }, [forecastDays, currentHourData]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -174,6 +194,7 @@ export default function Home() {
             >
               <CurrentWeatherCard
                 currentData={currentHourData}
+                rollingStats={rollingStats}
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
                 className="mt-4 md:mt-8"
               />

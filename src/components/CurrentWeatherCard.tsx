@@ -11,17 +11,18 @@ import {
   Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
-import { BlendedHour } from "@/lib/types";
+import { BlendedHour, RollingStats } from "@/lib/types";
 import { getWeatherDescription } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface CurrentWeatherCardProps {
   currentData: BlendedHour | null;
+  rollingStats: RollingStats | null;
   locationName: string;
   className?: string;
 }
 
-export default function CurrentWeatherCard({ currentData, locationName, className }: CurrentWeatherCardProps) {
+export default function CurrentWeatherCard({ currentData, rollingStats, locationName, className }: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
   
   if (!currentData) return null;
@@ -111,6 +112,35 @@ export default function CurrentWeatherCard({ currentData, locationName, classNam
               unit="km"
             />
           </div>
+
+          {/* Rolling Stats Division */}
+          {rollingStats && (
+            <div className="flex flex-col gap-4 w-full lg:w-48 xl:w-56">
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="glass-panel p-3 rounded-2xl flex flex-col border-white/5 bg-white/[0.02]">
+                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 leading-none">24h Snow</span>
+                        <div className="flex items-baseline gap-0.5">
+                            <span className="text-lg font-black text-white leading-none">{rollingStats.snow24h.toFixed(1)}</span>
+                            <span className="text-[8px] font-bold text-slate-500">cm</span>
+                        </div>
+                        {rollingStats.slr24h != null && (
+                            <span className="text-[8px] font-black text-accent-cyan/60 uppercase mt-1 leading-none">SLR: {rollingStats.slr24h.toFixed(0)}:1</span>
+                        )}
+                    </div>
+                    
+                    <div className="glass-panel p-3 rounded-2xl flex flex-col border-white/5 bg-white/[0.02]">
+                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 leading-none">48h Snow</span>
+                        <div className="flex items-baseline gap-0.5">
+                            <span className="text-lg font-black text-white leading-none">{rollingStats.snow48h.toFixed(1)}</span>
+                            <span className="text-[8px] font-bold text-slate-500">cm</span>
+                        </div>
+                        {rollingStats.slr48h != null && (
+                            <span className="text-[8px] font-black text-accent-cyan/60 uppercase mt-1 leading-none">SLR: {rollingStats.slr48h.toFixed(0)}:1</span>
+                        )}
+                    </div>
+                </div>
+            </div>
+          )}
 
         </div>
         

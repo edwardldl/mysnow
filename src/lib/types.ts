@@ -133,6 +133,13 @@ export interface WindowData {
     avgVisibility?: number | null;
 }
 
+export interface RollingStats {
+    snow24h: number;
+    snow48h: number;
+    slr24h: number | null;
+    slr48h: number | null;
+}
+
 export interface DayData {
     dateStr: string;
     dateObj: Date;

@@ -1,5 +1,5 @@
 import { calcSLR, OpenMeteoHour } from './slr';
-import { OpenMeteoResponse, OpenMeteoDaily, Location, BlendedHour, DayData } from './types';
+import { OpenMeteoResponse, OpenMeteoDaily, Location, BlendedHour, DayData, RollingStats } from './types';
 
 // Snow weather codes from Open-Meteo WMO codes
 const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86]);
@@ -334,8 +334,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
 
         const dateStr = point.time.split('T')[0];
         
-        // Filter out dates before today
-        if (dateStr < todayStr) return;
+        // Removed filter for dates before today to allow historical data
 
         if (!days[dateStr]) {
             let sunriseStr = null;
@@ -490,4 +489,40 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
     });
 
     return result;
+}
+
+/**
+ * Calculates rolling snowfall and SLR for the last 24 and 48 hours relative to a reference time.
+ */
+export function calculateRollingStats(allHourly: BlendedHour[], nowISO: string): RollingStats {
+    const nowTs = new Date(nowISO).getTime();
+    const ts24 = nowTs - 24 * 60 * 60 * 1000;
+    const ts48 = nowTs - 48 * 60 * 60 * 1000;
+
+    const aggregate = (hours: BlendedHour[]) => {
+        const snow = hours.reduce((sum, h) => sum + h.snowfall, 0);
+        const liquid = hours.reduce((sum, h) => sum + h.liquidMM, 0);
+        const slr = liquid > 0 ? (snow * 10) / liquid : null;
+        return { snow, slr };
+    };
+
+    const h24 = allHourly.filter(h => {
+        const t = new Date(h.time).getTime();
+        return t <= nowTs && t > ts24;
+    });
+
+    const h48 = allHourly.filter(h => {
+        const t = new Date(h.time).getTime();
+        return t <= nowTs && t > ts48;
+    });
+
+    const s24 = aggregate(h24);
+    const s48 = aggregate(h48);
+
+    return {
+        snow24h: s24.snow,
+        slr24h: s24.slr,
+        snow48h: s48.snow,
+        slr48h: s48.slr
+    };
 }

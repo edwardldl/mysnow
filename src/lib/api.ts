@@ -131,6 +131,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&daily=sunrise,sunset` +
             `&models=best_match` +
             `&forecast_days=15` +
+            `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
@@ -155,6 +156,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
             `&forecast_days=3` +
+            `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
@@ -163,6 +165,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&forecast_days=15` +
+            `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
@@ -213,6 +216,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&daily=sunrise,sunset` +
             `&models=${omModel}` +
             `&forecast_days=${days}` +
+            `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
