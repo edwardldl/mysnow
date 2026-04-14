@@ -77,7 +77,16 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
             layers: point.layers || []
         };
 
-        const result = calcSLR(meteoHour, algorithm, prevSlr);
+        // Fallback for missing atmospheric profiles (common in historical reanalysis / coarse models)
+        let effectiveAlgo = algorithm;
+        const hasValidProfile = meteoHour.layers.length > 0 && 
+                               meteoHour.layers.some(l => l.rh > 0 || l.gz > 0);
+        
+        if (!hasValidProfile && (algorithm === 'hybrid' || algorithm === 'kinematic' || algorithm === 'complex')) {
+            effectiveAlgo = 'simple';
+        }
+
+        const result = calcSLR(meteoHour, effectiveAlgo, prevSlr);
         
         let slr = null;
         let snow = 0;

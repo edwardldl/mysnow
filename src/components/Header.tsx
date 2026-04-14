@@ -72,6 +72,7 @@ export default function Header({
 
         {/* Right Column: Actions */}
         <div className="flex items-center gap-2 md:gap-3 shrink-0 ml-auto">
+
           <LocationDropdown
             locations={locations}
             currentLocationId={currentLocationId}
