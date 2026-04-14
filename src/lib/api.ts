@@ -110,12 +110,46 @@ const HOURLY_PARAMS = [
     PRESSURE_LEVELS.map(l => `wind_speed_${l}`).join(',')
 ].join(",");
 
+const HISTORICAL_HOURLY_PARAMS = [
+    "snowfall",
+    "precipitation",
+    "temperature_2m",
+    "dew_point_2m",
+    "wind_speed_10m",
+    "wind_direction_10m",
+    "snow_depth",
+    "apparent_temperature",
+    "relative_humidity_2m",
+    "wind_gusts_10m",
+    "cloud_cover",
+    "freezing_level_height",
+    "weather_code",
+    "wet_bulb_temperature_2m",
+    "pressure_msl",
+    "surface_pressure",
+    "soil_temperature_0cm",
+    "shortwave_radiation",
+    "cape",
+    "visibility",
+    "uv_index",
+    "boundary_layer_height",
+    "total_column_integrated_water_vapour",
+    "lifted_index",
+    "convective_inhibition",
+    PRESSURE_LEVELS.map(l => `temperature_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `relative_humidity_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `geopotential_height_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `vertical_velocity_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `cloud_cover_${l}`).join(','),
+    PRESSURE_LEVELS.map(l => `wind_speed_${l}`).join(',')
+].join(",");
+
 /**
  * Fetch data from Open-Meteo API
  */
-export async function fetchWeatherData(locationKey: string, modelMode = 'best_match') {
+export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false) {
     const cacheKey = `${locationKey}|${modelMode}`;
-    if (weatherCache.has(cacheKey)) {
+    if (!forceRefresh && weatherCache.has(cacheKey)) {
         return weatherCache.get(cacheKey)!;
     }
 
@@ -258,7 +292,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
 
     const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
         `&start_date=${startDate}&end_date=${endDate}` +
-        `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+        `&hourly=${HISTORICAL_HOURLY_PARAMS},snowfall_water_equivalent` +
         `&daily=sunrise,sunset` +
         `&models=${model}` +
         `&wind_speed_unit=ms` +

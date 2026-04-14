@@ -121,7 +121,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
   const selectedDay = days.find((d) => d.dateStr === selectedDate) || days[0];
 
   return (
-    <div className="max-w-7xl mx-auto w-full px-4 md:px-8 flex flex-col gap-8 md:gap-10 pb-20 mt-6 md:mt-12">
+    <div className="max-w-7xl mx-auto w-full px-4 md:px-8 flex flex-col gap-8 md:gap-10 pb-20 mt-4 md:mt-4">
       {/* Detail View */}
       <AnimatePresence mode="wait">
         <motion.div

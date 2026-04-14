@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Snowflake, Cpu, Zap } from "lucide-react";
+import { RefreshCw, Snowflake, Cpu, Zap, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { BlendedHour, Location } from "@/lib/types";
 import LocationDropdown from "./LocationDropdown";
@@ -21,6 +21,7 @@ interface HeaderProps {
   setModelId: (id: string) => void;
   algoId: string;
   setAlgoId: (id: string) => void;
+  isOffline?: boolean;
 }
 
 export default function Header({
@@ -36,6 +37,7 @@ export default function Header({
   setModelId,
   algoId,
   setAlgoId,
+  isOffline,
 }: HeaderProps) {
 
   // Debug: log isLoading changes
@@ -47,8 +49,15 @@ export default function Header({
         {/* Left Column: Branding */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
           <div className="flex items-center gap-2 md:gap-3">
-            <div className="p-1.5 md:p-2 bg-accent-blue rounded-lg md:rounded-xl neon-glow-cyan text-white">
-              <Snowflake className="w-4 h-4 md:w-5 md:h-5 animate-pulse-soft" />
+            <div className={cn(
+              "p-1.5 md:p-2 rounded-lg md:rounded-xl neon-glow-cyan text-white transition-colors duration-500",
+              isOffline ? "bg-slate-700 neon-glow-slate" : "bg-accent-blue neon-glow-cyan"
+            )}>
+              {isOffline ? (
+                 <WifiOff className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
+              ) : (
+                <Snowflake className="w-4 h-4 md:w-5 md:h-5 animate-pulse-soft" />
+              )}
             </div>
             <div className="hidden sm:block">
               <h1 className="text-base md:text-lg font-bold tracking-tight text-white m-0 leading-tight">
@@ -63,6 +72,7 @@ export default function Header({
 
         {/* Right Column: Actions */}
         <div className="flex items-center gap-2 md:gap-3 shrink-0 ml-auto">
+
           <LocationDropdown
             locations={locations}
             currentLocationId={currentLocationId}

@@ -2,10 +2,19 @@
 
 import React from "react";
 import { Info, Map as MapIcon, Database, Mountain } from "lucide-react";
+import ModeToggle from "./ModeToggle";
 
-export default function CreditsFooter() {
+interface CreditsFooterProps {
+  mode: "forecast" | "history";
+  setMode: (mode: "forecast" | "history") => void;
+}
+
+export default function CreditsFooter({ mode, setMode }: CreditsFooterProps) {
   return (
     <footer className="w-full bg-slate-950 border-t border-white/5 py-12 px-4 md:px-8 mt-20">
+      <div className="max-w-7xl mx-auto mb-12 flex justify-center">
+        <ModeToggle mode={mode} setMode={setMode} />
+      </div>
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         
         {/* Weather Data */}
