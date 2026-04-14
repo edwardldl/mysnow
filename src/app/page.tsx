@@ -175,7 +175,7 @@ export default function Home() {
             minTemp: selectedDay.minTemp,
             maxTemp: selectedDay.maxTemp,
             feelsLike: selectedDay.hourly[12]?.feelsLike || selectedDay.maxTemp,
-            precipProb: Math.max(...selectedDay.hourly.map(h => h.precipProb)),
+            precipProb: Math.max(...selectedDay.hourly.map(h => h.precipChance || 0)),
             liquidMM: selectedDay.totalPrecipitation,
             snowfall: selectedDay.totalSnowfall,
             windSpeed: selectedDay.hourly.reduce((acc, h) => acc + (h.windSpeed || 0), 0) / (selectedDay.hourly.length || 1),
