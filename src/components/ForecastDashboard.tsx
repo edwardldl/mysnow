@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
-import { DayData } from "@/lib/types";
+import { DayData, WeatherDataStatus } from "@/lib/types";
 import { getSlrColor } from "@/lib/utils";
 
 interface ForecastDashboardProps {
@@ -12,9 +12,10 @@ interface ForecastDashboardProps {
   isLoading: boolean;
   selectedDate: string | null;
   timezone?: string;
+  dataStatus?: WeatherDataStatus;
 }
 
-export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles' }: ForecastDashboardProps) {
+export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles', dataStatus = 'fresh' }: ForecastDashboardProps) {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [primaryContainer, setPrimaryContainer] = React.useState<HTMLDivElement | null>(null);
 
@@ -156,6 +157,14 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
               <div className="flex items-center">
                 <span className="text-[10px] uppercase font-black text-slate-500 mr-2">Core Engine</span>
                 <span className="text-xs font-bold text-accent-cyan">{selectedDay.modelString}</span>
+                {dataStatus !== 'fresh' && (
+                  <div className={cn(
+                    "ml-2 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider",
+                    dataStatus === 'cached' ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                  )}>
+                    {dataStatus}
+                  </div>
+                )}
               </div>
               {selectedDay.lastRunAvailabilityTime && (
                 <div className="flex items-center gap-1.5 opacity-60">

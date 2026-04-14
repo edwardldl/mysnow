@@ -1,4 +1,4 @@
-import type { Location, OpenMeteoResponse } from './types';
+import type { Location, OpenMeteoResponse, WeatherDataResult } from './types';
 
 const DEFAULT_LOCATIONS: Record<string, Location> = {
     palisades: {
@@ -111,15 +111,14 @@ type WeatherCacheItem = {
 const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
 const WEATHER_CACHE_PREFIX = 'mysnow_weather_cache_';
 
-function getCachedData(key: string): WeatherCacheItem | null {
+function getCachedData(key: string, allowExpired = false): WeatherCacheItem | null {
     if (typeof window === 'undefined') return null;
     try {
         const cached = localStorage.getItem(WEATHER_CACHE_PREFIX + key);
         if (!cached) return null;
         const item: WeatherCacheItem = JSON.parse(cached);
         const age = Date.now() - item.timestamp;
-        if (age > CACHE_EXPIRATION_MS) {
-            localStorage.removeItem(WEATHER_CACHE_PREFIX + key);
+        if (!allowExpired && age > CACHE_EXPIRATION_MS) {
             return null;
         }
         return item;
@@ -139,6 +138,10 @@ function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): 
     }
 }
 
+export function hasValidCache(locationKey: string, modelMode: string): boolean {
+    const cacheKey = `${locationKey}|${modelMode}`;
+    return getCachedData(cacheKey) !== null;
+}
 
 /** Metadata backfill (elevation, timezone) for custom locations once the API response is available. */
 function updateCustomLocationMetadata(loc: Location, data: OpenMeteoResponse): void {
@@ -242,11 +245,11 @@ const HISTORICAL_HOURLY_PARAMS = [
 /**
  * Fetch data from Open-Meteo API
  */
-export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false) {
+export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false): Promise<WeatherDataResult> {
     const cacheKey = `${locationKey}|${modelMode}`;
     if (!forceRefresh) {
         const cached = getCachedData(cacheKey);
-        if (cached) return cached;
+        if (cached) return { ...cached, status: 'cached' as const };
     }
 
     const locs = getLocations();
@@ -280,11 +283,14 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
             updateCustomLocationMetadata(loc, data);
 
-            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' };
-            setCachedData(cacheKey, result);
+            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match', status: 'fresh' as const };
+            const { status, ...cacheable } = result;
+            setCachedData(cacheKey, cacheable);
             return result;
         } catch (error) {
             console.error("Error fetching Best Match data:", error);
+            const stale = getCachedData(cacheKey, true);
+            if (stale) return { ...stale, status: 'stale' as const };
             throw error;
         }
     } else if (modelMode === 'hrrr_ecmwf') {
@@ -327,11 +333,14 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
             updateCustomLocationMetadata(loc, ecmwfData);
 
-            const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' };
-            setCachedData(cacheKey, result);
+            const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf', status: 'fresh' as const };
+            const { status, ...cacheable } = result;
+            setCachedData(cacheKey, cacheable);
             return result;
         } catch (error) {
             console.error("Error fetching weather data:", error);
+            const stale = getCachedData(cacheKey, true);
+            if (stale) return { ...stale, status: 'stale' as const };
             throw error;
         }
     } else {
@@ -388,11 +397,14 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
             updateCustomLocationMetadata(loc, data);
 
-            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode };
-            setCachedData(cacheKey, result);
+            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode, status: 'fresh' as const };
+            const { status, ...cacheable } = result;
+            setCachedData(cacheKey, cacheable);
             return result;
         } catch (error) {
             console.error(`Error fetching ${omModel} data:`, error);
+            const stale = getCachedData(cacheKey, true);
+            if (stale) return { ...stale, status: 'stale' as const };
             throw error;
         }
     }

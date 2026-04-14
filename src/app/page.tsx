@@ -10,9 +10,9 @@ import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import ErrorBanner from "@/components/ErrorBanner";
-import { fetchWeatherData, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
+import { fetchWeatherData, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
-import { Location, DayData, RollingStats } from "@/lib/types";
+import { Location, DayData, RollingStats, WeatherDataStatus } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -45,6 +45,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [dataStatus, setDataStatus] = useState<WeatherDataStatus>("fresh");
+
 
   // Initialize locations and current location from persistence
   useEffect(() => {
@@ -75,17 +77,22 @@ export default function Home() {
   }, []);
 
   const loadData = useCallback(async (locId: string, model: string, algo: string, force = false) => {
-    setIsLoading(true);
+    const cached = !force && hasValidCache(locId, model);
+    
+    // Only show the full-screen loader if we don't have cached data
+    if (!cached) {
+      setIsLoading(true);
+    }
+    
     setError(null);
     setIsOffline(!navigator.onLine);
     setRefreshKey(prev => prev + 1);
     try {
-      // Add a small delay to ensure the animation is visible
-      await new Promise(resolve => setTimeout(resolve, 800));
       const data = await fetchWeatherData(locId, model, force);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
       const grouped = groupData(blended, data.location.timezone);
       setForecastDays(grouped);
+      setDataStatus(data.status);
       setLocations(getLocations()); // Refresh locations to pick up backfilled metadata (elevation, timezone)
       setIsOffline(false);
 
@@ -327,6 +334,7 @@ export default function Home() {
                 rollingStats={rollingStats}
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
                 timezone={locations[currentLocationId]?.timezone}
+                dataStatus={dataStatus}
                 className={cn(
                   "mt-4 md:mt-4",
                   (error && activeDays.length > 0) && "mt-2 md:mt-2"
@@ -354,6 +362,7 @@ export default function Home() {
                   isLoading={isLoading && mode === "forecast"}
                   selectedDate={activeSelectedDate}
                   timezone={locations[currentLocationId]?.timezone}
+                  dataStatus={dataStatus}
                 />
               )}
             </motion.div>

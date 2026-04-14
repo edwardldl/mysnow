@@ -165,3 +165,12 @@ export interface DayData {
     weatherCode: number | null;
     lastRunAvailabilityTime?: number;
 }
+export type WeatherDataStatus = 'fresh' | 'cached' | 'stale';
+
+export interface WeatherDataResult {
+    hrrrData: OpenMeteoResponse | null;
+    ecmwfData: OpenMeteoResponse;
+    location: Location;
+    mode: string;
+    status: WeatherDataStatus;
+}
