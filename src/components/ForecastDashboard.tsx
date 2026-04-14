@@ -152,9 +152,26 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 </button>
               </div>
             </div>
-            <div className="glass-panel px-4 py-2 rounded-xl border-white/5 bg-white/2 self-start md:self-end">
-              <span className="text-[10px] uppercase font-black text-slate-500 mr-2">Core Engine</span>
-              <span className="text-xs font-bold text-accent-cyan">{selectedDay.modelString}</span>
+            <div className="glass-panel px-4 py-2 rounded-xl border-white/5 bg-white/2 flex flex-col gap-1 self-start md:self-end">
+              <div className="flex items-center">
+                <span className="text-[10px] uppercase font-black text-slate-500 mr-2">Core Engine</span>
+                <span className="text-xs font-bold text-accent-cyan">{selectedDay.modelString}</span>
+              </div>
+              {selectedDay.lastRunAvailabilityTime && (
+                <div className="flex items-center gap-1.5 opacity-60">
+                  <span className="text-[9px] uppercase font-black text-slate-500">Last Out</span>
+                  <span className="text-[10px] font-bold text-slate-300">
+                    {new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hourCycle: 'h23',
+                      timeZone: timezone
+                    }).format(new Date(selectedDay.lastRunAvailabilityTime * 1000))}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

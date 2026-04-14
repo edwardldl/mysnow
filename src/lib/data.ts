@@ -173,7 +173,7 @@ export function blendForecasts(
     location: Location,
     slrAlgorithm = 'kinematic',
     modelMode = 'best_match'
-): { hourly: BlendedHour[], daily: OpenMeteoDaily } {
+): { hourly: BlendedHour[], daily: OpenMeteoDaily, lastRunAvailabilityTime?: number } {
     const rawHourly: Partial<BlendedHour>[] = [];
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
@@ -326,13 +326,14 @@ export function blendForecasts(
             time: ecmwf.daily?.time || [],
             sunrise: ecmwf.daily?.sunrise || [],
             sunset: ecmwf.daily?.sunset || []
-        }
+        },
+        lastRunAvailabilityTime: ecmwf.lastRunAvailabilityTime || hrrr?.lastRunAvailabilityTime
     };
 }
 
-export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteoDaily }, timezone = 'America/Los_Angeles'): DayData[] {
+export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteoDaily, lastRunAvailabilityTime?: number }, timezone = 'America/Los_Angeles'): DayData[] {
     const days: Record<string, DayData> = {};
-    const { hourly, daily } = blendedData;
+    const { hourly, daily, lastRunAvailabilityTime } = blendedData;
 
     // Get current local date in PST (America/Los_Angeles) to filter out past days.
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: timezone });
@@ -370,7 +371,8 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
                 snowLayersOnGround: [],
                 minTemp: 100,
                 maxTemp: -100,
-                weatherCode: null
+                weatherCode: null,
+                lastRunAvailabilityTime: lastRunAvailabilityTime
             };
             // Using hidden property to collect codes for heuristic
             (days[dateStr] as any)._allWeatherCodes = [];

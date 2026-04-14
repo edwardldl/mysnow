@@ -63,6 +63,42 @@ export function setLastLocationId(id: string): void {
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/forecast';
+const META_BASE_URL = 'https://api.open-meteo.com/data';
+
+/** Mapping of internal models to Open-Meteo static metadata names */
+const MODEL_META_MAP: Record<string, string> = {
+    'best_match': 'ecmwf_ifs',
+    'hrrr_ecmwf': 'ncep_hrrr_conus',
+    'hrrr': 'ncep_hrrr_conus',
+    'gem_hrdps_west': 'cmc_gem_hrdps',
+    'nbm': 'ncep_nbm_conus',
+    'nam': 'ncep_nam_conus',
+    'gem_regional': 'cmc_gem_rdps',
+    'ecmwf': 'ecmwf_ifs',
+    'gfs': 'ncep_gfs025'
+};
+
+async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
+    const metaKey = MODEL_META_MAP[modelKey];
+    if (!metaKey) return undefined;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+    try {
+        const res = await fetch(`${META_BASE_URL}/${metaKey}/static/meta.json`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok) return undefined;
+        const data = await res.json();
+        return data.last_run_availability_time;
+    } catch (e: any) {
+        clearTimeout(timeoutId);
+        if (e.name === 'AbortError') {
+            console.warn(`Metadata fetch for ${modelKey} timed out after 2s`);
+        }
+        return undefined;
+    }
+}
 
 const weatherCache = new Map<string, { hrrrData: OpenMeteoResponse | null, ecmwfData: OpenMeteoResponse, location: Location, mode: string }>();
 
@@ -179,6 +215,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
     if (!loc) throw new Error("Invalid location");
 
     const timezone = "auto";
+    const metaPromise = fetchModelStatus(modelMode);
 
     if (modelMode === 'best_match') {
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
@@ -191,9 +228,16 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         try {
-            const res = await fetch(url);
+            console.time(`fetchWeatherData:${modelMode}`);
+            const [res, lastRunAvailabilityTime] = await Promise.all([
+                fetch(url),
+                metaPromise
+            ]);
+            console.timeEnd(`fetchWeatherData:${modelMode}`);
+
             if (!res.ok) throw new Error(`Best Match fetch failed: ${res.status}`);
             const data = await res.json();
+            data.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
             updateCustomLocationMetadata(loc, data);
 
@@ -225,16 +269,22 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         try {
-            const [hrrrRes, ecmwfRes] = await Promise.all([
+            console.time(`fetchWeatherData:${modelMode}`);
+            const [hrrrRes, ecmwfRes, lastRunAvailabilityTime] = await Promise.all([
                 fetch(hrrrUrl),
-                fetch(ecmwfUrl)
+                fetch(ecmwfUrl),
+                metaPromise
             ]);
+            console.timeEnd(`fetchWeatherData:${modelMode}`);
 
             if (!hrrrRes.ok) throw new Error(`HRRR fetch failed: ${hrrrRes.status}`);
             if (!ecmwfRes.ok) throw new Error(`ECMWF fetch failed: ${ecmwfRes.status}`);
 
             const hrrrData = await hrrrRes.json();
             const ecmwfData = await ecmwfRes.json();
+
+            hrrrData.lastRunAvailabilityTime = lastRunAvailabilityTime;
+            ecmwfData.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
             updateCustomLocationMetadata(loc, ecmwfData);
 
@@ -276,18 +326,26 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         try {
-            const res = await fetch(url);
+            console.time(`fetchWeatherData:${modelMode}`);
+            const [res, lastRunAvailabilityTime] = await Promise.all([
+                fetch(url),
+                metaPromise
+            ]);
+            console.timeEnd(`fetchWeatherData:${modelMode}`);
+
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
+                const modelName = modelMode.toUpperCase();
                 if (errData.reason && errData.reason.includes("geographic")) {
-                    throw new Error(`Location outside ${omModel} coverage area.`);
+                    throw new Error(`Location outside ${modelName} coverage area.`);
                 }
                 if (errData.reason && errData.reason.includes("data is available")) {
-                    throw new Error(`No data available for this location in ${omModel}.`);
+                    throw new Error(`No data available for this location in ${modelName}.`);
                 }
-                throw new Error(`${omModel} fetch failed: ${res.status}`);
+                throw new Error(`${modelName} fetch failed: ${res.status}`);
             }
             const data = await res.json();
+            data.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
             updateCustomLocationMetadata(loc, data);
 
@@ -310,6 +368,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
     if (!loc) throw new Error("Invalid location");
 
     const timezone = "auto";
+    const metaPromise = fetchModelStatus(model);
 
     const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
         `&start_date=${startDate}&end_date=${endDate}` +
@@ -320,9 +379,16 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
         `&timezone=${timezone}`;
 
     try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Historical fetch failed: ${res.status}`);
+        console.time(`fetchHistoricalWeatherData:${model}`);
+        const [res, lastRunAvailabilityTime] = await Promise.all([
+            fetch(url),
+            metaPromise
+        ]);
+        console.timeEnd(`fetchHistoricalWeatherData:${model}`);
+
+        if (!res.ok) throw new Error(`${model.toUpperCase()} historical fetch failed: ${res.status}`);
         const data = await res.json();
+        data.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
         updateCustomLocationMetadata(loc, data);
 

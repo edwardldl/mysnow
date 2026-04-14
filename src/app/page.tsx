@@ -23,6 +23,7 @@ export default function Home() {
   const [algoId, setAlgoId] = useState("hybrid");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
+  const lastFetchKeyRef = useRef<string | null>(null);
 
   const [forecastDays, setForecastDays] = useState<DayData[]>([]);
   const [historyDays, setHistoryDays] = useState<DayData[]>([]);
@@ -113,10 +114,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(locations).length > 0) {
+    const fetchKey = `${currentLocationId}-${modelId}-${algoId}`;
+    if (Object.keys(locations).length > 0 && lastFetchKeyRef.current !== fetchKey) {
+      lastFetchKeyRef.current = fetchKey;
       loadData(currentLocationId, modelId, algoId);
     }
-  }, [currentLocationId, modelId, algoId, loadData]); // Removed 'locations' to avoid loop when updating metadata
+  }, [currentLocationId, modelId, algoId, locations, loadData]);
 
   // Dynamic header height measurement
   useEffect(() => {

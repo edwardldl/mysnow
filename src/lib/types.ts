@@ -47,6 +47,7 @@ export interface OpenMeteoResponse {
     elevation?: number;
     timezone: string;
     timezone_abbreviation: string;
+    lastRunAvailabilityTime?: number;
 }
 
 export interface Location {
@@ -162,4 +163,5 @@ export interface DayData {
     minTemp: number;
     maxTemp: number;
     weatherCode: number | null;
+    lastRunAvailabilityTime?: number;
 }
