@@ -113,9 +113,9 @@ const HOURLY_PARAMS = [
 /**
  * Fetch data from Open-Meteo API
  */
-export async function fetchWeatherData(locationKey: string, modelMode = 'best_match') {
+export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false) {
     const cacheKey = `${locationKey}|${modelMode}`;
-    if (weatherCache.has(cacheKey)) {
+    if (!forceRefresh && weatherCache.has(cacheKey)) {
         return weatherCache.get(cacheKey)!;
     }
 

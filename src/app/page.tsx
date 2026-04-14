@@ -9,6 +9,7 @@ import HistorySection from "@/components/HistorySection";
 import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
+import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, RollingStats } from "@/lib/types";
@@ -27,6 +28,7 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Initialize locations and current location from persistence
@@ -45,17 +47,31 @@ export default function Home() {
     }
   }, [currentLocationId]);
 
+  // Sync offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const loadData = useCallback(async (locId: string, model: string, algo: string) => {
     setIsLoading(true);
     setError(null);
+    setIsOffline(!navigator.onLine);
     setRefreshKey(prev => prev + 1);
     try {
       // Add a small delay to ensure the animation is visible
       await new Promise(resolve => setTimeout(resolve, 800));
-      const data = await fetchWeatherData(locId, model);
+      const data = await fetchWeatherData(locId, model, true);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
       const grouped = groupData(blended);
       setForecastDays(grouped);
+      setIsOffline(false);
 
       // Ensure the initial selection is "today" if available, otherwise the first day
       if (grouped.length > 0) {
@@ -65,6 +81,7 @@ export default function Home() {
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to fetch weather data");
+      setIsOffline(!navigator.onLine);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -135,14 +152,14 @@ export default function Home() {
     // Search across all days for the current hour
     let found = null;
     for (const day of forecastDays) {
-        found = day.hourly.find(pt => pt.time.startsWith(currentHourISO));
-        if (found) break;
+      found = day.hourly.find(pt => pt.time.startsWith(currentHourISO));
+      if (found) break;
     }
-    
+
     // Fallback: If not found, try to find the start of today, otherwise just the first day's first hour.
     if (!found) {
-        const todayDay = forecastDays.find(d => d.dateStr === todayStr);
-        found = todayDay ? todayDay.hourly[0] : forecastDays[0].hourly[0];
+      const todayDay = forecastDays.find(d => d.dateStr === todayStr);
+      found = todayDay ? todayDay.hourly[0] : forecastDays[0].hourly[0];
     }
 
     return found;
@@ -154,54 +171,54 @@ export default function Home() {
 
   const displayData = React.useMemo(() => {
     if (forecastDays.length === 0) return null;
-    
+
     const isTodaySelected = selectedDate === todayStr;
     const selectedDay = forecastDays.find(d => d.dateStr === selectedDate);
-    
+
     if (isTodaySelected && currentHourData) {
-        return { 
-            data: {
-                ...currentHourData,
-                minTemp: selectedDay?.minTemp,
-                maxTemp: selectedDay?.maxTemp
-            }, 
-            isDaily: false 
-        };
+      return {
+        data: {
+          ...currentHourData,
+          minTemp: selectedDay?.minTemp,
+          maxTemp: selectedDay?.maxTemp
+        },
+        isDaily: false
+      };
     }
-    
+
     if (selectedDay) {
-        // Create a summary "BlendedHour" from DayData
-        const summary = {
-            time: selectedDay.dateStr + "T12:00:00",
-            temperature: selectedDay.maxTemp,
-            minTemp: selectedDay.minTemp,
-            maxTemp: selectedDay.maxTemp,
-            feelsLike: selectedDay.hourly[12]?.feelsLike || selectedDay.maxTemp,
-            precipProb: Math.max(...selectedDay.hourly.map(h => h.precipChance || 0)),
-            liquidMM: selectedDay.totalPrecipitation,
-            snowfall: selectedDay.totalSnowfall,
-            windSpeed: selectedDay.hourly.reduce((acc, h) => acc + (h.windSpeed || 0), 0) / (selectedDay.hourly.length || 1),
-            windDir: selectedDay.hourly[12]?.windDir,
-            gusts: Math.max(...selectedDay.hourly.map(h => h.gusts || 0)),
-            uvIndex: Math.max(...selectedDay.hourly.map(h => h.uvIndex || 0)),
-            visibility: Math.max(...selectedDay.hourly.map(h => h.visibility || 0)),
-            weatherCode: selectedDay.weatherCode || 0,
-        };
-        return { data: summary as any, isDaily: true };
+      // Create a summary "BlendedHour" from DayData
+      const summary = {
+        time: selectedDay.dateStr + "T12:00:00",
+        temperature: selectedDay.maxTemp,
+        minTemp: selectedDay.minTemp,
+        maxTemp: selectedDay.maxTemp,
+        feelsLike: selectedDay.hourly[12]?.feelsLike || selectedDay.maxTemp,
+        precipProb: Math.max(...selectedDay.hourly.map(h => h.precipChance || 0)),
+        liquidMM: selectedDay.totalPrecipitation,
+        snowfall: selectedDay.totalSnowfall,
+        windSpeed: selectedDay.hourly.reduce((acc, h) => acc + (h.windSpeed || 0), 0) / (selectedDay.hourly.length || 1),
+        windDir: selectedDay.hourly[12]?.windDir,
+        gusts: Math.max(...selectedDay.hourly.map(h => h.gusts || 0)),
+        uvIndex: Math.max(...selectedDay.hourly.map(h => h.uvIndex || 0)),
+        visibility: Math.max(...selectedDay.hourly.map(h => h.visibility || 0)),
+        weatherCode: selectedDay.weatherCode || 0,
+      };
+      return { data: summary as any, isDaily: true };
     }
-    
+
     return null;
   }, [forecastDays, selectedDate, todayStr, currentHourData]);
 
   const rollingStats = React.useMemo(() => {
     if (forecastDays.length === 0 || !displayData) return null;
     const allHourly = forecastDays.flatMap(d => d.hourly);
-    
+
     // Logic: If Today, use current hour. 
     // If not Today, use start of the selected Day (to look back at preceding 24h/48h).
     const isTodaySelected = selectedDate === todayStr;
     const refTime = isTodaySelected ? currentHourData?.time : selectedDate + "T00:00:00";
-    
+
     if (!refTime) return null;
     return calculateRollingStats(allHourly, refTime);
   }, [forecastDays, displayData, currentHourData, selectedDate, todayStr]);
@@ -211,6 +228,7 @@ export default function Home() {
       <Header
         onRefresh={() => loadData(currentLocationId, modelId, algoId)}
         isLoading={isLoading}
+        isOffline={isOffline}
         currentData={currentHourData}
         locations={locations}
         currentLocationId={currentLocationId}
@@ -242,46 +260,57 @@ export default function Home() {
       >
         <AnimatePresence mode="wait">
           {mode === "forecast" ? (
-            <motion.div
-              key={`${selectedDate || "forecast"}-${refreshKey}`}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.02 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <CurrentWeatherCard
-                currentData={displayData?.data || null}
-                isDaily={displayData?.isDaily || false}
-                rollingStats={rollingStats}
-                locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
-                className="mt-4 md:mt-8"
-              />
-
-
-
-              {error ? (
-                <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pb-20">
-                  <div className="glass-panel p-8 rounded-3xl border-accent-rose/20 text-center">
-                    <h3 className="text-xl font-bold text-accent-rose mb-2">Error Loading Data</h3>
-                    <p className="text-slate-400">{error}</p>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => loadData(currentLocationId, modelId, algoId)}
-                      className="mt-6 px-6 py-2 bg-accent-rose text-white rounded-full font-bold text-sm shadow-lg shadow-rose-500/20"
-                    >
-                      Retry
-                    </motion.button>
-                  </div>
-                </div>
-              ) : (
-                <ForecastDashboard
-                  days={forecastDays}
-                  isLoading={isLoading}
-                  selectedDate={selectedDate}
+            <div className="flex flex-col">
+              {error && forecastDays.length > 0 && (
+                <ErrorBanner
+                  message={error}
+                  isOffline={isOffline}
+                  onRetry={() => loadData(currentLocationId, modelId, algoId)}
                 />
               )}
-            </motion.div>
+
+              <motion.div
+                key={`${selectedDate || "forecast"}-${refreshKey}`}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <CurrentWeatherCard
+                  currentData={displayData?.data || null}
+                  isDaily={displayData?.isDaily || false}
+                  rollingStats={rollingStats}
+                  locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
+                  className={cn(
+                    "mt-4 md:mt-8",
+                    error && forecastDays.length > 0 && "mt-2 md:mt-4"
+                  )}
+                />
+
+                {error && forecastDays.length === 0 ? (
+                  <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pb-20">
+                    <div className="glass-panel p-8 rounded-3xl border-accent-rose/20 text-center">
+                      <h3 className="text-xl font-bold text-accent-rose mb-2">Error Loading Data</h3>
+                      <p className="text-slate-400">{error}</p>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => loadData(currentLocationId, modelId, algoId)}
+                        className="mt-6 px-6 py-2 bg-accent-rose text-white rounded-full font-bold text-sm shadow-lg shadow-rose-500/20"
+                      >
+                        Retry
+                      </motion.button>
+                    </div>
+                  </div>
+                ) : (
+                  <ForecastDashboard
+                    days={forecastDays}
+                    isLoading={isLoading}
+                    selectedDate={selectedDate}
+                  />
+                )}
+              </motion.div>
+            </div>
           ) : (
             <motion.div
               key="history"
