@@ -27,6 +27,7 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Initialize locations and current location from persistence
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function Home() {
   const loadData = useCallback(async (locId: string, model: string, algo: string) => {
     setIsLoading(true);
     setError(null);
+    setRefreshKey(prev => prev + 1);
     try {
       // Add a small delay to ensure the animation is visible
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -241,7 +243,7 @@ export default function Home() {
         <AnimatePresence mode="wait">
           {mode === "forecast" ? (
             <motion.div
-              key={selectedDate || "forecast"}
+              key={`${selectedDate || "forecast"}-${refreshKey}`}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.02 }}
