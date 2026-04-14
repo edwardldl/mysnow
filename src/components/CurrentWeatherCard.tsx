@@ -41,7 +41,7 @@ export default function CurrentWeatherCard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className={cn("w-full max-w-7xl mx-auto px-2 md:px-8 py-2 md:py-8", className)}
+      className={cn("w-full max-w-7xl mx-auto px-2 md:px-8 py-2 md:pt-3 md:pb-3", className)}
     >
       <div className="relative glass-panel rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden border-white/10 shadow-3xl bg-slate-950/40 backdrop-blur-3xl">
         
@@ -49,7 +49,7 @@ export default function CurrentWeatherCard({
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[60%] bg-accent-blue/20 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse-soft" />
         <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[60%] bg-accent-cyan/10 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse-soft" style={{ animationDelay: '2s' }} />
 
-        <div className="relative p-4 md:p-8 flex flex-col xl:flex-row gap-6 md:gap-8 xl:items-center">
+        <div className="relative p-4 md:pt-6 md:pb-8 md:px-8 flex flex-col xl:flex-row gap-6 md:gap-8 xl:items-center">
           
           {/* Section 1: The Hero */}
           <div className="flex-1 flex flex-row items-center gap-4 md:gap-10">

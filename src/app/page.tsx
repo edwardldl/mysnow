@@ -282,8 +282,8 @@ export default function Home() {
                   rollingStats={rollingStats}
                   locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
                   className={cn(
-                    "mt-4 md:mt-8",
-                    error && forecastDays.length > 0 && "mt-2 md:mt-4"
+                    "mt-4 md:mt-4",
+                    error && forecastDays.length > 0 && "mt-2 md:mt-2"
                   )}
                 />
 
