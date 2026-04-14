@@ -28,6 +28,18 @@ export default function Home() {
   const [historyDays, setHistoryDays] = useState<DayData[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [historySelectedDate, setHistorySelectedDate] = useState<string | null>(null);
+  const selectedDateRef = useRef<string | null>(null);
+  const historySelectedDateRef = useRef<string | null>(null);
+
+  // Sync refs with state
+  useEffect(() => {
+    selectedDateRef.current = selectedDate;
+  }, [selectedDate]);
+
+  useEffect(() => {
+    historySelectedDateRef.current = historySelectedDate;
+  }, [historySelectedDate]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
@@ -75,11 +87,19 @@ export default function Home() {
       setForecastDays(grouped);
       setIsOffline(false);
 
-      // Ensure the initial selection is "today" if available, otherwise the first day
+      // Ensure the initial selection preserves the previous date if available,
+      // otherwise fallback to "today", and if that's not available, the first day.
       if (grouped.length > 0) {
         const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
-        const todayExists = grouped.find(d => d.dateStr === todayStr);
-        setSelectedDate(todayExists ? todayStr : grouped[0].dateStr);
+        const prevDate = selectedDateRef.current;
+        const prevDateExists = grouped.find(d => d.dateStr === prevDate);
+
+        if (prevDate && prevDateExists) {
+          setSelectedDate(prevDate);
+        } else {
+          const todayExists = grouped.find(d => d.dateStr === todayStr);
+          setSelectedDate(todayExists ? todayStr : grouped[0].dateStr);
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to fetch weather data");
@@ -271,7 +291,11 @@ export default function Home() {
                 currentLocationId={currentLocationId} 
                 onResults={(days) => {
                   setHistoryDays(days);
-                  if (days.length > 0) setHistorySelectedDate(days[0].dateStr);
+                  if (days.length > 0) {
+                    const prevDate = historySelectedDateRef.current;
+                    const prevDateExists = days.find(d => d.dateStr === prevDate);
+                    setHistorySelectedDate(prevDate && prevDateExists ? prevDate : days[0].dateStr);
+                  }
                 }}
               />
             )}
