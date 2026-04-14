@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Snowflake } from "lucide-react";
+import { RefreshCw, Snowflake, Cpu, Zap } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { BlendedHour, Location } from "@/lib/types";
-import { getWeatherDescription } from "@/lib/utils";
 import LocationDropdown from "./LocationDropdown";
+import CompactSelector from "./CompactSelector";
+import { MODELS, ALGORITHMS } from "@/lib/constants";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -16,6 +17,10 @@ interface HeaderProps {
   onSelectLocation: (id: string) => void;
   onAddLocation: (name: string, lat: string, lon: string) => void;
   onRemoveLocation: (id: string) => void;
+  modelId: string;
+  setModelId: (id: string) => void;
+  algoId: string;
+  setAlgoId: (id: string) => void;
 }
 
 export default function Header({
@@ -27,8 +32,11 @@ export default function Header({
   onSelectLocation,
   onAddLocation,
   onRemoveLocation,
+  modelId,
+  setModelId,
+  algoId,
+  setAlgoId,
 }: HeaderProps) {
-  const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
 
   // Debug: log isLoading changes
   // console.log("Header isLoading:", isLoading);
@@ -63,14 +71,23 @@ export default function Header({
             onRemove={onRemoveLocation}
           />
 
-          {currentData && (
-            <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-              <span className="text-sm md:text-base">{weather?.icon}</span>
-              <span className="text-xs md:text-sm font-bold text-white">
-                {currentData.temperature.toFixed(1)}°
-              </span>
-            </div>
-          )}
+          <CompactSelector
+            label="Model"
+            icon={Cpu}
+            options={MODELS}
+            selectedId={modelId}
+            onSelect={setModelId}
+            accentColor="blue"
+          />
+
+          <CompactSelector
+            label="Physics"
+            icon={Zap}
+            options={ALGORITHMS}
+            selectedId={algoId}
+            onSelect={setAlgoId}
+            accentColor="violet"
+          />
 
           <button
             onClick={onRefresh}

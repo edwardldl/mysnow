@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import DateRibbon from "@/components/DateRibbon";
-import ControlSection from "@/components/ControlSection";
 import { cn } from "@/lib/utils_tailwind";
 import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
@@ -216,6 +215,10 @@ export default function Home() {
         onSelectLocation={setCurrentLocationId}
         onAddLocation={handleAddLocation}
         onRemoveLocation={handleRemoveLocation}
+        modelId={modelId}
+        setModelId={setModelId}
+        algoId={algoId}
+        setAlgoId={setAlgoId}
       />
 
       <div
@@ -253,12 +256,6 @@ export default function Home() {
               />
 
 
-              <ControlSection
-                modelId={modelId}
-                setModelId={setModelId}
-                algoId={algoId}
-                setAlgoId={setAlgoId}
-              />
 
               {error ? (
                 <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pb-20">
