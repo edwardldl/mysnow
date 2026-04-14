@@ -83,14 +83,16 @@ export default function Home() {
       await new Promise(resolve => setTimeout(resolve, 800));
       const data = await fetchWeatherData(locId, model, true);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
-      const grouped = groupData(blended);
+      const grouped = groupData(blended, data.location.timezone);
       setForecastDays(grouped);
+      setLocations(getLocations()); // Refresh locations to pick up backfilled metadata (elevation, timezone)
       setIsOffline(false);
 
       // Ensure the initial selection preserves the previous date if available,
       // otherwise fallback to "today", and if that's not available, the first day.
       if (grouped.length > 0) {
-        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+        const timezone = data.location.timezone || 'America/Los_Angeles';
+        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: timezone });
         const prevDate = selectedDateRef.current;
         const prevDateExists = grouped.find(d => d.dateStr === prevDate);
 
@@ -114,7 +116,7 @@ export default function Home() {
     if (Object.keys(locations).length > 0) {
       loadData(currentLocationId, modelId, algoId);
     }
-  }, [currentLocationId, modelId, algoId, locations, loadData]);
+  }, [currentLocationId, modelId, algoId, loadData]); // Removed 'locations' to avoid loop when updating metadata
 
   // Dynamic header height measurement
   useEffect(() => {
@@ -156,7 +158,7 @@ export default function Home() {
       day: '2-digit',
       hour: '2-digit',
       hourCycle: 'h23',
-      timeZone: 'America/Los_Angeles'
+      timeZone: locations[currentLocationId]?.timezone || 'America/Los_Angeles'
     });
 
     const parts = fmt.formatToParts(now);
@@ -164,12 +166,12 @@ export default function Home() {
     const m = parts.find(p => p.type === 'month')?.value;
     const d = parts.find(p => p.type === 'day')?.value;
     const h = parts.find(p => p.type === 'hour')?.value;
-    
+
     return {
       currentHourISO: `${y}-${m}-${d}T${h}:00`,
       todayStr: `${y}-${m}-${d}`
     };
-  }, []);
+  }, [locations, currentLocationId]);
 
   const { currentHourISO, todayStr } = timeInfo;
 
@@ -277,6 +279,7 @@ export default function Home() {
           days={activeDays}
           selectedDate={activeSelectedDate}
           onSelect={setActiveSelectedDate}
+          timezone={locations[currentLocationId]?.timezone}
         />
       </div>
 
@@ -287,8 +290,8 @@ export default function Home() {
         <AnimatePresence mode="wait">
           <div className="flex flex-col">
             {mode === "history" && (
-              <HistorySection 
-                currentLocationId={currentLocationId} 
+              <HistorySection
+                currentLocationId={currentLocationId}
                 onResults={(days) => {
                   setHistoryDays(days);
                   if (days.length > 0) {
@@ -320,6 +323,7 @@ export default function Home() {
                 isDaily={displayData?.isDaily || false}
                 rollingStats={rollingStats}
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
+                timezone={locations[currentLocationId]?.timezone}
                 className={cn(
                   "mt-4 md:mt-4",
                   (error && activeDays.length > 0) && "mt-2 md:mt-2"
@@ -346,14 +350,15 @@ export default function Home() {
                   days={activeDays}
                   isLoading={isLoading && mode === "forecast"}
                   selectedDate={activeSelectedDate}
+                  timezone={locations[currentLocationId]?.timezone}
                 />
               )}
             </motion.div>
           </div>
         </AnimatePresence>
 
-      <CreditsFooter mode={mode} setMode={setMode} />
-    </main>
+        <CreditsFooter mode={mode} setMode={setMode} />
+      </main>
 
       {/* Decorative Background Elements */}
       <div className="fixed top-0 left-0 w-full h-full -z-50 overflow-hidden pointer-events-none">

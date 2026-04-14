@@ -11,9 +11,10 @@ interface ForecastDashboardProps {
   days: DayData[];
   isLoading: boolean;
   selectedDate: string | null;
+  timezone?: string;
 }
 
-export default function ForecastDashboard({ days, isLoading, selectedDate }: ForecastDashboardProps) {
+export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles' }: ForecastDashboardProps) {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [primaryContainer, setPrimaryContainer] = React.useState<HTMLDivElement | null>(null);
 
@@ -64,18 +65,18 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
 
   React.useEffect(() => {
     const now = new Date();
-    // Robust local date/hour detection for America/Los_Angeles
-    const today = now.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+    // Robust local date/hour detection for the specific timezone
+    const today = now.toLocaleDateString('en-CA', { timeZone: timezone });
     const fmt = new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
       hourCycle: 'h23',
-      timeZone: 'America/Los_Angeles'
+      timeZone: timezone
     });
     const localHour = fmt.format(now);
 
     setTodayStr(today);
     setCurrentHourISO(`${today}T${localHour}`);
-  }, []);
+  }, [timezone]);
 
   const nowRef = React.useRef<HTMLDivElement>(null);
 

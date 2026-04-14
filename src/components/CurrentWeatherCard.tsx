@@ -22,6 +22,7 @@ interface CurrentWeatherCardProps {
   rollingStats: RollingStats | null;
   locationName: string;
   isDaily?: boolean;
+  timezone?: string;
   className?: string;
 }
 
@@ -30,6 +31,7 @@ export default function CurrentWeatherCard({
   rollingStats, 
   locationName, 
   isDaily = false,
+  timezone = 'America/Los_Angeles',
   className 
 }: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
@@ -79,7 +81,7 @@ export default function CurrentWeatherCard({
                    <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" /> 
                    {isDaily 
                     ? new Date(currentData.time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-                    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezone })
                    }
                 </span>
               </div>

@@ -8,6 +8,7 @@ const DEFAULT_LOCATIONS: Record<string, Location> = {
         longitude: -120.245402,
         elevationFt: 8100,
         elevationM: 2470,
+        timezone: 'America/Los_Angeles',
         isCustom: false
     }
 };
@@ -65,11 +66,31 @@ const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/foreca
 
 const weatherCache = new Map<string, { hrrrData: OpenMeteoResponse | null, ecmwfData: OpenMeteoResponse, location: Location, mode: string }>();
 
-/** Backfill elevation fields for custom locations once the API response is available. */
-function updateCustomElevation(loc: Location, apiElevation: number | undefined): void {
-    if (loc.isCustom && apiElevation != null) {
-        loc.elevationM = Math.round(apiElevation);
-        loc.elevationFt = Math.round(apiElevation * 3.28084);
+/** Metadata backfill (elevation, timezone) for custom locations once the API response is available. */
+function updateCustomLocationMetadata(loc: Location, data: OpenMeteoResponse): void {
+    if (loc.isCustom) {
+        let changed = false;
+        if (data.elevation != null && loc.elevationM === '--') {
+            loc.elevationM = Math.round(data.elevation);
+            loc.elevationFt = Math.round(data.elevation * 3.28084);
+            changed = true;
+        }
+        if (data.timezone && !loc.timezone) {
+            loc.timezone = data.timezone;
+            changed = true;
+        }
+
+        if (changed) {
+            const customLocsJson = localStorage.getItem('calisnow_locations');
+            const customLocs: Record<string, Location> = customLocsJson ? JSON.parse(customLocsJson) : {};
+            customLocs[loc.id] = { ...loc };
+            localStorage.setItem('calisnow_locations', JSON.stringify(customLocs));
+        }
+    } else {
+        // For default locations, just ensure the timezone is attached to the object in memory
+        if (data.timezone && !loc.timezone) {
+            loc.timezone = data.timezone;
+        }
     }
 }
 
@@ -157,7 +178,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
     const loc = locs[locationKey];
     if (!loc) throw new Error("Invalid location");
 
-    const timezone = "America/Los_Angeles";
+    const timezone = "auto";
 
     if (modelMode === 'best_match') {
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
@@ -174,7 +195,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             if (!res.ok) throw new Error(`Best Match fetch failed: ${res.status}`);
             const data = await res.json();
 
-            updateCustomElevation(loc, data.elevation);
+            updateCustomLocationMetadata(loc, data);
 
             const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' };
             weatherCache.set(cacheKey, result);
@@ -215,7 +236,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             const hrrrData = await hrrrRes.json();
             const ecmwfData = await ecmwfRes.json();
 
-            updateCustomElevation(loc, ecmwfData.elevation);
+            updateCustomLocationMetadata(loc, ecmwfData);
 
             const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' };
             weatherCache.set(cacheKey, result);
@@ -237,7 +258,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             'gfs': 'gfs_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
-        
+
         // Models like HRRR, NAM, and GEM have shorter leads. 
         let days = 15;
         if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
@@ -268,7 +289,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             }
             const data = await res.json();
 
-            updateCustomElevation(loc, data.elevation);
+            updateCustomLocationMetadata(loc, data);
 
             const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode };
             weatherCache.set(cacheKey, result);
@@ -288,7 +309,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
     const loc = locs[locationKey];
     if (!loc) throw new Error("Invalid location");
 
-    const timezone = "America/Los_Angeles";
+    const timezone = "auto";
 
     const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
         `&start_date=${startDate}&end_date=${endDate}` +
@@ -303,7 +324,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
         if (!res.ok) throw new Error(`Historical fetch failed: ${res.status}`);
         const data = await res.json();
 
-        updateCustomElevation(loc, data.elevation);
+        updateCustomLocationMetadata(loc, data);
 
         return { hrrrData: null, ecmwfData: data, location: loc, mode: 'historical', model };
     } catch (error) {
