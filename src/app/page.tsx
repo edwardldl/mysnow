@@ -128,6 +128,34 @@ export default function Home() {
     }
   }, [currentLocationId, modelId, algoId, locations, loadData]);
 
+  // Prefetch data for all other locations when model changes or locations list is updated.
+  // This ensures that switching locations is instantaneous.
+  useEffect(() => {
+    if (Object.keys(locations).length <= 1) return;
+
+    const prefetch = async () => {
+      // Small delay to let the initial primary fetch settle
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const locIds = Object.keys(locations);
+      for (const locId of locIds) {
+        // Skip current location because fetchWeatherData was already called for it by loadData
+        if (locId === currentLocationId) continue;
+
+        try {
+          // Fetch sequentially to avoid race conditions when updating location metadata in localStorage
+          await fetchWeatherData(locId, modelId);
+          // Small delay between locations to avoid hitting rate limits (429)
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (err) {
+          console.warn(`Prefetch failed for ${locId} with model ${modelId}:`, err);
+        }
+      }
+    };
+
+    prefetch();
+  }, [modelId, locations, currentLocationId]);
+
   // Dynamic header height measurement
   useEffect(() => {
     if (!stickyHeaderRef.current) return;
