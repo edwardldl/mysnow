@@ -13,7 +13,7 @@ import {
   CloudRain
 } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
-import { BlendedHour, RollingStats } from "@/lib/types";
+import { BlendedHour, RollingStats, WeatherDataStatus } from "@/lib/types";
 import { getWeatherDescription } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -22,6 +22,8 @@ interface CurrentWeatherCardProps {
   rollingStats: RollingStats | null;
   locationName: string;
   isDaily?: boolean;
+  timezone?: string;
+  dataStatus?: WeatherDataStatus;
   className?: string;
 }
 
@@ -30,6 +32,8 @@ export default function CurrentWeatherCard({
   rollingStats, 
   locationName, 
   isDaily = false,
+  timezone = 'America/Los_Angeles',
+  dataStatus = 'fresh',
   className 
 }: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
@@ -69,17 +73,12 @@ export default function CurrentWeatherCard({
             
             <div className="flex flex-col min-w-0">
               <div className="flex items-center flex-wrap gap-2 mb-1 md:mb-3">
-                <span className={cn(
-                    "px-2 py-0.5 md:px-3 md:py-1 rounded-full text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-lg",
-                    isDaily ? "bg-slate-700 shadow-slate-900/20" : "bg-accent-blue shadow-blue-500/20"
-                )}>
-                    {isDaily ? "Daily Summary" : "Live Observation"}
-                </span>
+
                 <span className="text-slate-400 text-[10px] md:text-xs font-bold flex items-center gap-1 opacity-80">
                    <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" /> 
                    {isDaily 
                     ? new Date(currentData.time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-                    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezone })
                    }
                 </span>
               </div>

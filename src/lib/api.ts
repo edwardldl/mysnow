@@ -1,4 +1,4 @@
-import type { Location, OpenMeteoResponse } from './types';
+import type { Location, OpenMeteoResponse, WeatherDataResult } from './types';
 
 const DEFAULT_LOCATIONS: Record<string, Location> = {
     palisades: {
@@ -8,6 +8,7 @@ const DEFAULT_LOCATIONS: Record<string, Location> = {
         longitude: -120.245402,
         elevationFt: 8100,
         elevationM: 2470,
+        timezone: 'America/Los_Angeles',
         isCustom: false
     }
 };
@@ -62,14 +63,111 @@ export function setLastLocationId(id: string): void {
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/forecast';
+const META_BASE_URL = 'https://api.open-meteo.com/data';
 
-const weatherCache = new Map<string, { hrrrData: OpenMeteoResponse | null, ecmwfData: OpenMeteoResponse, location: Location, mode: string }>();
+/** Mapping of internal models to Open-Meteo static metadata names */
+const MODEL_META_MAP: Record<string, string> = {
+    'best_match': 'ecmwf_ifs',
+    'hrrr_ecmwf': 'ncep_hrrr_conus',
+    'hrrr': 'ncep_hrrr_conus',
+    'gem_hrdps_west': 'cmc_gem_hrdps',
+    'nbm': 'ncep_nbm_conus',
+    'nam': 'ncep_nam_conus',
+    'gem_regional': 'cmc_gem_rdps',
+    'ecmwf': 'ecmwf_ifs',
+    'gfs': 'ncep_gfs025'
+};
 
-/** Backfill elevation fields for custom locations once the API response is available. */
-function updateCustomElevation(loc: Location, apiElevation: number | undefined): void {
-    if (loc.isCustom && apiElevation != null) {
-        loc.elevationM = Math.round(apiElevation);
-        loc.elevationFt = Math.round(apiElevation * 3.28084);
+async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
+    const metaKey = MODEL_META_MAP[modelKey];
+    if (!metaKey) return undefined;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+    try {
+        const res = await fetch(`${META_BASE_URL}/${metaKey}/static/meta.json`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok) return undefined;
+        const data = await res.json();
+        return data.last_run_availability_time;
+    } catch (e: any) {
+        clearTimeout(timeoutId);
+        if (e.name === 'AbortError') {
+            console.warn(`Metadata fetch for ${modelKey} timed out after 2s`);
+        }
+        return undefined;
+    }
+}
+
+type WeatherCacheItem = {
+    hrrrData: OpenMeteoResponse | null;
+    ecmwfData: OpenMeteoResponse;
+    location: Location;
+    mode: string;
+    timestamp: number;
+};
+
+const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
+const WEATHER_CACHE_PREFIX = 'mysnow_weather_cache_';
+
+function getCachedData(key: string, allowExpired = false): WeatherCacheItem | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const cached = localStorage.getItem(WEATHER_CACHE_PREFIX + key);
+        if (!cached) return null;
+        const item: WeatherCacheItem = JSON.parse(cached);
+        const age = Date.now() - item.timestamp;
+        if (!allowExpired && age > CACHE_EXPIRATION_MS) {
+            return null;
+        }
+        return item;
+    } catch (e) {
+        console.error("Error reading weather cache:", e);
+        return null;
+    }
+}
+
+function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): void {
+    if (typeof window === 'undefined') return;
+    try {
+        const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
+        localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
+    } catch (e) {
+        console.error("Error writing weather cache:", e);
+    }
+}
+
+export function hasValidCache(locationKey: string, modelMode: string): boolean {
+    const cacheKey = `${locationKey}|${modelMode}`;
+    return getCachedData(cacheKey) !== null;
+}
+
+/** Metadata backfill (elevation, timezone) for custom locations once the API response is available. */
+function updateCustomLocationMetadata(loc: Location, data: OpenMeteoResponse): void {
+    if (loc.isCustom) {
+        let changed = false;
+        if (data.elevation != null && loc.elevationM === '--') {
+            loc.elevationM = Math.round(data.elevation);
+            loc.elevationFt = Math.round(data.elevation * 3.28084);
+            changed = true;
+        }
+        if (data.timezone && !loc.timezone) {
+            loc.timezone = data.timezone;
+            changed = true;
+        }
+
+        if (changed) {
+            const customLocsJson = localStorage.getItem('calisnow_locations');
+            const customLocs: Record<string, Location> = customLocsJson ? JSON.parse(customLocsJson) : {};
+            customLocs[loc.id] = { ...loc };
+            localStorage.setItem('calisnow_locations', JSON.stringify(customLocs));
+        }
+    } else {
+        // For default locations, just ensure the timezone is attached to the object in memory
+        if (data.timezone && !loc.timezone) {
+            loc.timezone = data.timezone;
+        }
     }
 }
 
@@ -147,17 +245,19 @@ const HISTORICAL_HOURLY_PARAMS = [
 /**
  * Fetch data from Open-Meteo API
  */
-export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false) {
+export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false): Promise<WeatherDataResult> {
     const cacheKey = `${locationKey}|${modelMode}`;
-    if (!forceRefresh && weatherCache.has(cacheKey)) {
-        return weatherCache.get(cacheKey)!;
+    if (!forceRefresh) {
+        const cached = getCachedData(cacheKey);
+        if (cached) return { ...cached, status: 'cached' as const };
     }
 
     const locs = getLocations();
     const loc = locs[locationKey];
     if (!loc) throw new Error("Invalid location");
 
-    const timezone = "America/Los_Angeles";
+    const timezone = "auto";
+    const metaPromise = fetchModelStatus(modelMode);
 
     if (modelMode === 'best_match') {
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
@@ -170,17 +270,27 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         try {
-            const res = await fetch(url);
+            console.time(`fetchWeatherData:${modelMode}`);
+            const [res, lastRunAvailabilityTime] = await Promise.all([
+                fetch(url),
+                metaPromise
+            ]);
+            console.timeEnd(`fetchWeatherData:${modelMode}`);
+
             if (!res.ok) throw new Error(`Best Match fetch failed: ${res.status}`);
             const data = await res.json();
+            data.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
-            updateCustomElevation(loc, data.elevation);
+            updateCustomLocationMetadata(loc, data);
 
-            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' };
-            weatherCache.set(cacheKey, result);
+            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match', status: 'fresh' as const };
+            const { status, ...cacheable } = result;
+            setCachedData(cacheKey, cacheable);
             return result;
         } catch (error) {
             console.error("Error fetching Best Match data:", error);
+            const stale = getCachedData(cacheKey, true);
+            if (stale) return { ...stale, status: 'stale' as const };
             throw error;
         }
     } else if (modelMode === 'hrrr_ecmwf') {
@@ -204,10 +314,13 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         try {
-            const [hrrrRes, ecmwfRes] = await Promise.all([
+            console.time(`fetchWeatherData:${modelMode}`);
+            const [hrrrRes, ecmwfRes, lastRunAvailabilityTime] = await Promise.all([
                 fetch(hrrrUrl),
-                fetch(ecmwfUrl)
+                fetch(ecmwfUrl),
+                metaPromise
             ]);
+            console.timeEnd(`fetchWeatherData:${modelMode}`);
 
             if (!hrrrRes.ok) throw new Error(`HRRR fetch failed: ${hrrrRes.status}`);
             if (!ecmwfRes.ok) throw new Error(`ECMWF fetch failed: ${ecmwfRes.status}`);
@@ -215,13 +328,19 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             const hrrrData = await hrrrRes.json();
             const ecmwfData = await ecmwfRes.json();
 
-            updateCustomElevation(loc, ecmwfData.elevation);
+            hrrrData.lastRunAvailabilityTime = lastRunAvailabilityTime;
+            ecmwfData.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
-            const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' };
-            weatherCache.set(cacheKey, result);
+            updateCustomLocationMetadata(loc, ecmwfData);
+
+            const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf', status: 'fresh' as const };
+            const { status, ...cacheable } = result;
+            setCachedData(cacheKey, cacheable);
             return result;
         } catch (error) {
             console.error("Error fetching weather data:", error);
+            const stale = getCachedData(cacheKey, true);
+            if (stale) return { ...stale, status: 'stale' as const };
             throw error;
         }
     } else {
@@ -237,7 +356,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             'gfs': 'gfs_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
-        
+
         // Models like HRRR, NAM, and GEM have shorter leads. 
         let days = 15;
         if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
@@ -255,26 +374,37 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         try {
-            const res = await fetch(url);
+            console.time(`fetchWeatherData:${modelMode}`);
+            const [res, lastRunAvailabilityTime] = await Promise.all([
+                fetch(url),
+                metaPromise
+            ]);
+            console.timeEnd(`fetchWeatherData:${modelMode}`);
+
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
+                const modelName = modelMode.toUpperCase();
                 if (errData.reason && errData.reason.includes("geographic")) {
-                    throw new Error(`Location outside ${omModel} coverage area.`);
+                    throw new Error(`Location outside ${modelName} coverage area.`);
                 }
                 if (errData.reason && errData.reason.includes("data is available")) {
-                    throw new Error(`No data available for this location in ${omModel}.`);
+                    throw new Error(`No data available for this location in ${modelName}.`);
                 }
-                throw new Error(`${omModel} fetch failed: ${res.status}`);
+                throw new Error(`${modelName} fetch failed: ${res.status}`);
             }
             const data = await res.json();
+            data.lastRunAvailabilityTime = lastRunAvailabilityTime;
 
-            updateCustomElevation(loc, data.elevation);
+            updateCustomLocationMetadata(loc, data);
 
-            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode };
-            weatherCache.set(cacheKey, result);
+            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode, status: 'fresh' as const };
+            const { status, ...cacheable } = result;
+            setCachedData(cacheKey, cacheable);
             return result;
         } catch (error) {
             console.error(`Error fetching ${omModel} data:`, error);
+            const stale = getCachedData(cacheKey, true);
+            if (stale) return { ...stale, status: 'stale' as const };
             throw error;
         }
     }
@@ -288,7 +418,8 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
     const loc = locs[locationKey];
     if (!loc) throw new Error("Invalid location");
 
-    const timezone = "America/Los_Angeles";
+    const timezone = "auto";
+    const metaPromise = fetchModelStatus(model);
 
     const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
         `&start_date=${startDate}&end_date=${endDate}` +
@@ -299,11 +430,18 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
         `&timezone=${timezone}`;
 
     try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Historical fetch failed: ${res.status}`);
-        const data = await res.json();
+        console.time(`fetchHistoricalWeatherData:${model}`);
+        const [res, lastRunAvailabilityTime] = await Promise.all([
+            fetch(url),
+            metaPromise
+        ]);
+        console.timeEnd(`fetchHistoricalWeatherData:${model}`);
 
-        updateCustomElevation(loc, data.elevation);
+        if (!res.ok) throw new Error(`${model.toUpperCase()} historical fetch failed: ${res.status}`);
+        const data = await res.json();
+        data.lastRunAvailabilityTime = lastRunAvailabilityTime;
+
+        updateCustomLocationMetadata(loc, data);
 
         return { hrrrData: null, ecmwfData: data, location: loc, mode: 'historical', model };
     } catch (error) {

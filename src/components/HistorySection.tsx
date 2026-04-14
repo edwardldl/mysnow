@@ -24,7 +24,7 @@ export default function HistorySection({ currentLocationId, onResults }: History
     try {
       const data = await fetchHistoricalWeatherData(currentLocationId, startDate, endDate);
       const blended = blendForecasts(null, data.ecmwfData, data.location, "hybrid", "historical");
-      const grouped = groupData(blended);
+      const grouped = groupData(blended, data.location.timezone);
       onResults(grouped);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to fetch historical data");

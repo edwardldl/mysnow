@@ -10,9 +10,9 @@ import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import ErrorBanner from "@/components/ErrorBanner";
-import { fetchWeatherData, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
+import { fetchWeatherData, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
-import { Location, DayData, RollingStats } from "@/lib/types";
+import { Location, DayData, RollingStats, WeatherDataStatus } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -23,15 +23,30 @@ export default function Home() {
   const [algoId, setAlgoId] = useState("hybrid");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
+  const lastFetchKeyRef = useRef<string | null>(null);
 
   const [forecastDays, setForecastDays] = useState<DayData[]>([]);
   const [historyDays, setHistoryDays] = useState<DayData[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [historySelectedDate, setHistorySelectedDate] = useState<string | null>(null);
+  const selectedDateRef = useRef<string | null>(null);
+  const historySelectedDateRef = useRef<string | null>(null);
+
+  // Sync refs with state
+  useEffect(() => {
+    selectedDateRef.current = selectedDate;
+  }, [selectedDate]);
+
+  useEffect(() => {
+    historySelectedDateRef.current = historySelectedDate;
+  }, [historySelectedDate]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [dataStatus, setDataStatus] = useState<WeatherDataStatus>("fresh");
+
 
   // Initialize locations and current location from persistence
   useEffect(() => {
@@ -61,25 +76,40 @@ export default function Home() {
     };
   }, []);
 
-  const loadData = useCallback(async (locId: string, model: string, algo: string) => {
-    setIsLoading(true);
+  const loadData = useCallback(async (locId: string, model: string, algo: string, force = false) => {
+    const cached = !force && hasValidCache(locId, model);
+    
+    // Only show the full-screen loader if we don't have cached data
+    if (!cached) {
+      setIsLoading(true);
+    }
+    
     setError(null);
     setIsOffline(!navigator.onLine);
     setRefreshKey(prev => prev + 1);
     try {
-      // Add a small delay to ensure the animation is visible
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const data = await fetchWeatherData(locId, model, true);
+      const data = await fetchWeatherData(locId, model, force);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
-      const grouped = groupData(blended);
+      const grouped = groupData(blended, data.location.timezone);
       setForecastDays(grouped);
+      setDataStatus(data.status);
+      setLocations(getLocations()); // Refresh locations to pick up backfilled metadata (elevation, timezone)
       setIsOffline(false);
 
-      // Ensure the initial selection is "today" if available, otherwise the first day
+      // Ensure the initial selection preserves the previous date if available,
+      // otherwise fallback to "today", and if that's not available, the first day.
       if (grouped.length > 0) {
-        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
-        const todayExists = grouped.find(d => d.dateStr === todayStr);
-        setSelectedDate(todayExists ? todayStr : grouped[0].dateStr);
+        const timezone = data.location.timezone || 'America/Los_Angeles';
+        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: timezone });
+        const prevDate = selectedDateRef.current;
+        const prevDateExists = grouped.find(d => d.dateStr === prevDate);
+
+        if (prevDate && prevDateExists) {
+          setSelectedDate(prevDate);
+        } else {
+          const todayExists = grouped.find(d => d.dateStr === todayStr);
+          setSelectedDate(todayExists ? todayStr : grouped[0].dateStr);
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to fetch weather data");
@@ -91,10 +121,40 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(locations).length > 0) {
+    const fetchKey = `${currentLocationId}-${modelId}-${algoId}`;
+    if (Object.keys(locations).length > 0 && lastFetchKeyRef.current !== fetchKey) {
+      lastFetchKeyRef.current = fetchKey;
       loadData(currentLocationId, modelId, algoId);
     }
   }, [currentLocationId, modelId, algoId, locations, loadData]);
+
+  // Prefetch data for all other locations when model changes or locations list is updated.
+  // This ensures that switching locations is instantaneous.
+  useEffect(() => {
+    if (Object.keys(locations).length <= 1) return;
+
+    const prefetch = async () => {
+      // Small delay to let the initial primary fetch settle
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const locIds = Object.keys(locations);
+      for (const locId of locIds) {
+        // Skip current location because fetchWeatherData was already called for it by loadData
+        if (locId === currentLocationId) continue;
+
+        try {
+          // Fetch sequentially to avoid race conditions when updating location metadata in localStorage
+          await fetchWeatherData(locId, modelId);
+          // Small delay between locations to avoid hitting rate limits (429)
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (err) {
+          console.warn(`Prefetch failed for ${locId} with model ${modelId}:`, err);
+        }
+      }
+    };
+
+    prefetch();
+  }, [modelId, locations, currentLocationId]);
 
   // Dynamic header height measurement
   useEffect(() => {
@@ -136,7 +196,7 @@ export default function Home() {
       day: '2-digit',
       hour: '2-digit',
       hourCycle: 'h23',
-      timeZone: 'America/Los_Angeles'
+      timeZone: locations[currentLocationId]?.timezone || 'America/Los_Angeles'
     });
 
     const parts = fmt.formatToParts(now);
@@ -144,12 +204,12 @@ export default function Home() {
     const m = parts.find(p => p.type === 'month')?.value;
     const d = parts.find(p => p.type === 'day')?.value;
     const h = parts.find(p => p.type === 'hour')?.value;
-    
+
     return {
       currentHourISO: `${y}-${m}-${d}T${h}:00`,
       todayStr: `${y}-${m}-${d}`
     };
-  }, []);
+  }, [locations, currentLocationId]);
 
   const { currentHourISO, todayStr } = timeInfo;
 
@@ -234,7 +294,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header
-        onRefresh={() => loadData(currentLocationId, modelId, algoId)}
+        onRefresh={() => loadData(currentLocationId, modelId, algoId, true)}
         isLoading={isLoading}
         isOffline={isOffline}
         currentData={currentHourData}
@@ -257,6 +317,7 @@ export default function Home() {
           days={activeDays}
           selectedDate={activeSelectedDate}
           onSelect={setActiveSelectedDate}
+          timezone={locations[currentLocationId]?.timezone}
         />
       </div>
 
@@ -267,11 +328,15 @@ export default function Home() {
         <AnimatePresence mode="wait">
           <div className="flex flex-col">
             {mode === "history" && (
-              <HistorySection 
-                currentLocationId={currentLocationId} 
+              <HistorySection
+                currentLocationId={currentLocationId}
                 onResults={(days) => {
                   setHistoryDays(days);
-                  if (days.length > 0) setHistorySelectedDate(days[0].dateStr);
+                  if (days.length > 0) {
+                    const prevDate = historySelectedDateRef.current;
+                    const prevDateExists = days.find(d => d.dateStr === prevDate);
+                    setHistorySelectedDate(prevDate && prevDateExists ? prevDate : days[0].dateStr);
+                  }
                 }}
               />
             )}
@@ -296,6 +361,8 @@ export default function Home() {
                 isDaily={displayData?.isDaily || false}
                 rollingStats={rollingStats}
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
+                timezone={locations[currentLocationId]?.timezone}
+                dataStatus={dataStatus}
                 className={cn(
                   "mt-4 md:mt-4",
                   (error && activeDays.length > 0) && "mt-2 md:mt-2"
@@ -322,14 +389,16 @@ export default function Home() {
                   days={activeDays}
                   isLoading={isLoading && mode === "forecast"}
                   selectedDate={activeSelectedDate}
+                  timezone={locations[currentLocationId]?.timezone}
+                  dataStatus={dataStatus}
                 />
               )}
             </motion.div>
           </div>
         </AnimatePresence>
 
-      <CreditsFooter mode={mode} setMode={setMode} />
-    </main>
+        <CreditsFooter mode={mode} setMode={setMode} />
+      </main>
 
       {/* Decorative Background Elements */}
       <div className="fixed top-0 left-0 w-full h-full -z-50 overflow-hidden pointer-events-none">

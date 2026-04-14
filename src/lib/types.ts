@@ -45,6 +45,9 @@ export interface OpenMeteoResponse {
     hourly: OpenMeteoHourly;
     daily?: OpenMeteoDaily;
     elevation?: number;
+    timezone: string;
+    timezone_abbreviation: string;
+    lastRunAvailabilityTime?: number;
 }
 
 export interface Location {
@@ -56,6 +59,7 @@ export interface Location {
     elevationM: number | string;
     /** Feet above sea level. '--' for custom locations before the first API fetch. */
     elevationFt: number | string;
+    timezone?: string;
     isCustom?: boolean;
 }
 
@@ -159,4 +163,14 @@ export interface DayData {
     minTemp: number;
     maxTemp: number;
     weatherCode: number | null;
+    lastRunAvailabilityTime?: number;
+}
+export type WeatherDataStatus = 'fresh' | 'cached' | 'stale';
+
+export interface WeatherDataResult {
+    hrrrData: OpenMeteoResponse | null;
+    ecmwfData: OpenMeteoResponse;
+    location: Location;
+    mode: string;
+    status: WeatherDataStatus;
 }
