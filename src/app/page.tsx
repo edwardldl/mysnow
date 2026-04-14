@@ -74,7 +74,7 @@ export default function Home() {
     };
   }, []);
 
-  const loadData = useCallback(async (locId: string, model: string, algo: string) => {
+  const loadData = useCallback(async (locId: string, model: string, algo: string, force = false) => {
     setIsLoading(true);
     setError(null);
     setIsOffline(!navigator.onLine);
@@ -82,7 +82,7 @@ export default function Home() {
     try {
       // Add a small delay to ensure the animation is visible
       await new Promise(resolve => setTimeout(resolve, 800));
-      const data = await fetchWeatherData(locId, model, true);
+      const data = await fetchWeatherData(locId, model, force);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
       const grouped = groupData(blended, data.location.timezone);
       setForecastDays(grouped);
@@ -259,7 +259,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header
-        onRefresh={() => loadData(currentLocationId, modelId, algoId)}
+        onRefresh={() => loadData(currentLocationId, modelId, algoId, true)}
         isLoading={isLoading}
         isOffline={isOffline}
         currentData={currentHourData}

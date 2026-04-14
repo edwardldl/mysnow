@@ -100,7 +100,45 @@ async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
     }
 }
 
-const weatherCache = new Map<string, { hrrrData: OpenMeteoResponse | null, ecmwfData: OpenMeteoResponse, location: Location, mode: string }>();
+type WeatherCacheItem = {
+    hrrrData: OpenMeteoResponse | null;
+    ecmwfData: OpenMeteoResponse;
+    location: Location;
+    mode: string;
+    timestamp: number;
+};
+
+const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
+const WEATHER_CACHE_PREFIX = 'mysnow_weather_cache_';
+
+function getCachedData(key: string): WeatherCacheItem | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const cached = localStorage.getItem(WEATHER_CACHE_PREFIX + key);
+        if (!cached) return null;
+        const item: WeatherCacheItem = JSON.parse(cached);
+        const age = Date.now() - item.timestamp;
+        if (age > CACHE_EXPIRATION_MS) {
+            localStorage.removeItem(WEATHER_CACHE_PREFIX + key);
+            return null;
+        }
+        return item;
+    } catch (e) {
+        console.error("Error reading weather cache:", e);
+        return null;
+    }
+}
+
+function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): void {
+    if (typeof window === 'undefined') return;
+    try {
+        const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
+        localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
+    } catch (e) {
+        console.error("Error writing weather cache:", e);
+    }
+}
+
 
 /** Metadata backfill (elevation, timezone) for custom locations once the API response is available. */
 function updateCustomLocationMetadata(loc: Location, data: OpenMeteoResponse): void {
@@ -206,8 +244,9 @@ const HISTORICAL_HOURLY_PARAMS = [
  */
 export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', forceRefresh = false) {
     const cacheKey = `${locationKey}|${modelMode}`;
-    if (!forceRefresh && weatherCache.has(cacheKey)) {
-        return weatherCache.get(cacheKey)!;
+    if (!forceRefresh) {
+        const cached = getCachedData(cacheKey);
+        if (cached) return cached;
     }
 
     const locs = getLocations();
@@ -242,7 +281,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, data);
 
             const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' };
-            weatherCache.set(cacheKey, result);
+            setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error("Error fetching Best Match data:", error);
@@ -289,7 +328,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, ecmwfData);
 
             const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' };
-            weatherCache.set(cacheKey, result);
+            setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error("Error fetching weather data:", error);
@@ -350,7 +389,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, data);
 
             const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode };
-            weatherCache.set(cacheKey, result);
+            setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error(`Error fetching ${omModel} data:`, error);
