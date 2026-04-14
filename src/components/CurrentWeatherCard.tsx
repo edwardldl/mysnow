@@ -18,13 +18,20 @@ import { getWeatherDescription } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface CurrentWeatherCardProps {
-  currentData: BlendedHour | null;
+  currentData: (BlendedHour & { minTemp?: number; maxTemp?: number }) | null;
   rollingStats: RollingStats | null;
   locationName: string;
+  isDaily?: boolean;
   className?: string;
 }
 
-export default function CurrentWeatherCard({ currentData, rollingStats, locationName, className }: CurrentWeatherCardProps) {
+export default function CurrentWeatherCard({ 
+  currentData, 
+  rollingStats, 
+  locationName, 
+  isDaily = false,
+  className 
+}: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
   
   if (!currentData) return null;
@@ -58,9 +65,18 @@ export default function CurrentWeatherCard({ currentData, rollingStats, location
             
             <div className="flex flex-col">
               <div className="flex items-center gap-3 mb-3">
-                <span className="px-3 py-1 rounded-full bg-accent-blue text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20">Live Observation</span>
+                <span className={cn(
+                    "px-3 py-1 rounded-full text-white text-[10px] font-black uppercase tracking-widest shadow-lg",
+                    isDaily ? "bg-slate-700 shadow-slate-900/20" : "bg-accent-blue shadow-blue-500/20"
+                )}>
+                    {isDaily ? "Daily Summary" : "Live Observation"}
+                </span>
                 <span className="text-slate-400 text-xs font-bold flex items-center gap-1.5 opacity-80">
-                   <Clock className="w-3.5 h-3.5" /> {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                   <Clock className="w-3.5 h-3.5" /> 
+                   {isDaily 
+                    ? new Date(currentData.time).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+                    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                   }
                 </span>
               </div>
               
@@ -70,16 +86,42 @@ export default function CurrentWeatherCard({ currentData, rollingStats, location
               
               <div className="flex items-baseline gap-6">
                 <span className="text-7xl md:text-9xl font-black text-white tracking-tighter drop-shadow-sm">
-                  {currentData.temperature.toFixed(1)}<span className="text-accent-blue">°</span>
+                  {isDaily && currentData.minTemp !== undefined && currentData.maxTemp !== undefined ? (
+                    <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4">
+                        <span className="text-rose-400">{currentData.maxTemp.toFixed(0)}°</span>
+                        <span className="text-4xl md:text-6xl text-slate-500 font-black">/</span>
+                        <span className="text-5xl md:text-7xl text-blue-400">{currentData.minTemp.toFixed(0)}°</span>
+                    </div>
+                  ) : (
+                    <>
+                        {currentData.temperature.toFixed(1)}<span className="text-accent-blue">°</span>
+                    </>
+                  )}
                 </span>
                 <div className="flex flex-col mb-2 md:mb-4">
                   <span className="text-xl md:text-3xl font-bold text-slate-200 tracking-tight leading-none mb-2">
                     {weather?.label}
                   </span>
-                  <div className="flex items-center gap-2 text-slate-400 font-bold text-sm md:text-base uppercase tracking-tight">
-                    <Thermometer className="w-4 h-4 text-rose-400" />
-                    Feels like <span className="text-white">{currentData.feelsLike?.toFixed(1)}°</span>
-                  </div>
+                  {!isDaily && (
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2 text-slate-400 font-bold text-sm md:text-base uppercase tracking-tight">
+                            <Thermometer className="w-4 h-4 text-rose-400" />
+                            Feels like <span className="text-white">{currentData.feelsLike?.toFixed(1)}°</span>
+                        </div>
+                        {currentData.minTemp !== undefined && currentData.maxTemp !== undefined && (
+                            <div className="flex items-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-widest">
+                                <span className="text-rose-400/80">H: <span className="text-white">{currentData.maxTemp.toFixed(0)}°</span></span>
+                                <span className="text-blue-400/80">L: <span className="text-white">{currentData.minTemp.toFixed(0)}°</span></span>
+                            </div>
+                        )}
+                    </div>
+                  )}
+                  {isDaily && (
+                    <div className="flex items-center gap-2 text-slate-400 font-bold text-sm md:text-base uppercase tracking-tight">
+                        <Snowflake className="w-4 h-4 text-accent-cyan" />
+                        Total Snow <span className="text-white">{(currentData.snowfall || 0).toFixed(1)} cm</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -90,63 +132,67 @@ export default function CurrentWeatherCard({ currentData, rollingStats, location
             
             {/* Live Atmosphere Group */}
             <div className="flex flex-col gap-4">
-                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Live Atmosphere</h3>
+                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
+                    {isDaily ? "Day Atmosphere" : "Live Atmosphere"}
+                </h3>
                 <div className="grid grid-cols-3 gap-3">
-                    <CompactStatBox 
-                        icon={<Wind className="w-3.5 h-3.5 text-emerald-400" />}
-                        label="Wind"
-                        value={`${(currentData.windSpeed! * 3.6).toFixed(0)}`}
-                        unit="km/h"
-                        subValue={currentData.gusts != null && currentData.gusts > (currentData.windSpeed || 0) ? `G:${(currentData.gusts * 3.6).toFixed(0)}` : undefined}
-                        extra={
-                            <div className="flex items-center gap-1 mt-1">
-                                <Navigation2 
-                                    className="w-3 h-3 text-emerald-400"
-                                    style={{ transform: `rotate(${(currentData.windDir || 0) + 180}deg)`, fill: 'currentColor' }}
-                                />
-                                <span className="text-[8px] font-bold text-emerald-400/60 lowercase tracking-tighter">
-                                    {((currentData.windDir || 0))}°
-                                </span>
-                            </div>
-                        }
-                    />
-                    <CompactStatBox 
-                        icon={<Sun className="w-3.5 h-3.5 text-yellow-400" />}
-                        label="UV Index"
-                        value={currentData.uvIndex?.toFixed(1) || "0.0"}
-                        unit={currentData.uvIndex != null && currentData.uvIndex > 5 ? "High" : "Low"}
-                    />
-                    <CompactStatBox 
-                        icon={<Eye className="w-3.5 h-3.5 text-violet-400" />}
-                        label="Visibility"
-                        value={currentData.visibility != null ? (currentData.visibility / 1000).toFixed(1) : "--"}
-                        unit="km"
-                    />
+                  <CompactStatBox 
+                      icon={<Wind className="w-3.5 h-3.5 text-emerald-400" />}
+                      label="Wind"
+                      value={`${(currentData.windSpeed! * 3.6).toFixed(0)}`}
+                      unit="km/h"
+                      subValue={currentData.gusts != null && currentData.gusts > (currentData.windSpeed || 0) ? `G:${(currentData.gusts * 3.6).toFixed(0)}` : undefined}
+                      extra={
+                          <div className="flex items-center gap-1 mt-1">
+                              <Navigation2 
+                                  className="w-3 h-3 text-emerald-400"
+                                  style={{ transform: `rotate(${(currentData.windDir || 0) + 180}deg)`, fill: 'currentColor' }}
+                              />
+                              <span className="text-[8px] font-bold text-emerald-400/60 lowercase tracking-tighter">
+                                  {((currentData.windDir || 0))}°
+                              </span>
+                          </div>
+                      }
+                  />
+                  <CompactStatBox 
+                      icon={<Sun className="w-3.5 h-3.5 text-yellow-400" />}
+                      label="UV Index"
+                      value={currentData.uvIndex?.toFixed(1) || "0.0"}
+                      unit={currentData.uvIndex != null && currentData.uvIndex > 5 ? "High" : "Low"}
+                  />
+                  <CompactStatBox 
+                      icon={<Eye className="w-3.5 h-3.5 text-violet-400" />}
+                      label="Visibility"
+                      value={currentData.visibility != null ? (currentData.visibility / 1000).toFixed(1) : "--"}
+                      unit="km"
+                  />
                 </div>
             </div>
 
             {/* Snow Accumulation Group */}
             <div className="flex flex-col gap-4">
-                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Snow Accumulation</h3>
+                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
+                    {isDaily ? "Snow History" : "Snow Accumulation"}
+                </h3>
                 <div className="grid grid-cols-3 gap-3">
                     <CompactStatBox 
                         icon={<Snowflake className="w-3.5 h-3.5 text-accent-cyan" />}
-                        label="Rate"
+                        label={isDaily ? "Daily Snow" : "Rate"}
                         value={currentData.snowfall.toFixed(1)}
-                        unit="cm/h"
+                        unit={isDaily ? "cm" : "cm/h"}
                     />
                     {rollingStats && (
                         <>
                             <CompactStatBox 
                                 icon={<Waves className="w-3.5 h-3.5 text-blue-400" />}
-                                label="24h Snow"
+                                label={isDaily ? "Prior 24h" : "24h Snow"}
                                 value={rollingStats.snow24h.toFixed(1)}
                                 unit="cm"
                                 subValue={rollingStats.slr24h != null ? `${rollingStats.slr24h.toFixed(0)}:1` : undefined}
                             />
                             <CompactStatBox 
                                 icon={<CloudRain className="w-3.5 h-3.5 text-indigo-400" />}
-                                label="48h Snow"
+                                label={isDaily ? "Prior 48h" : "48h Snow"}
                                 value={rollingStats.snow48h.toFixed(1)}
                                 unit="cm"
                                 subValue={rollingStats.slr48h != null ? `${rollingStats.slr48h.toFixed(0)}:1` : undefined}

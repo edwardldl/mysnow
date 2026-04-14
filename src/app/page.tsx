@@ -147,11 +147,63 @@ export default function Home() {
     return found;
   }, [forecastDays]);
 
+  const todayStr = React.useMemo(() => {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+  }, []);
+
+  const displayData = React.useMemo(() => {
+    if (forecastDays.length === 0) return null;
+    
+    const isTodaySelected = selectedDate === todayStr;
+    const selectedDay = forecastDays.find(d => d.dateStr === selectedDate);
+    
+    if (isTodaySelected && currentHourData) {
+        return { 
+            data: {
+                ...currentHourData,
+                minTemp: selectedDay?.minTemp,
+                maxTemp: selectedDay?.maxTemp
+            }, 
+            isDaily: false 
+        };
+    }
+    
+    if (selectedDay) {
+        // Create a summary "BlendedHour" from DayData
+        const summary = {
+            time: selectedDay.dateStr + "T12:00:00",
+            temperature: selectedDay.maxTemp,
+            minTemp: selectedDay.minTemp,
+            maxTemp: selectedDay.maxTemp,
+            feelsLike: selectedDay.hourly[12]?.feelsLike || selectedDay.maxTemp,
+            precipProb: Math.max(...selectedDay.hourly.map(h => h.precipProb)),
+            liquidMM: selectedDay.totalPrecipitation,
+            snowfall: selectedDay.totalSnowfall,
+            windSpeed: selectedDay.hourly.reduce((acc, h) => acc + (h.windSpeed || 0), 0) / (selectedDay.hourly.length || 1),
+            windDir: selectedDay.hourly[12]?.windDir,
+            gusts: Math.max(...selectedDay.hourly.map(h => h.gusts || 0)),
+            uvIndex: Math.max(...selectedDay.hourly.map(h => h.uvIndex || 0)),
+            visibility: Math.max(...selectedDay.hourly.map(h => h.visibility || 0)),
+            weatherCode: selectedDay.weatherCode || 0,
+        };
+        return { data: summary as any, isDaily: true };
+    }
+    
+    return null;
+  }, [forecastDays, selectedDate, todayStr, currentHourData]);
+
   const rollingStats = React.useMemo(() => {
-    if (forecastDays.length === 0 || !currentHourData) return null;
+    if (forecastDays.length === 0 || !displayData) return null;
     const allHourly = forecastDays.flatMap(d => d.hourly);
-    return calculateRollingStats(allHourly, currentHourData.time);
-  }, [forecastDays, currentHourData]);
+    
+    // Logic: If Today, use current hour. 
+    // If not Today, use start of the selected Day (to look back at preceding 24h/48h).
+    const isTodaySelected = selectedDate === todayStr;
+    const refTime = isTodaySelected ? currentHourData?.time : selectedDate + "T00:00:00";
+    
+    if (!refTime) return null;
+    return calculateRollingStats(allHourly, refTime);
+  }, [forecastDays, displayData, currentHourData, selectedDate, todayStr]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -186,14 +238,15 @@ export default function Home() {
         <AnimatePresence mode="wait">
           {mode === "forecast" ? (
             <motion.div
-              key="forecast"
+              key={selectedDate || "forecast"}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.02 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
               <CurrentWeatherCard
-                currentData={currentHourData}
+                currentData={displayData?.data || null}
+                isDaily={displayData?.isDaily || false}
                 rollingStats={rollingStats}
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
                 className="mt-4 md:mt-8"
