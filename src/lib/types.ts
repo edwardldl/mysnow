@@ -133,6 +133,13 @@ export interface WindowData {
     avgVisibility?: number | null;
 }
 
+export interface RollingStats {
+    snow24h: number;
+    snow48h: number;
+    slr24h: number | null;
+    slr48h: number | null;
+}
+
 export interface DayData {
     dateStr: string;
     dateObj: Date;
@@ -149,4 +156,7 @@ export interface DayData {
     snowLayersOnGround: Array<{ SWE_mm: number; density: number; ageInHours: number }>;
     maxHourlySnowfall?: number;
     maxWindowSnowfall?: number;
+    minTemp: number;
+    maxTemp: number;
+    weatherCode: number | null;
 }

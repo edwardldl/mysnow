@@ -139,7 +139,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate }: For
                 <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
                   {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
                 </h2>
-                <button 
+                <button
                   onClick={() => setShowDisplaySettings(!showDisplaySettings)}
                   className={cn(
                     "p-2 rounded-xl border border-white/5 transition-all hover:bg-white/5",
@@ -331,7 +331,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
                 )}
               >
                 {isCurrent && (
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-accent-cyan text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(34,211,238,0.4)] whitespace-nowrap">
+                  <div className="absolute top-[-32px] left-1/2 -translate-x-1/2 bg-accent-cyan text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(34,211,238,0.4)] whitespace-nowrap">
                     NOW
                   </div>
                 )}
@@ -424,7 +424,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const pos = ((temp - minTemp) / range) * chartHeight;
             const feelsLike = h.feelsLike ?? temp;
             const feelsPos = ((feelsLike - minTemp) / range) * chartHeight;
-            
+
             const isFreezing = temp <= 0;
             const isFeelsFreezing = feelsLike <= 0;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
@@ -450,20 +450,20 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 )}
               >
                 {isCurrent && (
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-rose-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(251,113,133,0.4)] whitespace-nowrap">
+                  <div className="absolute top-[-32px] left-1/2 -translate-x-1/2 bg-rose-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(251,113,133,0.4)] whitespace-nowrap">
                     NOW
                   </div>
                 )}
 
                 {/* Connecting Line if different */}
                 {Math.abs(pos - feelsPos) > 4 && (
-                   <div 
-                    style={{ 
-                      bottom: `${Math.min(pos, feelsPos) + 36 + 15}px`, 
-                      height: `${Math.abs(pos - feelsPos)}px` 
+                  <div
+                    style={{
+                      bottom: `${Math.min(pos, feelsPos) + 36 + 15}px`,
+                      height: `${Math.abs(pos - feelsPos)}px`
                     }}
                     className="absolute w-[1px] bg-white/10 z-0"
-                   />
+                  />
                 )}
 
                 {/* Feels Like Dot (Ghost/Secondary) */}
@@ -487,7 +487,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 />
 
                 {/* Labels */}
-                <div 
+                <div
                   className="absolute flex flex-col items-center gap-0 pointer-events-none"
                   style={{ bottom: `${Math.max(pos, feelsPos) + 36 + 28}px` }}
                 >
@@ -581,7 +581,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                 )}
               >
                 {isCurrent && (
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(52,211,153,0.4)] whitespace-nowrap">
+                  <div className="absolute top-[-32px] left-1/2 -translate-x-1/2 bg-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(52,211,153,0.4)] whitespace-nowrap">
                     NOW
                   </div>
                 )}
@@ -617,20 +617,14 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                   className="absolute bg-emerald-500/40 rounded-t-md z-10 border-t border-emerald-400/30"
                 />
 
-                {/* Permanent Labels */}
-                {gust > 0 && (
+                {/* Combined Gust/Wind Label */}
+                {(gust > 0 || speed > 0) && (
                   <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
-                    <span className="text-[11px] md:text-[13px] font-black text-emerald-300 tabular-nums drop-shadow-lg">
-                      {gust.toFixed(0)}
-                    </span>
-                  </div>
-                )}
-
-                {speed > 0 && Math.abs(gustHeight - speedHeight) > 16 && (
-                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${speedHeight + 38}px` }}>
-                    <span className="text-[10px] md:text-[11px] font-black text-white/80 tabular-nums drop-shadow-md">
-                      {speed.toFixed(0)}
-                    </span>
+                    <div className="flex items-center gap-0.5 font-black tabular-nums drop-shadow-lg leading-none">
+                      <span className="text-[11px] md:text-[13px] text-emerald-300">{gust.toFixed(0)}</span>
+                      <span className="text-[9px] text-white/30 mx-0.5 italic">/</span>
+                      <span className="text-[9px] md:text-[10px] text-white/70">{speed.toFixed(0)}</span>
+                    </div>
                   </div>
                 )}
 
@@ -714,7 +708,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
                 )}
               >
                 {isCurrent && (
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-yellow-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(250,204,21,0.4)] whitespace-nowrap">
+                  <div className="absolute top-[-32px] left-1/2 -translate-x-1/2 bg-yellow-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(250,204,21,0.4)] whitespace-nowrap">
                     NOW
                   </div>
                 )}
@@ -805,7 +799,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
                 )}
               >
                 {isCurrent && (
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-indigo-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(129,140,248,0.4)] whitespace-nowrap">
+                  <div className="absolute top-[-32px] left-1/2 -translate-x-1/2 bg-indigo-400 text-[8px] font-black px-1.5 py-0.5 rounded-full text-slate-950 z-30 shadow-[0_0_15px_rgba(129,140,248,0.4)] whitespace-nowrap">
                     NOW
                   </div>
                 )}
@@ -947,8 +941,8 @@ function ChartToggle({ label, icon, active, onClick, color }: { label: string, i
       onClick={onClick}
       className={cn(
         "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tighter transition-all",
-        active 
-          ? activeClass 
+        active
+          ? activeClass
           : "bg-white/[0.02] text-slate-500 border-white/5 hover:bg-white/5"
       )}
     >
