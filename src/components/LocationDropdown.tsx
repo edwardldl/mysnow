@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import skiAreasData from "@/data/ski-areas.json";
 import { Location } from "@/lib/types";
+import { isValidCoordinate } from "@/lib/api";
 
 interface SkiArea {
   name: string;
@@ -35,6 +36,7 @@ export default function LocationDropdown({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SkiArea[]>([]);
   const [coords, setCoords] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentLocation = locations[currentLocationId] || Object.values(locations)[0];
@@ -50,6 +52,11 @@ export default function LocationDropdown({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Clear error when inputs change
+  useEffect(() => {
+    setError(null);
+  }, [searchQuery, coords]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -72,13 +79,30 @@ export default function LocationDropdown({
   };
 
   const handleAdd = () => {
-    const [lat, lon] = coords.split(/[\s,]+/).filter(Boolean);
-    if (lat && lon) {
-      onAdd(searchQuery || `${parseFloat(lat).toFixed(2)}, ${parseFloat(lon).toFixed(2)}`, lat, lon);
+    setError(null);
+    const [latStr, lonStr] = coords.split(/[\s,]+/).filter(Boolean);
+    
+    if (!latStr || !lonStr) {
+      setError("Please enter both latitude and longitude.");
+      return;
+    }
+
+    const lat = parseFloat(latStr);
+    const lon = parseFloat(lonStr);
+
+    if (!isValidCoordinate(lat, lon)) {
+      setError("Invalid coordinates. Latitude must be -90 to 90, Longitude -180 to 180.");
+      return;
+    }
+
+    try {
+      onAdd(searchQuery || `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latStr, lonStr);
       setSearchQuery("");
       setCoords("");
       setView("list");
       setIsOpen(false);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to add location");
     }
   };
 
@@ -202,8 +226,21 @@ export default function LocationDropdown({
                     placeholder="Latitude, Longitude"
                     value={coords}
                     onChange={(e) => setCoords(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-accent-blue/50 transition-all font-sans"
+                    className={cn(
+                        "w-full bg-white/5 border rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none transition-all font-sans",
+                        error ? "border-accent-rose/50 bg-accent-rose/5" : "border-white/10 focus:border-accent-blue/50"
+                    )}
                   />
+
+                  {error && (
+                    <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[10px] font-bold text-accent-rose px-1"
+                    >
+                        {error}
+                    </motion.p>
+                  )}
 
                   <div className="flex gap-2 pt-2">
                     <button

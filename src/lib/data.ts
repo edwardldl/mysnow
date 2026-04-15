@@ -211,10 +211,12 @@ export function blendForecasts(
 
         const point: Partial<BlendedHour> = { time, dateObj };
 
-        if (hrrr && hrrrIdx !== -1) {
+        if (hrrr && hrrrIdx !== -1 && hrrr.hourly.temperature_2m[hrrrIdx] !== null) {
             point.model = 'HRRR';
             point.precipitation = hrrr.hourly.precipitation ? hrrr.hourly.precipitation[hrrrIdx] : 0;
-            point.liquidMM = point.precipitation || 0;
+            point.liquidMM = (hrrr.hourly.snowfall_water_equivalent && hrrr.hourly.snowfall_water_equivalent[hrrrIdx] != null)
+                ? hrrr.hourly.snowfall_water_equivalent[hrrrIdx]
+                : (point.precipitation || 0);
             point.temperature = hrrr.hourly.temperature_2m[hrrrIdx];
             point.dewPoint = hrrr.hourly.dew_point_2m ? hrrr.hourly.dew_point_2m[hrrrIdx] : null;
             point.windSpeed = hrrr.hourly.wind_speed_10m ? hrrr.hourly.wind_speed_10m[hrrrIdx] : null;
