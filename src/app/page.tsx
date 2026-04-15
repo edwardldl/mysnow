@@ -10,7 +10,7 @@ import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import ErrorBanner from "@/components/ErrorBanner";
-import { fetchWeatherData, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
+import { fetchWeatherData, fetchBulkWeatherData, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, RollingStats, WeatherDataStatus } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -78,12 +78,12 @@ export default function Home() {
 
   const loadData = useCallback(async (locId: string, model: string, algo: string, force = false) => {
     const cached = !force && hasValidCache(locId, model);
-    
+
     // Only show the full-screen loader if we don't have cached data
     if (!cached) {
       setIsLoading(true);
     }
-    
+
     setError(null);
     setIsOffline(!navigator.onLine);
     setRefreshKey(prev => prev + 1);
@@ -128,33 +128,21 @@ export default function Home() {
     }
   }, [currentLocationId, modelId, algoId, locations, loadData]);
 
-  // Prefetch data for all other locations when model changes or locations list is updated.
-  // This ensures that switching locations is instantaneous.
+  const lastPrefetchedModelRef = useRef<string | null>(null);
+  const lastPrefetchedLocsCountRef = useRef<number>(0);
+
+  // Background pre-fetch for all locations when model or locations list change
   useEffect(() => {
-    if (Object.keys(locations).length <= 1) return;
-
-    const prefetch = async () => {
-      // Small delay to let the initial primary fetch settle
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const locIds = Object.keys(locations);
-      for (const locId of locIds) {
-        // Skip current location because fetchWeatherData was already called for it by loadData
-        if (locId === currentLocationId) continue;
-
-        try {
-          // Fetch sequentially to avoid race conditions when updating location metadata in localStorage
-          await fetchWeatherData(locId, modelId);
-          // Small delay between locations to avoid hitting rate limits (429)
-          await new Promise(resolve => setTimeout(resolve, 500));
-        } catch (err) {
-          console.warn(`Prefetch failed for ${locId} with model ${modelId}:`, err);
-        }
+    const locIds = Object.keys(locations);
+    if (locIds.length > 0) {
+      if (lastPrefetchedModelRef.current !== modelId || lastPrefetchedLocsCountRef.current !== locIds.length) {
+        lastPrefetchedModelRef.current = modelId;
+        lastPrefetchedLocsCountRef.current = locIds.length;
+        fetchBulkWeatherData(locIds, modelId);
       }
-    };
+    }
+  }, [modelId, locations]);
 
-    prefetch();
-  }, [modelId, locations, currentLocationId]);
 
   // Dynamic header height measurement
   useEffect(() => {
