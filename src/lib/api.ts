@@ -319,7 +319,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
     } else if (modelMode === 'hrrr_ecmwf') {
         // 1. Fetch HRRR (0-48 hours)
         const hrrrUrl = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
-            `&hourly=${HOURLY_PARAMS}` +
+            `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
             `&forecast_days=3` +
@@ -532,7 +532,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
         }
     } else if (modelMode === 'hrrr_ecmwf') {
         const hrrrUrl = `${BASE_URL}?latitude=${latitudes}&longitude=${longitudes}` +
-            `&hourly=${HOURLY_PARAMS}` +
+            `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
             `&forecast_days=3` +
