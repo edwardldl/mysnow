@@ -379,6 +379,35 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             'gfs': 'gfs_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
+        
+        // Use dedicated high-resolution ECMWF endpoint if specified
+        if (modelMode === 'ecmwf') {
+            const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+                `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+                `&daily=sunrise,sunset` +
+                `&forecast_days=15` +
+                `&past_days=7` +
+                `&wind_speed_unit=ms` +
+                `&timezone=${timezone}`;
+                
+            try {
+                console.time(`fetchWeatherData:${modelMode}`);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(ecmwfUrl), metaPromise]);
+                console.timeEnd(`fetchWeatherData:${modelMode}`);
+                if (!res.ok) throw new Error(`ECMWF High-Res fetch failed: ${res.status}`);
+                const data = await res.json();
+                data.lastRunAvailabilityTime = lastRunAvailabilityTime;
+                updateCustomLocationMetadata(loc, data);
+                const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'ecmwf', status: 'fresh' as const };
+                setCachedData(cacheKey, result);
+                return result;
+            } catch (error) {
+                console.error("Error fetching ECMWF High-Res data:", error);
+                const stale = getCachedData(cacheKey, true);
+                if (stale) return { ...stale, status: 'stale' as const };
+                throw error;
+            }
+        }
 
         // Models like HRRR, NAM, and GEM have shorter leads.
         let days = 15;
@@ -589,6 +618,39 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             'gfs': 'gfs_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
+
+        // Use dedicated high-resolution ECMWF endpoint if specified
+        if (modelMode === 'ecmwf') {
+            const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${latitudes}&longitude=${longitudes}` +
+                `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+                `&daily=sunrise,sunset` +
+                `&forecast_days=15` +
+                `&past_days=7` +
+                `&wind_speed_unit=ms` +
+                `&timezone=${timezone}`;
+
+            try {
+                console.time(`fetchBulkWeatherData:${modelMode}`);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(ecmwfUrl), metaPromise]);
+                console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
+                if (!res.ok) throw new Error("Bulk ECMWF High-Res fetch failed");
+                const data = await res.json();
+                const results = Array.isArray(data) ? data : [data];
+                results.forEach((item, idx) => {
+                    const loc = toFetch[idx];
+                    if (!loc) return;
+                    item.lastRunAvailabilityTime = lastRunAvailabilityTime;
+                    updateCustomLocationMetadata(loc, item);
+                    const result = { hrrrData: null, ecmwfData: item, location: loc, mode: 'ecmwf' };
+                    setCachedData(`${loc.id}|ecmwf`, result);
+                });
+                return;
+            } catch (e) {
+                console.error("Bulk ECMWF High-Res prefetch failed:", e);
+                return;
+            }
+        }
+
         let days = 15;
         if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
         else if (omModel === 'ncep_nam_conus') days = 4;

@@ -13,7 +13,7 @@ export const MODELS: ConfigOption[] = [
   { id: "nbm", name: "NCEP NBM", desc: "2.5km / USA | 0-7d. Calibrated consensus blend.", badge: "0-7D" },
   { id: "nam", name: "NCEP NAM", desc: "3km / USA | 0-84h. Precise mesoscale tracking.", badge: "0-84H" },
   { id: "gem_regional", name: "GEM Regional", desc: "10km / N. Am | 1-3d. Reliable coastal storm bridge.", badge: "1-3D" },
-  { id: "ecmwf", name: "ECMWF IFS Global", desc: "25km / Global | 3-10d. Standard global consensus model.", badge: "3-10D" },
+  { id: "ecmwf", name: "ECMWF IFS HRES", desc: "9km / Global | 3-10d. Premier high-resolution global model.", badge: "3-10D" },
   { id: "gfs", name: "NCEP GFS", desc: "~13km / Global | 3-14+ d. Standard US global.", badge: "3-14D" },
 ];
 
