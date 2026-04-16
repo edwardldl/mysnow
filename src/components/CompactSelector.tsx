@@ -13,6 +13,7 @@ interface CompactSelectorProps {
   selectedId: string;
   onSelect: (id: string) => void;
   accentColor: "blue" | "rose" | "cyan" | "violet";
+  align?: "left" | "right" | "center";
 }
 
 export default function CompactSelector({
@@ -22,6 +23,7 @@ export default function CompactSelector({
   selectedId,
   onSelect,
   accentColor,
+  align = "right",
 }: CompactSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +52,12 @@ export default function CompactSelector({
     cyan: "bg-accent-cyan/20 text-accent-cyan border-accent-cyan/30",
     violet: "bg-violet-500/20 text-violet-400 border-violet-500/30",
   }[accentColor];
+  
+  const alignClasses = {
+    left: "left-0",
+    right: "right-0",
+    center: "left-1/2 -ml-32",
+  }[align];
 
   return (
     <div className="relative" ref={containerRef}>
@@ -94,7 +102,10 @@ export default function CompactSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute top-full right-0 mt-2 w-64 md:w-72 bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden"
+            className={cn(
+              "fixed md:absolute top-[calc(60px+var(--sat,0px)+8px)] md:top-full left-4 right-4 md:left-auto md:w-72 bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden",
+              "md:right-0" // Always right-aligned on desktop
+            )}
           >
             <div className="p-2 max-h-[400px] overflow-y-auto no-scrollbar">
               <div className="px-3 py-2 border-b border-white/5 mb-1">

@@ -126,7 +126,7 @@ export default function LocationDropdown({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute top-full right-0 mt-2 w-72 md:w-80 bg-slate-950/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100]"
+            className="fixed md:absolute top-[calc(60px+var(--sat,0px)+8px)] md:top-full left-4 right-4 md:left-auto md:right-0 md:ml-0 md:w-80 bg-slate-950/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100]"
           >
             {view === "list" ? (
               <div className="p-2">

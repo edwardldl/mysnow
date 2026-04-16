@@ -82,6 +82,7 @@ export function isValidCoordinate(lat?: number, lon?: number): boolean {
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/forecast';
+const ENSEMBLE_URL = 'https://ensemble-api.open-meteo.com/v1/ensemble';
 const META_BASE_URL = 'https://api.open-meteo.com/data';
 
 /** Mapping of internal models to Open-Meteo static metadata names */
@@ -94,6 +95,8 @@ const MODEL_META_MAP: Record<string, string> = {
     'nam': 'ncep_nam_conus',
     'gem_regional': 'cmc_gem_rdps',
     'ecmwf': 'ecmwf_ifs',
+    'ecmwf_aifs': 'ecmwf_aifs025',
+    'ecmwf_aifs_ensemble': 'ecmwf_aifs025',
     'gfs': 'ncep_gfs025'
 };
 
@@ -147,14 +150,118 @@ function getCachedData(key: string, allowExpired = false): WeatherCacheItem | nu
     }
 }
 
+/**
+ * Removes the oldest weather cache entries from localStorage to free up space.
+ * returns true if it cleared something, false otherwise.
+ */
+function evictOldestCacheEntries(neededEntries = 5): boolean {
+    if (typeof window === 'undefined') return false;
+    try {
+        const weatherKeys: { key: string, timestamp: number }[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(WEATHER_CACHE_PREFIX)) {
+                try {
+                    const item = JSON.parse(localStorage.getItem(key) || '{}');
+                    if (item.timestamp) {
+                        weatherKeys.push({ key, timestamp: item.timestamp });
+                    }
+                } catch (e) {
+                    // If parsing fails, just treat it as very old or corrupt and potentially delete it
+                    weatherKeys.push({ key, timestamp: 0 });
+                }
+            }
+        }
+
+        if (weatherKeys.length === 0) return false;
+
+        // Sort by timestamp (oldest first)
+        weatherKeys.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Remove the oldest entries
+        const toRemove = weatherKeys.slice(0, Math.min(neededEntries, weatherKeys.length));
+        toRemove.forEach(entry => localStorage.removeItem(entry.key));
+        
+        console.warn(`Cache quota exceeded. Evicted ${toRemove.length} oldest weather entries.`);
+        return true;
+    } catch (e) {
+        console.error("Error during cache eviction:", e);
+        return false;
+    }
+}
+
 function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): void {
     if (typeof window === 'undefined') return;
     try {
         const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
         localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
-    } catch (e) {
+    } catch (e: any) {
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            const cleared = evictOldestCacheEntries(8); // Clear a decent chunk
+            if (cleared) {
+                try {
+                    // Try one more time after internal cleanup
+                    const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
+                    localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
+                    return;
+                } catch (retryError) {
+                    console.error("Critical: Still out of space after eviction.", retryError);
+                }
+            }
+        }
         console.error("Error writing weather cache:", e);
     }
+}
+
+/**
+ * Averages ensemble member data into a single OpenMeteoResponse.
+ */
+function averageEnsembleData(data: any): OpenMeteoResponse {
+    const members = Array.isArray(data) ? data : [data];
+    if (members.length === 0) throw new Error("No ensemble data received");
+
+    const first = members[0];
+    const result: OpenMeteoResponse = {
+        hourly: {
+            time: first.hourly.time,
+            temperature_2m: []
+        },
+        daily: first.daily,
+        elevation: first.elevation,
+        timezone: first.timezone,
+        timezone_abbreviation: first.timezone_abbreviation
+    };
+
+    const keys = Object.keys(first.hourly).filter(k => k !== 'time');
+    const memberCount = members.length;
+
+    keys.forEach(key => {
+        const firstVal = first.hourly[key];
+        if (!Array.isArray(firstVal)) return;
+
+        const averaged = new Array(firstVal.length).fill(0);
+        members.forEach(m => {
+            const mVal = m.hourly[key];
+            if (Array.isArray(mVal)) {
+                for (let i = 0; i < mVal.length; i++) {
+                    averaged[i] += (mVal[i] || 0);
+                }
+            }
+        });
+
+        result.hourly[key] = averaged.map(v => v / memberCount);
+    });
+
+    return result;
+}
+
+async function fetchEnsembleData(url: string, lastRunAvailabilityTime?: number): Promise<OpenMeteoResponse> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Ensemble fetch failed: ${res.status}`);
+    const data = await res.json();
+    const averaged = averageEnsembleData(data);
+    averaged.lastRunAvailabilityTime = lastRunAvailabilityTime;
+    return averaged;
 }
 
 export function hasValidCache(locationKey: string, modelMode: string): boolean {
@@ -225,6 +332,21 @@ const HOURLY_PARAMS = [
     PRESSURE_LEVELS.map(l => `vertical_velocity_${l}`).join(','),
     PRESSURE_LEVELS.map(l => `cloud_cover_${l}`).join(','),
     PRESSURE_LEVELS.map(l => `wind_speed_${l}`).join(',')
+].join(",");
+
+const ENSEMBLE_HOURLY_PARAMS = [
+    "snowfall",
+    "precipitation",
+    "temperature_2m",
+    "dew_point_2m",
+    "wind_speed_10m",
+    "snow_depth",
+    "relative_humidity_2m",
+    "freezing_level_height",
+    "weather_code",
+    "snowfall_water_equivalent",
+    "temperature_850hPa",
+    "temperature_700hPa"
 ].join(",");
 
 const HISTORICAL_HOURLY_PARAMS = [
@@ -376,9 +498,70 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             'nam': 'ncep_nam_conus',
             'gem_regional': 'gem_regional',
             'ecmwf': 'ecmwf_ifs',
+            'ecmwf_aifs': 'ecmwf_aifs025_single',
+            'ecmwf_aifs_ensemble': 'ecmwf_aifs025_ensemble',
             'gfs': 'gfs_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
+        
+        // Use dedicated high-resolution ECMWF endpoint if specified
+        if (modelMode === 'ecmwf') {
+            const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+                `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+                `&daily=sunrise,sunset` +
+                `&forecast_days=15` +
+                `&past_days=7` +
+                `&wind_speed_unit=ms` +
+                `&timezone=${timezone}`;
+                
+            try {
+                console.time(`fetchWeatherData:${modelMode}`);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(ecmwfUrl), metaPromise]);
+                console.timeEnd(`fetchWeatherData:${modelMode}`);
+                if (!res.ok) throw new Error(`ECMWF High-Res fetch failed: ${res.status}`);
+                const data = await res.json();
+                data.lastRunAvailabilityTime = lastRunAvailabilityTime;
+                updateCustomLocationMetadata(loc, data);
+                const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'ecmwf', status: 'fresh' as const };
+                setCachedData(cacheKey, result);
+                return result;
+            } catch (error) {
+                console.error("Error fetching ECMWF High-Res data:", error);
+                const stale = getCachedData(cacheKey, true);
+                if (stale) return { ...stale, status: 'stale' as const };
+                throw error;
+            }
+        }
+
+        // Use dedicated Ensemble API for ensemble models
+        if (modelMode.endsWith('_ensemble')) {
+            const url = `${ENSEMBLE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+                `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
+                `&daily=sunrise,sunset` +
+                `&models=${omModel}` +
+                `&forecast_days=15` +
+                `&past_days=7` +
+                `&wind_speed_unit=ms` +
+                `&timezone=${timezone}`;
+
+            try {
+                console.time(`fetchWeatherData:${modelMode}`);
+                const [lastRunAvailabilityTime] = await Promise.all([metaPromise]);
+                const data = await fetchEnsembleData(url, lastRunAvailabilityTime);
+                console.timeEnd(`fetchWeatherData:${modelMode}`);
+                
+                updateCustomLocationMetadata(loc, data);
+                const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode, status: 'fresh' as const };
+                const { status, ...cacheable } = result;
+                setCachedData(cacheKey, cacheable);
+                return result;
+            } catch (error) {
+                console.error(`Error fetching ensemble data ${omModel}:`, error);
+                const stale = getCachedData(cacheKey, true);
+                if (stale) return { ...stale, status: 'stale' as const };
+                throw error;
+            }
+        }
 
         // Models like HRRR, NAM, and GEM have shorter leads.
         let days = 15;
@@ -586,9 +769,81 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             'nam': 'ncep_nam_conus',
             'gem_regional': 'gem_regional',
             'ecmwf': 'ecmwf_ifs',
+            'ecmwf_aifs': 'ecmwf_aifs025_single',
+            'ecmwf_aifs_ensemble': 'ecmwf_aifs025_ensemble',
             'gfs': 'gfs_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
+
+        // Use dedicated high-resolution ECMWF endpoint if specified
+        if (modelMode === 'ecmwf') {
+            const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${latitudes}&longitude=${longitudes}` +
+                `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
+                `&daily=sunrise,sunset` +
+                `&forecast_days=15` +
+                `&past_days=7` +
+                `&wind_speed_unit=ms` +
+                `&timezone=${timezone}`;
+
+            try {
+                console.time(`fetchBulkWeatherData:${modelMode}`);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(ecmwfUrl), metaPromise]);
+                console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
+                if (!res.ok) throw new Error("Bulk ECMWF High-Res fetch failed");
+                const data = await res.json();
+                const results = Array.isArray(data) ? data : [data];
+                results.forEach((item, idx) => {
+                    const loc = toFetch[idx];
+                    if (!loc) return;
+                    item.lastRunAvailabilityTime = lastRunAvailabilityTime;
+                    updateCustomLocationMetadata(loc, item);
+                    const result = { hrrrData: null, ecmwfData: item, location: loc, mode: 'ecmwf' };
+                    setCachedData(`${loc.id}|ecmwf`, result);
+                });
+                return;
+            } catch (e) {
+                console.error("Bulk ECMWF High-Res prefetch failed:", e);
+                return;
+            }
+        }
+
+        if (modelMode.endsWith('_ensemble')) {
+            const url = `${ENSEMBLE_URL}?latitude=${latitudes}&longitude=${longitudes}` +
+                `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
+                `&daily=sunrise,sunset` +
+                `&models=${omModel}` +
+                `&forecast_days=15` +
+                `&past_days=7` +
+                `&wind_speed_unit=ms` +
+                `&timezone=${timezone}`;
+
+            try {
+                console.time(`fetchBulkWeatherData:${modelMode}`);
+                const [lastRunAvailabilityTime] = await Promise.all([metaPromise]);
+                const res = await fetch(url);
+                console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
+                if (!res.ok) throw new Error(`Bulk Ensemble fetch failed: ${res.status}`);
+                const data = await res.json();
+                
+                // For bulk, data might be an array of arrays (one per location, each containing members)
+                const locationResults = Array.isArray(data) ? data : [data];
+                
+                locationResults.forEach((locData, idx) => {
+                    const loc = toFetch[idx];
+                    if (!loc) return;
+                    const averaged = averageEnsembleData(locData);
+                    averaged.lastRunAvailabilityTime = lastRunAvailabilityTime;
+                    updateCustomLocationMetadata(loc, averaged);
+                    const result = { hrrrData: null, ecmwfData: averaged, location: loc, mode: modelMode };
+                    setCachedData(`${loc.id}|${modelMode}`, result);
+                });
+                return;
+            } catch (e) {
+                console.error(`Bulk ensemble prefetch failed for ${omModel}:`, e);
+                return;
+            }
+        }
+
         let days = 15;
         if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
         else if (omModel === 'ncep_nam_conus') days = 4;

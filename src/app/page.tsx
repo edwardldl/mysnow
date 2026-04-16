@@ -349,6 +349,8 @@ export default function Home() {
                 isDaily={displayData?.isDaily || false}
                 rollingStats={rollingStats}
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
+                latitude={locations[currentLocationId]?.latitude}
+                longitude={locations[currentLocationId]?.longitude}
                 timezone={locations[currentLocationId]?.timezone}
                 dataStatus={dataStatus}
                 className={cn(

@@ -88,6 +88,7 @@ export default function Header({
             selectedId={modelId}
             onSelect={setModelId}
             accentColor="blue"
+            align="center"
           />
 
           <CompactSelector
@@ -97,6 +98,7 @@ export default function Header({
             selectedId={algoId}
             onSelect={setAlgoId}
             accentColor="violet"
+            align="right"
           />
 
           <button
