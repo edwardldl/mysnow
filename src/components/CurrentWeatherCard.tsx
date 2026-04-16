@@ -21,6 +21,8 @@ interface CurrentWeatherCardProps {
   currentData: (BlendedHour & { minTemp?: number; maxTemp?: number }) | null;
   rollingStats: RollingStats | null;
   locationName: string;
+  latitude?: number;
+  longitude?: number;
   isDaily?: boolean;
   timezone?: string;
   dataStatus?: WeatherDataStatus;
@@ -31,12 +33,21 @@ export default function CurrentWeatherCard({
   currentData, 
   rollingStats, 
   locationName, 
+  latitude,
+  longitude,
   isDaily = false,
   timezone = 'America/Los_Angeles',
   dataStatus = 'fresh',
   className 
 }: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
+
+  const formatCoord = (val: number | undefined, isLat: boolean) => {
+    if (val === undefined) return null;
+    const abs = Math.abs(val).toFixed(3);
+    const dir = isLat ? (val >= 0 ? 'N' : 'S') : (val >= 0 ? 'E' : 'W');
+    return `${abs}°${dir}`;
+  };
   
   if (!currentData) return null;
 
@@ -86,6 +97,14 @@ export default function CurrentWeatherCard({
               <h2 className="text-xl md:text-4xl font-black text-white tracking-tighter truncate">
                 {locationName}
               </h2>
+              
+              {(latitude !== undefined && longitude !== undefined) && (
+                <div className="flex items-center gap-2 text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest opacity-70 mb-1 md:mb-2">
+                  <span>{formatCoord(latitude, true)}</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-700" />
+                  <span>{formatCoord(longitude, false)}</span>
+                </div>
+              )}
               
               <div className="flex items-center md:items-baseline gap-3 md:gap-4 mt-0.5">
                 <span className="text-4xl md:text-8xl font-black text-white tracking-tighter drop-shadow-sm">
