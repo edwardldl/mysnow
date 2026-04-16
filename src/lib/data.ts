@@ -477,6 +477,8 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             'GEM_REGIONAL': 'GEM Reg.',
             'NCEP_NBM_CONUS': 'NBM',
             'ECMWF_IFS': 'ECMWF',
+            'ECMWF_AIFS025_SINGLE': 'AIFS',
+            'ECMWF_AIFS025_ENSEMBLE': 'AIFS Ens',
             'GFS_GLOBAL': 'GFS'
         };
         day.modelString = Array.from(day.models)
