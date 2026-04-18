@@ -64,7 +64,7 @@ export default function CompactSelector({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 px-1.5 h-9 md:px-3 md:h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group",
+          "flex items-center gap-1 px-1 h-9 sm:px-1.5 sm:gap-2 md:px-3 md:h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group",
           isOpen && "ring-1 ring-white/20 bg-white/10"
         )}
         aria-label={label}
@@ -76,16 +76,16 @@ export default function CompactSelector({
           <Icon className="w-3 h-3 md:w-3.5 md:h-3.5" />
         </div>
         
-        {/* Mobile: Hidden, Desktop: Shown */}
+        {/* Mobile: Hidden, Tablet & Desktop: Shown */}
         <div className="hidden md:flex flex-col items-start gap-0">
           <span className="text-[10px] uppercase tracking-widest text-slate-500 font-black leading-none mb-0.5">
             {label}
           </span>
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-xs font-bold text-white truncate max-w-[100px] leading-none">
+            <span className="hidden md:block text-xs font-bold text-white truncate max-w-[60px] lg:max-w-[100px] leading-none">
               {selectedOption.name}
             </span>
-            <ChevronDown className={cn("w-3 h-3 text-slate-500 transition-transform duration-300", isOpen && "rotate-180")} />
+            <ChevronDown className={cn("hidden lg:block w-3 h-3 text-slate-500 transition-transform duration-300", isOpen && "rotate-180")} />
           </div>
         </div>
 
