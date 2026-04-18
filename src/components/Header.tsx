@@ -49,10 +49,10 @@ export default function Header({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(60px+var(--sat,0px))] md:h-[calc(72px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-5 lg:px-8 h-full flex items-center justify-center min-[400px]:justify-between gap-1.5 sm:gap-2 lg:gap-4">
         {/* Left Column: Branding */}
-        <div className="flex items-center gap-2 md:gap-4 shrink-0">
-          <div className="flex items-center gap-2 md:gap-3">
+        <div className="hidden min-[400px]:flex items-center gap-2 lg:gap-4 shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3">
             <div className={cn(
               "p-1.5 md:p-2 rounded-lg md:rounded-xl neon-glow-cyan text-white transition-colors duration-500",
               isOffline ? "bg-slate-700 neon-glow-slate" : "bg-accent-blue neon-glow-cyan"
@@ -63,11 +63,11 @@ export default function Header({
                 <Snowflake className="w-4 h-4 md:w-5 md:h-5 animate-pulse-soft" />
               )}
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <h1 className="text-base md:text-lg font-bold tracking-tight text-white m-0 leading-tight">
                 MySnow
               </h1>
-              <p className="text-[7px] md:text-[8px] uppercase tracking-widest text-slate-500 font-bold opacity-80">
+              <p className="hidden lg:block text-[7px] md:text-[8px] uppercase tracking-widest text-slate-500 font-bold opacity-80">
                 Advanced Ski Forecasting
               </p>
             </div>
@@ -75,7 +75,7 @@ export default function Header({
         </div>
 
         {/* Right Column: Actions */}
-        <div className="flex items-center gap-2 md:gap-3 shrink-0 ml-auto">
+        <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 shrink-0 min-[400px]:ml-auto">
 
           <LocationDropdown
             locations={locations}
