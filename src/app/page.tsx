@@ -351,6 +351,8 @@ export default function Home() {
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
                 latitude={locations[currentLocationId]?.latitude}
                 longitude={locations[currentLocationId]?.longitude}
+                minElevationM={locations[currentLocationId]?.minElevationM}
+                maxElevationM={locations[currentLocationId]?.maxElevationM}
                 timezone={locations[currentLocationId]?.timezone}
                 dataStatus={dataStatus}
                 className={cn(

@@ -8,6 +8,8 @@ const DEFAULT_LOCATIONS: Record<string, Location> = {
         longitude: -120.245402,
         elevationFt: 8100,
         elevationM: 2470,
+        minElevationM: 1896,
+        maxElevationM: 2666,
         timezone: 'America/Los_Angeles',
         isCustom: false
     }
@@ -99,6 +101,27 @@ const MODEL_META_MAP: Record<string, string> = {
     'ecmwf_aifs_ensemble': 'ecmwf_aifs025',
     'gfs': 'ncep_gfs025'
 };
+
+/**
+ * Calculates the elevation parameter for Open-Meteo.
+ * Returns the average of min and max elevation if available,
+ * otherwise falls back to single elevation or 'nan' for grid default.
+ */
+function getApiElevation(loc: Location): string {
+    const min = loc.minElevationM;
+    const max = loc.maxElevationM;
+
+    if (min != null && max != null) {
+        return ((min + max) / 2).toString();
+    }
+    
+    // Fallback if min/max not available
+    if (typeof loc.elevationM === 'number') {
+        return loc.elevationM.toString();
+    }
+    
+    return 'nan';
+}
 
 async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
     const metaKey = MODEL_META_MAP[modelKey];
@@ -406,6 +429,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
     if (modelMode === 'best_match') {
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            `&elevation=${getApiElevation(loc)}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=best_match` +
@@ -441,6 +465,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
     } else if (modelMode === 'hrrr_ecmwf') {
         // 1. Fetch HRRR (0-48 hours)
         const hrrrUrl = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            `&elevation=${getApiElevation(loc)}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
@@ -451,6 +476,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
         // 2. Fetch ECMWF IFS (Up to 16 days, we'll fetch 15)
         const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            `&elevation=${getApiElevation(loc)}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&forecast_days=15` +
@@ -507,6 +533,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         // Use dedicated high-resolution ECMWF endpoint if specified
         if (modelMode === 'ecmwf') {
             const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+                `&elevation=${getApiElevation(loc)}` +
                 `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
                 `&daily=sunrise,sunset` +
                 `&forecast_days=15` +
@@ -536,6 +563,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         // Use dedicated Ensemble API for ensemble models
         if (modelMode.endsWith('_ensemble')) {
             const url = `${ENSEMBLE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+                `&elevation=${getApiElevation(loc)}` +
                 `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
                 `&daily=sunrise,sunset` +
                 `&models=${omModel}` +
@@ -571,6 +599,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         else if (omModel === 'gem_regional') days = 4;
 
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            `&elevation=${getApiElevation(loc)}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=${omModel}` +
@@ -632,6 +661,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
     const metaPromise = fetchModelStatus(model);
 
     const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        `&elevation=${getApiElevation(loc)}` +
         `&start_date=${startDate}&end_date=${endDate}` +
         `&hourly=${HISTORICAL_HOURLY_PARAMS},snowfall_water_equivalent` +
         `&daily=sunrise,sunset` +
@@ -680,11 +710,13 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
 
     const latitudes = toFetch.map(l => l.latitude).join(',');
     const longitudes = toFetch.map(l => l.longitude).join(',');
+    const elevations = toFetch.map(l => getApiElevation(l)).join(',');
     const timezone = "auto";
     const metaPromise = fetchModelStatus(modelMode);
 
     if (modelMode === 'best_match') {
         const url = `${BASE_URL}?latitude=${latitudes}&longitude=${longitudes}` +
+            `&elevation=${elevations}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=best_match` +
@@ -715,6 +747,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
         }
     } else if (modelMode === 'hrrr_ecmwf') {
         const hrrrUrl = `${BASE_URL}?latitude=${latitudes}&longitude=${longitudes}` +
+            `&elevation=${elevations}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&models=gfs_hrrr` +
@@ -724,6 +757,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             `&timezone=${timezone}`;
 
         const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${latitudes}&longitude=${longitudes}` +
+            `&elevation=${elevations}` +
             `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
             `&daily=sunrise,sunset` +
             `&forecast_days=15` +
@@ -778,6 +812,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
         // Use dedicated high-resolution ECMWF endpoint if specified
         if (modelMode === 'ecmwf') {
             const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${latitudes}&longitude=${longitudes}` +
+                `&elevation=${elevations}` +
                 `&hourly=${HOURLY_PARAMS},snowfall_water_equivalent` +
                 `&daily=sunrise,sunset` +
                 `&forecast_days=15` +

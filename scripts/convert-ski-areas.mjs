@@ -58,8 +58,8 @@ try {
     region: item.regions || '',
     lat: item.lat || '',
     lon: item.lng || '', // Mapping lng to lon
-    min_elevation_m: item.min_elevation_m ? parseInt(item.min_elevation_m, 10) : null,
-    max_elevation_m: item.max_elevation_m ? parseInt(item.max_elevation_m, 10) : null
+    minElevationM: item.min_elevation_m ? parseInt(item.min_elevation_m, 10) : null,
+    maxElevationM: item.max_elevation_m ? parseInt(item.max_elevation_m, 10) : null
   }));
 
   fs.mkdirSync(path.dirname(jsonPath), { recursive: true });
