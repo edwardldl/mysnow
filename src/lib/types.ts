@@ -59,6 +59,8 @@ export interface Location {
     elevationM: number | string;
     /** Feet above sea level. '--' for custom locations before the first API fetch. */
     elevationFt: number | string;
+    minElevationM?: number;
+    maxElevationM?: number;
     timezone?: string;
     isCustom?: boolean;
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Snowflake, Cpu, Zap, WifiOff } from "lucide-react";
+import { RefreshCw, Snowflake, Cpu, Zap, WifiOff, Mountain } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { BlendedHour, Location } from "@/lib/types";
 import LocationDropdown from "./LocationDropdown";
 import CompactSelector from "./CompactSelector";
-import { MODELS, ALGORITHMS } from "@/lib/constants";
+import { MODELS, ALGORITHMS, ELEVATION_MODES } from "@/lib/constants";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -21,6 +21,8 @@ interface HeaderProps {
   setModelId: (id: string) => void;
   algoId: string;
   setAlgoId: (id: string) => void;
+  elevationMode: string;
+  setElevationMode: (mode: string) => void;
   isOffline?: boolean;
 }
 
@@ -37,6 +39,8 @@ export default function Header({
   setModelId,
   algoId,
   setAlgoId,
+  elevationMode,
+  setElevationMode,
   isOffline,
 }: HeaderProps) {
 
@@ -98,6 +102,16 @@ export default function Header({
             selectedId={algoId}
             onSelect={setAlgoId}
             accentColor="violet"
+            align="center"
+          />
+
+          <CompactSelector
+            label="Elevation"
+            icon={Mountain}
+            options={ELEVATION_MODES}
+            selectedId={elevationMode}
+            onSelect={setElevationMode}
+            accentColor="cyan"
             align="right"
           />
 

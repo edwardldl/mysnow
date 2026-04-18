@@ -10,7 +10,7 @@ import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import ErrorBanner from "@/components/ErrorBanner";
-import { fetchWeatherData, fetchBulkWeatherData, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
+import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, RollingStats, WeatherDataStatus } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +21,7 @@ export default function Home() {
   const [currentLocationId, setCurrentLocationId] = useState("palisades");
   const [modelId, setModelId] = useState("best_match");
   const [algoId, setAlgoId] = useState("hybrid");
+  const [elevationMode, setElevationMode] = useState<string>("avg");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const lastFetchKeyRef = useRef<string | null>(null);
@@ -55,6 +56,10 @@ export default function Home() {
     if (lastLocId && getLocations()[lastLocId]) {
       setCurrentLocationId(lastLocId);
     }
+    const lastElevationMode = localStorage.getItem('mysnow_elevation_mode');
+    if (lastElevationMode) {
+      setElevationMode(lastElevationMode);
+    }
   }, []);
 
   // Persist location selection
@@ -63,6 +68,13 @@ export default function Home() {
       setLastLocationId(currentLocationId);
     }
   }, [currentLocationId]);
+
+  // Persist elevation mode
+  useEffect(() => {
+    if (elevationMode) {
+      localStorage.setItem('mysnow_elevation_mode', elevationMode);
+    }
+  }, [elevationMode]);
 
   // Sync offline status
   useEffect(() => {
@@ -76,8 +88,8 @@ export default function Home() {
     };
   }, []);
 
-  const loadData = useCallback(async (locId: string, model: string, algo: string, force = false) => {
-    const cached = !force && hasValidCache(locId, model);
+  const loadData = useCallback(async (locId: string, model: string, algo: string, elevation: string = 'avg', force = false) => {
+    const cached = !force && hasValidCache(locId, model, elevation);
 
     // Only show the full-screen loader if we don't have cached data
     if (!cached) {
@@ -88,7 +100,7 @@ export default function Home() {
     setIsOffline(!navigator.onLine);
     setRefreshKey(prev => prev + 1);
     try {
-      const data = await fetchWeatherData(locId, model, force);
+      const data = await fetchWeatherData(locId, model, elevation, force);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
       const grouped = groupData(blended, data.location.timezone);
       setForecastDays(grouped);
@@ -121,12 +133,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const fetchKey = `${currentLocationId}-${modelId}-${algoId}`;
+    const fetchKey = `${currentLocationId}-${modelId}-${algoId}-${elevationMode}`;
     if (Object.keys(locations).length > 0 && lastFetchKeyRef.current !== fetchKey) {
       lastFetchKeyRef.current = fetchKey;
-      loadData(currentLocationId, modelId, algoId);
+      loadData(currentLocationId, modelId, algoId, elevationMode);
     }
-  }, [currentLocationId, modelId, algoId, locations, loadData]);
+  }, [currentLocationId, modelId, algoId, elevationMode, locations, loadData]);
 
   const lastPrefetchedModelRef = useRef<string | null>(null);
   const lastPrefetchedLocsCountRef = useRef<number>(0);
@@ -135,13 +147,20 @@ export default function Home() {
   useEffect(() => {
     const locIds = Object.keys(locations);
     if (locIds.length > 0) {
-      if (lastPrefetchedModelRef.current !== modelId || lastPrefetchedLocsCountRef.current !== locIds.length) {
-        lastPrefetchedModelRef.current = modelId;
+      if (lastPrefetchedModelRef.current !== `${modelId}|${elevationMode}` || lastPrefetchedLocsCountRef.current !== locIds.length) {
+        lastPrefetchedModelRef.current = `${modelId}|${elevationMode}`;
         lastPrefetchedLocsCountRef.current = locIds.length;
-        fetchBulkWeatherData(locIds, modelId);
+        fetchBulkWeatherData(locIds, modelId, elevationMode);
       }
     }
-  }, [modelId, locations]);
+  }, [modelId, elevationMode, locations]);
+
+  // Proactively fetch all elevations for the current location to make switching instant
+  useEffect(() => {
+    if (Object.keys(locations).length > 0 && currentLocationId) {
+      fetchElevationTriad(currentLocationId, modelId);
+    }
+  }, [currentLocationId, modelId, locations]);
 
 
   // Dynamic header height measurement
@@ -161,9 +180,9 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const handleAddLocation = (name: string, lat: string, lon: string) => {
+  const handleAddLocation = (name: string, lat: string, lon: string, minElev?: number, maxElev?: number) => {
     const id = name.toLowerCase().replace(/\s+/g, '-');
-    const newLocs = saveLocation(id, name, lat, lon);
+    const newLocs = saveLocation(id, name, lat, lon, minElev, maxElev);
     setLocations(newLocs);
     setCurrentLocationId(id);
   };
@@ -282,7 +301,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header
-        onRefresh={() => loadData(currentLocationId, modelId, algoId, true)}
+        onRefresh={() => loadData(currentLocationId, modelId, algoId, elevationMode, true)}
         isLoading={isLoading}
         isOffline={isOffline}
         currentData={currentHourData}
@@ -295,6 +314,8 @@ export default function Home() {
         setModelId={setModelId}
         algoId={algoId}
         setAlgoId={setAlgoId}
+        elevationMode={elevationMode}
+        setElevationMode={setElevationMode}
       />
 
       <div
@@ -351,6 +372,8 @@ export default function Home() {
                 locationName={locations[currentLocationId]?.name || "Palisades Tahoe"}
                 latitude={locations[currentLocationId]?.latitude}
                 longitude={locations[currentLocationId]?.longitude}
+                minElevationM={locations[currentLocationId]?.minElevationM}
+                maxElevationM={locations[currentLocationId]?.maxElevationM}
                 timezone={locations[currentLocationId]?.timezone}
                 dataStatus={dataStatus}
                 className={cn(
@@ -367,7 +390,7 @@ export default function Home() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => loadData(currentLocationId, modelId, algoId)}
+                      onClick={() => loadData(currentLocationId, modelId, algoId, elevationMode)}
                       className="mt-6 px-6 py-2 bg-accent-rose text-white rounded-full font-bold text-sm shadow-lg shadow-rose-500/20"
                     >
                       Retry

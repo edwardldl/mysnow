@@ -28,3 +28,9 @@ export const ALGORITHMS: ConfigOption[] = [
   { id: "simple", name: "Kuchera (Vanilla)", desc: "Piecewise regression on max temp aloft." },
   { id: "standard", name: "10:1 (Fixed)", desc: "Constant ratio: 1cm snow per 1mm liquid." },
 ];
+
+export const ELEVATION_MODES: ConfigOption[] = [
+  { id: "min", name: "Base (Min)", desc: "Simulate for the lowest point of the resort." },
+  { id: "avg", name: "Mid (Avg)", desc: "Simulate for the resort median elevation." },
+  { id: "max", name: "Peak (Max)", desc: "Simulate for the highest mountain peaks." },
+];

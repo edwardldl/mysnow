@@ -10,7 +10,8 @@ import {
   Navigation2,
   Clock,
   Waves,
-  CloudRain
+  CloudRain,
+  Mountain
 } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { BlendedHour, RollingStats, WeatherDataStatus } from "@/lib/types";
@@ -26,6 +27,8 @@ interface CurrentWeatherCardProps {
   isDaily?: boolean;
   timezone?: string;
   dataStatus?: WeatherDataStatus;
+  minElevationM?: number;
+  maxElevationM?: number;
   className?: string;
 }
 
@@ -38,6 +41,8 @@ export default function CurrentWeatherCard({
   isDaily = false,
   timezone = 'America/Los_Angeles',
   dataStatus = 'fresh',
+  minElevationM,
+  maxElevationM,
   className 
 }: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
@@ -103,6 +108,17 @@ export default function CurrentWeatherCard({
                   <span>{formatCoord(latitude, true)}</span>
                   <span className="w-1 h-1 rounded-full bg-slate-700" />
                   <span>{formatCoord(longitude, false)}</span>
+                </div>
+              )}
+              
+              {(minElevationM !== undefined && maxElevationM !== undefined) && (
+                <div className="flex items-center gap-2 text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest opacity-70 mb-1 md:mb-2">
+                  <Mountain className="w-3 h-3 text-accent-cyan" />
+                  <span>{minElevationM}m</span>
+                  <span className="text-slate-700 italic lowercase font-medium">to</span>
+                  <span>{maxElevationM}m</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-700 mx-1" />
+                  <span className="text-white/60">avg: {Math.round((minElevationM + maxElevationM) / 2)}m</span>
                 </div>
               )}
               

@@ -14,13 +14,15 @@ interface SkiArea {
   lon: string;
   region: string;
   country: string;
+  minElevationM?: number;
+  maxElevationM?: number;
 }
 
 interface LocationDropdownProps {
   locations: Record<string, Location>;
   currentLocationId: string;
   onSelect: (id: string) => void;
-  onAdd: (name: string, lat: string, lon: string) => void;
+  onAdd: (name: string, lat: string, lon: string, minElev?: number, maxElev?: number) => void;
   onRemove: (id: string) => void;
 }
 
@@ -36,6 +38,7 @@ export default function LocationDropdown({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SkiArea[]>([]);
   const [coords, setCoords] = useState("");
+  const [selectedArea, setSelectedArea] = useState<SkiArea | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +78,7 @@ export default function LocationDropdown({
   const handleSelectArea = (area: SkiArea) => {
     setSearchQuery(area.name);
     setCoords(`${area.lat}, ${area.lon}`);
+    setSelectedArea(area);
     setSearchResults([]);
   };
 
@@ -96,9 +100,13 @@ export default function LocationDropdown({
     }
 
     try {
-      onAdd(searchQuery || `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latStr, lonStr);
+      const minElev = selectedArea?.minElevationM;
+      const maxElev = selectedArea?.maxElevationM;
+
+      onAdd(searchQuery || `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latStr, lonStr, minElev, maxElev);
       setSearchQuery("");
       setCoords("");
+      setSelectedArea(null);
       setView("list");
       setIsOpen(false);
     } catch (err: unknown) {
