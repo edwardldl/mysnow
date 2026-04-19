@@ -21,9 +21,13 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
 
   // Synchronize scrolling across multiple chart containers
   const handleScroll = (e: React.UIEvent<HTMLDivElement>, index: number) => {
-    const scrollLeft = (e.target as HTMLDivElement).scrollLeft;
+    const target = e.target as HTMLDivElement;
+    const scrollLeft = target.scrollLeft;
+
     scrollRefs.current.forEach((ref, i) => {
-      if (ref && i !== index) {
+      // ONLY update if it's a different container AND its scrollLeft is not already correct
+      // This prevents recursive event loops that kill momentum
+      if (ref && i !== index && Math.abs(ref.scrollLeft - scrollLeft) > 1) {
         ref.scrollLeft = scrollLeft;
       }
     });
@@ -326,7 +330,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
         >
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
@@ -444,7 +448,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
         >
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
@@ -587,7 +591,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
         >
           {day.hourly.map((h, i) => {
             const speed = getSpeedKmH(h.windSpeed);
@@ -716,7 +720,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
         >
           {day.hourly.map((h, i) => {
             const uv = h.uvIndex ?? 0;
@@ -807,7 +811,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8 [overscroll-behavior-x:contain]"
+          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
         >
           {day.hourly.map((h, i) => {
             const visKm = (h.visibility ?? 0) / 1000;
@@ -880,7 +884,7 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
       <div
         ref={scrollRef}
         onScroll={onScroll}
-        className="flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4 px-4 md:px-8 [overscroll-behavior-x:contain]"
+        className="flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4 px-4 md:px-8"
       >
         {day.hourly.map((h, i) => {
           const hour = parseInt(h.time.split('T')[1].split(':')[0]);
