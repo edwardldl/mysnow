@@ -18,18 +18,29 @@ interface ForecastDashboardProps {
 export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles', dataStatus = 'fresh' }: ForecastDashboardProps) {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [primaryContainer, setPrimaryContainer] = React.useState<HTMLDivElement | null>(null);
+  const isSyncingRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
 
   // Synchronize scrolling across multiple chart containers
   const handleScroll = (e: React.UIEvent<HTMLDivElement>, index: number) => {
+    if (isSyncingRef.current) return;
+
     const target = e.target as HTMLDivElement;
     const scrollLeft = target.scrollLeft;
 
-    scrollRefs.current.forEach((ref, i) => {
-      // ONLY update if it's a different container AND its scrollLeft is not already correct
-      // This prevents recursive event loops that kill momentum
-      if (ref && i !== index && Math.abs(ref.scrollLeft - scrollLeft) > 1) {
-        ref.scrollLeft = scrollLeft;
-      }
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+
+    rafIdRef.current = requestAnimationFrame(() => {
+      isSyncingRef.current = true;
+      scrollRefs.current.forEach((ref, i) => {
+        if (ref && i !== index && Math.abs(ref.scrollLeft - scrollLeft) > 1) {
+          ref.scrollLeft = scrollLeft;
+        }
+      });
+      // Small tick to release the guard after all programmatic scrolls have triggered their events
+      requestAnimationFrame(() => {
+        isSyncingRef.current = false;
+      });
     });
   };
 
@@ -331,6 +342,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
           ref={scrollRef}
           onScroll={onScroll}
           className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
@@ -449,6 +461,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
           ref={scrollRef}
           onScroll={onScroll}
           className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
@@ -592,6 +605,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
           ref={scrollRef}
           onScroll={onScroll}
           className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
             const speed = getSpeedKmH(h.windSpeed);
@@ -721,6 +735,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
           ref={scrollRef}
           onScroll={onScroll}
           className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
             const uv = h.uvIndex ?? 0;
@@ -812,6 +827,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
           ref={scrollRef}
           onScroll={onScroll}
           className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
             const visKm = (h.visibility ?? 0) / 1000;
@@ -885,6 +901,7 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         ref={scrollRef}
         onScroll={onScroll}
         className="flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4 px-4 md:px-8"
+        style={{ transform: 'translateZ(0)' }}
       >
         {day.hourly.map((h, i) => {
           const hour = parseInt(h.time.split('T')[1].split(':')[0]);
