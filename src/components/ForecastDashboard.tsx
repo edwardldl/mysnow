@@ -1,11 +1,17 @@
-"use client";
-
 import React, { useRef } from "react";
 import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData, WeatherDataStatus } from "@/lib/types";
 import { getSlrColor } from "@/lib/utils";
+
+const getTimeColor = (hour: number) => {
+  if (hour === 9 || hour === 16) return `hsl(45, 100%, 65%)`; // Yellow
+  if (hour === 10 || hour === 15) return `hsl(38, 100%, 65%)`; // Golden-Yellow
+  if (hour === 11 || hour === 14) return `hsl(32, 100%, 65%)`; // Golden-Orange
+  if (hour === 12 || hour === 13) return `hsl(25, 100%, 65%)`; // Orange
+  return undefined;
+};
 
 interface ForecastDashboardProps {
   days: DayData[];
@@ -337,11 +343,21 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
         <SlrLegend />
       </div>
 
-      <div className="relative">
+      <div className="flex">
+        {/* Fixed Y-Axis Ruler */}
+        <div 
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
+        >
+          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
+            <span className="flex items-center">10</span>
+            <span className="flex items-center mt-auto">0</span>
+          </div>
+        </div>
+
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
           style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
@@ -351,16 +367,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
             const isSunrise = day.sunrise && h.time.substring(0, 13) === day.sunrise.substring(0, 13);
             const isSunset = day.sunset && h.time.substring(0, 13) === day.sunset.substring(0, 13);
             const barColor = h.slr ? getSlrColor(h.slr) : "rgba(255, 255, 255, 0.05)";
-
-            const getPeakHue = (h: number) => {
-              if (h === 9 || h === 16) return 45; // Yellow
-              if (h === 10 || h === 15) return 38; // Golden-Yellow
-              if (h === 11 || h === 14) return 32; // Golden-Orange
-              if (h === 12 || h === 13) return 25; // Orange
-              return null;
-            };
-            const peakHue = getPeakHue(hour);
-            const peakText = peakHue !== null ? `hsl(${peakHue}, 100%, 65%)` : undefined;
+            const peakText = getTimeColor(hour);
 
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
 
@@ -408,7 +415,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
                     style={{ color: peakText }}
                     className={cn(
                       "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                      isMidnight ? "bg-white text-slate-950" : (peakText ? "" : "text-slate-500")
+                      peakText ? "" : "text-slate-500"
                     )}
                   >
                     {hour.toString().padStart(2, '0')}
@@ -444,23 +451,24 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         </div>
       </div>
 
-      <div className="relative">
-        {/* Y-Axis Labels aligned with chart baseline */}
-        <div
-          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
-          style={{ bottom: "46px", height: `${chartHeight}px` }}
+      <div className="flex">
+        {/* Fixed Y-Axis Ruler */}
+        <div 
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
         >
-          <span className="flex items-center h-4">{maxTemp.toFixed(0)}°</span>
-          <div className="flex-grow flex items-center" style={{ height: "0px" }}>
-            <span className="translate-y-[-50%]" style={{ position: 'absolute', bottom: `${((0 - minTemp) / range) * chartHeight}px` }}>0°</span>
+          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
+            <span className="flex items-center h-4">{maxTemp.toFixed(0)}°</span>
+            <div className="flex-grow flex items-center relative" style={{ height: "0px" }}>
+              <span className="translate-y-[-50%] absolute" style={{ bottom: `${((0 - minTemp) / range) * chartHeight}px` }}>0°</span>
+            </div>
+            <span className="flex items-center h-4 mt-auto">{minTemp.toFixed(0)}°</span>
           </div>
-          <span className="flex items-center h-4 mt-auto">{minTemp.toFixed(0)}°</span>
         </div>
 
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
           style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
@@ -473,16 +481,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const isFeelsFreezing = feelsLike <= 0;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
-
-            const getPeakHue = (h: number) => {
-              if (h === 9 || h === 16) return 45; // Yellow
-              if (h === 10 || h === 15) return 38; // Golden-Yellow
-              if (h === 11 || h === 14) return 32; // Golden-Orange
-              if (h === 12 || h === 13) return 25; // Orange
-              return null;
-            };
-            const peakHue = getPeakHue(hour);
-            const peakText = peakHue !== null ? `hsl(${peakHue}, 100%, 65%)` : undefined;
+            const peakText = getTimeColor(hour);
 
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             return (
@@ -558,7 +557,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
                     style={{ color: peakText }}
                     className={cn(
                       "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                      isMidnight ? "bg-white text-slate-950" : (peakText ? "" : "text-slate-500")
+                      peakText ? "" : "text-slate-500"
                     )}
                   >
                     {hour.toString().padStart(2, '0')}
@@ -591,20 +590,21 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
         </div>
       </div>
 
-      <div className="relative">
-        {/* Y-Axis Labels */}
-        <div
-          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
-          style={{ bottom: "46px", height: `${chartHeight}px` }}
+      <div className="flex">
+        {/* Fixed Y-Axis Ruler */}
+        <div 
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
         >
-          <span className="flex items-center h-4">{safeMax}</span>
-          <span className="flex items-center h-4 mt-auto">0</span>
+          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
+            <span className="flex items-center h-4">{safeMax}</span>
+            <span className="flex items-center h-4 mt-auto">0</span>
+          </div>
         </div>
 
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
           style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
@@ -616,6 +616,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const peakText = getTimeColor(hour);
 
             return (
               <div
@@ -664,7 +665,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
 
                 {/* Combined Gust/Wind Label */}
                 {(gust > 0 || speed > 0) && (
-                  <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
+                   <div className="absolute z-20 flex flex-col items-center" style={{ bottom: `${gustHeight + 38}px` }}>
                     <div className="flex items-center gap-0.5 font-black tabular-nums drop-shadow-lg leading-none">
                       <span className="text-[11px] md:text-[13px] text-emerald-300">{gust.toFixed(0)}</span>
                       <span className="text-[9px] text-white/30 mx-0.5 italic">/</span>
@@ -675,9 +676,10 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
 
                 <div className="absolute bottom-2 flex flex-col items-center">
                   <span
+                    style={{ color: peakText }}
                     className={cn(
                       "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                      peakText ? "" : "text-slate-500"
                     )}
                   >
                     {hour.toString().padStart(2, '0')}
@@ -721,20 +723,21 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
         </div>
       </div>
 
-      <div className="relative">
-        {/* Y-Axis Labels */}
-        <div
-          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
-          style={{ bottom: "46px", height: `${chartHeight}px` }}
+      <div className="flex">
+        {/* Fixed Y-Axis Ruler */}
+        <div 
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
         >
-          <span className="flex items-center h-4">12</span>
-          <span className="flex items-center h-4 mt-auto">0</span>
+          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
+            <span className="flex items-center h-4">12</span>
+            <span className="flex items-center h-4 mt-auto">0</span>
+          </div>
         </div>
 
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          className="flex-1 flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
           style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
@@ -744,6 +747,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const peakText = getTimeColor(hour);
 
             return (
               <div
@@ -783,9 +787,10 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
 
                 <div className="absolute bottom-2 flex flex-col items-center">
                   <span
+                    style={{ color: peakText }}
                     className={cn(
                       "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                      peakText ? "" : "text-slate-500"
                     )}
                   >
                     {hour.toString().padStart(2, '0')}
@@ -813,20 +818,21 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
         </div>
       </div>
 
-      <div className="relative">
-        {/* Y-Axis Labels */}
-        <div
-          className="absolute -left-2 md:-left-4 h-full flex flex-col pointer-events-none z-0 text-[10px] font-black text-slate-700"
-          style={{ bottom: "46px", height: `${chartHeight}px` }}
+      <div className="flex">
+        {/* Fixed Y-Axis Ruler */}
+        <div 
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
         >
-          <span className="flex items-center h-4">25</span>
-          <span className="flex items-center h-4 mt-auto">0</span>
+          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
+            <span className="flex items-center h-4">25</span>
+            <span className="flex items-center h-4 mt-auto">0</span>
+          </div>
         </div>
 
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 px-4 md:px-8"
+          className="flex-1 flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
           style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
@@ -836,6 +842,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const peakText = getTimeColor(hour);
 
             return (
               <div
@@ -872,9 +879,10 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
 
                 <div className="absolute bottom-2 flex flex-col items-center">
                   <span
+                    style={{ color: peakText }}
                     className={cn(
                       "text-[11px] md:text-[13px] font-black tabular-nums transition-all px-2 py-0.5 rounded-md",
-                      isMidnight ? "bg-white text-slate-950" : "text-slate-500"
+                      peakText ? "" : "text-slate-500"
                     )}
                   >
                     {hour.toString().padStart(2, '0')}
@@ -897,30 +905,39 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         <Info className="w-5 h-5 text-slate-500" />
         <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Advanced Telemetry</h3>
       </div>
-      <div
-        ref={scrollRef}
-        onScroll={onScroll}
-        className="flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4 px-4 md:px-8"
-        style={{ transform: 'translateZ(0)' }}
-      >
-        {day.hourly.map((h, i) => {
-          const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-          const isMidnight = hour === 0;
-          const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
-          return (
-            <div
-              key={i}
-              className={cn(
-                "min-w-[48px] md:min-w-[60px] flex flex-col gap-3 items-center bg-white/[0.02] py-4 rounded-xl transition-colors",
-                isCurrent ? "bg-accent-cyan/[0.08] ring-1 ring-inset ring-accent-cyan/20" : "hover:bg-white/[0.04]"
-              )}
-            >
-              <div className={cn(
-                "px-2 py-0.5 rounded text-[10px] font-black tabular-nums mb-1",
-                isMidnight ? "bg-white text-slate-950" : "text-slate-500"
-              )}>
-                {hour.toString().padStart(2, '0')}
-              </div>
+      <div className="flex px-0">
+        {/* Alignment Spacer for Telemetry */}
+        <div className="flex-none w-10 md:w-12" />
+
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex-1 flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4 pr-4 md:pr-8"
+          style={{ transform: 'translateZ(0)' }}
+        >
+          {day.hourly.map((h, i) => {
+            const hour = parseInt(h.time.split('T')[1].split(':')[0]);
+            const isMidnight = hour === 0;
+            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const peakText = getTimeColor(hour);
+
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "min-w-[48px] md:min-w-[60px] flex flex-col gap-3 items-center bg-white/[0.02] py-4 rounded-xl transition-colors",
+                  isCurrent ? "bg-accent-cyan/[0.08] ring-1 ring-inset ring-accent-cyan/20" : "hover:bg-white/[0.04]"
+                )}
+              >
+                <div 
+                  style={{ color: peakText }}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-black tabular-nums mb-1",
+                      peakText ? "" : "text-slate-500"
+                    )}
+                >
+                  {hour.toString().padStart(2, '0')}
+                </div>
               <MetricPill label="RH" value={h.rh != null ? `${h.rh.toFixed(0)}%` : '--'} color="cyan" />
               <MetricPill label="CLD" value={h.clouds != null ? `${h.clouds.toFixed(0)}%` : '--'} color="slate" />
               <MetricPill label="LVL" value={h.snowLevel != null ? `${(h.snowLevel / 1000).toFixed(1)}k` : '--'} color="blue" />
@@ -931,7 +948,8 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         })}
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 function MetricPill({ label, value, color }: { label: string, value: string, color: string }) {
