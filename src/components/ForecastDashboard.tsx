@@ -346,11 +346,12 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
       <div className="flex">
         {/* Fixed Y-Axis Ruler */}
         <div 
-          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[76px]"
         >
-          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
-            <span className="flex items-center">10</span>
-            <span className="flex items-center mt-auto">0</span>
+          <div className="relative w-full" style={{ height: `${chartHeight}px` }}>
+            <span className="absolute top-0 right-2">10</span>
+            <span className="absolute top-1/2 -translate-y-1/2 right-2">5</span>
+            <span className="absolute bottom-0 right-2">0</span>
           </div>
         </div>
 
@@ -454,14 +455,28 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
       <div className="flex">
         {/* Fixed Y-Axis Ruler */}
         <div 
-          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[86px]"
         >
-          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
-            <span className="flex items-center h-4">{maxTemp.toFixed(0)}°</span>
-            <div className="flex-grow flex items-center relative" style={{ height: "0px" }}>
-              <span className="translate-y-[-50%] absolute" style={{ bottom: `${((0 - minTemp) / range) * chartHeight}px` }}>0°</span>
-            </div>
-            <span className="flex items-center h-4 mt-auto">{minTemp.toFixed(0)}°</span>
+          <div className="relative w-full" style={{ height: `${chartHeight}px` }}>
+            {/* Top Label */}
+            <span className="absolute top-0 right-2">{maxTemp.toFixed(0)}°</span>
+            
+            {/* Mid/Zero Label */}
+            {minTemp < -1 && maxTemp > 1 ? (
+              <span 
+                className="absolute -translate-y-1/2 right-2" 
+                style={{ bottom: `${((0 - minTemp) / range) * chartHeight}px` }}
+              >
+                0°
+              </span>
+            ) : (
+              <span className="absolute top-1/2 -translate-y-1/2 right-2">
+                {((maxTemp + minTemp) / 2).toFixed(0)}°
+              </span>
+            )}
+
+            {/* Bottom Label */}
+            <span className="absolute bottom-0 right-2">{minTemp.toFixed(0)}°</span>
           </div>
         </div>
 
@@ -593,11 +608,12 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
       <div className="flex">
         {/* Fixed Y-Axis Ruler */}
         <div 
-          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[76px]"
         >
-          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
-            <span className="flex items-center h-4">{safeMax}</span>
-            <span className="flex items-center h-4 mt-auto">0</span>
+          <div className="relative w-full" style={{ height: `${chartHeight}px` }}>
+            <span className="absolute top-0 right-2">{safeMax}</span>
+            <span className="absolute top-1/2 -translate-y-1/2 right-2">{(safeMax / 2).toFixed(0)}</span>
+            <span className="absolute bottom-0 right-2">0</span>
           </div>
         </div>
 
@@ -726,11 +742,12 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
       <div className="flex">
         {/* Fixed Y-Axis Ruler */}
         <div 
-          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[76px]"
         >
-          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
-            <span className="flex items-center h-4">12</span>
-            <span className="flex items-center h-4 mt-auto">0</span>
+          <div className="relative w-full" style={{ height: `${chartHeight}px` }}>
+            <span className="absolute top-0 right-2">12</span>
+            <span className="absolute top-1/2 -translate-y-1/2 right-2">6</span>
+            <span className="absolute bottom-0 right-2">0</span>
           </div>
         </div>
 
@@ -821,11 +838,12 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
       <div className="flex">
         {/* Fixed Y-Axis Ruler */}
         <div 
-          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[46px]"
+          className="flex-none w-10 md:w-12 flex flex-col justify-end pointer-events-none text-[10px] font-black text-slate-500 pb-[76px]"
         >
-          <div className="flex flex-col justify-between" style={{ height: `${chartHeight}px` }}>
-            <span className="flex items-center h-4">25</span>
-            <span className="flex items-center h-4 mt-auto">0</span>
+          <div className="relative w-full" style={{ height: `${chartHeight}px` }}>
+            <span className="absolute top-0 right-2">25</span>
+            <span className="absolute top-1/2 -translate-y-1/2 right-2">12</span>
+            <span className="absolute bottom-0 right-2">0</span>
           </div>
         </div>
 
