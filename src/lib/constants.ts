@@ -17,6 +17,7 @@ export const MODELS: ConfigOption[] = [
   { id: "ecmwf_aifs", name: "ECMWF AIFS", desc: "AI-driven high-res model (0.25°). Next-gen efficiency.", badge: "0-15D" },
   { id: "ecmwf_aifs_ensemble", name: "ECMWF AIFS Ensemble", desc: "51-member AI ensemble average. Probabilistic depth.", badge: "0-15D" },
   { id: "gfs", name: "NCEP GFS", desc: "~13km / Global | 3-14+ d. Standard US global.", badge: "3-14D" },
+  { id: "icon_global", name: "DWD ICON Global", desc: "11km / Global | 0-7d. High-quality German global model.", badge: "0-7D" },
 ];
 
 export const ALGORITHMS: ConfigOption[] = [
