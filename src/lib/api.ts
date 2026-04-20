@@ -101,7 +101,8 @@ const MODEL_META_MAP: Record<string, string> = {
     'ecmwf': 'ecmwf_ifs',
     'ecmwf_aifs': 'ecmwf_aifs025',
     'ecmwf_aifs_ensemble': 'ecmwf_aifs025',
-    'gfs': 'ncep_gfs025'
+    'gfs': 'ncep_gfs025',
+    'icon_global': 'dwd_icon'
 };
 
 /**
@@ -530,7 +531,8 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             'ecmwf': 'ecmwf_ifs',
             'ecmwf_aifs': 'ecmwf_aifs025_single',
             'ecmwf_aifs_ensemble': 'ecmwf_aifs025_ensemble',
-            'gfs': 'gfs_global'
+            'gfs': 'gfs_global',
+            'icon_global': 'icon_global'
         };
         const omModel = modelMap[modelMode] || modelMode;
         
@@ -601,6 +603,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         else if (omModel === 'ncep_nam_conus') days = 4;
         else if (omModel === 'ncep_nbm_conus') days = 7;
         else if (omModel === 'gem_regional') days = 4;
+        else if (omModel === 'icon_global') days = 7;
 
         const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
             `&elevation=${getApiElevation(loc, elevationMode)}` +
