@@ -114,35 +114,48 @@ export default function CompactSelector({
                 </span>
               </div>
               
-              {options.map((opt) => (
-                <div
-                  key={opt.id}
-                  onClick={() => {
-                    onSelect(opt.id);
-                    setIsOpen(false);
-                  }}
-                  className={cn(
-                    "group flex flex-col p-3 rounded-xl cursor-pointer transition-all mb-1 last:mb-0",
-                    opt.id === selectedId
-                      ? accentClasses
-                      : "hover:bg-white/5 text-slate-400 hover:text-slate-200"
-                  )}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={cn("text-xs font-bold", opt.id === selectedId ? "text-inherit" : "text-white")}>
-                      {opt.name}
-                    </span>
-                    {opt.badge && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-black uppercase tracking-tighter shrink-0 ml-2">
-                        {opt.badge}
-                      </span>
+              {options.map((opt, index) => {
+                const showSection = opt.section && (index === 0 || options[index - 1].section !== opt.section);
+                return (
+                  <React.Fragment key={opt.id}>
+                    {showSection && (
+                      <div className="px-3 py-2 mt-2 mb-1 flex items-center gap-2">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-bold whitespace-nowrap">
+                          {opt.section}
+                        </span>
+                        <div className="h-px w-full bg-white/5" />
+                      </div>
                     )}
-                  </div>
-                  <p className="text-[10px] leading-relaxed opacity-70 font-medium">
-                    {opt.desc}
-                  </p>
-                </div>
-              ))}
+                    <div
+                      key={opt.id}
+                      onClick={() => {
+                        onSelect(opt.id);
+                        setIsOpen(false);
+                      }}
+                      className={cn(
+                        "group flex flex-col p-3 rounded-xl cursor-pointer transition-all mb-1 last:mb-0",
+                        opt.id === selectedId
+                          ? accentClasses
+                          : "hover:bg-white/5 text-slate-400 hover:text-slate-200"
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={cn("text-xs font-bold", opt.id === selectedId ? "text-inherit" : "text-white")}>
+                          {opt.name}
+                        </span>
+                        {opt.badge && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-black uppercase tracking-tighter shrink-0 ml-2">
+                            {opt.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] leading-relaxed opacity-70 font-medium">
+                        {opt.desc}
+                      </p>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
             </div>
           </motion.div>
         )}
