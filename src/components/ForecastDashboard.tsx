@@ -333,12 +333,19 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
   // USER: snow bar should max out at 10cm of snowfall
   const safeMax = 10;
 
+  // Calculate Running Total
+  let runningTotal = 0;
+  const cumulativeData = day.hourly.map((h) => {
+    runningTotal += h.snowfall;
+    return runningTotal;
+  });
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Snowflake className="w-5 h-5 text-accent-cyan" />
-          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Snowfall Intensity (cm)</h3>
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Snowfall Intensity & Accum. (cm)</h3>
         </div>
         <SlrLegend />
       </div>
@@ -358,7 +365,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
+          className="flex-1 flex items-end h-[340px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-16 pr-4 md:pr-8"
           style={{ transform: 'translateZ(0)' }}
         >
           {day.hourly.map((h, i) => {
@@ -369,6 +376,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
             const isSunset = day.sunset && h.time.substring(0, 13) === day.sunset.substring(0, 13);
             const barColor = h.slr ? getSlrColor(h.slr) : "rgba(255, 255, 255, 0.05)";
             const peakText = getTimeColor(hour);
+            const cumValue = cumulativeData[i];
 
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
 
@@ -386,6 +394,20 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
                     NOW
                   </div>
                 )}
+
+                {/* Cumulative Label at Top Margin with Headroom */}
+                {cumValue > 0 && (
+                  <div className="absolute top-0 flex flex-col items-center gap-0 opacity-60 group-hover/bar:opacity-100 transition-opacity">
+                    <span className="text-[8px] font-black text-slate-500 tabular-nums leading-none">Σ</span>
+                    <span className={cn(
+                      "text-[10px] font-bold tabular-nums transition-colors",
+                      h.snowfall > 0 ? "text-accent-cyan" : "text-slate-400"
+                    )}>
+                      {cumValue.toFixed(1)}
+                    </span>
+                  </div>
+                )}
+
                 {/* Solar Indicator Lines */}
                 {(isSunrise || isSunset) && (
                   <div className="absolute inset-y-0 left-0 w-[1px] border-l border-dashed border-amber-500/20 z-0 h-full" />
