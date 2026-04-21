@@ -23,7 +23,6 @@ interface ForecastDashboardProps {
 
 export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles', dataStatus = 'fresh' }: ForecastDashboardProps) {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [primaryContainer, setPrimaryContainer] = React.useState<HTMLDivElement | null>(null);
   const isSyncingRef = useRef(false);
   const rafIdRef = useRef<number | null>(null);
 
@@ -34,19 +33,20 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
     const target = e.target as HTMLDivElement;
     const scrollLeft = target.scrollLeft;
 
+    // Synchronously block other events and update all siblings
+    isSyncingRef.current = true;
+    
+    scrollRefs.current.forEach((ref, i) => {
+      if (ref && i !== index && Math.abs(ref.scrollLeft - scrollLeft) > 0.5) {
+        ref.scrollLeft = scrollLeft;
+      }
+    });
+
     if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
 
+    // Reset the guard in the next frame to allow the browser to settle
     rafIdRef.current = requestAnimationFrame(() => {
-      isSyncingRef.current = true;
-      scrollRefs.current.forEach((ref, i) => {
-        if (ref && i !== index && Math.abs(ref.scrollLeft - scrollLeft) > 1) {
-          ref.scrollLeft = scrollLeft;
-        }
-      });
-      // Small tick to release the guard after all programmatic scrolls have triggered their events
-      requestAnimationFrame(() => {
-        isSyncingRef.current = false;
-      });
+      isSyncingRef.current = false;
     });
   };
 
@@ -104,12 +104,15 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
 
   React.useEffect(() => {
     const performScroll = (behavior: ScrollBehavior = 'smooth') => {
+      // Find the first available container to use as a coordinate source
+      const anyContainer = scrollRefs.current.find(c => c !== null);
       const target = nowRef.current;
-      if (primaryContainer && target) {
+      
+      if (anyContainer && target) {
         const targetRect = target.getBoundingClientRect();
-        const containerRect = primaryContainer.getBoundingClientRect();
-        const relativeLeft = targetRect.left - containerRect.left + primaryContainer.scrollLeft;
-        const targetX = relativeLeft - primaryContainer.offsetWidth / 2 + target.offsetWidth / 2;
+        const containerRect = anyContainer.getBoundingClientRect();
+        const relativeLeft = targetRect.left - containerRect.left + anyContainer.scrollLeft;
+        const targetX = relativeLeft - anyContainer.offsetWidth / 2 + target.offsetWidth / 2;
 
         scrollRefs.current.forEach(c => {
           if (c) c.scrollTo({ left: targetX, behavior });
@@ -117,19 +120,17 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
       }
     };
 
-    if (nowRef.current && primaryContainer) {
-      // Immediate jump with a short delay for layout
-      const t0 = setTimeout(() => performScroll('auto'), 50);
-      const t1 = setTimeout(() => performScroll('smooth'), 500);
-      const t2 = setTimeout(() => performScroll('smooth'), 1500);
+    // Perform scroll on meaningful state changes
+    const t0 = setTimeout(() => performScroll('auto'), 50);
+    const t1 = setTimeout(() => performScroll('smooth'), 500);
+    const t2 = setTimeout(() => performScroll('smooth'), 1500);
 
-      return () => {
-        clearTimeout(t0);
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    }
-  }, [selectedDate, currentHourISO, days, primaryContainer]);
+    return () => {
+      clearTimeout(t0);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [selectedDate, days, visibleCharts.snow]); // Re-run if snow chart enters/exits to ensure alignment
 
   if (isLoading) {
     return (
@@ -244,7 +245,6 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                     nowRef={nowRef}
                     scrollRef={(el) => {
                       scrollRefs.current[0] = el;
-                      setPrimaryContainer(el);
                     }}
                     onScroll={(e) => handleScroll(e, 0)}
                   />
@@ -333,12 +333,19 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
   // USER: snow bar should max out at 10cm of snowfall
   const safeMax = 10;
 
+  // Calculate Running Total
+  let runningTotal = 0;
+  const cumulativeData = day.hourly.map((h) => {
+    runningTotal += h.snowfall;
+    return runningTotal;
+  });
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Snowflake className="w-5 h-5 text-accent-cyan" />
-          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Snowfall Intensity (cm)</h3>
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Snowfall Intensity & Accum. (cm)</h3>
         </div>
         <SlrLegend />
       </div>
@@ -358,8 +365,8 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
-          style={{ transform: 'translateZ(0)' }}
+          className="flex-1 flex items-end h-[340px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-16 pr-4 md:pr-8"
+          style={{ transform: 'translateZ(0)', willChange: 'scroll-position' }}
         >
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
@@ -369,6 +376,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
             const isSunset = day.sunset && h.time.substring(0, 13) === day.sunset.substring(0, 13);
             const barColor = h.slr ? getSlrColor(h.slr) : "rgba(255, 255, 255, 0.05)";
             const peakText = getTimeColor(hour);
+            const cumValue = cumulativeData[i];
 
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
 
@@ -386,6 +394,20 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
                     NOW
                   </div>
                 )}
+
+                {/* Cumulative Label at Top Margin with Headroom */}
+                {cumValue > 0 && (
+                  <div className="absolute top-0 flex flex-col items-center gap-0 opacity-60 group-hover/bar:opacity-100 transition-opacity">
+                    <span className="text-[8px] font-black text-slate-500 tabular-nums leading-none">Σ</span>
+                    <span className={cn(
+                      "text-[10px] font-bold tabular-nums transition-colors",
+                      h.snowfall > 0 ? "text-accent-cyan" : "text-slate-400"
+                    )}>
+                      {cumValue.toFixed(1)}
+                    </span>
+                  </div>
+                )}
+
                 {/* Solar Indicator Lines */}
                 {(isSunrise || isSunset) && (
                   <div className="absolute inset-y-0 left-0 w-[1px] border-l border-dashed border-amber-500/20 z-0 h-full" />
@@ -484,7 +506,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
           ref={scrollRef}
           onScroll={onScroll}
           className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
-          style={{ transform: 'translateZ(0)' }}
+          style={{ transform: 'translateZ(0)', willChange: 'scroll-position' }}
         >
           {day.hourly.map((h, i) => {
             const temp = h.temperature ?? 0;
@@ -621,7 +643,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
           ref={scrollRef}
           onScroll={onScroll}
           className="flex-1 flex items-end h-[300px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
-          style={{ transform: 'translateZ(0)' }}
+          style={{ transform: 'translateZ(0)', willChange: 'scroll-position' }}
         >
           {day.hourly.map((h, i) => {
             const speed = getSpeedKmH(h.windSpeed);
@@ -755,7 +777,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
           ref={scrollRef}
           onScroll={onScroll}
           className="flex-1 flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
-          style={{ transform: 'translateZ(0)' }}
+          style={{ transform: 'translateZ(0)', willChange: 'scroll-position' }}
         >
           {day.hourly.map((h, i) => {
             const uv = h.uvIndex ?? 0;
@@ -851,7 +873,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
           ref={scrollRef}
           onScroll={onScroll}
           className="flex-1 flex items-end h-[240px] gap-1 md:gap-1.5 overflow-x-auto no-scrollbar relative z-10 pb-10 pt-12 pr-4 md:pr-8"
-          style={{ transform: 'translateZ(0)' }}
+          style={{ transform: 'translateZ(0)', willChange: 'scroll-position' }}
         >
           {day.hourly.map((h, i) => {
             const visKm = (h.visibility ?? 0) / 1000;
@@ -930,8 +952,8 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="flex-1 flex overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-4 pr-4 md:pr-8"
-          style={{ transform: 'translateZ(0)' }}
+          className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 md:gap-1.5 pb-2 pr-4 md:pr-8 relative z-10"
+          style={{ transform: 'translateZ(0)', willChange: 'scroll-position' }}
         >
           {day.hourly.map((h, i) => {
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
