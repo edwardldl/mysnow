@@ -658,6 +658,90 @@ async function fetchDualForcing(url: string): Promise<Response> {
     });
 }
 
+interface OptionalApiPayload {
+    data: unknown | null;
+    error: string | null;
+}
+
+interface ModelPoolPayloads {
+    hrrr: unknown | null;
+    ecmwf: unknown | null;
+}
+
+interface ModelPoolRecord {
+    index: number;
+    primary: OpenMeteoResponse;
+    primaryIdentity: 'hrrr' | 'ecmwf';
+    hrrrOverride: OpenMeteoResponse | null;
+}
+
+function apiFailureReason(payload: unknown): string | null {
+    if (!isRecord(payload) || typeof payload.reason !== 'string') return null;
+    const reason = payload.reason.trim();
+    return reason.length > 0 ? reason : null;
+}
+
+async function readOptionalApiPayload(response: Response, label: string): Promise<OptionalApiPayload> {
+    if (!response.ok) {
+        const payload: unknown = await response.json().catch(() => null);
+        const reason = apiFailureReason(payload);
+        return {
+            data: null,
+            error: `${label} fetch failed (${response.status}${reason ? `: ${reason}` : ''})`,
+        };
+    }
+
+    try {
+        return { data: await response.json(), error: null };
+    } catch {
+        return { data: null, error: `${label} returned an invalid JSON response` };
+    }
+}
+
+/**
+ * HRRR is regional and either provider can occasionally be unavailable. A
+ * pooled forecast should remain usable when one model succeeds instead of
+ * turning a partial upstream failure into a blank application.
+ */
+async function readModelPoolPayloads(hrrrResponse: Response, ecmwfResponse: Response): Promise<ModelPoolPayloads> {
+    const [hrrr, ecmwf] = await Promise.all([
+        readOptionalApiPayload(hrrrResponse, 'HRRR'),
+        readOptionalApiPayload(ecmwfResponse, 'ECMWF'),
+    ]);
+
+    if (hrrr.data === null && ecmwf.data === null) {
+        throw new Error([hrrr.error, ecmwf.error].filter(Boolean).join('; ') || 'No forecast model returned data');
+    }
+
+    if (hrrr.error) console.warn(`${hrrr.error}. Continuing with ECMWF.`);
+    if (ecmwf.error) console.warn(`${ecmwf.error}. Continuing with HRRR.`);
+    return { hrrr: hrrr.data, ecmwf: ecmwf.data };
+}
+
+function modelPoolRecords(payloads: ModelPoolPayloads): ModelPoolRecord[] {
+    const toSlots = (payload: unknown | null): Array<OpenMeteoResponse | null> => {
+        if (payload === null) return [];
+        const values = Array.isArray(payload) ? payload : [payload];
+        return values.map(value => isOpenMeteoResponse(value) ? value : null);
+    };
+    const hrrr = toSlots(payloads.hrrr);
+    const ecmwf = toSlots(payloads.ecmwf);
+    const length = Math.max(hrrr.length, ecmwf.length);
+
+    return Array.from({ length }, (_, index) => {
+        const ecmwfRecord = ecmwf[index] ?? null;
+        const hrrrRecord = hrrr[index] ?? null;
+        const primary = ecmwfRecord ?? hrrrRecord;
+        if (!primary) return null;
+        return {
+            index,
+            primary,
+            primaryIdentity: ecmwfRecord ? 'ecmwf' as const : 'hrrr' as const,
+            hrrrOverride: ecmwfRecord ? hrrrRecord : null,
+        };
+    }).filter((record): record is ModelPoolRecord => record !== null);
+}
+
 const ENSEMBLE_HOURLY_PARAMS = [
     "snowfall",
     "precipitation",
@@ -758,11 +842,16 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             ]);
             console.timeEnd(`fetchWeatherData:${modelMode}`);
 
-            if (!hrrrRes.ok) throw new Error(`HRRR fetch failed: ${hrrrRes.status}`);
-            if (!ecmwfRes.ok) throw new Error(`ECMWF fetch failed: ${ecmwfRes.status}`);
+            const [record] = modelPoolRecords(await readModelPoolPayloads(hrrrRes, ecmwfRes));
+            if (!record) throw new Error('Forecast models returned invalid data.');
 
-            const hrrrData = attachResponseMetadata(await hrrrRes.json(), 'hrrr', lastRunAvailabilityTime);
-            const ecmwfData = attachResponseMetadata(await ecmwfRes.json(), 'ecmwf', lastRunAvailabilityTime);
+            // blendForecasts iterates the long-range/primary response. When
+            // ECMWF is unavailable, HRRR becomes the primary response and is
+            // not also passed as the short-range override.
+            const ecmwfData = attachResponseMetadata(record.primary, record.primaryIdentity, lastRunAvailabilityTime);
+            const hrrrData = record.hrrrOverride
+                ? attachResponseMetadata(record.hrrrOverride, 'hrrr', lastRunAvailabilityTime)
+                : null;
 
             updateCustomLocationMetadata(loc, ecmwfData);
 
@@ -1032,20 +1121,15 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             ]);
             console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
 
-            if (!hrrrRes.ok || !ecmwfRes.ok) throw new Error("Bulk HRRR/ECMWF fetch failed");
-            const hrrrData = await hrrrRes.json();
-            const ecmwfData = await ecmwfRes.json();
+            const records = modelPoolRecords(await readModelPoolPayloads(hrrrRes, ecmwfRes));
+            if (records.length === 0) throw new Error('Forecast models returned invalid bulk data.');
 
-            const hrrrResults = Array.isArray(hrrrData) ? hrrrData : [hrrrData];
-            const ecmwfResults = Array.isArray(ecmwfData) ? ecmwfData : [ecmwfData];
-
-            ecmwfResults.forEach((item, idx) => {
-                const loc = toFetch[idx];
-                const hrrrItem = hrrrResults[idx];
+            records.forEach(record => {
+                const loc = toFetch[record.index];
                 if (!loc) return;
-                const displayData = attachResponseMetadata(item, 'ecmwf', lastRunAvailabilityTime);
-                const hrrrDisplayData = hrrrItem
-                    ? attachResponseMetadata(hrrrItem, 'hrrr', lastRunAvailabilityTime)
+                const displayData = attachResponseMetadata(record.primary, record.primaryIdentity, lastRunAvailabilityTime);
+                const hrrrDisplayData = record.hrrrOverride
+                    ? attachResponseMetadata(record.hrrrOverride, 'hrrr', lastRunAvailabilityTime)
                     : null;
 
                 updateCustomLocationMetadata(loc, displayData);
@@ -1252,18 +1336,15 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
             const [hrrrRes, ecmwfRes, lastRunAvailabilityTime] = await Promise.all([
                 fetchDualForcing(hrrrUrl), fetchDualForcing(ecmwfUrl), metaPromise
             ]);
-            if (!hrrrRes.ok || !ecmwfRes.ok) return;
-            const hrrrData = await hrrrRes.json();
-            const ecmwfData = await ecmwfRes.json();
-            const hrrrResults = Array.isArray(hrrrData) ? hrrrData : [hrrrData];
-            const ecmwfResults = Array.isArray(ecmwfData) ? ecmwfData : [ecmwfData];
+            const records = modelPoolRecords(await readModelPoolPayloads(hrrrRes, ecmwfRes));
+            if (records.length === 0) throw new Error('Forecast models returned invalid reference-site data.');
 
-            ecmwfResults.forEach((item, idx) => {
-                const mode = missingModes[idx];
-                const hrrrItem = hrrrResults[idx];
-                const displayData = attachResponseMetadata(item, 'ecmwf', lastRunAvailabilityTime);
-                const hrrrDisplayData = hrrrItem
-                    ? attachResponseMetadata(hrrrItem, 'hrrr', lastRunAvailabilityTime)
+            records.forEach(record => {
+                const mode = missingModes[record.index];
+                if (!mode) return;
+                const displayData = attachResponseMetadata(record.primary, record.primaryIdentity, lastRunAvailabilityTime);
+                const hrrrDisplayData = record.hrrrOverride
+                    ? attachResponseMetadata(record.hrrrOverride, 'hrrr', lastRunAvailabilityTime)
                     : null;
                 updateCustomLocationMetadata(loc, displayData);
                 const result = { hrrrData: hrrrDisplayData, ecmwfData: displayData, location: loc, mode: 'hrrr_ecmwf' };

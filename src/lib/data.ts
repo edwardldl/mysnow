@@ -171,7 +171,11 @@ export function blendForecasts(
         }));
     };
 
-    const modelLabel = modelMode === 'best_match' ? 'BEST' : modelMode.toUpperCase();
+    const modelLabel = modelMode === 'best_match'
+        ? 'BEST'
+        : (modelMode === 'hrrr_ecmwf' && !hrrr
+            ? (ecmwf.modelIdentity ?? 'ecmwf').toUpperCase()
+            : modelMode.toUpperCase());
 
     for (let i = 0; i < ecmwfTimes.length; i++) {
         const time = ecmwfTimes[i];
