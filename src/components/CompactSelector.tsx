@@ -54,9 +54,9 @@ export default function CompactSelector({
   }[accentColor];
   
   const alignClasses = {
-    left: "left-0",
-    right: "right-0",
-    center: "left-1/2 -ml-32",
+    left: "md:left-0 md:right-auto",
+    right: "md:left-auto md:right-0",
+    center: "md:left-1/2 md:right-auto md:-translate-x-1/2",
   }[align];
 
   return (
@@ -104,7 +104,7 @@ export default function CompactSelector({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={cn(
               "fixed md:absolute top-[calc(60px+var(--sat,0px)+8px)] md:top-full left-4 right-4 md:left-auto md:w-72 bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden",
-              "md:right-0" // Always right-aligned on desktop
+              alignClasses
             )}
           >
             <div className="p-2 max-h-[400px] overflow-y-auto no-scrollbar">

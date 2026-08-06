@@ -17,6 +17,12 @@ export function formatHour(timeStr: string): string {
     return timeStr.split('T')[1];
 }
 
+/** Format an API day key as a calendar date without shifting it in the viewer's timezone. */
+export function formatCalendarDate(dateStr: string, options: Intl.DateTimeFormatOptions): string {
+    return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' })
+        .format(new Date(`${dateStr}T00:00:00Z`));
+}
+
 export function formatTemp(temp: number | null): string {
     return temp !== null ? temp.toFixed(1) + '°C' : '--';
 }

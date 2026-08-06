@@ -3,7 +3,7 @@
 import React from "react";
 import { DayData } from "@/lib/types";
 import { cn } from "@/lib/utils_tailwind";
-import { getSlrColor, getWeatherDescription } from "@/lib/utils";
+import { formatCalendarDate, getSlrColor, getWeatherDescription } from "@/lib/utils";
 
 interface DayCardProps {
   day: DayData;
@@ -42,10 +42,10 @@ export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
       {/* Date Header */}
       <div className="flex flex-col gap-0.5">
         <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">
-          {new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(new Date(day.dateStr))}
+          {formatCalendarDate(day.dateStr, { weekday: 'short' })}
         </span>
         <span className="text-sm font-bold text-white whitespace-nowrap">
-          {new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(day.dateStr + 'T12:00:00'))}
+          {formatCalendarDate(day.dateStr, { day: 'numeric', month: 'short' })}
         </span>
       </div>
 

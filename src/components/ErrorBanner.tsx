@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AlertCircle, RefreshCw, WifiOff } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 
 interface ErrorBannerProps {

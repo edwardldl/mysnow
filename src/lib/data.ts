@@ -333,12 +333,10 @@ export function blendForecasts(
     };
 }
 
-export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteoDaily, lastRunAvailabilityTime?: number }, timezone = 'America/Los_Angeles'): DayData[] {
+export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteoDaily, lastRunAvailabilityTime?: number }): DayData[] {
     const days: Record<string, DayData> = {};
+    const weatherCodesByDay: Record<string, number[]> = {};
     const { hourly, daily, lastRunAvailabilityTime } = blendedData;
-
-    // Get current local date in PST (America/Los_Angeles) to filter out past days.
-    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: timezone });
 
     hourly.forEach(point => {
         // Skip points with no data (end of model lead time)
@@ -376,8 +374,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
                 weatherCode: null,
                 lastRunAvailabilityTime: lastRunAvailabilityTime
             };
-            // Using hidden property to collect codes for heuristic
-            (days[dateStr] as any)._allWeatherCodes = [];
+            weatherCodesByDay[dateStr] = [];
         }
 
         days[dateStr].hourly.push(point);
@@ -392,7 +389,7 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
         }
 
         if (point.weatherCode !== null) {
-            (days[dateStr] as any)._allWeatherCodes.push(point.weatherCode);
+            weatherCodesByDay[dateStr].push(point.weatherCode);
         }
     });
 
@@ -486,13 +483,13 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             .join('-');
 
         // Finalize weather code based on severity
-        const codes = (day as any)._allWeatherCodes as number[];
-        if (codes && codes.length > 0) {
+        const codes = weatherCodesByDay[day.dateStr];
+        if (codes.length > 0) {
             let topCode = codes[0];
             let topWeight = -1;
 
             codes.forEach(c => {
-                const w = SEVERITY_WEIGHTS[c] || 0;
+                const w = SEVERITY_WEIGHTS[c] ?? 0;
                 if (w > topWeight) {
                     topWeight = w;
                     topCode = c;
@@ -500,7 +497,6 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
             });
             day.weatherCode = topCode;
         }
-        delete (day as any)._allWeatherCodes;
     });
 
     return result;

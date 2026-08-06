@@ -3,7 +3,7 @@ import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2 } 
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData, WeatherDataStatus } from "@/lib/types";
-import { getSlrColor } from "@/lib/utils";
+import { formatCalendarDate, getSlrColor } from "@/lib/utils";
 
 const getTimeColor = (hour: number) => {
   if (hour === 9 || hour === 16) return `hsl(45, 100%, 65%)`; // Yellow
@@ -51,7 +51,6 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   };
 
   const [currentHourISO, setCurrentHourISO] = React.useState<string | null>(null);
-  const [todayStr, setTodayStr] = React.useState<string | null>(null);
   const [showDisplaySettings, setShowDisplaySettings] = React.useState(false);
 
   // Chart Visibility State
@@ -86,18 +85,20 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   };
 
   React.useEffect(() => {
-    const now = new Date();
-    // Robust local date/hour detection for the specific timezone
-    const today = now.toLocaleDateString('en-CA', { timeZone: timezone });
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      hourCycle: 'h23',
-      timeZone: timezone
-    });
-    const localHour = fmt.format(now);
+    const updateCurrentHour = () => {
+      const now = new Date();
+      const today = now.toLocaleDateString('en-CA', { timeZone: timezone });
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        hourCycle: 'h23',
+        timeZone: timezone
+      });
+      setCurrentHourISO(`${today}T${fmt.format(now)}`);
+    };
 
-    setTodayStr(today);
-    setCurrentHourISO(`${today}T${localHour}`);
+    updateCurrentHour();
+    const intervalId = window.setInterval(updateCurrentHour, 60 * 1000);
+    return () => window.clearInterval(intervalId);
   }, [timezone]);
 
   const nowRef = React.useRef<HTMLDivElement>(null);
@@ -161,7 +162,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
               <span className="text-[10px] md:text-xs uppercase font-black tracking-[0.2em] text-accent-cyan/60 mb-1">Detailed Outlook</span>
               <div className="flex items-center gap-3">
                 <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-                  {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
+                  {formatCalendarDate(selectedDay.dateStr, { weekday: 'long', month: 'long', day: 'numeric' })}
                 </h2>
                 <button
                   onClick={() => setShowDisplaySettings(!showDisplaySettings)}
@@ -333,12 +334,10 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
   // USER: snow bar should max out at 10cm of snowfall
   const safeMax = 10;
 
-  // Calculate Running Total
-  let runningTotal = 0;
-  const cumulativeData = day.hourly.map((h) => {
-    runningTotal += h.snowfall;
-    return runningTotal;
-  });
+  const cumulativeData = day.hourly.reduce<number[]>(
+    (totals, hour) => [...totals, (totals[totals.length - 1] ?? 0) + hour.snowfall],
+    []
+  );
 
   return (
     <div className="flex flex-col gap-1">
@@ -371,7 +370,6 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isSunrise = day.sunrise && h.time.substring(0, 13) === day.sunrise.substring(0, 13);
             const isSunset = day.sunset && h.time.substring(0, 13) === day.sunset.substring(0, 13);
             const barColor = h.slr ? getSlrColor(h.slr) : "rgba(255, 255, 255, 0.05)";
@@ -517,7 +515,6 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const isFreezing = temp <= 0;
             const isFeelsFreezing = feelsLike <= 0;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const peakText = getTimeColor(hour);
 
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
@@ -652,7 +649,6 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const gustHeight = (gust / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 
@@ -784,7 +780,6 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
             const height = (Math.min(uv, safeMax) / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 
@@ -880,7 +875,6 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
             const height = (Math.min(visKm, safeMax) / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 
@@ -957,7 +951,6 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         >
           {day.hourly.map((h, i) => {
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 

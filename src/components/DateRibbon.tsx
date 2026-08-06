@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
 import { Snowflake } from "lucide-react";
-import { getSlrColor, getWeatherDescription } from "@/lib/utils";
+import { formatCalendarDate, getSlrColor, getWeatherDescription } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface DateRibbonProps {
@@ -25,12 +25,13 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
 
     if (container && target) {
       // Small delay to ensure layout is ready
-      setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
         container.scrollTo({
           left: target.offsetLeft - container.offsetLeft,
           behavior: "smooth"
         });
       }, 100);
+      return () => window.clearTimeout(timeoutId);
     }
   }, [days]); // Re-run when days change (e.g. on initial load)
 
@@ -46,8 +47,7 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
           const isToday = day.dateStr === todayStr;
           const isPast = day.dateStr < todayStr;
 
-          const date = new Date(day.dateStr + 'T12:00:00'); // Use midday to avoid TZ shifts
-          const dayName = isToday ? "Today" : new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date);
+          const dayName = isToday ? "Today" : formatCalendarDate(day.dateStr, { weekday: 'short' });
           const dayNum = day.dateStr.split('-')[2];
 
           // NEW: Storm & SLR Logic

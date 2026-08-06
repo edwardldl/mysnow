@@ -6,13 +6,12 @@ import DateRibbon from "@/components/DateRibbon";
 import { cn } from "@/lib/utils_tailwind";
 import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
-import ModeToggle from "@/components/ModeToggle";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
-import { Location, DayData, RollingStats, WeatherDataStatus } from "@/lib/types";
+import { Location, DayData, WeatherDataStatus } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -25,6 +24,8 @@ export default function Home() {
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const lastFetchKeyRef = useRef<string | null>(null);
+  const latestDataRequestRef = useRef(0);
+  const currentLocationIdRef = useRef(currentLocationId);
 
   const [forecastDays, setForecastDays] = useState<DayData[]>([]);
   const [historyDays, setHistoryDays] = useState<DayData[]>([]);
@@ -42,11 +43,24 @@ export default function Home() {
     historySelectedDateRef.current = historySelectedDate;
   }, [historySelectedDate]);
 
+  // Historical results describe the previous location, so never keep them after a switch.
+  useEffect(() => {
+    currentLocationIdRef.current = currentLocationId;
+    setHistoryDays([]);
+    setHistorySelectedDate(null);
+  }, [currentLocationId]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [dataStatus, setDataStatus] = useState<WeatherDataStatus>("fresh");
+  const [, setNowTick] = useState(0);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNowTick(tick => tick + 1), 60 * 1000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
 
   // Initialize locations and current location from persistence
@@ -89,6 +103,7 @@ export default function Home() {
   }, []);
 
   const loadData = useCallback(async (locId: string, model: string, algo: string, elevation: string = 'avg', force = false) => {
+    const requestId = ++latestDataRequestRef.current;
     const cached = !force && hasValidCache(locId, model, elevation);
 
     // Only show the full-screen loader if we don't have cached data
@@ -102,7 +117,11 @@ export default function Home() {
     try {
       const data = await fetchWeatherData(locId, model, elevation, force);
       const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
-      const grouped = groupData(blended, data.location.timezone);
+      const grouped = groupData(blended);
+
+      // A later selection or refresh started another request while this one was in flight.
+      if (requestId !== latestDataRequestRef.current) return;
+
       setForecastDays(grouped);
       setDataStatus(data.status);
       setLocations(getLocations()); // Refresh locations to pick up backfilled metadata (elevation, timezone)
@@ -124,11 +143,14 @@ export default function Home() {
         }
       }
     } catch (err: unknown) {
+      if (requestId !== latestDataRequestRef.current) return;
       setError(err instanceof Error ? err.message : "Failed to fetch weather data");
       setIsOffline(!navigator.onLine);
       console.error(err);
     } finally {
-      setIsLoading(false);
+      if (requestId === latestDataRequestRef.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -140,27 +162,27 @@ export default function Home() {
     }
   }, [currentLocationId, modelId, algoId, elevationMode, locations, loadData]);
 
-  const lastPrefetchedModelRef = useRef<string | null>(null);
-  const lastPrefetchedLocsCountRef = useRef<number>(0);
+  const lastPrefetchKeyRef = useRef<string | null>(null);
 
-  // Background pre-fetch for all locations when model or locations list change
+  // The selected location is fetched above. Pre-fetch only the other locations.
   useEffect(() => {
-    const locIds = Object.keys(locations);
-    if (locIds.length > 0) {
-      if (lastPrefetchedModelRef.current !== `${modelId}|${elevationMode}` || lastPrefetchedLocsCountRef.current !== locIds.length) {
-        lastPrefetchedModelRef.current = `${modelId}|${elevationMode}`;
-        lastPrefetchedLocsCountRef.current = locIds.length;
-        fetchBulkWeatherData(locIds, modelId, elevationMode);
-      }
+    const locIds = Object.keys(locations)
+      .filter(id => id !== currentLocationId)
+      .sort();
+    const prefetchKey = `${modelId}|${elevationMode}|${locIds.join(',')}`;
+
+    if (locIds.length > 0 && lastPrefetchKeyRef.current !== prefetchKey) {
+      lastPrefetchKeyRef.current = prefetchKey;
+      fetchBulkWeatherData(locIds, modelId, elevationMode);
     }
-  }, [modelId, elevationMode, locations]);
+  }, [currentLocationId, modelId, elevationMode, locations]);
 
-  // Proactively fetch all elevations for the current location to make switching instant
+  // Wait for the active elevation to load, then fetch only the other two elevations.
   useEffect(() => {
-    if (Object.keys(locations).length > 0 && currentLocationId) {
+    if (forecastDays.length > 0 && currentLocationId) {
       fetchElevationTriad(currentLocationId, modelId);
     }
-  }, [currentLocationId, modelId, locations]);
+  }, [currentLocationId, modelId, forecastDays]);
 
 
   // Dynamic header height measurement
@@ -181,7 +203,17 @@ export default function Home() {
   }, []);
 
   const handleAddLocation = (name: string, lat: string, lon: string, minElev?: number, maxElev?: number) => {
-    const id = name.toLowerCase().replace(/\s+/g, '-');
+    const baseId = name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'location';
+    let id = baseId;
+    let suffix = 2;
+    while (locations[id]) {
+      id = `${baseId}-${suffix++}`;
+    }
+
     const newLocs = saveLocation(id, name, lat, lon, minElev, maxElev);
     setLocations(newLocs);
     setCurrentLocationId(id);
@@ -195,7 +227,7 @@ export default function Home() {
     }
   };
 
-  const timeInfo = React.useMemo(() => {
+  const timeInfo = (() => {
     const now = new Date();
     const fmt = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -216,7 +248,7 @@ export default function Home() {
       currentHourISO: `${y}-${m}-${d}T${h}:00`,
       todayStr: `${y}-${m}-${d}`
     };
-  }, [locations, currentLocationId]);
+  })();
 
   const { currentHourISO, todayStr } = timeInfo;
 
@@ -277,9 +309,9 @@ export default function Home() {
         gusts: Math.max(...selectedDay.hourly.map(h => h.gusts || 0)),
         uvIndex: Math.max(...selectedDay.hourly.map(h => h.uvIndex || 0)),
         visibility: Math.max(...selectedDay.hourly.map(h => h.visibility || 0)),
-        weatherCode: selectedDay.weatherCode || 0,
+        weatherCode: selectedDay.weatherCode ?? 0,
       };
-      return { data: summary as any, isDaily: true };
+      return { data: summary, isDaily: true };
     }
 
     return null;
@@ -304,7 +336,6 @@ export default function Home() {
         onRefresh={() => loadData(currentLocationId, modelId, algoId, elevationMode, true)}
         isLoading={isLoading}
         isOffline={isOffline}
-        currentData={currentHourData}
         locations={locations}
         currentLocationId={currentLocationId}
         onSelectLocation={setCurrentLocationId}
@@ -339,7 +370,10 @@ export default function Home() {
             {mode === "history" && (
               <HistorySection
                 currentLocationId={currentLocationId}
-                onResults={(days) => {
+                algoId={algoId}
+                elevationMode={elevationMode}
+                onResults={(locationId, days) => {
+                  if (locationId !== currentLocationIdRef.current) return;
                   setHistoryDays(days);
                   if (days.length > 0) {
                     const prevDate = historySelectedDateRef.current;
@@ -354,7 +388,7 @@ export default function Home() {
               <ErrorBanner
                 message={error}
                 isOffline={isOffline}
-                onRetry={() => loadData(currentLocationId, modelId, algoId)}
+                onRetry={() => loadData(currentLocationId, modelId, algoId, elevationMode)}
               />
             )}
 

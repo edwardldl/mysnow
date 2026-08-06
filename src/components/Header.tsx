@@ -3,7 +3,7 @@
 import React from "react";
 import { RefreshCw, Snowflake, Cpu, Zap, WifiOff, Mountain } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
-import { BlendedHour, Location } from "@/lib/types";
+import { Location } from "@/lib/types";
 import LocationDropdown from "./LocationDropdown";
 import CompactSelector from "./CompactSelector";
 import { MODELS, ALGORITHMS, ELEVATION_MODES } from "@/lib/constants";
@@ -11,11 +11,10 @@ import { MODELS, ALGORITHMS, ELEVATION_MODES } from "@/lib/constants";
 interface HeaderProps {
   onRefresh: () => void;
   isLoading?: boolean;
-  currentData?: BlendedHour | null;
   locations: Record<string, Location>;
   currentLocationId: string;
   onSelectLocation: (id: string) => void;
-  onAddLocation: (name: string, lat: string, lon: string) => void;
+  onAddLocation: (name: string, lat: string, lon: string, minElev?: number, maxElev?: number) => void;
   onRemoveLocation: (id: string) => void;
   modelId: string;
   setModelId: (id: string) => void;
@@ -29,7 +28,6 @@ interface HeaderProps {
 export default function Header({
   onRefresh,
   isLoading,
-  currentData,
   locations,
   currentLocationId,
   onSelectLocation,
@@ -43,10 +41,6 @@ export default function Header({
   setElevationMode,
   isOffline,
 }: HeaderProps) {
-
-  // Debug: log isLoading changes
-  // console.log("Header isLoading:", isLoading);
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(60px+var(--sat,0px))] md:h-[calc(72px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl transition-all duration-300">
       <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-5 lg:px-8 h-full flex items-center justify-center min-[400px]:justify-between gap-1.5 sm:gap-2 lg:gap-4">

@@ -1,35 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Calendar, History } from "lucide-react";
-import { cn } from "@/lib/utils_tailwind";
 import { fetchHistoricalWeatherData } from "@/lib/api";
 import { blendForecasts, groupData } from "@/lib/data";
 import { DayData } from "@/lib/types";
 
 interface HistorySectionProps {
   currentLocationId: string;
-  onResults: (days: DayData[]) => void;
+  algoId: string;
+  elevationMode: string;
+  onResults: (locationId: string, days: DayData[]) => void;
 }
 
-export default function HistorySection({ currentLocationId, onResults }: HistorySectionProps) {
+export default function HistorySection({ currentLocationId, algoId, elevationMode, onResults }: HistorySectionProps) {
   const [startDate, setStartDate] = useState("2024-11-01");
   const [endDate, setEndDate] = useState("2024-11-15");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const latestRequestRef = useRef(0);
+
+  useEffect(() => {
+    // Ignore an in-flight result for the previous location.
+    latestRequestRef.current += 1;
+    setIsLoading(false);
+    setError(null);
+  }, [currentLocationId]);
 
   const handleFetch = async () => {
+    if (!startDate || !endDate || startDate > endDate) {
+      setError("Choose a start date that is on or before the end date.");
+      return;
+    }
+
+    const requestId = ++latestRequestRef.current;
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchHistoricalWeatherData(currentLocationId, startDate, endDate);
-      const blended = blendForecasts(null, data.ecmwfData, data.location, "hybrid", "historical");
-      const grouped = groupData(blended, data.location.timezone);
-      onResults(grouped);
+      const data = await fetchHistoricalWeatherData(currentLocationId, startDate, endDate, 'best_match', elevationMode);
+      const blended = blendForecasts(null, data.ecmwfData, data.location, algoId, "historical");
+      const grouped = groupData(blended);
+
+      if (requestId !== latestRequestRef.current) return;
+      onResults(currentLocationId, grouped);
     } catch (err: unknown) {
+      if (requestId !== latestRequestRef.current) return;
       setError(err instanceof Error ? err.message : "Failed to fetch historical data");
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequestRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 

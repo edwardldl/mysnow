@@ -15,15 +15,60 @@ const DEFAULT_LOCATIONS: Record<string, Location> = {
     }
 };
 
-export function getLocations() {
-    const customLocsJson = localStorage.getItem('calisnow_locations');
-    const customLocs = customLocsJson ? JSON.parse(customLocsJson) : {};
-    return { ...DEFAULT_LOCATIONS, ...customLocs };
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+function isOpenMeteoResponse(value: unknown): value is OpenMeteoResponse {
+    return isRecord(value)
+        && isRecord(value.hourly)
+        && Array.isArray(value.hourly.time)
+        && Array.isArray(value.hourly.temperature_2m)
+        && typeof value.timezone === 'string'
+        && typeof value.timezone_abbreviation === 'string';
+}
+
+function isStoredLocation(value: unknown): value is Location {
+    if (!isRecord(value)) return false;
+    return typeof value.id === 'string'
+        && typeof value.name === 'string'
+        && isValidCoordinate(value.latitude as number, value.longitude as number)
+        && (typeof value.elevationM === 'number' || typeof value.elevationM === 'string')
+        && (typeof value.elevationFt === 'number' || typeof value.elevationFt === 'string');
+}
+
+function getCustomLocations(): Record<string, Location> {
+    if (typeof window === 'undefined') return {};
+
+    try {
+        const stored = localStorage.getItem('calisnow_locations');
+        if (!stored) return {};
+
+        const parsed: unknown = JSON.parse(stored);
+        if (!isRecord(parsed)) return {};
+
+        return Object.fromEntries(
+            Object.entries(parsed).filter(([id, location]) =>
+                !DEFAULT_LOCATIONS[id] && isStoredLocation(location) && location.id === id
+            )
+        ) as Record<string, Location>;
+    } catch (error) {
+        console.warn('Ignoring invalid saved locations:', error);
+        return {};
+    }
+}
+
+export function getLocations(): Record<string, Location> {
+    return { ...DEFAULT_LOCATIONS, ...getCustomLocations() };
 }
 
 export function saveLocation(id: string, name: string, lat: string, lon: string, minElev?: number, maxElev?: number): Record<string, Location> {
-    const customLocsJson = localStorage.getItem('calisnow_locations');
-    const customLocs: Record<string, Location> = customLocsJson ? JSON.parse(customLocsJson) : {};
+    if (typeof window === 'undefined') throw new Error('Locations can only be saved in a browser.');
+    if (!id || DEFAULT_LOCATIONS[id]) {
+        throw new Error('Please choose a unique name for this location.');
+    }
+
+    const customLocs = getCustomLocations();
 
     const latitude = parseFloat(lat);
     const longitude = parseFloat(lon);
@@ -50,12 +95,10 @@ export function saveLocation(id: string, name: string, lat: string, lon: string,
 }
 
 export function removeLocation(id: string): Record<string, Location> {
+    if (typeof window === 'undefined') return getLocations();
     if (DEFAULT_LOCATIONS[id]) return getLocations(); // Can't delete defaults
 
-    const customLocsJson = localStorage.getItem('calisnow_locations');
-    if (!customLocsJson) return getLocations();
-
-    const customLocs = JSON.parse(customLocsJson);
+    const customLocs = getCustomLocations();
     delete customLocs[id];
 
     localStorage.setItem('calisnow_locations', JSON.stringify(customLocs));
@@ -139,11 +182,13 @@ async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
         const res = await fetch(`${META_BASE_URL}/${metaKey}/static/meta.json`, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (!res.ok) return undefined;
-        const data = await res.json();
-        return data.last_run_availability_time;
-    } catch (e: any) {
+        const data: unknown = await res.json();
+        return isRecord(data) && typeof data.last_run_availability_time === 'number'
+            ? data.last_run_availability_time
+            : undefined;
+    } catch (error: unknown) {
         clearTimeout(timeoutId);
-        if (e.name === 'AbortError') {
+        if (error instanceof DOMException && error.name === 'AbortError') {
             console.warn(`Metadata fetch for ${modelKey} timed out after 2s`);
         }
         return undefined;
@@ -161,12 +206,28 @@ type WeatherCacheItem = {
 const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
 const WEATHER_CACHE_PREFIX = 'mysnow_weather_cache_';
 
+function isWeatherCacheItem(value: unknown): value is WeatherCacheItem {
+    if (!isRecord(value) || typeof value.timestamp !== 'number' || !Number.isFinite(value.timestamp) || typeof value.mode !== 'string') {
+        return false;
+    }
+
+    if (!isStoredLocation(value.location) || !isOpenMeteoResponse(value.ecmwfData)) {
+        return false;
+    }
+
+    return value.hrrrData === null || isOpenMeteoResponse(value.hrrrData);
+}
+
 function getCachedData(key: string, allowExpired = false): WeatherCacheItem | null {
     if (typeof window === 'undefined') return null;
     try {
         const cached = localStorage.getItem(WEATHER_CACHE_PREFIX + key);
         if (!cached) return null;
-        const item: WeatherCacheItem = JSON.parse(cached);
+        const item: unknown = JSON.parse(cached);
+        if (!isWeatherCacheItem(item)) {
+            localStorage.removeItem(WEATHER_CACHE_PREFIX + key);
+            return null;
+        }
         const age = Date.now() - item.timestamp;
         if (!allowExpired && age > CACHE_EXPIRATION_MS) {
             return null;
@@ -190,11 +251,11 @@ function evictOldestCacheEntries(neededEntries = 5): boolean {
             const key = localStorage.key(i);
             if (key && key.startsWith(WEATHER_CACHE_PREFIX)) {
                 try {
-                    const item = JSON.parse(localStorage.getItem(key) || '{}');
-                    if (item.timestamp) {
+                    const item: unknown = JSON.parse(localStorage.getItem(key) || '{}');
+                    if (isRecord(item) && typeof item.timestamp === 'number' && Number.isFinite(item.timestamp)) {
                         weatherKeys.push({ key, timestamp: item.timestamp });
                     }
-                } catch (e) {
+                } catch {
                     // If parsing fails, just treat it as very old or corrupt and potentially delete it
                     weatherKeys.push({ key, timestamp: 0 });
                 }
@@ -223,8 +284,10 @@ function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): 
     try {
         const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
         localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
-    } catch (e: any) {
-        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+    } catch (error: unknown) {
+        const quotaExceeded = error instanceof DOMException
+            && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED');
+        if (quotaExceeded) {
             const cleared = evictOldestCacheEntries(8); // Clear a decent chunk
             if (cleared) {
                 try {
@@ -237,16 +300,18 @@ function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): 
                 }
             }
         }
-        console.error("Error writing weather cache:", e);
+        console.error("Error writing weather cache:", error);
     }
 }
 
 /**
  * Averages ensemble member data into a single OpenMeteoResponse.
  */
-function averageEnsembleData(data: any): OpenMeteoResponse {
+function averageEnsembleData(data: unknown): OpenMeteoResponse {
     const members = Array.isArray(data) ? data : [data];
-    if (members.length === 0) throw new Error("No ensemble data received");
+    if (members.length === 0 || !members.every(isOpenMeteoResponse)) {
+        throw new Error("Invalid ensemble data received");
+    }
 
     const first = members[0];
     const result: OpenMeteoResponse = {
@@ -261,23 +326,27 @@ function averageEnsembleData(data: any): OpenMeteoResponse {
     };
 
     const keys = Object.keys(first.hourly).filter(k => k !== 'time');
-    const memberCount = members.length;
-
     keys.forEach(key => {
         const firstVal = first.hourly[key];
         if (!Array.isArray(firstVal)) return;
 
-        const averaged = new Array(firstVal.length).fill(0);
+        const totals = new Array(firstVal.length).fill(0);
+        const counts = new Array(firstVal.length).fill(0);
         members.forEach(m => {
             const mVal = m.hourly[key];
             if (Array.isArray(mVal)) {
                 for (let i = 0; i < mVal.length; i++) {
-                    averaged[i] += (mVal[i] || 0);
+                    if (typeof mVal[i] === 'number' && Number.isFinite(mVal[i])) {
+                        totals[i] += mVal[i];
+                        counts[i] += 1;
+                    }
                 }
             }
         });
 
-        result.hourly[key] = averaged.map(v => v / memberCount);
+        result.hourly[key] = totals.map((total, index) =>
+            counts[index] > 0 ? total / counts[index] : 0
+        );
     });
 
     return result;
@@ -312,8 +381,7 @@ function updateCustomLocationMetadata(loc: Location, data: OpenMeteoResponse): v
         }
 
         if (changed) {
-            const customLocsJson = localStorage.getItem('calisnow_locations');
-            const customLocs: Record<string, Location> = customLocsJson ? JSON.parse(customLocsJson) : {};
+            const customLocs = getCustomLocations();
             customLocs[loc.id] = { ...loc };
             localStorage.setItem('calisnow_locations', JSON.stringify(customLocs));
         }
@@ -458,8 +526,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, data);
 
             const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match', status: 'fresh' as const };
-            const { status, ...cacheable } = result;
-            setCachedData(cacheKey, cacheable);
+            setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error("Error fetching Best Match data:", error);
@@ -510,8 +577,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, ecmwfData);
 
             const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf', status: 'fresh' as const };
-            const { status, ...cacheable } = result;
-            setCachedData(cacheKey, cacheable);
+            setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error("Error fetching weather data:", error);
@@ -586,8 +652,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 
                 updateCustomLocationMetadata(loc, data);
                 const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode, status: 'fresh' as const };
-                const { status, ...cacheable } = result;
-                setCachedData(cacheKey, cacheable);
+                setCachedData(cacheKey, result);
                 return result;
             } catch (error) {
                 console.error(`Error fetching ensemble data ${omModel}:`, error);
@@ -640,8 +705,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, data);
 
             const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode, status: 'fresh' as const };
-            const { status, ...cacheable } = result;
-            setCachedData(cacheKey, cacheable);
+            setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error(`Error fetching ${omModel} data:`, error);
@@ -1098,4 +1162,3 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
         }
     }
 }
-
