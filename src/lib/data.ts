@@ -1,10 +1,11 @@
 import { OpenMeteoResponse, OpenMeteoDaily, Location, BlendedHour, DayData, RollingStats } from './types';
 import { normalizeProfile } from './snow/profile';
+import { intervalDirectionMean, intervalMean, intervalRepresentativeLayers } from './snow/atmosphere/interval';
 import { calculateSnowfall } from './snow/snowfall';
 import { advanceSnowpack } from './snow/snowpack';
 import { summarizeEnsembleSnowfall } from './snow/ensemble';
 import { toSlrMethod } from './snow/slr';
-import { DEFAULT_SLR_METHOD, type SnowLayer } from './snow/types';
+import { DEFAULT_SLR_METHOD, type ForecastProvenance, type SnowLayer } from './snow/types';
 
 const SEVERITY_WEIGHTS: Record<number, number> = {
     // Thunderstorm
@@ -21,6 +22,32 @@ const SEVERITY_WEIGHTS: Record<number, number> = {
     // Cloudy/Clear
     3: 40, 2: 39, 1: 38, 0: 37
 };
+
+function forecastProvenance(data: OpenMeteoResponse, index: number): ForecastProvenance {
+    const validTime = data.hourly.time[index] ?? '';
+    const firstTime = Date.parse(data.hourly.time[0] ?? '');
+    const secondTime = Date.parse(data.hourly.time[1] ?? '');
+    const returnedTimeStepMinutes = Number.isFinite(firstTime) && Number.isFinite(secondTime)
+        ? Math.max(1, Math.round((secondTime - firstTime) / 60_000))
+        : 60;
+    const metadata = data.requestMetadata;
+    return {
+        modelId: data.modelIdentity ?? 'unknown',
+        initializationTime: null,
+        validTime,
+        leadHours: null,
+        nativeTimeStepMinutes: null,
+        returnedTimeStepMinutes,
+        requestedLatitude: metadata?.requestedLatitude ?? data.latitude ?? 0,
+        requestedLongitude: metadata?.requestedLongitude ?? data.longitude ?? 0,
+        returnedLatitude: data.latitude ?? metadata?.requestedLatitude ?? 0,
+        returnedLongitude: data.longitude ?? metadata?.requestedLongitude ?? 0,
+        requestedElevationM: metadata?.requestedElevationM ?? null,
+        modelGridElevationM: metadata?.modelGridElevationM ?? null,
+        predictionVersion: 'slope-aware-v1',
+        calibrationVersion: 'uncalibrated-mvp-v1',
+    };
+}
 
 /**
  * Calculate absolute snow level based on evaporative and diabatic cooling
@@ -42,25 +69,28 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
 
     for (let i = 0; i < hourly.length; i++) {
         const point = hourly[i];
-        const profile = normalizeProfile(point.layers ?? [], {
-            surfacePressureHpa: point.surface_pressure ?? null,
+        const previous = i > 0 ? hourly[i - 1] : undefined;
+        const representativeSurfacePressure = intervalMean(previous?.surface_pressure, point.surface_pressure);
+        const profile = normalizeProfile(intervalRepresentativeLayers(previous?.layers, point.layers), {
+            surfacePressureHpa: representativeSurfacePressure,
             stationElevationM: elevation,
         });
         const snowfallResult = calculateSnowfall({
             time: point.time ?? '',
             precipitationMm: point.precipitation ?? null,
+            precipitationProbabilityPct: point.precipChance ?? null,
             snowfallCm: point.snowfall_raw ?? null,
             snowfallWaterEquivalentMm: point.snowfallWaterEquivalentMm ?? null,
             precipitationType: point.precipitationType ?? null,
             weatherCode: point.weatherCode ?? null,
             surface: {
-                temperatureC: point.temperature ?? null,
-                dewPointC: point.dewPoint ?? null,
-                relativeHumidityPct: point.rh ?? null,
-                wetBulbTemperatureC: point.wet_bulb_temperature_2m ?? null,
-                windSpeedMs: point.windSpeed ?? null,
-                windDirectionDeg: point.windDir ?? null,
-                surfacePressureHpa: point.surface_pressure ?? null,
+                temperatureC: intervalMean(previous?.temperature, point.temperature),
+                dewPointC: intervalMean(previous?.dewPoint, point.dewPoint),
+                relativeHumidityPct: intervalMean(previous?.rh, point.rh),
+                wetBulbTemperatureC: intervalMean(previous?.wet_bulb_temperature_2m, point.wet_bulb_temperature_2m),
+                windSpeedMs: intervalMean(previous?.windSpeed, point.windSpeed),
+                windDirectionDeg: intervalDirectionMean(previous?.windDir, point.windDir),
+                surfacePressureHpa: representativeSurfacePressure,
                 stationElevationM: elevation,
             },
             profile,
@@ -149,8 +179,10 @@ export function blendForecasts(
         const hrrrIdx = hrrrTimes.indexOf(time);
 
         const point: Partial<BlendedHour> = { time, dateObj };
+        let pointSource = ecmwf;
 
         if (hrrr && hrrrIdx !== -1 && hrrr.hourly.temperature_2m[hrrrIdx] !== null) {
+            pointSource = hrrr;
             point.model = 'HRRR';
             point.precipitation = hrrr.hourly.precipitation ? hrrr.hourly.precipitation[hrrrIdx] : 0;
             point.liquidMM = point.precipitation;
@@ -253,6 +285,7 @@ export function blendForecasts(
             point.layers = extractLayers(ecmwf, i);
         }
 
+        point.provenance = forecastProvenance(pointSource, pointSource === hrrr ? hrrrIdx : i);
         rawHourly.push(point);
     }
 

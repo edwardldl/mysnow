@@ -71,6 +71,7 @@ export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
       </div>
 
       {/* Snow Value */}
+      <span className="text-[8px] -mb-3 uppercase font-black tracking-wider text-slate-600">Reference fresh</span>
       <div className="flex items-baseline gap-1.5">
         <span className={cn(
           "text-4xl font-black tracking-tighter",

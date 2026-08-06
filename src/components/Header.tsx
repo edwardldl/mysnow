@@ -100,7 +100,7 @@ export default function Header({
           />
 
           <CompactSelector
-            label="Elevation"
+            label="Reference Site"
             icon={Mountain}
             options={ELEVATION_MODES}
             selectedId={elevationMode}

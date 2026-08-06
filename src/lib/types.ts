@@ -1,5 +1,6 @@
 import type { RawPressureLayer } from './snow/profile';
-import type { EnsembleSnowfallResult, SnowLayer, SnowfallResult, SnowpackStep } from './snow/types';
+import type { EnsembleSnowfallResult, ForecastProvenance, SnowLayer, SnowfallResult, SnowpackStep } from './snow/types';
+import type { ResortReferencePoint, ResortSnowForecast } from './snow/resort/types';
 
 export interface OpenMeteoHourly {
     time: string[];
@@ -47,6 +48,8 @@ export interface OpenMeteoResponse {
     hourly: OpenMeteoHourly;
     daily?: OpenMeteoDaily;
     elevation?: number;
+    latitude?: number;
+    longitude?: number;
     timezone: string;
     timezone_abbreviation: string;
     lastRunAvailabilityTime?: number;
@@ -57,6 +60,13 @@ export interface OpenMeteoResponse {
         temperature: '°C';
         verticalVelocity: 'm/s';
         windSpeed: 'm/s';
+    };
+    requestMetadata?: {
+        requestedLatitude: number;
+        requestedLongitude: number;
+        requestedElevationM: number | null;
+        modelGridElevationM: number | null;
+        rawProfileAttached: boolean;
     };
 }
 
@@ -73,6 +83,7 @@ export interface Location {
     maxElevationM?: number;
     timezone?: string;
     isCustom?: boolean;
+    referencePoints?: ResortReferencePoint[];
 }
 
 export interface BlendedHour {
@@ -123,6 +134,7 @@ export interface BlendedHour {
     rainMm?: number;
     ensembleSnowfall?: EnsembleSnowfallResult;
     snowpackStep?: SnowpackStep;
+    provenance?: ForecastProvenance;
 }
 
 export interface WindowData {
@@ -184,6 +196,7 @@ export interface DayData {
     maxTemp: number;
     weatherCode: number | null;
     lastRunAvailabilityTime?: number;
+    resortForecast?: ResortSnowForecast;
 }
 export type WeatherDataStatus = 'fresh' | 'cached' | 'stale';
 

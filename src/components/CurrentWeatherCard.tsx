@@ -231,12 +231,12 @@ export default function CurrentWeatherCard({
             {/* Snow Accumulation Group */}
             <div className="flex flex-col gap-2 md:gap-4">
                 <h3 className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
-                    {isDaily ? "Snow History" : "Snow Accumulation"}
+                    {isDaily ? "Reference Snow History" : "Reference Snow Accumulation"}
                 </h3>
                 <div className="grid grid-cols-3 xl:grid-cols-3 gap-2 md:gap-3">
                     <CompactStatBox 
                         icon={<Snowflake className="w-3 md:w-3.5 h-3 md:h-3.5 text-accent-cyan" />}
-                        label={isDaily ? "Daily Snow" : "Rate"}
+                        label={isDaily ? "Fresh Snow" : "Fresh Rate"}
                         value={currentData.snowfall.toFixed(1)}
                         unit={isDaily ? "cm" : "cm/h"}
                     />
@@ -244,14 +244,14 @@ export default function CurrentWeatherCard({
                         <>
                             <CompactStatBox 
                                 icon={<Waves className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-400" />}
-                                label={isDaily ? "Prior 24h" : "24h Snow"}
+                                label={isDaily ? "Prior 24h" : "24h Fresh"}
                                 value={rollingStats.snow24h.toFixed(1)}
                                 unit="cm"
                                 subValue={rollingStats.slr24h != null ? `${rollingStats.slr24h.toFixed(0)}:1` : undefined}
                             />
                             <CompactStatBox 
                                 icon={<CloudRain className="w-3 md:w-3.5 h-3 md:h-3.5 text-indigo-400" />}
-                                label={isDaily ? "Prior 48h" : "48h Snow"}
+                                label={isDaily ? "Prior 48h" : "48h Fresh"}
                                 value={rollingStats.snow48h.toFixed(1)}
                                 unit="cm"
                                 subValue={rollingStats.slr48h != null ? `${rollingStats.slr48h.toFixed(0)}:1` : undefined}

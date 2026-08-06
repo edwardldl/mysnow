@@ -1,4 +1,5 @@
 import type { Location, OpenMeteoResponse, WeatherDataResult } from './types';
+import { referencePointForMode } from './snow/resort/geometry';
 
 const DEFAULT_LOCATIONS: Record<string, Location> = {
     palisades: {
@@ -6,10 +7,39 @@ const DEFAULT_LOCATIONS: Record<string, Location> = {
         name: 'Palisades Tahoe',
         latitude: 39.193416,
         longitude: -120.245402,
-        elevationFt: 8100,
-        elevationM: 2470,
-        minElevationM: 1896,
-        maxElevationM: 2666,
+        elevationFt: 8200,
+        elevationM: 2499,
+        minElevationM: 1889,
+        maxElevationM: 2708,
+        referencePoints: [
+            {
+                id: 'palisades-base',
+                name: 'Village base',
+                role: 'base',
+                latitude: 39.196999,
+                longitude: -120.24313,
+                elevationM: 1889,
+                geometrySource: 'curated'
+            },
+            {
+                id: 'palisades-high-camp',
+                name: 'High Camp',
+                role: 'mid_mountain',
+                latitude: 39.195899,
+                longitude: -120.260845,
+                elevationM: 2499,
+                geometrySource: 'curated'
+            },
+            {
+                id: 'palisades-upper-mountain',
+                name: 'Upper mountain',
+                role: 'summit',
+                latitude: 39.181764,
+                longitude: -120.266494,
+                elevationM: 2708,
+                geometrySource: 'curated'
+            }
+        ],
         timezone: 'America/Los_Angeles',
         isCustom: false
     }
@@ -212,6 +242,8 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapabilities> = {
  * otherwise falls back to single elevation or 'nan' for grid default.
  */
 function getApiElevation(loc: Location, mode: string = 'avg'): string {
+    const referencePoint = referencePointForMode(loc, mode);
+    if (referencePoint.geometrySource === 'curated') return referencePoint.elevationM.toString();
     const min = loc.minElevationM;
     const max = loc.maxElevationM;
 
@@ -227,6 +259,14 @@ function getApiElevation(loc: Location, mode: string = 'avg'): string {
     }
     
     return 'nan';
+}
+
+function getApiLatitude(loc: Location, mode: string = 'avg'): number {
+    return referencePointForMode(loc, mode).latitude;
+}
+
+function getApiLongitude(loc: Location, mode: string = 'avg'): number {
+    return referencePointForMode(loc, mode).longitude;
 }
 
 function estimatedSurfacePressureHpa(loc: Location, elevationMode: string): number | null {
@@ -278,7 +318,8 @@ type WeatherCacheItem = {
 };
 
 const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
-const WEATHER_CACHE_PREFIX = 'mysnow_weather_cache_';
+const WEATHER_CACHE_NAMESPACE = 'mysnow_weather_cache_';
+const WEATHER_CACHE_PREFIX = `${WEATHER_CACHE_NAMESPACE}v2_`;
 
 function isWeatherCacheItem(value: unknown): value is WeatherCacheItem {
     if (!isRecord(value) || typeof value.timestamp !== 'number' || !Number.isFinite(value.timestamp) || typeof value.mode !== 'string') {
@@ -326,7 +367,7 @@ function evictOldestCacheEntries(neededEntries = 5): boolean {
         const weatherKeys: { key: string, timestamp: number }[] = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key && key.startsWith(WEATHER_CACHE_PREFIX)) {
+            if (key && key.startsWith(WEATHER_CACHE_NAMESPACE)) {
                 try {
                     const item: unknown = JSON.parse(localStorage.getItem(key) || '{}');
                     if (isRecord(item) && typeof item.timestamp === 'number' && Number.isFinite(item.timestamp)) {
@@ -417,15 +458,18 @@ function extractEnsembleMembers(
             hourly,
             daily: data.daily,
             elevation: data.elevation,
+            latitude: data.latitude,
+            longitude: data.longitude,
             timezone: data.timezone,
             timezone_abbreviation: data.timezone_abbreviation,
+            requestMetadata: data.requestMetadata,
         }, modelIdentity, lastRunAvailabilityTime);
     }).filter(isOpenMeteoResponse);
     return { displayData, members };
 }
 
 async function fetchEnsembleData(url: string, lastRunAvailabilityTime?: number, modelIdentity?: string): Promise<EnsembleFetchData> {
-    const res = await fetch(url);
+    const res = await fetchDualForcing(url);
     if (!res.ok) throw new Error(`Ensemble fetch failed: ${res.status}`);
     return extractEnsembleMembers(await res.json(), lastRunAvailabilityTime, modelIdentity);
 }
@@ -529,6 +573,91 @@ function weatherHourlyParamsForLocations(locations: Location[], modelMode: strin
         : weatherHourlyParams(highestLocation, modelMode, elevationMode);
 }
 
+function isRawAtmosphericVariable(variable: string): boolean {
+    return /_(?:1000|9\d\d|8\d\d|7\d\d|6\d\d|5\d\d|4\d\d)hPa$/.test(variable)
+        || variable === 'total_column_integrated_water_vapour';
+}
+
+function queryNumbers(value: string | null): number[] {
+    return (value ?? '').split(',').map(Number).filter(Number.isFinite);
+}
+
+function mergeDualForcingPayload(
+    surfacePayload: unknown,
+    rawPayload: unknown,
+    requestedLatitudes: number[],
+    requestedLongitudes: number[],
+    requestedElevations: number[],
+): unknown {
+    const surfaces = Array.isArray(surfacePayload) ? surfacePayload : [surfacePayload];
+    const raws = Array.isArray(rawPayload) ? rawPayload : [rawPayload];
+    const merged = surfaces.map((surface, index) => {
+        if (!isRecord(surface)) return surface;
+        const raw = raws[index];
+        const rawRecord = isRecord(raw) ? raw : null;
+        const rawHourly = rawRecord && isRecord(rawRecord.hourly) ? rawRecord.hourly : null;
+        const surfaceHourly = isRecord(surface.hourly) ? surface.hourly : {};
+        const rawProfile = rawHourly === null
+            ? {}
+            : Object.fromEntries(Object.entries(rawHourly).filter(([key]) => key === 'time' || isRawAtmosphericVariable(key)));
+        return {
+            ...surface,
+            hourly: { ...surfaceHourly, ...rawProfile },
+            requestMetadata: {
+                requestedLatitude: requestedLatitudes[index] ?? requestedLatitudes[0] ?? Number(surface.latitude),
+                requestedLongitude: requestedLongitudes[index] ?? requestedLongitudes[0] ?? Number(surface.longitude),
+                requestedElevationM: requestedElevations[index] ?? requestedElevations[0] ?? null,
+                modelGridElevationM: rawRecord && typeof rawRecord.elevation === 'number' ? rawRecord.elevation : null,
+                rawProfileAttached: rawHourly !== null,
+            },
+        };
+    });
+    return Array.isArray(surfacePayload) ? merged : merged[0];
+}
+
+/** Fetch native-grid profiles separately from elevation-adjusted surface data. */
+async function fetchDualForcing(url: string): Promise<Response> {
+    const surfaceUrl = new URL(url);
+    const rawUrl = new URL(url);
+    const hourlyVariables = (surfaceUrl.searchParams.get('hourly') ?? '').split(',').filter(Boolean);
+    const surfaceVariables = hourlyVariables.filter(variable => !isRawAtmosphericVariable(variable));
+    const rawVariables = hourlyVariables.filter(isRawAtmosphericVariable);
+    surfaceUrl.searchParams.set('hourly', surfaceVariables.join(','));
+    surfaceUrl.searchParams.set('cell_selection', 'land');
+    rawUrl.searchParams.set('hourly', rawVariables.join(','));
+    rawUrl.searchParams.set('elevation', 'nan');
+    rawUrl.searchParams.set('cell_selection', 'nearest');
+    rawUrl.searchParams.delete('daily');
+
+    const surfacePromise = fetch(surfaceUrl);
+    const rawPromise = rawVariables.length > 0
+        ? fetch(rawUrl).catch(error => {
+            console.warn('Native-grid profile request failed; continuing with surface forcing only.', error);
+            return null;
+        })
+        : Promise.resolve(null);
+    const [surfaceResponse, rawResponse] = await Promise.all([surfacePromise, rawPromise]);
+    if (!surfaceResponse.ok) return surfaceResponse;
+
+    const surfacePayload: unknown = await surfaceResponse.json();
+    const rawPayload: unknown = rawResponse?.ok ? await rawResponse.json() : null;
+    const requestedLatitudes = queryNumbers(surfaceUrl.searchParams.get('latitude'));
+    const requestedLongitudes = queryNumbers(surfaceUrl.searchParams.get('longitude'));
+    const requestedElevations = queryNumbers(surfaceUrl.searchParams.get('elevation'));
+    const merged = mergeDualForcingPayload(
+        surfacePayload,
+        rawPayload,
+        requestedLatitudes,
+        requestedLongitudes,
+        requestedElevations,
+    );
+    return new Response(JSON.stringify(merged), {
+        status: surfaceResponse.status,
+        statusText: surfaceResponse.statusText,
+        headers: { 'content-type': 'application/json' },
+    });
+}
+
 const ENSEMBLE_HOURLY_PARAMS = [
     "snowfall",
     "precipitation",
@@ -566,7 +695,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
     const metaPromise = fetchModelStatus(modelMode);
 
     if (modelMode === 'best_match') {
-        const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        const url = `${BASE_URL}?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
             `&elevation=${getApiElevation(loc, elevationMode)}` +
             `&hourly=${weatherHourlyParams(loc, 'best_match', elevationMode)}` +
             `&daily=sunrise,sunset` +
@@ -579,7 +708,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         try {
             console.time(`fetchWeatherData:${modelMode}`);
             const [res, lastRunAvailabilityTime] = await Promise.all([
-                fetch(url),
+                fetchDualForcing(url),
                 metaPromise
             ]);
             console.timeEnd(`fetchWeatherData:${modelMode}`);
@@ -600,7 +729,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         }
     } else if (modelMode === 'hrrr_ecmwf') {
         // 1. Fetch HRRR (0-48 hours)
-        const hrrrUrl = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        const hrrrUrl = `${BASE_URL}?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
             `&elevation=${getApiElevation(loc, elevationMode)}` +
             `&hourly=${weatherHourlyParams(loc, 'hrrr', elevationMode)}` +
             `&daily=sunrise,sunset` +
@@ -611,7 +740,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&timezone=${timezone}`;
 
         // 2. Fetch ECMWF IFS (Up to 16 days, we'll fetch 15)
-        const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
             `&elevation=${getApiElevation(loc, elevationMode)}` +
             `&hourly=${weatherHourlyParams(loc, 'ecmwf', elevationMode)}` +
             `&daily=sunrise,sunset` +
@@ -623,8 +752,8 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         try {
             console.time(`fetchWeatherData:${modelMode}`);
             const [hrrrRes, ecmwfRes, lastRunAvailabilityTime] = await Promise.all([
-                fetch(hrrrUrl),
-                fetch(ecmwfUrl),
+                fetchDualForcing(hrrrUrl),
+                fetchDualForcing(ecmwfUrl),
                 metaPromise
             ]);
             console.timeEnd(`fetchWeatherData:${modelMode}`);
@@ -665,7 +794,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         
         // Use dedicated high-resolution ECMWF endpoint if specified
         if (modelMode === 'ecmwf') {
-            const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
                 `&elevation=${getApiElevation(loc, elevationMode)}` +
                 `&hourly=${weatherHourlyParams(loc, 'ecmwf', elevationMode)}` +
                 `&daily=sunrise,sunset` +
@@ -676,7 +805,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 
             try {
                 console.time(`fetchWeatherData:${modelMode}`);
-                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(ecmwfUrl), metaPromise]);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetchDualForcing(ecmwfUrl), metaPromise]);
                 console.timeEnd(`fetchWeatherData:${modelMode}`);
                 if (!res.ok) throw new Error(`ECMWF High-Res fetch failed: ${res.status}`);
                 const data = attachResponseMetadata(await res.json(), 'ecmwf', lastRunAvailabilityTime);
@@ -694,7 +823,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
         // Use dedicated Ensemble API for ensemble models
         if (modelMode.endsWith('_ensemble')) {
-            const url = `${ENSEMBLE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+            const url = `${ENSEMBLE_URL}?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
                 `&elevation=${getApiElevation(loc, elevationMode)}` +
                 `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
                 `&daily=sunrise,sunset` +
@@ -730,7 +859,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         else if (omModel === 'gem_regional') days = 4;
         else if (omModel === 'icon_global') days = 7;
 
-        const url = `${BASE_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+        const url = `${BASE_URL}?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
             `&elevation=${getApiElevation(loc, elevationMode)}` +
             `&hourly=${weatherHourlyParams(loc, modelMode, elevationMode)}` +
             `&daily=sunrise,sunset` +
@@ -743,7 +872,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         try {
             console.time(`fetchWeatherData:${modelMode}`);
             const [res, lastRunAvailabilityTime] = await Promise.all([
-                fetch(url),
+                fetchDualForcing(url),
                 metaPromise
             ]);
             console.timeEnd(`fetchWeatherData:${modelMode}`);
@@ -790,7 +919,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
     const timezone = "auto";
     const metaPromise = fetchModelStatus(model);
 
-    const url = `${HISTORICAL_URL}?latitude=${loc.latitude}&longitude=${loc.longitude}` +
+    const url = `${HISTORICAL_URL}?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
         `&elevation=${getApiElevation(loc, elevationMode)}` +
         `&start_date=${startDate}&end_date=${endDate}` +
         `&hourly=${weatherHourlyParams(loc, model, elevationMode)}` +
@@ -802,7 +931,7 @@ export async function fetchHistoricalWeatherData(locationKey: string, startDate:
     try {
         console.time(`fetchHistoricalWeatherData:${model}`);
         const [res, lastRunAvailabilityTime] = await Promise.all([
-            fetch(url),
+            fetchDualForcing(url),
             metaPromise
         ]);
         console.timeEnd(`fetchHistoricalWeatherData:${model}`);
@@ -837,8 +966,8 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
     });
     if (toFetch.length === 0) return;
 
-    const latitudes = toFetch.map(l => l.latitude).join(',');
-    const longitudes = toFetch.map(l => l.longitude).join(',');
+    const latitudes = toFetch.map(l => getApiLatitude(l, elevationMode)).join(',');
+    const longitudes = toFetch.map(l => getApiLongitude(l, elevationMode)).join(',');
     const elevations = toFetch.map(l => getApiElevation(l, elevationMode)).join(',');
     const timezone = "auto";
     const metaPromise = fetchModelStatus(modelMode);
@@ -856,7 +985,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
 
         try {
             console.time(`fetchBulkWeatherData:${modelMode}`);
-            const [res, lastRunAvailabilityTime] = await Promise.all([fetch(url), metaPromise]);
+            const [res, lastRunAvailabilityTime] = await Promise.all([fetchDualForcing(url), metaPromise]);
             console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
 
             if (!res.ok) throw new Error(`Bulk Best Match fetch failed: ${res.status}, ${url}`);
@@ -866,9 +995,9 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             results.forEach((item, idx) => {
                 const loc = toFetch[idx];
                 if (!loc) return;
-                item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                updateCustomLocationMetadata(loc, item);
-                const result = { hrrrData: null, ecmwfData: item, location: loc, mode: 'best_match' };
+                const displayData = attachResponseMetadata(item, 'best_match', lastRunAvailabilityTime);
+                updateCustomLocationMetadata(loc, displayData);
+                const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: 'best_match' };
                 setCachedData(`${loc.id}|best_match|${elevationMode}`, result);
             });
         } catch (e) {
@@ -897,8 +1026,8 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
         try {
             console.time(`fetchBulkWeatherData:${modelMode}`);
             const [hrrrRes, ecmwfRes, lastRunAvailabilityTime] = await Promise.all([
-                fetch(hrrrUrl),
-                fetch(ecmwfUrl),
+                fetchDualForcing(hrrrUrl),
+                fetchDualForcing(ecmwfUrl),
                 metaPromise
             ]);
             console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
@@ -914,11 +1043,13 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
                 const loc = toFetch[idx];
                 const hrrrItem = hrrrResults[idx];
                 if (!loc) return;
-                item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                if (hrrrItem) hrrrItem.lastRunAvailabilityTime = lastRunAvailabilityTime;
+                const displayData = attachResponseMetadata(item, 'ecmwf', lastRunAvailabilityTime);
+                const hrrrDisplayData = hrrrItem
+                    ? attachResponseMetadata(hrrrItem, 'hrrr', lastRunAvailabilityTime)
+                    : null;
 
-                updateCustomLocationMetadata(loc, item);
-                const result = { hrrrData: hrrrItem, ecmwfData: item, location: loc, mode: 'hrrr_ecmwf' };
+                updateCustomLocationMetadata(loc, displayData);
+                const result = { hrrrData: hrrrDisplayData, ecmwfData: displayData, location: loc, mode: 'hrrr_ecmwf' };
                 setCachedData(`${loc.id}|hrrr_ecmwf|${elevationMode}`, result);
             });
         } catch (e) {
@@ -951,7 +1082,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
 
             try {
                 console.time(`fetchBulkWeatherData:${modelMode}`);
-                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(ecmwfUrl), metaPromise]);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetchDualForcing(ecmwfUrl), metaPromise]);
                 console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
                 if (!res.ok) throw new Error("Bulk ECMWF High-Res fetch failed");
                 const data = await res.json();
@@ -959,9 +1090,9 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
                 results.forEach((item, idx) => {
                     const loc = toFetch[idx];
                     if (!loc) return;
-                    item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                    updateCustomLocationMetadata(loc, item);
-                    const result = { hrrrData: null, ecmwfData: item, location: loc, mode: 'ecmwf' };
+                    const displayData = attachResponseMetadata(item, 'ecmwf', lastRunAvailabilityTime);
+                    updateCustomLocationMetadata(loc, displayData);
+                    const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: 'ecmwf' };
                     setCachedData(`${loc.id}|ecmwf|${elevationMode}`, result);
                 });
                 return;
@@ -985,7 +1116,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             try {
                 console.time(`fetchBulkWeatherData:${modelMode}`);
                 const [lastRunAvailabilityTime] = await Promise.all([metaPromise]);
-                const res = await fetch(url);
+                const res = await fetchDualForcing(url);
                 console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
                 if (!res.ok) throw new Error(`Bulk Ensemble fetch failed: ${res.status}`);
                 const data = await res.json();
@@ -1026,7 +1157,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
 
         try {
             console.time(`fetchBulkWeatherData:${modelMode}`);
-            const [res, lastRunAvailabilityTime] = await Promise.all([fetch(url), metaPromise]);
+            const [res, lastRunAvailabilityTime] = await Promise.all([fetchDualForcing(url), metaPromise]);
             console.timeEnd(`fetchBulkWeatherData:${modelMode}`);
 
             if (!res.ok) throw new Error(`Bulk ${modelMode} fetch failed: ${res.status}`);
@@ -1036,9 +1167,9 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             results.forEach((item, idx) => {
                 const loc = toFetch[idx];
                 if (!loc) return;
-                item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                updateCustomLocationMetadata(loc, item);
-                const result = { hrrrData: null, ecmwfData: item, location: loc, mode: modelMode };
+                const displayData = attachResponseMetadata(item, modelMode, lastRunAvailabilityTime);
+                updateCustomLocationMetadata(loc, displayData);
+                const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: modelMode };
                 setCachedData(`${loc.id}|${modelMode}|${elevationMode}`, result);
             });
         } catch (e) {
@@ -1061,8 +1192,8 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
     
     if (missingModes.length === 0) return;
 
-    const latitudes = missingModes.map(() => loc.latitude).join(',');
-    const longitudes = missingModes.map(() => loc.longitude).join(',');
+    const latitudes = missingModes.map(mode => getApiLatitude(loc, mode)).join(',');
+    const longitudes = missingModes.map(mode => getApiLongitude(loc, mode)).join(',');
     const elevations = missingModes.map(mode => getApiElevation(loc, mode)).join(',');
     const timezone = "auto";
     const metaPromise = fetchModelStatus(modelMode);
@@ -1082,16 +1213,16 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
             `&timezone=${timezone}`;
 
         try {
-            const [res, lastRunAvailabilityTime] = await Promise.all([fetch(url), metaPromise]);
+            const [res, lastRunAvailabilityTime] = await Promise.all([fetchDualForcing(url), metaPromise]);
             if (!res.ok) return;
             const data = await res.json();
             const results = Array.isArray(data) ? data : [data];
 
             results.forEach((item, idx) => {
                 const mode = missingModes[idx];
-                item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                updateCustomLocationMetadata(loc, item);
-                const result = { hrrrData: null, ecmwfData: item, location: loc, mode: 'best_match' };
+                const displayData = attachResponseMetadata(item, 'best_match', lastRunAvailabilityTime);
+                updateCustomLocationMetadata(loc, displayData);
+                const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: 'best_match' };
                 setCachedData(`${loc.id}|best_match|${mode}`, result);
             });
         } catch (e) {
@@ -1119,7 +1250,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
 
         try {
             const [hrrrRes, ecmwfRes, lastRunAvailabilityTime] = await Promise.all([
-                fetch(hrrrUrl), fetch(ecmwfUrl), metaPromise
+                fetchDualForcing(hrrrUrl), fetchDualForcing(ecmwfUrl), metaPromise
             ]);
             if (!hrrrRes.ok || !ecmwfRes.ok) return;
             const hrrrData = await hrrrRes.json();
@@ -1130,10 +1261,12 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
             ecmwfResults.forEach((item, idx) => {
                 const mode = missingModes[idx];
                 const hrrrItem = hrrrResults[idx];
-                item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                if (hrrrItem) hrrrItem.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                updateCustomLocationMetadata(loc, item);
-                const result = { hrrrData: hrrrItem, ecmwfData: item, location: loc, mode: 'hrrr_ecmwf' };
+                const displayData = attachResponseMetadata(item, 'ecmwf', lastRunAvailabilityTime);
+                const hrrrDisplayData = hrrrItem
+                    ? attachResponseMetadata(hrrrItem, 'hrrr', lastRunAvailabilityTime)
+                    : null;
+                updateCustomLocationMetadata(loc, displayData);
+                const result = { hrrrData: hrrrDisplayData, ecmwfData: displayData, location: loc, mode: 'hrrr_ecmwf' };
                 setCachedData(`${loc.id}|hrrr_ecmwf|${mode}`, result);
             });
         } catch (e) {
@@ -1167,7 +1300,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
 
             try {
                 const [lastRunAvailabilityTime] = await Promise.all([metaPromise]);
-                const res = await fetch(url);
+                const res = await fetchDualForcing(url);
                 if (!res.ok) return;
                 const data = await res.json();
                 const locationResults = Array.isArray(data) ? data : [data];
@@ -1200,16 +1333,16 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                 `&timezone=${timezone}`;
 
             try {
-                const [res, lastRunAvailabilityTime] = await Promise.all([fetch(url), metaPromise]);
+                const [res, lastRunAvailabilityTime] = await Promise.all([fetchDualForcing(url), metaPromise]);
                 if (!res.ok) return;
                 const data = await res.json();
                 const results = Array.isArray(data) ? data : [data];
 
                 results.forEach((item, idx) => {
                     const mode = missingModes[idx];
-                    item.lastRunAvailabilityTime = lastRunAvailabilityTime;
-                    updateCustomLocationMetadata(loc, item);
-                    const result = { hrrrData: null, ecmwfData: item, location: loc, mode: modelMode };
+                    const displayData = attachResponseMetadata(item, modelMode, lastRunAvailabilityTime);
+                    updateCustomLocationMetadata(loc, displayData);
+                    const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: modelMode };
                     setCachedData(`${loc.id}|${modelMode}|${mode}`, result);
                 });
             } catch (e) {

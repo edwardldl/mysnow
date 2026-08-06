@@ -120,7 +120,7 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
                       <div className={cn(
                         "flex items-center gap-0.5 px-1 rounded-sm",
                         "bg-accent-blue/20"
-                      )}>
+                      )} title="Reference fresh snowfall (cm)">
                         <Snowflake className={cn(
                           "w-2 h-2",
                           isSelected ? "text-white" : (isStorm ? "text-white" : "text-accent-cyan"),

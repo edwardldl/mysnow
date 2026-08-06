@@ -8,7 +8,9 @@ MySnow is a weather forecasting application for skiers, snowboarders, and mounta
 
 - **🎯 Multi-Resolution Modelling**: Seamlessly switch between regional high-resolution models (3km) and global premier models (9km).
 - **❄️ Explainable snow physics**: Separates precipitation amount, frozen fraction, fresh-snow SLR, snowfall, and snowpack settling.
-- **⛰️ Elevation-Aware Simulation**: View precise forecasts for the Base, Mid-mountain, or Peak of any resort with automated statistical downscaling.
+- **⛰️ Slope-aware products**: Separates reference fresh snowfall, natural slope deposition, opening-time new snow, and managed-piste depth.
+- **📍 Real resort reference sites**: The built-in resort uses distinct base, mid-mountain, and summit coordinates; custom locations are explicitly marked as estimated geometry until curated points are supplied.
+- **🌬️ Mass-conserving terrain guidance**: Publishes sheltered, neutral, and exposed SRU ranges without claiming an exact 10 m snow map.
 - **🤖 Ensemble processing**: Evaluates available ensemble members independently and reports snowfall spread rather than deriving snow from averaged atmospheric fields.
 - **📱 PWA & Offline Support**: Installed as a native-feeling app with persistent caching and "stale-while-error" resilience for the deep backcountry.
 - **🌍 Dynamic Timezones & Coordinates**: Location-aware processing ensures you see the data exactly as it happens on the mountain.
@@ -36,6 +38,18 @@ MySnow calculates frozen precipitation separately from fresh-snow density. The p
 - **Open-Meteo snowfall**: model-output comparison.
 
 Surface modifiers are versioned but disabled until backtesting calibrates them. The UI shows the phase, frozen SWE, method, fallbacks and warnings for every precipitation hour.
+
+Open-Meteo snowfall remains a fixed-conversion comparison product. MySnow never divides it by precipitation and presents the result as a model-native or observed SLR.
+
+## Forecast product definitions
+
+- **Reference fresh snowfall** is the fresh depth expected at a level, sheltered reference site before settling.
+- **Natural slope accumulation** applies elevation-aware baseline forcing and mass-conserving directional deposition at Ski-Slope Reference Unit (SRU) scale.
+- **Opening-time snow** is new natural snow remaining after explicit settling, melt, wind compaction, and modeled wind loss.
+- **Total natural snowpack** combines old and new modeled layers.
+- **Managed-piste depth** is withheld unless snowmaking, grooming, or transfer telemetry is available. Without it, the UI says that grooming and snowmaking are not included.
+
+The initial terrain coefficients and deterministic uncertainty envelopes are marked `uncalibrated_mvp`. They are useful as transparent guidance and test fixtures, not as locally validated drift-depth predictions.
 
 ## 🛠️ Technical Stack
 

@@ -99,7 +99,6 @@ function applySurfaceModifiers(
 export function estimateFreshSnowSlr(
   input: SnowfallInput,
   method: SlrMethod,
-  frozenSweMm?: number,
   warmNoseEnergyCM: number | null = null,
 ): SlrEstimate {
   if (method === 'fixed_10') {
@@ -111,16 +110,13 @@ export function estimateFreshSnowSlr(
   }
 
   if (method === 'open_meteo_snowfall') {
-    const precipitationMm = Math.max(0, frozenSweMm ?? input.precipitationMm ?? 0);
-    const snowfallCm = input.snowfallCm;
-    const freshSlr = snowfallCm !== null && snowfallCm >= 0 && precipitationMm > 0
-      ? Math.max(3, Math.min(30, (snowfallCm * 10) / precipitationMm))
-      : null;
     const diagnostics = emptyDiagnostics(input, 'open_meteo_snowfall');
-    diagnostics.sourceFreshSlr = freshSlr;
-    diagnostics.finalFreshSlr = freshSlr;
-    if (freshSlr === null) diagnostics.warnings.push('MODEL_SNOWFALL_UNAVAILABLE');
-    return { freshSlr, diagnostics };
+    // Open-Meteo's generic snowfall field uses a fixed conversion. Keep it as
+    // a comparison depth and never reinterpret it as an observed/model SLR.
+    if (input.snowfallCm === null || input.snowfallCm < 0) {
+      diagnostics.warnings.push('MODEL_SNOWFALL_UNAVAILABLE');
+    }
+    return { freshSlr: null, diagnostics };
   }
 
   if (method === 'cobb_2011') {

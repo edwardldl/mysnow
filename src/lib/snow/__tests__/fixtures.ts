@@ -2,12 +2,12 @@ import { normalizeProfile, type RawPressureLayer } from '../profile';
 import type { SnowfallInput, SurfaceMeteorology } from '../types';
 
 const baseLayers: RawPressureLayer[] = [
-  { pressureHpa: 850, geopotentialHeightM: 1500, temperatureC: -5, dewPointC: -5.2, relativeHumidityWaterPct: 97, verticalVelocityMs: 0.03, windSpeedMs: 6, windDirectionDeg: 220, cloudCoverPct: 95 },
-  { pressureHpa: 800, geopotentialHeightM: 2000, temperatureC: -8, dewPointC: -8.2, relativeHumidityWaterPct: 97, verticalVelocityMs: 0.04, windSpeedMs: 7, windDirectionDeg: 220, cloudCoverPct: 95 },
-  { pressureHpa: 700, geopotentialHeightM: 3100, temperatureC: -13, dewPointC: -13.2, relativeHumidityWaterPct: 97, verticalVelocityMs: 0.08, windSpeedMs: 9, windDirectionDeg: 225, cloudCoverPct: 95 },
-  { pressureHpa: 600, geopotentialHeightM: 4300, temperatureC: -16, dewPointC: -16.2, relativeHumidityWaterPct: 97, verticalVelocityMs: 0.09, windSpeedMs: 11, windDirectionDeg: 230, cloudCoverPct: 95 },
-  { pressureHpa: 500, geopotentialHeightM: 5700, temperatureC: -21, dewPointC: -21.2, relativeHumidityWaterPct: 97, verticalVelocityMs: 0.06, windSpeedMs: 14, windDirectionDeg: 235, cloudCoverPct: 95 },
-  { pressureHpa: 400, geopotentialHeightM: 7200, temperatureC: -28, dewPointC: -28.2, relativeHumidityWaterPct: 97, verticalVelocityMs: 0.03, windSpeedMs: 18, windDirectionDeg: 240, cloudCoverPct: 95 },
+  { pressureHpa: 850, geopotentialHeightM: 1500, temperatureC: -5, dewPointC: -5.2, relativeHumidityWaterPct: 97, verticalVelocityMs: -0.03, windSpeedMs: 6, windDirectionDeg: 220, cloudCoverPct: 95 },
+  { pressureHpa: 800, geopotentialHeightM: 2000, temperatureC: -8, dewPointC: -8.2, relativeHumidityWaterPct: 97, verticalVelocityMs: -0.04, windSpeedMs: 7, windDirectionDeg: 220, cloudCoverPct: 95 },
+  { pressureHpa: 700, geopotentialHeightM: 3100, temperatureC: -13, dewPointC: -13.2, relativeHumidityWaterPct: 97, verticalVelocityMs: -0.08, windSpeedMs: 9, windDirectionDeg: 225, cloudCoverPct: 95 },
+  { pressureHpa: 600, geopotentialHeightM: 4300, temperatureC: -16, dewPointC: -16.2, relativeHumidityWaterPct: 97, verticalVelocityMs: -0.09, windSpeedMs: 11, windDirectionDeg: 230, cloudCoverPct: 95 },
+  { pressureHpa: 500, geopotentialHeightM: 5700, temperatureC: -21, dewPointC: -21.2, relativeHumidityWaterPct: 97, verticalVelocityMs: -0.06, windSpeedMs: 14, windDirectionDeg: 235, cloudCoverPct: 95 },
+  { pressureHpa: 400, geopotentialHeightM: 7200, temperatureC: -28, dewPointC: -28.2, relativeHumidityWaterPct: 97, verticalVelocityMs: -0.03, windSpeedMs: 18, windDirectionDeg: 240, cloudCoverPct: 95 },
 ];
 
 function cloneLayers(overrides: Partial<RawPressureLayer>[] = []): RawPressureLayer[] {
@@ -49,8 +49,8 @@ export function makeFixture(overrides: FixtureOverrides = {}): SnowfallInput {
 export const profileFixtures = {
   coldSaturatedDgzStrongLift: makeFixture(),
   coldSaturatedDgzNoLift: makeFixture({ layers: cloneLayers().map(layer => ({ ...layer, verticalVelocityMs: 0 })) }),
-  strongLiftAboveDgz: makeFixture({ layers: cloneLayers([{ verticalVelocityMs: 0.01 }, {}, {}, { verticalVelocityMs: 0.14 }, { verticalVelocityMs: 0.12 }]) }),
-  strongLiftBelowDgz: makeFixture({ layers: cloneLayers([{ verticalVelocityMs: 0.12 }, { verticalVelocityMs: 0.14 }, { verticalVelocityMs: 0.02 }]) }),
+  strongLiftAboveDgz: makeFixture({ layers: cloneLayers([{ verticalVelocityMs: -0.01 }, {}, {}, { verticalVelocityMs: -0.14 }, { verticalVelocityMs: -0.12 }]) }),
+  strongLiftBelowDgz: makeFixture({ layers: cloneLayers([{ verticalVelocityMs: -0.12 }, { verticalVelocityMs: -0.14 }, { verticalVelocityMs: -0.02 }]) }),
   completelyDryDgz: makeFixture({ layers: cloneLayers().map(layer => ({ ...layer, dewPointC: layer.temperatureC! - 12, relativeHumidityWaterPct: 35 })) }),
   elevatedWarmNose: makeFixture({ layers: cloneLayers([
     {}, {}, { temperatureC: 1, dewPointC: 0.7 }, { temperatureC: 2, dewPointC: 1.7 }, { temperatureC: -5, dewPointC: -5.2 },

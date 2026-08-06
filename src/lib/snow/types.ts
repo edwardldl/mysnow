@@ -16,6 +16,22 @@ export const DEFAULT_SLR_METHOD: SlrMethod = 'kuchera';
 
 export const MIN_ACCUMULATING_SWE_MM = 0.01;
 
+export interface Quantiles {
+  p10: number;
+  p50: number;
+  p90: number;
+}
+
+export interface PhaseDistribution {
+  snow: number;
+  mixedRainSnow: number;
+  rain: number;
+  icePellets: number;
+  freezingRain: number;
+  expectedFrozenFraction: number;
+  confidence: number;
+}
+
 export interface PressureLayer {
   pressureHpa: number;
   geopotentialHeightM: number | null;
@@ -56,6 +72,7 @@ export interface PhaseResult {
   rainFraction: number;
   iceFraction?: number;
   confidence: number;
+  distribution: PhaseDistribution;
   source:
     | 'snowfall_water_equivalent'
     | 'precipitation_type'
@@ -115,17 +132,27 @@ export interface QpfAdjustmentResult {
   confidence: number;
 }
 
+export interface QpfDistribution {
+  probabilityWet: number;
+  amountMm: Quantiles;
+  method: 'raw_model_envelope' | 'ensemble';
+  confidence: number;
+}
+
 export interface SnowfallResult {
   precipitationMm: number;
   snowFraction: number;
   frozenSweMm: number;
   freshSlr: number | null;
+  freshSlrQuantiles: Quantiles | null;
   freshSnowCm: number;
+  freshSnowQuantilesCm: Quantiles;
   rainMm: number;
   phase: PhaseResult;
   method: SlrMethod;
   diagnostics: SlrDiagnostics;
   qpfAdjustment: QpfAdjustmentResult;
+  qpfDistribution: QpfDistribution;
 }
 
 export interface SnowLayer {
@@ -147,6 +174,17 @@ export interface SnowpackStep {
   meltSweMm: number;
 }
 
+export interface NaturalSnowState {
+  sweMm: number;
+  depthCm: number;
+  densityKgM3: number;
+  liquidWaterMm: number;
+  surfaceTemperatureC: number;
+  ageHours: number;
+  windCompactionIndex: number;
+  crustProbability: number;
+}
+
 export interface EnsembleSnowfallResult {
   memberResults: SnowfallResult[];
   p10SnowCm: number;
@@ -161,9 +199,27 @@ export interface EnsembleSnowfallResult {
   missingMemberCount: number;
 }
 
+export interface ForecastProvenance {
+  modelId: string;
+  initializationTime: string | null;
+  validTime: string;
+  leadHours: number | null;
+  nativeTimeStepMinutes: number | null;
+  returnedTimeStepMinutes: number;
+  requestedLatitude: number;
+  requestedLongitude: number;
+  returnedLatitude: number;
+  returnedLongitude: number;
+  requestedElevationM: number | null;
+  modelGridElevationM: number | null;
+  predictionVersion: string;
+  calibrationVersion: string;
+}
+
 export interface SnowfallInput {
   time: string;
   precipitationMm: number | null;
+  precipitationProbabilityPct?: number | null;
   snowfallCm: number | null;
   snowfallWaterEquivalentMm: number | null;
   precipitationType: number | null;

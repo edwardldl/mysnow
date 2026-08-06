@@ -14,6 +14,8 @@ describe('profile normalization', () => {
   });
 
   it('uses one explicit geometric-velocity sign convention', () => {
+    expect(upwardVelocity(-0.08)).toBe(0.08);
+    expect(upwardVelocity(0.08)).toBe(0);
     expect(upwardVelocity(0.08, 'positive_up')).toBe(0.08);
     expect(upwardVelocity(-0.08, 'positive_up')).toBe(0);
     expect(upwardVelocity(-0.08, 'positive_down')).toBe(0.08);

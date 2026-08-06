@@ -13,13 +13,16 @@ import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCa
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, WeatherDataStatus } from "@/lib/types";
 import { DEFAULT_SLR_METHOD } from "@/lib/snow/types";
+import { DEFAULT_FORECAST_MODE } from "@/lib/snow/openmeteo/capabilities";
+import { referencePointForMode } from "@/lib/snow/resort/geometry";
+import { buildResortSnowForecasts } from "@/lib/snow/resort/forecast";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [mode, setMode] = useState<"forecast" | "history">("forecast");
   const [locations, setLocations] = useState<Record<string, Location>>({});
   const [currentLocationId, setCurrentLocationId] = useState("palisades");
-  const [modelId, setModelId] = useState("best_match");
+  const [modelId, setModelId] = useState(DEFAULT_FORECAST_MODE);
   const [algoId, setAlgoId] = useState<string>(DEFAULT_SLR_METHOD);
   const [elevationMode, setElevationMode] = useState<string>("avg");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
@@ -116,22 +119,54 @@ export default function Home() {
     setIsOffline(!navigator.onLine);
     setRefreshKey(prev => prev + 1);
     try {
-      const data = await fetchWeatherData(locId, model, elevation, force);
-      const blended = blendForecasts(
-        data.hrrrData,
-        data.ecmwfData,
-        data.location,
-        algo,
-        data.mode,
-        data.ensembleMembers,
+      const referenceModes = ['min', 'avg', 'max'] as const;
+      // Open-Meteo accepts coordinate arrays. Prime all real resort reference
+      // points together, then use the individual cache records below.
+      if (!force) await fetchElevationTriad(locId, model);
+      const results = await Promise.allSettled(
+        referenceModes.map(referenceMode => fetchWeatherData(locId, model, referenceMode, force)),
       );
-      const grouped = groupData(blended);
+      const selectedIndex = referenceModes.indexOf(elevation as typeof referenceModes[number]);
+      const selectedResult = results[selectedIndex === -1 ? 1 : selectedIndex];
+      if (selectedResult.status === 'rejected') throw selectedResult.reason;
+
+      const pointForecasts = results.flatMap((result, index) => {
+        if (result.status === 'rejected') return [];
+        const data = result.value;
+        const grouped = groupData(blendForecasts(
+          data.hrrrData,
+          data.ecmwfData,
+          data.location,
+          algo,
+          data.mode,
+          data.ensembleMembers,
+        ));
+        return [{
+          mode: referenceModes[index],
+          data,
+          grouped,
+          point: referencePointForMode(data.location, referenceModes[index]),
+        }];
+      });
+      const selectedPointForecast = pointForecasts.find(point => point.mode === elevation)
+        ?? pointForecasts.find(point => point.mode === 'avg')
+        ?? pointForecasts[0];
+      if (!selectedPointForecast) throw new Error('No reference-site forecast was available.');
+      const resortForecasts = buildResortSnowForecasts(
+        selectedPointForecast.data.location,
+        pointForecasts.map(point => ({ point: point.point, days: point.grouped })),
+      );
+      const grouped = selectedPointForecast.grouped.map(day => ({
+        ...day,
+        resortForecast: resortForecasts[day.dateStr],
+      }));
+      const data = selectedPointForecast.data;
 
       // A later selection or refresh started another request while this one was in flight.
       if (requestId !== latestDataRequestRef.current) return;
 
       setForecastDays(grouped);
-      setDataStatus(data.status);
+      setDataStatus(!cached || force ? 'fresh' : data.status);
       setLocations(getLocations()); // Refresh locations to pick up backfilled metadata (elevation, timezone)
       setIsOffline(false);
 
@@ -184,14 +219,6 @@ export default function Home() {
       fetchBulkWeatherData(locIds, modelId, elevationMode);
     }
   }, [currentLocationId, modelId, elevationMode, locations]);
-
-  // Wait for the active elevation to load, then fetch only the other two elevations.
-  useEffect(() => {
-    if (forecastDays.length > 0 && currentLocationId) {
-      fetchElevationTriad(currentLocationId, modelId);
-    }
-  }, [currentLocationId, modelId, forecastDays]);
-
 
   // Dynamic header height measurement
   useEffect(() => {

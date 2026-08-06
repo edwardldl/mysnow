@@ -1,7 +1,8 @@
 import { relativeHumidityIceFromDewPoint } from './humidity';
 import type { NormalizedProfile, PressureLayer } from './types';
 
-export const VERTICAL_VELOCITY_CONVENTION = 'positive_up' as const;
+/** Open-Meteo geometric vertical velocity is negative for upward ascent. */
+export const VERTICAL_VELOCITY_CONVENTION = 'positive_down' as const;
 
 const PRESSURE_TOLERANCE_HPA = 1;
 const ELEVATION_TOLERANCE_M = 100;

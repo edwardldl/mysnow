@@ -37,7 +37,7 @@ export default function HistorySection({ currentLocationId, algoId, elevationMod
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchHistoricalWeatherData(currentLocationId, startDate, endDate, 'best_match', elevationMode);
+      const data = await fetchHistoricalWeatherData(currentLocationId, startDate, endDate, 'ecmwf_ifs', elevationMode);
       const blended = blendForecasts(null, data.ecmwfData, data.location, algoId, "historical");
       const grouped = groupData(blended);
 
@@ -57,7 +57,7 @@ export default function HistorySection({ currentLocationId, algoId, elevationMod
     <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl font-black text-white tracking-tight">History Backtest</h2>
-        <p className="text-slate-400 text-sm italic">Analyze past storm performance and model skill.</p>
+        <p className="text-slate-400 text-sm italic">Analyze explicit-model reference-site snowfall; this is not managed-piste history.</p>
       </div>
 
       <div className="glass-panel p-6 rounded-3xl grid grid-cols-1 md:grid-cols-3 gap-6 items-end border border-white/10">

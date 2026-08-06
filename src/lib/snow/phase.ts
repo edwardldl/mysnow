@@ -1,5 +1,5 @@
 import { wetBulbFromTemperatureAndDewPoint } from './humidity';
-import type { PhaseResult, SnowDiagnosticWarning, SnowfallInput } from './types';
+import type { PhaseDistribution, PhaseResult, SnowDiagnosticWarning, SnowfallInput } from './types';
 
 const PRECIPITATION_EPSILON_MM = 0.01;
 
@@ -56,21 +56,23 @@ function integrateThermalProfile(input: SnowfallInput): ThermalEnergy {
   }
 
   let warmNoseEnergyCM = 0;
-  let refreezeEnergyCM = 0;
-  let encounteredWarmLayer = false;
+  const segments: Array<{ wetBulbC: number; energyCM: number }> = [];
   for (let index = 0; index < levels.length - 1; index += 1) {
     const bottom = levels[index];
     const top = levels[index + 1];
     const thicknessCm = Math.max(0, top.heightM - bottom.heightM) * 100;
     const wetBulbC = (bottom.wetBulbC + top.wetBulbC) / 2;
 
-    if (wetBulbC > 0) {
-      encounteredWarmLayer = true;
-      warmNoseEnergyCM += wetBulbC * thicknessCm;
-    } else if (encounteredWarmLayer) {
-      refreezeEnergyCM += Math.abs(wetBulbC) * thicknessCm;
-    }
+    const energyCM = Math.abs(wetBulbC) * thicknessCm;
+    segments.push({ wetBulbC, energyCM });
+    if (wetBulbC > 0) warmNoseEnergyCM += energyCM;
   }
+  const lowestWarmSegment = segments.findIndex(segment => segment.wetBulbC > 0);
+  const refreezeEnergyCM = lowestWarmSegment <= 0
+    ? 0
+    : segments.slice(0, lowestWarmSegment)
+      .filter(segment => segment.wetBulbC < 0)
+      .reduce((sum, segment) => sum + segment.energyCM, 0);
 
   return { warmNoseEnergyCM, refreezeEnergyCM, hasProfile: true };
 }
@@ -90,10 +92,38 @@ function buildResult(
   }
   if ((thermal.warmNoseEnergyCM ?? 0) > 50_000) warnings.push('LARGE_WARM_NOSE');
 
+  const mixedRainSnow = Math.min(0.35, 0.7 * Math.min(boundedSnowFraction, 1 - boundedSnowFraction));
+  const warmNose = thermal.warmNoseEnergyCM ?? 0;
+  const refreeze = thermal.refreezeEnergyCM ?? 0;
+  const icePellets = warmNose > 50_000 && refreeze > warmNose * 0.25
+    ? Math.min(0.2, boundedSnowFraction * 0.3)
+    : 0;
+  const freezingRain = warmNose > 50_000 && refreeze <= warmNose * 0.25
+    ? Math.min(0.2, (1 - boundedSnowFraction) * 0.3)
+    : 0;
+  const rawDistribution = {
+    snow: Math.max(0, boundedSnowFraction - mixedRainSnow / 2 - icePellets),
+    mixedRainSnow,
+    rain: Math.max(0, 1 - boundedSnowFraction - mixedRainSnow / 2 - freezingRain),
+    icePellets,
+    freezingRain,
+  };
+  const distributionTotal = Object.values(rawDistribution).reduce((sum, value) => sum + value, 0) || 1;
+  const distribution: PhaseDistribution = {
+    snow: rawDistribution.snow / distributionTotal,
+    mixedRainSnow: rawDistribution.mixedRainSnow / distributionTotal,
+    rain: rawDistribution.rain / distributionTotal,
+    icePellets: rawDistribution.icePellets / distributionTotal,
+    freezingRain: rawDistribution.freezingRain / distributionTotal,
+    expectedFrozenFraction: boundedSnowFraction,
+    confidence: clamp(confidence),
+  };
+
   return {
     snowFraction: boundedSnowFraction,
     rainFraction: 1 - boundedSnowFraction,
     confidence: clamp(confidence),
+    distribution,
     source,
     diagnostics: {
       surfaceWetBulbC,
