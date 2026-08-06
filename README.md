@@ -1,15 +1,15 @@
-# 🏔️ MySnow: High-Fidelity Snow Forecasting
+# 🏔️ MySnow: Snow Forecasting
 
-MySnow is a premium, state-of-the-art weather forecasting application specifically engineered for skiers, snowboarders, and mountain enthusiasts. It combines high-resolution meteorological models with advanced snow physics to provide the most accurate snowfall estimates available.
+MySnow is a weather forecasting application for skiers, snowboarders, and mountain enthusiasts. It combines Open-Meteo forecasts with an explainable snowfall pipeline; forecasts should be treated as guidance, not a replacement for local observations or avalanche information.
 
 ![MySnow Preview](public/preview.png) *(Note: Add your own preview image here)*
 
 ## 🌟 Key Features
 
 - **🎯 Multi-Resolution Modelling**: Seamlessly switch between regional high-resolution models (3km) and global premier models (9km).
-- **❄️ Advanced Snow Physics**: Choose from multiple Snow-to-Liquid Ratio (SLR) algorithms including Hybrid Cobb-Kuchera and Dendritic Habit diagrams.
+- **❄️ Explainable snow physics**: Separates precipitation amount, frozen fraction, fresh-snow SLR, snowfall, and snowpack settling.
 - **⛰️ Elevation-Aware Simulation**: View precise forecasts for the Base, Mid-mountain, or Peak of any resort with automated statistical downscaling.
-- **🤖 Next-Gen AI Integration**: Leverages ECMWF AIFS (AI-driven forecasting) and probabilistic ensemble averages for long-range precision.
+- **🤖 Ensemble processing**: Evaluates available ensemble members independently and reports snowfall spread rather than deriving snow from averaged atmospheric fields.
 - **📱 PWA & Offline Support**: Installed as a native-feeling app with persistent caching and "stale-while-error" resilience for the deep backcountry.
 - **🌍 Dynamic Timezones & Coordinates**: Location-aware processing ensures you see the data exactly as it happens on the mountain.
 
@@ -28,12 +28,14 @@ MySnow orchestrates data from the world's leading meteorological agencies:
 
 ## 🧪 The Science of Snow (SLR Algorithms)
 
-Standard apps assume a 10:1 snow-to-water ratio. MySnow knows better. We use physics-based logic to fragment and compact snow based on temperature aloft, wind shear, and moisture:
+MySnow calculates frozen precipitation separately from fresh-snow density. The production choices are:
 
-- **Hybrid (Kuchera-Cobb)**: Physical depth + wind compaction boost.
-- **Cobb (DGZ-Enhanced)**: Focuses on saturated Dendritic Growth Zone lift.
-- **Dendro**: Uses crystal habit diagrams and DGZ depth for high-precision fluff.
-- **KRC-Comp**: Advanced riming and fragmentation logic for high-fidelity density.
+- **Kuchera**: deterministic temperature-profile baseline and current default.
+- **Cobb 2011**: cloud, ascent, layer thickness and RH-over-ice weighting; it explicitly falls back to Kuchera when its required profile data are unavailable.
+- **Fixed 10:1**: comparison baseline.
+- **Open-Meteo snowfall**: model-output comparison.
+
+Surface modifiers are versioned but disabled until backtesting calibrates them. The UI shows the phase, frozen SWE, method, fallbacks and warnings for every precipitation hour.
 
 ## 🛠️ Technical Stack
 
@@ -83,4 +85,3 @@ MySnow includes a massive dataset of over 2MB of global ski areas (`src/data/ski
 
 ---
 *Built with ❤️ for the mountains.*
-

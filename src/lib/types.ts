@@ -1,4 +1,5 @@
-import type { PressureLayer } from './slr';
+import type { RawPressureLayer } from './snow/profile';
+import type { EnsembleSnowfallResult, SnowLayer, SnowfallResult, SnowpackStep } from './snow/types';
 
 export interface OpenMeteoHourly {
     time: string[];
@@ -29,6 +30,7 @@ export interface OpenMeteoHourly {
     precipitation?: number[];
     snowfall?: number[];
     snowfall_water_equivalent?: number[];
+    precipitation_type?: number[];
     lifted_index?: number[];
     convective_inhibition?: number[];
     uv_index?: number[];
@@ -48,6 +50,14 @@ export interface OpenMeteoResponse {
     timezone: string;
     timezone_abbreviation: string;
     lastRunAvailabilityTime?: number;
+    modelIdentity?: string;
+    profileUnits?: {
+        pressure: 'hPa';
+        geopotentialHeight: 'm';
+        temperature: '°C';
+        verticalVelocity: 'm/s';
+        windSpeed: 'm/s';
+    };
 }
 
 export interface Location {
@@ -99,12 +109,20 @@ export interface BlendedHour {
     temperature_850hPa?: number | null;
     temperature_700hPa?: number | null;
     snowfall_raw?: number | null;
+    snowfallWaterEquivalentMm?: number | null;
+    precipitationType?: number | null;
     slr: number | null;
     snowfall: number;
     method: string | null;
     slrCategory: string | null;
     uvIndex: number | null;
-    layers?: PressureLayer[];
+    layers?: RawPressureLayer[];
+    snowfallResult?: SnowfallResult;
+    snowFraction?: number;
+    frozenSweMm?: number;
+    rainMm?: number;
+    ensembleSnowfall?: EnsembleSnowfallResult;
+    snowpackStep?: SnowpackStep;
 }
 
 export interface WindowData {
@@ -159,7 +177,7 @@ export interface DayData {
     windows: WindowData[];
     snowDepthValues: number[];
     snowDepth?: string;
-    snowLayersOnGround: Array<{ SWE_mm: number; density: number; ageInHours: number }>;
+    snowLayersOnGround: SnowLayer[];
     maxHourlySnowfall?: number;
     maxWindowSnowfall?: number;
     minTemp: number;
@@ -172,6 +190,7 @@ export type WeatherDataStatus = 'fresh' | 'cached' | 'stale';
 export interface WeatherDataResult {
     hrrrData: OpenMeteoResponse | null;
     ecmwfData: OpenMeteoResponse;
+    ensembleMembers?: OpenMeteoResponse[];
     location: Location;
     mode: string;
     status: WeatherDataStatus;

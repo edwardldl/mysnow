@@ -229,7 +229,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
 
           {/* Redone Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            <StatBox label="Total Snowfall" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Model Correction Applied" />
+            <StatBox label="Total Snowfall" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Phase-separated estimate" />
             <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
             <StatBox label="Snow Depth" value={selectedDay.snowDepth || "--"} trend="Estimated Settling" />
             <StatBox label="Solar Events" value={selectedDay.sunrise ? `${selectedDay.sunrise.split('T')[1].substring(0, 5)} / ${selectedDay.sunset?.split('T')[1].substring(0, 5)}` : '--'} trend="Sunrise / Sunset" />
@@ -447,7 +447,37 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
           })}
         </div>
       </div>
+      <SnowfallDiagnostics day={day} />
     </div>
+  );
+}
+
+function SnowfallDiagnostics({ day }: { day: DayData }) {
+  const snowfallHours = day.hourly.filter(hour => hour.snowfallResult && hour.precipitation > 0);
+  if (snowfallHours.length === 0) return null;
+
+  return (
+    <details className="mt-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 text-[10px] text-slate-400">
+      <summary className="cursor-pointer select-none font-black uppercase tracking-wider text-slate-300">
+        Snowfall calculation details
+      </summary>
+      <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+        {snowfallHours.map(hour => {
+          const result = hour.snowfallResult!;
+          const sourceMethod = result.diagnostics.sourceMethod.replaceAll('_', ' ');
+          return (
+            <div key={hour.time} className="rounded-lg border border-white/5 bg-slate-950/40 p-2 leading-relaxed">
+              <p className="font-bold text-slate-200">{hour.time.slice(11, 16)} · {result.phase.snowFraction.toFixed(0)}% frozen</p>
+              <p>Source: {sourceMethod} · SLR: {result.freshSlr?.toFixed(1) ?? '--'}:1</p>
+              <p>Frozen SWE: {result.frozenSweMm.toFixed(1)} mm · Fresh snow: {result.freshSnowCm.toFixed(1)} cm</p>
+              {hour.ensembleSnowfall && <p className="text-accent-cyan">Ensemble P10–P90: {hour.ensembleSnowfall.p10SnowCm.toFixed(1)}–{hour.ensembleSnowfall.p90SnowCm.toFixed(1)} cm</p>}
+              {result.diagnostics.fallbackReason && <p className="text-amber-300">Fallback: {result.diagnostics.fallbackReason.replaceAll('_', ' ')}</p>}
+              {result.diagnostics.warnings.length > 0 && <p className="text-amber-300">{result.diagnostics.warnings.join(', ').replaceAll('_', ' ')}</p>}
+            </div>
+          );
+        })}
+      </div>
+    </details>
   );
 }
 

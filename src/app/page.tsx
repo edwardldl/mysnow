@@ -12,6 +12,7 @@ import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, WeatherDataStatus } from "@/lib/types";
+import { DEFAULT_SLR_METHOD } from "@/lib/snow/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -19,7 +20,7 @@ export default function Home() {
   const [locations, setLocations] = useState<Record<string, Location>>({});
   const [currentLocationId, setCurrentLocationId] = useState("palisades");
   const [modelId, setModelId] = useState("best_match");
-  const [algoId, setAlgoId] = useState("hybrid");
+  const [algoId, setAlgoId] = useState<string>(DEFAULT_SLR_METHOD);
   const [elevationMode, setElevationMode] = useState<string>("avg");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
@@ -116,7 +117,14 @@ export default function Home() {
     setRefreshKey(prev => prev + 1);
     try {
       const data = await fetchWeatherData(locId, model, elevation, force);
-      const blended = blendForecasts(data.hrrrData, data.ecmwfData, data.location, algo, data.mode);
+      const blended = blendForecasts(
+        data.hrrrData,
+        data.ecmwfData,
+        data.location,
+        algo,
+        data.mode,
+        data.ensembleMembers,
+      );
       const grouped = groupData(blended);
 
       // A later selection or refresh started another request while this one was in flight.

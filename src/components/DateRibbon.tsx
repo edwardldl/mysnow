@@ -52,7 +52,8 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
 
           // NEW: Storm & SLR Logic
           const isStorm = day.totalSnowfall >= 15;
-          const avgSlr = day.totalPrecipitation > 0 ? (day.totalSnowfall * 10) / day.totalPrecipitation : 0;
+          const frozenSweMm = day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
+          const avgSlr = frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
           const slrColor = getSlrColor(avgSlr);
 
           return (

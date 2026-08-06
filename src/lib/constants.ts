@@ -22,13 +22,10 @@ export const MODELS: ConfigOption[] = [
 ];
 
 export const ALGORITHMS: ConfigOption[] = [
-  { id: "hybrid", name: "Hybrid (Kuchera-Cobb)", desc: "Physical depth + wind compaction boost." },
-  { id: "cobb", name: "Cobb (DGZ-Enhanced)", desc: "Piecewise curve + saturated DGZ lift." },
-  { id: "dendro", name: "Dendro (Habit Diagram)", desc: "Physics-based crystal habit & DGZ depth." },
-  { id: "krc", name: "KRC-Comp (High-Fi)", desc: "Riming + Wind Shear fragmentation logic." },
-  { id: "kuchera_plus", name: "Kuchera (DGZ-Plus)", desc: "Vanilla + true physical DGZ depth boost." },
-  { id: "simple", name: "Kuchera (Vanilla)", desc: "Piecewise regression on max temp aloft." },
-  { id: "standard", name: "10:1 (Fixed)", desc: "Constant ratio: 1cm snow per 1mm liquid." },
+  { id: "kuchera", name: "Kuchera", desc: "Reliable temperature-profile baseline." },
+  { id: "cobb_2011", name: "Cobb 2011", desc: "Profile-based cloud and ascent weighting; falls back to Kuchera." },
+  { id: "fixed_10", name: "Fixed 10:1", desc: "Reference baseline: 1cm snow per 1mm frozen SWE." },
+  { id: "open_meteo_snowfall", name: "Open-Meteo Snowfall", desc: "Model-output comparison, using its reported snowfall depth." },
 ];
 
 export const ELEVATION_MODES: ConfigOption[] = [

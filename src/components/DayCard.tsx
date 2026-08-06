@@ -13,7 +13,8 @@ interface DayCardProps {
 
 export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
   const isStorm = day.totalSnowfall >= 15;
-  const avgSlr = day.totalPrecipitation > 0 ? (day.totalSnowfall * 10) / day.totalPrecipitation : 0;
+  const frozenSweMm = day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
+  const avgSlr = frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
   const isPowder = avgSlr >= 15 && day.totalSnowfall > 2;
 
   const dynamicColor = getSlrColor(avgSlr);
