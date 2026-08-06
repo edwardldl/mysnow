@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
-import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2 } from "lucide-react";
+import { Snowflake, Thermometer, Info, Wind, Navigation2, Sun, Eye, Settings2, Mountain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData, WeatherDataStatus } from "@/lib/types";
-import { getSlrColor } from "@/lib/utils";
+import { formatCalendarDate, getSlrColor } from "@/lib/utils";
 
 const getTimeColor = (hour: number) => {
   if (hour === 9 || hour === 16) return `hsl(45, 100%, 65%)`; // Yellow
@@ -51,7 +51,6 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   };
 
   const [currentHourISO, setCurrentHourISO] = React.useState<string | null>(null);
-  const [todayStr, setTodayStr] = React.useState<string | null>(null);
   const [showDisplaySettings, setShowDisplaySettings] = React.useState(false);
 
   // Chart Visibility State
@@ -86,18 +85,20 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   };
 
   React.useEffect(() => {
-    const now = new Date();
-    // Robust local date/hour detection for the specific timezone
-    const today = now.toLocaleDateString('en-CA', { timeZone: timezone });
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      hourCycle: 'h23',
-      timeZone: timezone
-    });
-    const localHour = fmt.format(now);
+    const updateCurrentHour = () => {
+      const now = new Date();
+      const today = now.toLocaleDateString('en-CA', { timeZone: timezone });
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        hourCycle: 'h23',
+        timeZone: timezone
+      });
+      setCurrentHourISO(`${today}T${fmt.format(now)}`);
+    };
 
-    setTodayStr(today);
-    setCurrentHourISO(`${today}T${localHour}`);
+    updateCurrentHour();
+    const intervalId = window.setInterval(updateCurrentHour, 60 * 1000);
+    return () => window.clearInterval(intervalId);
   }, [timezone]);
 
   const nowRef = React.useRef<HTMLDivElement>(null);
@@ -161,7 +162,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
               <span className="text-[10px] md:text-xs uppercase font-black tracking-[0.2em] text-accent-cyan/60 mb-1">Detailed Outlook</span>
               <div className="flex items-center gap-3">
                 <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-                  {new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(selectedDay.dateStr + 'T12:00:00'))}
+                  {formatCalendarDate(selectedDay.dateStr, { weekday: 'long', month: 'long', day: 'numeric' })}
                 </h2>
                 <button
                   onClick={() => setShowDisplaySettings(!showDisplaySettings)}
@@ -228,11 +229,13 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
 
           {/* Redone Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            <StatBox label="Total Snowfall" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Model Correction Applied" />
+            <StatBox label="Reference Fresh Snow" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Selected sheltered reference site" />
             <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
-            <StatBox label="Snow Depth" value={selectedDay.snowDepth || "--"} trend="Estimated Settling" />
+            <StatBox label="Total Natural Snowpack" value={selectedDay.snowDepth || "--"} trend="Old and new snow after evolution" />
             <StatBox label="Solar Events" value={selectedDay.sunrise ? `${selectedDay.sunrise.split('T')[1].substring(0, 5)} / ${selectedDay.sunset?.split('T')[1].substring(0, 5)}` : '--'} trend="Sunrise / Sunset" />
           </div>
+
+          {selectedDay.resortForecast && <SlopeAwareSummary forecast={selectedDay.resortForecast} />}
 
           {/* Redone Chart Matrix */}
           <div className="glass-panel rounded-3xl p-3 md:p-5 border border-white/5 relative overflow-hidden flex flex-col gap-2 md:gap-3">
@@ -308,6 +311,87 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   );
 }
 
+function rangeLabel(range: { p10: number; p50: number; p90: number }): string {
+  return `${range.p10.toFixed(0)}–${range.p90.toFixed(0)} cm`;
+}
+
+function SlopeAwareSummary({ forecast }: { forecast: NonNullable<DayData['resortForecast']> }) {
+  const terrainLabels = {
+    sheltered: 'Sheltered terrain',
+    neutral: 'Neutral terrain',
+    exposed: 'Wind-exposed terrain',
+  } as const;
+  const drift = forecast.slopeUnits.find(unit => unit.unit.management === 'natural'
+    && unit.drift.category === 'significant_lee_loading')
+    ?? forecast.slopeUnits.find(unit => unit.unit.management === 'natural'
+      && unit.drift.category !== 'drift_unlikely');
+  const comparisonOnly = forecast.diagnostics.productMode === 'open_meteo_comparison';
+  const neutralUnits = forecast.slopeUnits
+    .filter(unit => unit.unit.management === 'natural' && unit.unit.exposure === 'neutral')
+    .sort((a, b) => a.openingSnowCm.p50 - b.openingSnowCm.p50);
+  const neutralBreakdown = neutralUnits[Math.floor(neutralUnits.length / 2)];
+
+  return (
+    <section className="glass-panel rounded-3xl border border-white/5 p-4 md:p-6 flex flex-col gap-5" aria-labelledby="slope-forecast-title">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <Mountain className="w-5 h-5 text-accent-cyan" />
+            <h3 id="slope-forecast-title" className="text-sm uppercase font-black tracking-widest text-white">Slope-aware snow products</h3>
+          </div>
+          <p className="text-[10px] text-slate-500 mt-1">SRU-scale ranges; local drifts and scour remain unresolved.</p>
+        </div>
+        <span className="text-[9px] uppercase font-black tracking-wider text-slate-500">
+          Opening {forecast.openingTime.slice(0, 10)} · {forecast.openingTime.slice(11)}
+        </span>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {forecast.referencePoints.map(reference => (
+          <div key={reference.point.id} className="rounded-2xl border border-white/5 bg-white/[0.025] p-3">
+            <p className="text-[9px] uppercase font-black tracking-widest text-slate-500">{reference.point.name}</p>
+            <p className="text-lg font-black text-white mt-1">{rangeLabel(reference.freshSnowCm)}</p>
+            <p className="text-[10px] text-slate-400">Fresh reference snowfall · P50 {reference.freshSnowCm.p50.toFixed(0)} cm</p>
+            {!comparisonOnly && <p className="text-[10px] text-accent-cyan mt-2">At opening: {rangeLabel(reference.openingSnowCm)}</p>}
+            <p className="text-[9px] text-slate-500 mt-1">Snow {Math.round(reference.phase.snow * 100)}% · Mixed {Math.round(reference.phase.mixedRainSnow * 100)}% · Rain {Math.round(reference.phase.rain * 100)}%</p>
+          </div>
+        ))}
+      </div>
+
+      {!comparisonOnly && <div className="grid gap-3 md:grid-cols-3">
+        {(Object.keys(terrainLabels) as Array<keyof typeof terrainLabels>).map(exposure => (
+          <div key={exposure} className="rounded-xl border border-white/5 bg-slate-950/35 px-3 py-2">
+            <p className="text-[9px] uppercase font-black tracking-wider text-slate-500">{terrainLabels[exposure]}</p>
+            <p className="text-base font-black text-white">{rangeLabel(forecast.terrainSummary[exposure])} at opening</p>
+            <p className="text-[9px] text-slate-500">Median {forecast.terrainSummary[exposure].p50.toFixed(0)} cm</p>
+          </div>
+        ))}
+      </div>}
+
+      {!comparisonOnly && neutralBreakdown && (
+        <p className="text-[9px] text-slate-500 -mt-2">
+          Representative neutral SRU: fell {neutralBreakdown.freshSnowCm.p50.toFixed(1)} cm · settlement {neutralBreakdown.settlementCm.toFixed(1)} cm · wind {neutralBreakdown.windCompactionOrLossCm.toFixed(1)} cm · melt {neutralBreakdown.meltDepthCm.toFixed(1)} cm · remaining {neutralBreakdown.openingSnowCm.p50.toFixed(1)} cm
+        </p>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between rounded-xl border border-amber-400/10 bg-amber-400/[0.04] px-3 py-2">
+        <div className="flex flex-col gap-1">
+          {comparisonOnly && <p className="text-[10px] text-amber-100/80">Open-Meteo snowfall is a comparison depth; opening-time and terrain products are intentionally unavailable.</p>}
+          {!comparisonOnly && drift && (
+            <p className="text-[10px] text-amber-100/80">
+              Wind redistribution: {drift.drift.category.replaceAll('_', ' ')}
+              {drift.drift.loadingDirectionDeg !== null ? ` toward ${drift.drift.loadingDirectionDeg.toFixed(0)}°` : ''}
+              {' · '}{Math.round(drift.drift.confidence * 100)}% directional confidence
+            </p>
+          )}
+          <p className="text-[10px] text-amber-100/70">{forecast.management.label}</p>
+        </div>
+        <p className="text-[9px] uppercase font-black tracking-wider text-slate-500 whitespace-nowrap">Primary uncertainty: {forecast.diagnostics.dominantUncertainty.replaceAll('_', ' ')}</p>
+      </div>
+    </section>
+  );
+}
+
 function StatBox({ label, value, trend }: { label: string, value: string, trend: string }) {
   return (
     <div className="glass-card p-4 md:p-6 rounded-2xl flex flex-col group border border-white/5 hover:border-white/10 transition-colors">
@@ -333,19 +417,17 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
   // USER: snow bar should max out at 10cm of snowfall
   const safeMax = 10;
 
-  // Calculate Running Total
-  let runningTotal = 0;
-  const cumulativeData = day.hourly.map((h) => {
-    runningTotal += h.snowfall;
-    return runningTotal;
-  });
+  const cumulativeData = day.hourly.reduce<number[]>(
+    (totals, hour) => [...totals, (totals[totals.length - 1] ?? 0) + hour.snowfall],
+    []
+  );
 
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Snowflake className="w-5 h-5 text-accent-cyan" />
-          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Snowfall Intensity & Accum. (cm)</h3>
+          <h3 className="text-xs md:text-sm uppercase font-black tracking-widest text-white">Reference Fresh Snowfall & Accum. (cm)</h3>
         </div>
         <SlrLegend />
       </div>
@@ -371,7 +453,6 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
           {day.hourly.map((h, i) => {
             const height = (Math.min(h.snowfall, 10) / safeMax) * chartHeight;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isSunrise = day.sunrise && h.time.substring(0, 13) === day.sunrise.substring(0, 13);
             const isSunset = day.sunset && h.time.substring(0, 13) === day.sunset.substring(0, 13);
             const barColor = h.slr ? getSlrColor(h.slr) : "rgba(255, 255, 255, 0.05)";
@@ -449,7 +530,40 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
           })}
         </div>
       </div>
+      <SnowfallDiagnostics day={day} />
     </div>
+  );
+}
+
+function SnowfallDiagnostics({ day }: { day: DayData }) {
+  const snowfallHours = day.hourly.filter(hour => hour.snowfallResult && hour.precipitation > 0);
+  if (snowfallHours.length === 0) return null;
+
+  return (
+    <details className="mt-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 text-[10px] text-slate-400">
+      <summary className="cursor-pointer select-none font-black uppercase tracking-wider text-slate-300">
+        Snowfall calculation details
+      </summary>
+      <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+        {snowfallHours.map(hour => {
+          const result = hour.snowfallResult!;
+          const sourceMethod = result.diagnostics.sourceMethod.replaceAll('_', ' ');
+          return (
+            <div key={hour.time} className="rounded-lg border border-white/5 bg-slate-950/40 p-2 leading-relaxed">
+              <p className="font-bold text-slate-200">{hour.time.slice(11, 16)} · {(result.phase.snowFraction * 100).toFixed(0)}% frozen</p>
+              <p>Source: {sourceMethod} · SLR P10–P90: {result.freshSlrQuantiles ? `${result.freshSlrQuantiles.p10.toFixed(1)}–${result.freshSlrQuantiles.p90.toFixed(1)}:1` : '--'}</p>
+              <p>QPF P10–P90: {result.qpfDistribution.amountMm.p10.toFixed(1)}–{result.qpfDistribution.amountMm.p90.toFixed(1)} mm · wet probability {Math.round(result.qpfDistribution.probabilityWet * 100)}%</p>
+              <p>Frozen SWE: {result.frozenSweMm.toFixed(1)} mm · Fresh snow: {result.freshSnowCm.toFixed(1)} cm</p>
+              <p>Physics range P10–P90: {result.freshSnowQuantilesCm.p10.toFixed(1)}–{result.freshSnowQuantilesCm.p90.toFixed(1)} cm</p>
+              {hour.ensembleSnowfall && <p className="text-accent-cyan">Ensemble P10–P90: {hour.ensembleSnowfall.p10SnowCm.toFixed(1)}–{hour.ensembleSnowfall.p90SnowCm.toFixed(1)} cm</p>}
+              {hour.provenance && <p>Grid: {hour.provenance.returnedLatitude.toFixed(3)}, {hour.provenance.returnedLongitude.toFixed(3)} · native elevation {hour.provenance.modelGridElevationM?.toFixed(0) ?? '--'} m</p>}
+              {result.diagnostics.fallbackReason && <p className="text-amber-300">Fallback: {result.diagnostics.fallbackReason.replaceAll('_', ' ')}</p>}
+              {result.diagnostics.warnings.length > 0 && <p className="text-amber-300">{result.diagnostics.warnings.join(', ').replaceAll('_', ' ')}</p>}
+            </div>
+          );
+        })}
+      </div>
+    </details>
   );
 }
 
@@ -517,7 +631,6 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const isFreezing = temp <= 0;
             const isFeelsFreezing = feelsLike <= 0;
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const peakText = getTimeColor(hour);
 
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
@@ -652,7 +765,6 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const gustHeight = (gust / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 
@@ -784,7 +896,6 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
             const height = (Math.min(uv, safeMax) / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 
@@ -880,7 +991,6 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
             const height = (Math.min(visKm, safeMax) / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 
@@ -957,7 +1067,6 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         >
           {day.hourly.map((h, i) => {
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isMidnight = hour === 0;
             const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
             const peakText = getTimeColor(hour);
 

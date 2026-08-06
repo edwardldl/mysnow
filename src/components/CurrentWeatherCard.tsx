@@ -15,11 +15,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils_tailwind";
 import { BlendedHour, RollingStats, WeatherDataStatus } from "@/lib/types";
-import { getWeatherDescription } from "@/lib/utils";
+import { formatCalendarDate, getWeatherDescription } from "@/lib/utils";
 import { motion } from "framer-motion";
 
+type WeatherCardData = Pick<BlendedHour,
+  "time" | "temperature" | "feelsLike" | "windSpeed" | "windDir" | "gusts" | "uvIndex" | "visibility" | "snowfall" | "weatherCode"
+> & {
+  minTemp?: number;
+  maxTemp?: number;
+};
+
 interface CurrentWeatherCardProps {
-  currentData: (BlendedHour & { minTemp?: number; maxTemp?: number }) | null;
+  currentData: WeatherCardData | null;
   rollingStats: RollingStats | null;
   locationName: string;
   latitude?: number;
@@ -40,7 +47,7 @@ export default function CurrentWeatherCard({
   longitude,
   isDaily = false,
   timezone = 'America/Los_Angeles',
-  dataStatus = 'fresh',
+  dataStatus,
   minElevationM,
   maxElevationM,
   className 
@@ -93,7 +100,7 @@ export default function CurrentWeatherCard({
                 <span className="text-slate-400 text-[10px] md:text-xs font-bold flex items-center gap-1 opacity-80">
                    <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" /> 
                    {isDaily 
-                    ? new Date(currentData.time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+                    ? formatCalendarDate(currentData.time.split('T')[0], { weekday: 'short', month: 'short', day: 'numeric' })
                     : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezone })
                    }
                 </span>
@@ -102,6 +109,12 @@ export default function CurrentWeatherCard({
               <h2 className="text-xl md:text-4xl font-black text-white tracking-tighter truncate">
                 {locationName}
               </h2>
+
+              {dataStatus && dataStatus !== 'fresh' && (
+                <span className="mt-1 w-fit rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-300">
+                  {dataStatus} data
+                </span>
+              )}
               
               {(latitude !== undefined && longitude !== undefined) && (
                 <div className="flex items-center gap-2 text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest opacity-70 mb-1 md:mb-2">
@@ -218,12 +231,12 @@ export default function CurrentWeatherCard({
             {/* Snow Accumulation Group */}
             <div className="flex flex-col gap-2 md:gap-4">
                 <h3 className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
-                    {isDaily ? "Snow History" : "Snow Accumulation"}
+                    {isDaily ? "Reference Snow History" : "Reference Snow Accumulation"}
                 </h3>
                 <div className="grid grid-cols-3 xl:grid-cols-3 gap-2 md:gap-3">
                     <CompactStatBox 
                         icon={<Snowflake className="w-3 md:w-3.5 h-3 md:h-3.5 text-accent-cyan" />}
-                        label={isDaily ? "Daily Snow" : "Rate"}
+                        label={isDaily ? "Fresh Snow" : "Fresh Rate"}
                         value={currentData.snowfall.toFixed(1)}
                         unit={isDaily ? "cm" : "cm/h"}
                     />
@@ -231,14 +244,14 @@ export default function CurrentWeatherCard({
                         <>
                             <CompactStatBox 
                                 icon={<Waves className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-400" />}
-                                label={isDaily ? "Prior 24h" : "24h Snow"}
+                                label={isDaily ? "Prior 24h" : "24h Fresh"}
                                 value={rollingStats.snow24h.toFixed(1)}
                                 unit="cm"
                                 subValue={rollingStats.slr24h != null ? `${rollingStats.slr24h.toFixed(0)}:1` : undefined}
                             />
                             <CompactStatBox 
                                 icon={<CloudRain className="w-3 md:w-3.5 h-3 md:h-3.5 text-indigo-400" />}
-                                label={isDaily ? "Prior 48h" : "48h Snow"}
+                                label={isDaily ? "Prior 48h" : "48h Fresh"}
                                 value={rollingStats.snow48h.toFixed(1)}
                                 unit="cm"
                                 subValue={rollingStats.slr48h != null ? `${rollingStats.slr48h.toFixed(0)}:1` : undefined}

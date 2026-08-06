@@ -56,12 +56,8 @@ export default function LocationDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Clear error when inputs change
-  useEffect(() => {
-    setError(null);
-  }, [searchQuery, coords]);
-
   const handleSearch = (query: string) => {
+    setError(null);
     setSearchQuery(query);
     if (query.length < 2) {
       setSearchResults([]);
@@ -76,6 +72,7 @@ export default function LocationDropdown({
   };
 
   const handleSelectArea = (area: SkiArea) => {
+    setError(null);
     setSearchQuery(area.name);
     setCoords(`${area.lat}, ${area.lon}`);
     setSelectedArea(area);
@@ -233,7 +230,10 @@ export default function LocationDropdown({
                     type="text"
                     placeholder="Latitude, Longitude"
                     value={coords}
-                    onChange={(e) => setCoords(e.target.value)}
+                    onChange={(e) => {
+                      setError(null);
+                      setCoords(e.target.value);
+                    }}
                     className={cn(
                         "w-full bg-white/5 border rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none transition-all font-sans",
                         error ? "border-accent-rose/50 bg-accent-rose/5" : "border-white/10 focus:border-accent-blue/50"

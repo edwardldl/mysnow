@@ -3,7 +3,7 @@
 import React from "react";
 import { DayData } from "@/lib/types";
 import { cn } from "@/lib/utils_tailwind";
-import { getSlrColor, getWeatherDescription } from "@/lib/utils";
+import { formatCalendarDate, getSlrColor, getWeatherDescription } from "@/lib/utils";
 
 interface DayCardProps {
   day: DayData;
@@ -13,7 +13,8 @@ interface DayCardProps {
 
 export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
   const isStorm = day.totalSnowfall >= 15;
-  const avgSlr = day.totalPrecipitation > 0 ? (day.totalSnowfall * 10) / day.totalPrecipitation : 0;
+  const frozenSweMm = day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
+  const avgSlr = frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
   const isPowder = avgSlr >= 15 && day.totalSnowfall > 2;
 
   const dynamicColor = getSlrColor(avgSlr);
@@ -42,10 +43,10 @@ export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
       {/* Date Header */}
       <div className="flex flex-col gap-0.5">
         <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">
-          {new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(new Date(day.dateStr))}
+          {formatCalendarDate(day.dateStr, { weekday: 'short' })}
         </span>
         <span className="text-sm font-bold text-white whitespace-nowrap">
-          {new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(day.dateStr + 'T12:00:00'))}
+          {formatCalendarDate(day.dateStr, { day: 'numeric', month: 'short' })}
         </span>
       </div>
 
@@ -70,6 +71,7 @@ export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
       </div>
 
       {/* Snow Value */}
+      <span className="text-[8px] -mb-3 uppercase font-black tracking-wider text-slate-600">Reference fresh</span>
       <div className="flex items-baseline gap-1.5">
         <span className={cn(
           "text-4xl font-black tracking-tighter",

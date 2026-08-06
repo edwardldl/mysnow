@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "MySnow - Ski Snow Forecast",
-  description: "High-resolution snow forecasts for ski resorts using HRRR and ECMWF models.",
+  description: "Reference-site, natural-slope, and opening-time snow guidance for ski resorts.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

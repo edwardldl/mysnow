@@ -7,7 +7,6 @@ export interface ConfigOption {
 }
 
 export const MODELS: ConfigOption[] = [
-  { id: "best_match", name: "Best Match (Ensemble)", desc: "AI selects the best local models. 7-15 days.", badge: "7-15D", section: "Most Used" },
   { id: "hrrr_ecmwf", name: "Blended (HRRR+ECMWF)", desc: "HRRR (3km) + ECMWF High-Res (9km). Optimal high-res blend.", badge: "0-15D", section: "Most Used" },
   { id: "hrrr", name: "NCEP HRRR", desc: "3km / USA | 0-48h. Gold standard for US mountains.", badge: "0-48H", section: "Most Used" },
   { id: "nam", name: "NCEP NAM", desc: "3km / USA | 0-84h. Precise mesoscale tracking.", badge: "0-84H", section: "Most Used" },
@@ -15,6 +14,7 @@ export const MODELS: ConfigOption[] = [
   { id: "icon_global", name: "DWD ICON Global", desc: "11km / Global | 0-7d. High-quality German global model.", badge: "0-7D", section: "Most Used" },
   { id: "ecmwf", name: "ECMWF IFS HRES", desc: "9km / Global | 3-10d. Premier high-resolution global model.", badge: "3-10D", section: "Most Used" },
   { id: "ecmwf_aifs", name: "ECMWF AIFS", desc: "AI-driven high-res model (0.25°). Next-gen efficiency.", badge: "0-15D", section: "Most Used" },
+  { id: "best_match", name: "Best Match (Comparison)", desc: "Open-Meteo may vary the source model; use as a comparison or fallback.", badge: "7-15D", section: "Other Models" },
   { id: "ecmwf_aifs_ensemble", name: "ECMWF AIFS Ensemble", desc: "51-member AI ensemble average. Probabilistic depth.", badge: "0-15D", section: "Other Models" },
   { id: "gem_hrdps_west", name: "GEM HRDPS West", desc: "2.5km / Canada | 0-48h. Excellent for deep Western valleys.", badge: "0-48H", section: "Other Models" },
   { id: "gem_regional", name: "GEM Regional", desc: "10km / N. Am | 1-3d. Reliable coastal storm bridge.", badge: "1-3D", section: "Other Models" },
@@ -22,17 +22,15 @@ export const MODELS: ConfigOption[] = [
 ];
 
 export const ALGORITHMS: ConfigOption[] = [
-  { id: "hybrid", name: "Hybrid (Kuchera-Cobb)", desc: "Physical depth + wind compaction boost." },
-  { id: "cobb", name: "Cobb (DGZ-Enhanced)", desc: "Piecewise curve + saturated DGZ lift." },
-  { id: "dendro", name: "Dendro (Habit Diagram)", desc: "Physics-based crystal habit & DGZ depth." },
-  { id: "krc", name: "KRC-Comp (High-Fi)", desc: "Riming + Wind Shear fragmentation logic." },
-  { id: "kuchera_plus", name: "Kuchera (DGZ-Plus)", desc: "Vanilla + true physical DGZ depth boost." },
-  { id: "simple", name: "Kuchera (Vanilla)", desc: "Piecewise regression on max temp aloft." },
-  { id: "standard", name: "10:1 (Fixed)", desc: "Constant ratio: 1cm snow per 1mm liquid." },
+  { id: "kuchera", name: "Kuchera", desc: "Reliable temperature-profile baseline.", section: "Production methods" },
+  { id: "cobb_2011", name: "Cobb 2011", desc: "Profile-based cloud and ascent weighting; falls back to Kuchera.", section: "Production methods" },
+  { id: "fixed_10", name: "Fixed 10:1", desc: "Reference baseline: 1cm snow per 1mm frozen SWE.", section: "Production methods" },
+  { id: "open_meteo_snowfall", name: "Open-Meteo Snowfall", desc: "Fixed-conversion model comparison; never treated as an observed SLR.", section: "Comparison products" },
+  { id: "experimental_krc", name: "KRC baseline", desc: "Experimental phase-separated baseline; not calibrated or validated for production use.", badge: "Experimental", section: "Experimental methods" },
 ];
 
 export const ELEVATION_MODES: ConfigOption[] = [
-  { id: "min", name: "Base (Min)", desc: "Simulate for the lowest point of the resort." },
-  { id: "avg", name: "Mid (Avg)", desc: "Simulate for the resort median elevation." },
-  { id: "max", name: "Peak (Max)", desc: "Simulate for the highest mountain peaks." },
+  { id: "min", name: "Base Site", desc: "Forecast at the resort's base reference coordinate and elevation." },
+  { id: "avg", name: "Mid-mountain Site", desc: "Forecast at the resort's mid-mountain reference coordinate and elevation." },
+  { id: "max", name: "Summit Site", desc: "Forecast at the resort's upper-mountain reference coordinate and elevation." },
 ];
