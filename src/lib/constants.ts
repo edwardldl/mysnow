@@ -22,10 +22,11 @@ export const MODELS: ConfigOption[] = [
 ];
 
 export const ALGORITHMS: ConfigOption[] = [
-  { id: "kuchera", name: "Kuchera", desc: "Reliable temperature-profile baseline." },
-  { id: "cobb_2011", name: "Cobb 2011", desc: "Profile-based cloud and ascent weighting; falls back to Kuchera." },
-  { id: "fixed_10", name: "Fixed 10:1", desc: "Reference baseline: 1cm snow per 1mm frozen SWE." },
-  { id: "open_meteo_snowfall", name: "Open-Meteo Snowfall", desc: "Model-output comparison, using its reported snowfall depth." },
+  { id: "kuchera", name: "Kuchera", desc: "Reliable temperature-profile baseline.", section: "Production methods" },
+  { id: "cobb_2011", name: "Cobb 2011", desc: "Profile-based cloud and ascent weighting; falls back to Kuchera.", section: "Production methods" },
+  { id: "fixed_10", name: "Fixed 10:1", desc: "Reference baseline: 1cm snow per 1mm frozen SWE.", section: "Production methods" },
+  { id: "open_meteo_snowfall", name: "Open-Meteo Snowfall", desc: "Model-output comparison, using its reported snowfall depth.", section: "Production methods" },
+  { id: "experimental_krc", name: "KRC baseline", desc: "Experimental phase-separated baseline; not calibrated or validated for production use.", badge: "Experimental", section: "Experimental methods" },
 ];
 
 export const ELEVATION_MODES: ConfigOption[] = [
