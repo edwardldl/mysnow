@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateCsslKucheraBaseline, evaluateJsonLines } from '../../../../training/slr_calibration/scripts/cssl-baseline';
+import { evaluateCsslKucheraBaseline, evaluateJsonLines, evaluateResearchKucheraBaseline } from '../../../../training/slr_calibration/scripts/cssl-baseline';
 
 function event() {
   return {
@@ -59,6 +59,18 @@ describe('CSSL exact MySnow Kuchera research bridge', () => {
     expect(result.row?.baseline_method).toBe('kuchera');
     expect(result.row?.baseline_slr).toBe(13.75);
     expect(result.row?.evaluated_profile_hours).toBe(2);
+  });
+
+  it('uses an explicit UTC observation window for multi-station GHCN events', () => {
+    const input = event();
+    const result = evaluateResearchKucheraBaseline({
+      ...input,
+      windowStartUtc: '2024-03-02T11:30:00Z',
+      windowEndUtc: '2024-03-02T12:30:00Z',
+    });
+    expect(result.rejectionReason).toBeNull();
+    expect(result.row?.evaluated_profile_hours).toBe(1);
+    expect(result.row?.baseline_slr).toBe(13);
   });
 
   it('is deterministic and explicitly does not enable calibration', () => {

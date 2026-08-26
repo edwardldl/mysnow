@@ -1,0 +1,137 @@
+{
+  "artifactId": "regional-slr-research-us-rockies-kuchera-v1",
+  "artifactVersion": "research-us-rockies-kuchera-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "822687fffffffff": "continental_mountain",
+      "82268ffffffffff": "continental_mountain",
+      "82269ffffffffff": "continental_mountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "coverage": {
+    "geographicNote": "U.S. Rockies research mask; trained on selected Colorado stations in WY2024 and evaluated on previously unseen CO/WY/NM stations in WY2025. Not production, Canadian Rockies, PNW, or worldwide validation.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2024-09-22T00:00:00Z",
+  "methods": {
+    "kuchera": {
+      "climate": {
+        "continental_mountain": {
+          "effectiveSampleSize": 94.066,
+          "logBias": -0.04774605,
+          "rawLogBias": -0.06297346,
+          "rawSampleCount": 103,
+          "residualStdLog": 0.27131479,
+          "shrinkageWeight": 0.75819322
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 94.066,
+        "logBias": -0.19745538,
+        "rawLogBias": -0.26042884,
+        "rawSampleCount": 103,
+        "residualStdLog": 0.27131479,
+        "shrinkageWeight": 0.75819322
+      },
+      "local": {
+        "US1COBO0202": {
+          "effectiveSampleSize": 19.7111,
+          "logBias": -0.01271381,
+          "rawLogBias": -0.03206403,
+          "rawSampleCount": 22,
+          "residualStdLog": 0.2286892,
+          "shrinkageWeight": 0.3965133
+        },
+        "US1COCF0025": {
+          "effectiveSampleSize": 17.8415,
+          "logBias": -0.01747613,
+          "rawLogBias": -0.04686181,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.24960955,
+          "shrinkageWeight": 0.37292912
+        },
+        "US1COGN0018": {
+          "effectiveSampleSize": 37.3956,
+          "logBias": 0.02048633,
+          "rawLogBias": 0.03692117,
+          "rawSampleCount": 40,
+          "residualStdLog": 0.27069834,
+          "shrinkageWeight": 0.55486679
+        },
+        "US1COPK0015": {
+          "effectiveSampleSize": 19.3568,
+          "logBias": -0.03163903,
+          "rawLogBias": -0.08067444,
+          "rawSampleCount": 22,
+          "residualStdLog": 0.26138398,
+          "shrinkageWeight": 0.39218158
+        }
+      },
+      "region": {
+        "842681bffffffff": {
+          "effectiveSampleSize": 19.7111,
+          "logBias": -0.02106727,
+          "rawLogBias": -0.0531313,
+          "rawSampleCount": 22,
+          "residualStdLog": 0.2286892,
+          "shrinkageWeight": 0.3965133
+        },
+        "84268e5ffffffff": {
+          "effectiveSampleSize": 17.8415,
+          "logBias": -0.02786947,
+          "rawLogBias": -0.07473128,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.24960955,
+          "shrinkageWeight": 0.37292912
+        },
+        "84268edffffffff": {
+          "effectiveSampleSize": 19.3568,
+          "logBias": -0.05205342,
+          "rawLogBias": -0.13272786,
+          "rawSampleCount": 22,
+          "residualStdLog": 0.26138398,
+          "shrinkageWeight": 0.39218158
+        },
+        "84269d9ffffffff": {
+          "effectiveSampleSize": 37.3956,
+          "logBias": 0.04602293,
+          "rawLogBias": 0.0829441,
+          "rawSampleCount": 40,
+          "residualStdLog": 0.27069834,
+          "shrinkageWeight": 0.55486679
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2024-09-22",
+  "training": {
+    "acceptedEventCount": 103,
+    "leakageGroup": "station_id + regional storm_group_id + water_year",
+    "minEffectiveSampleSize": 5.0,
+    "priorEffectiveSampleSize": 30.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "31bf7f00b24b73467465b6f0c5884709c1795eb1e653a7288ef2f05ed11c2697",
+    "sourceLabel": "NOAA GHCN-Daily same-window SNOW+WESF labels paired to Open-Meteo Historical Forecast profiles; research-only",
+    "stationCount": 4,
+    "target": "log(observed_slr / physical_baseline_slr)"
+  }
+}

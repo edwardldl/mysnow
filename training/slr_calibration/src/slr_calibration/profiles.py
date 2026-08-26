@@ -167,7 +167,7 @@ def backfill_openmeteo_profiles(
             _validate_response(payload)
             payloads[month] = payload
             request_records.append({
-                "month": month,
+                "period": period,
                 "requestStart": request_start.isoformat(),
                 "requestEnd": request_end.isoformat(),
                 "requestUrl": url,
@@ -273,6 +273,185 @@ def backfill_openmeteo_profiles(
             "Historical Forecast coverage is recent and model-dependent; it cannot backfill the 1971-present CSSL history.",
             "The response does not identify the exact contributing best-match model, so model provenance is incomplete.",
             "CSSL measurement windows are not documented precisely enough for exact hourly alignment; fixed-PST local calendar day is a research proxy.",
+            "Only model-snowfall hours are used; observed events with no aligned modeled snowfall are rejected.",
+            "The requested profile lacks dew point and vertical velocity, so it supports exact MySnow Kuchera but not a true Cobb estimate.",
+        ],
+    }
+    output_report.parent.mkdir(parents=True, exist_ok=True)
+    output_report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return report
+
+
+def backfill_openmeteo_multistation_profiles(
+    input_events: Path,
+    cache_dir: Path,
+    output_jsonl: Path,
+    output_report: Path,
+    start_date: date,
+    end_date: date,
+    station_ids: set[str] | None = None,
+    sleep_seconds: float = 0.25,
+) -> dict[str, Any]:
+    """Backfill exact 24-hour local-standard observation windows for multiple GHCN stations."""
+    all_events = _read_events(input_events)
+    events = [
+        row for row in all_events
+        if start_date <= _parse_date(row["observation_date"]) <= end_date
+        and (station_ids is None or row["station_id"] in station_ids)
+    ]
+    if not events:
+        raise ValueError("No GHCN events fall inside the requested station/profile period")
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    wanted: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for event in events:
+        event_date = _parse_date(event["observation_date"])
+        water_year = event_date.year + 1 if event_date.month >= 10 else event_date.year
+        wanted[(event["station_id"], f"wy{water_year}")].append(event)
+
+    output_records: list[dict[str, Any]] = []
+    rejection_counts: Counter[str] = Counter()
+    request_records: list[dict[str, Any]] = []
+    failed_requests: dict[str, str] = {}
+    downloaded = 0
+    reused = 0
+
+    for (station_id, period), station_events in sorted(wanted.items()):
+        latitude = float(station_events[0]["latitude"])
+        longitude = float(station_events[0]["longitude"])
+        station_elevation = float(station_events[0]["elevation_m"])
+        windows = []
+        for event in station_events:
+            end_instant = datetime.fromisoformat(event["valid_time"])
+            if end_instant.tzinfo is None:
+                raise ValueError(f"Event {event['event_id']} lacks a timezone offset")
+            end_utc = end_instant.astimezone(timezone.utc)
+            windows.append((end_utc - timedelta(hours=24), end_utc))
+        request_start = min(window[0] for window in windows).date() - timedelta(days=1)
+        request_end = max(window[1] for window in windows).date() + timedelta(days=1)
+        cache_path = cache_dir / station_id / f"{period}.json"
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        url = _request_url(latitude, longitude, request_start, request_end)
+        request_key = f"{station_id}:{period}"
+        try:
+            if cache_path.exists():
+                payload = json.loads(cache_path.read_text(encoding="utf-8"))
+                reused += 1
+            else:
+                payload = _download_json(url)
+                _validate_response(payload)
+                cache_path.write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+                downloaded += 1
+                if sleep_seconds > 0:
+                    time.sleep(sleep_seconds)
+            _validate_response(payload)
+            hours = _response_hours(payload)
+            hours_by_time = {
+                datetime.fromisoformat(hour["time"].replace("Z", "+00:00")): hour
+                for hour in hours
+            }
+            request_records.append({
+                "stationId": station_id,
+                "state": station_events[0].get("state"),
+                "period": period,
+                "eventCount": len(station_events),
+                "requestStart": request_start.isoformat(),
+                "requestEnd": request_end.isoformat(),
+                "cacheFile": str(cache_path.relative_to(cache_dir)),
+                "cacheSha256": hashlib.sha256(cache_path.read_bytes()).hexdigest(),
+                "returnedLatitude": payload.get("latitude"),
+                "returnedLongitude": payload.get("longitude"),
+                "returnedElevationM": payload.get("elevation"),
+                "timezone": payload.get("timezone"),
+                "utcOffsetSeconds": payload.get("utc_offset_seconds"),
+            })
+            for event in station_events:
+                end_instant = datetime.fromisoformat(event["valid_time"]).astimezone(timezone.utc)
+                start_instant = end_instant - timedelta(hours=24)
+                expected_instants = [start_instant + timedelta(hours=offset) for offset in range(1, 25)]
+                if any(instant not in hours_by_time for instant in expected_instants):
+                    rejection_counts["INCOMPLETE_OBSERVATION_WINDOW"] += 1
+                    continue
+                current_hours = [hours_by_time[instant] for instant in expected_instants]
+                snow_hours = [hour for hour in current_hours if (hour["snowfallCm"] or 0.0) > 0]
+                if not snow_hours:
+                    rejection_counts["NO_MODEL_SNOWFALL_ALIGNMENT"] += 1
+                    continue
+                usable_snow_hours = [
+                    hour for hour in snow_hours
+                    if any(
+                        level["temperatureC"] is not None
+                        and level["geopotentialHeightM"] is not None
+                        and level["geopotentialHeightM"] >= station_elevation - 100
+                        for level in hour["levels"]
+                    )
+                ]
+                if not usable_snow_hours:
+                    rejection_counts["NO_USABLE_ABOVE_GROUND_PROFILE"] += 1
+                    continue
+                first_current = datetime.fromisoformat(current_hours[0]["time"].replace("Z", "+00:00"))
+                previous_hour = hours_by_time.get(first_current - timedelta(hours=1))
+                if previous_hour is None:
+                    rejection_counts["MISSING_PRECEDING_INTERVAL_ENDPOINT"] += 1
+                    continue
+                output_records.append({
+                    **event,
+                    "elevation_m": station_elevation,
+                    "windowStartUtc": start_instant.isoformat().replace("+00:00", "Z"),
+                    "windowEndUtc": end_instant.isoformat().replace("+00:00", "Z"),
+                    "profileSource": "Open-Meteo Historical Forecast API",
+                    "profileModel": "best-match archive; exact contributing model not exposed by response",
+                    "profileRetrievedFrom": OPEN_METEO_ENDPOINT,
+                    "profileAlignment": "GHCN 24-hour window ending at reported America/Denver local observation time; production (t-1,t] interval-mean profile; model-precipitation weighted Kuchera; research-only",
+                    "profileHourCount": len(usable_snow_hours),
+                    "contextHourCount": len(current_hours) + 1,
+                    "modelSnowfallCm": round(sum(float(hour["snowfallCm"]) for hour in usable_snow_hours), 6),
+                    "hourly": [previous_hour, *current_hours],
+                })
+        except Exception as exc:
+            failed_requests[request_key] = f"{type(exc).__name__}: {exc}"
+            rejection_counts["PROFILE_REQUEST_UNAVAILABLE"] += len(station_events)
+
+    output_jsonl.parent.mkdir(parents=True, exist_ok=True)
+    with output_jsonl.open("w", encoding="utf-8") as handle:
+        for record in sorted(output_records, key=lambda row: row["event_id"]):
+            handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+
+    by_state: dict[str, dict[str, int]] = {}
+    for state in sorted({str(row.get("state") or "") for row in events}):
+        inputs = [row for row in events if row.get("state") == state]
+        outputs = [row for row in output_records if row.get("state") == state]
+        by_state[state] = {
+            "inputEventCount": len(inputs),
+            "alignedEventCount": len(outputs),
+            "inputStationCount": len({row["station_id"] for row in inputs}),
+            "alignedStationCount": len({row["station_id"] for row in outputs}),
+        }
+    report = {
+        "source": {
+            "name": "Open-Meteo Historical Forecast API",
+            "endpoint": OPEN_METEO_ENDPOINT,
+            "hourlyFields": list(HOURLY_FIELDS),
+            "modelIdentification": "best-match archive; exact contributing model not exposed by response",
+        },
+        "requestedPeriod": [start_date.isoformat(), end_date.isoformat()],
+        "requestedStationCount": len({row["station_id"] for row in events}),
+        "requestedStations": sorted({row["station_id"] for row in events}),
+        "inputEventCount": len(events),
+        "alignedEventCount": len(output_records),
+        "alignedStationCount": len({row["station_id"] for row in output_records}),
+        "rejectedEventCount": len(events) - len(output_records),
+        "rejectionCounts": dict(sorted(rejection_counts.items())),
+        "stationWaterYearRequestCount": len(wanted),
+        "downloadedRequestCount": downloaded,
+        "reusedCacheRequestCount": reused,
+        "failedRequests": failed_requests,
+        "byState": by_state,
+        "requests": request_records,
+        "limitations": [
+            "Historical Forecast coverage is recent and model-dependent; it is not ERA5 or the original operational forecast.",
+            "The response does not identify the exact contributing best-match model, so model provenance is incomplete.",
+            "GHCN observation time is treated as the reported America/Denver local clock time and each label is matched to the preceding 24 hours.",
             "Only model-snowfall hours are used; observed events with no aligned modeled snowfall are rejected.",
             "The requested profile lacks dew point and vertical velocity, so it supports exact MySnow Kuchera but not a true Cobb estimate.",
         ],
