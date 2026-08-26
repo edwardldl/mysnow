@@ -197,3 +197,49 @@ Raw ZIP, extraction, Open-Meteo responses, paired JSONL/CSV, rejection CSV, and 
 5. Fits only the earlier period and evaluates only later events from 12 entirely unseen, elevation-stratified stations (`SLF.1GT,SLF.1LS,SLF.2SO,SLF.3BR,SLF.4LA,SLF.4WI,SLF.5BI,SLF.5PU,SLF.5SA,SLF.5SE,SLF.5WJ,SLF.7SN`; cutoff 2022-01-01). The artifact is written only when overall MAE improves by at least 0.25 SLR, median AE does not worsen, at least half of eligible station and elevation slices improve, and the split includes at least six held-out stations across all three elevation bands.
 
 The committed artifact is `unvalidated`, Swiss-Alps-only, not runtime-registered, and not production-eligible. See `docs/regional-slr-calibration.md` for metrics and limitations. Attribution: Magnusson et al., EnviDat DOI `10.16904/envidat.590`, version 1.0, CC BY 4.0.
+
+## Sierra Nevada GHCN research slice (outside CSSL)
+
+This slice is independent of the single-site CSSL case study. A broad CA/NV screen found 2,193 positive same-date `SNOW`+`WESF` pairs, rejected five flagged pairs, and left 157 threshold-pass events at 32 stations (2021-01-23 through 2026-02-20; 1,193.9–2,069.9 m). The executable importer deliberately narrows that screen to the 28-station `SIERRA_STATIONS` whitelist covering the Sierra western slope, Tahoe high country, and eastern Sierra. It explicitly excludes Reno, Sparks, Carson City, Dayton, Susanville, and Mount Shasta-area leakage. CSSL is not in the whitelist.
+
+The importer reads NOAA GHCN-Daily `csv.gz/by_station` rows. It accepts only a same-station/same-date `SNOW` and `WESF` pair with blank measurement and quality flags, one identical valid observation time, positive non-accumulated 24-hour values, `SNOW >= 25 mm`, `WESF >= 2.5 mm`, and `2 < SLR < 50`. `SNOW` is millimetres; the by-station `WESF` integer is tenths of millimetres and is divided by ten. It never reads `SNWD`, `WESD`, or infers precipitation phase. Source-N exact 10:1 pairs are rejected as possible circular/default WESF. GHCN does not provide a separate WESF independence field; therefore blank source QC plus the circular-ratio rejection is the strongest reproducible screen available, and the result remains research-only. GHCN-Daily is a NOAA/U.S. government data product; local downloads and manifests are gitignored and carry URL, byte length, and SHA-256 provenance.
+
+Reproduction (raw/cache/report paths remain gitignored):
+
+```bash
+PYTHONPATH=training/slr_calibration/src training/slr_calibration/.venv/bin/python -m slr_calibration.cli import-ghcn-sierra \
+  --station-directory data/sierra-slr-research/raw/ghcn \
+  --station-metadata data/slr-training-data/raw/ghcn/ghcnd-stations.txt \
+  --output-events data/sierra-slr-research/normalized/sierra_events.csv \
+  --output-rejections data/sierra-slr-research/normalized/sierra_rejections.csv \
+  --output-report data/sierra-slr-research/reports/import.json
+
+PYTHONPATH=training/slr_calibration/src training/slr_calibration/.venv/bin/python -m slr_calibration.cli select-sierra-split \
+  --input data/sierra-slr-research/normalized/sierra_events.csv \
+  --output data/sierra-slr-research/normalized/sierra_selected_split.csv \
+  --train-stations US1CACV0012,US1CAED0020,US1CAMN0004,US1CAMN0006,US1CANV0051,US1CAPM0002,US1CAPM0009,USC00048760 \
+  --held-out-stations US1CACV0014,US1CAED0035,US1CAMN0005
+
+PYTHONPATH=training/slr_calibration/src training/slr_calibration/.venv/bin/python -m slr_calibration.cli backfill-openmeteo-sierra \
+  --input-events data/sierra-slr-research/normalized/sierra_selected_split.csv \
+  --cache-dir data/sierra-slr-research/raw/openmeteo \
+  --output data/sierra-slr-research/normalized/sierra_profiles.jsonl \
+  --output-report data/sierra-slr-research/reports/profiles.json \
+  --start-date 2022-10-01 --end-date 2024-09-30 \
+  --station-ids US1CACV0012,US1CAED0020,US1CAMN0004,US1CAMN0006,US1CANV0051,US1CAPM0002,US1CAPM0009,USC00048760,US1CACV0014,US1CAED0035,US1CAMN0005
+
+npx tsx training/slr_calibration/scripts/cssl-baseline.ts \
+  --input data/sierra-slr-research/normalized/sierra_profiles.jsonl \
+  --output data/sierra-slr-research/normalized/sierra_kuchera.csv \
+  --report data/sierra-slr-research/reports/baseline.json
+
+PYTHONPATH=training/slr_calibration/src training/slr_calibration/.venv/bin/python -m slr_calibration.cli evaluate-ghcn-sierra \
+  --input data/sierra-slr-research/normalized/sierra_kuchera.csv \
+  --artifact-output training/slr_calibration/artifacts/regional-slr-research-sierra-nevada-kuchera-v1.json \
+  --report-output data/sierra-slr-research/reports/evaluation.json \
+  --held-out-stations US1CACV0014,US1CAED0035,US1CAMN0005
+```
+
+The frozen whitelist import has 6,596 raw same-date pairs, 1,529 accepted events at 26 stations, and 5,067 explicit rejects, including 75 source-N exact 10:1 pairs. The selected recent split had 245 observations at 11 stations. Open-Meteo Historical Forecast aligned 225 (20 rejected: 14 incomplete windows, six with no modeled snowfall), and the exact current TypeScript production bridge produced all 225 Kuchera baselines with regional calibration disabled and below-ground pressure levels masked.
+
+Training used 206 WY2023 events / 22 regional storms / eight stations. Testing used 19 WY2024 events / 11 storms / three entirely unseen stations (Arnold 0.6 ENE, South Lake Tahoe 1.4 ESE, Mammoth Lakes 16.3 ESE). Baseline to calibrated metrics were: bias 0.374 -> -0.119, MAE 3.767 -> 3.222, median AE 3.517 -> 2.365, RMSE 4.675 -> 4.077, and approximate P10-P90 coverage 57.9% -> 63.2%. MAE improved at all three stations, all three geographic slices, and all three elevation slices. The 14.5% MAE reduction passes the conservative retention gate, but the holdout is small and uncertainty remains under-covered. The artifact is `unvalidated`, lives only under offline training artifacts, is not registered by the runtime, and cannot enable production calibration.

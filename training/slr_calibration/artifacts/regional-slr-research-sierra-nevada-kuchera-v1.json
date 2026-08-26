@@ -1,0 +1,193 @@
+{
+  "artifactId": "regional-slr-research-sierra-nevada-kuchera-v1",
+  "artifactVersion": "research-sierra-nevada-kuchera-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "822817fffffffff": "sierra_maritime_mountain",
+      "822837fffffffff": "sierra_maritime_mountain",
+      "82298ffffffffff": "sierra_maritime_mountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "coverage": {
+    "geographicNote": "Audited Sierra/Tahoe/eastern-Sierra mountain-station whitelist only; excludes adjacent cities and basins. Not statewide, production, or worldwide validation.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2023-05-03T00:00:00Z",
+  "methods": {
+    "kuchera": {
+      "climate": {
+        "sierra_maritime_mountain": {
+          "effectiveSampleSize": 206.0,
+          "logBias": -0.00488148,
+          "rawLogBias": -0.00559238,
+          "rawSampleCount": 206,
+          "residualStdLog": 0.43359463,
+          "shrinkageWeight": 0.87288136
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 206.0,
+        "logBias": -0.03840098,
+        "rawLogBias": -0.04399336,
+        "rawSampleCount": 206,
+        "residualStdLog": 0.43359463,
+        "shrinkageWeight": 0.87288136
+      },
+      "local": {
+        "US1CACV0012": {
+          "effectiveSampleSize": 23.0,
+          "logBias": -0.08548393,
+          "rawLogBias": -0.19698472,
+          "rawSampleCount": 23,
+          "residualStdLog": 0.42606919,
+          "shrinkageWeight": 0.43396226
+        },
+        "US1CAED0020": {
+          "effectiveSampleSize": 41.0,
+          "logBias": -0.05966567,
+          "rawLogBias": -0.10332348,
+          "rawSampleCount": 41,
+          "residualStdLog": 0.33133176,
+          "shrinkageWeight": 0.57746479
+        },
+        "US1CAMN0004": {
+          "effectiveSampleSize": 2.0,
+          "logBias": 0.00078182,
+          "rawLogBias": 0.0125091,
+          "rawSampleCount": 2,
+          "residualStdLog": 0.30006753,
+          "shrinkageWeight": 0.0625
+        },
+        "US1CAMN0006": {
+          "effectiveSampleSize": 15.0,
+          "logBias": -0.06626895,
+          "rawLogBias": -0.19880685,
+          "rawSampleCount": 15,
+          "residualStdLog": 0.36424861,
+          "shrinkageWeight": 0.33333333
+        },
+        "US1CANV0051": {
+          "effectiveSampleSize": 49.0,
+          "logBias": -0.00353261,
+          "rawLogBias": -0.00569544,
+          "rawSampleCount": 49,
+          "residualStdLog": 0.38386848,
+          "shrinkageWeight": 0.62025316
+        },
+        "US1CAPM0002": {
+          "effectiveSampleSize": 21.0,
+          "logBias": 0.01628999,
+          "rawLogBias": 0.03956141,
+          "rawSampleCount": 21,
+          "residualStdLog": 0.44729332,
+          "shrinkageWeight": 0.41176471
+        },
+        "US1CAPM0009": {
+          "effectiveSampleSize": 5.0,
+          "logBias": -0.001486,
+          "rawLogBias": -0.01040201,
+          "rawSampleCount": 5,
+          "residualStdLog": 0.26095239,
+          "shrinkageWeight": 0.14285714
+        },
+        "USC00048760": {
+          "effectiveSampleSize": 50.0,
+          "logBias": 0.08917458,
+          "rawLogBias": 0.14267933,
+          "rawSampleCount": 50,
+          "residualStdLog": 0.42495127,
+          "shrinkageWeight": 0.625
+        }
+      },
+      "region": {
+        "8428141ffffffff": {
+          "effectiveSampleSize": 21.0,
+          "logBias": 0.02769298,
+          "rawLogBias": 0.06725439,
+          "rawSampleCount": 21,
+          "residualStdLog": 0.44729332,
+          "shrinkageWeight": 0.41176471
+        },
+        "8429893ffffffff": {
+          "effectiveSampleSize": 5.0,
+          "logBias": -0.00173367,
+          "rawLogBias": -0.01213568,
+          "rawSampleCount": 5,
+          "residualStdLog": 0.26095239,
+          "shrinkageWeight": 0.14285714
+        },
+        "8429899ffffffff": {
+          "effectiveSampleSize": 91.0,
+          "logBias": 0.09659013,
+          "rawLogBias": 0.12843303,
+          "rawSampleCount": 91,
+          "residualStdLog": 0.40455501,
+          "shrinkageWeight": 0.75206612
+        },
+        "842989bffffffff": {
+          "effectiveSampleSize": 49.0,
+          "logBias": -0.00930254,
+          "rawLogBias": -0.01499798,
+          "rawSampleCount": 49,
+          "residualStdLog": 0.38386848,
+          "shrinkageWeight": 0.62025316
+        },
+        "84298c9ffffffff": {
+          "effectiveSampleSize": 2.0,
+          "logBias": 0.00083394,
+          "rawLogBias": 0.01334304,
+          "rawSampleCount": 2,
+          "residualStdLog": 0.30006753,
+          "shrinkageWeight": 0.0625
+        },
+        "84298dbffffffff": {
+          "effectiveSampleSize": 23.0,
+          "logBias": -0.15102162,
+          "rawLogBias": -0.34800634,
+          "rawSampleCount": 23,
+          "residualStdLog": 0.42606919,
+          "shrinkageWeight": 0.43396226
+        },
+        "84298ddffffffff": {
+          "effectiveSampleSize": 15.0,
+          "logBias": -0.09940342,
+          "rawLogBias": -0.29821027,
+          "rawSampleCount": 15,
+          "residualStdLog": 0.36424861,
+          "shrinkageWeight": 0.33333333
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2023-05-03",
+  "training": {
+    "acceptedEventCount": 206,
+    "leakageGroup": "entirely unseen station + regional contiguous-date storm group + chronological water year",
+    "minEffectiveSampleSize": 5.0,
+    "priorEffectiveSampleSize": 30.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "e8698d42b9304ede470d6eb22f7d1d9f03da986a39c1083a03bfb919aa74050e",
+    "sourceLabel": "NOAA GHCN-Daily direct same-window SNOW+WESF paired to Open-Meteo Historical Forecast profiles; Sierra research only",
+    "stationCount": 8,
+    "target": "log(observed_slr / physical_baseline_slr)"
+  }
+}

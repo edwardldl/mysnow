@@ -291,6 +291,7 @@ def backfill_openmeteo_multistation_profiles(
     end_date: date,
     station_ids: set[str] | None = None,
     sleep_seconds: float = 0.25,
+    profile_alignment_label: str = "GHCN 24-hour window ending at reported America/Denver local observation time",
 ) -> dict[str, Any]:
     """Backfill exact 24-hour local-standard observation windows for multiple GHCN stations."""
     all_events = _read_events(input_events)
@@ -357,6 +358,7 @@ def backfill_openmeteo_multistation_profiles(
                 "eventCount": len(station_events),
                 "requestStart": request_start.isoformat(),
                 "requestEnd": request_end.isoformat(),
+                "url": url,
                 "cacheFile": str(cache_path.relative_to(cache_dir)),
                 "cacheSha256": hashlib.sha256(cache_path.read_bytes()).hexdigest(),
                 "returnedLatitude": payload.get("latitude"),
@@ -402,7 +404,7 @@ def backfill_openmeteo_multistation_profiles(
                     "profileSource": "Open-Meteo Historical Forecast API",
                     "profileModel": "best-match archive; exact contributing model not exposed by response",
                     "profileRetrievedFrom": OPEN_METEO_ENDPOINT,
-                    "profileAlignment": "GHCN 24-hour window ending at reported America/Denver local observation time; production (t-1,t] interval-mean profile; model-precipitation weighted Kuchera; research-only",
+                    "profileAlignment": f"{profile_alignment_label}; production (t-1,t] interval-mean profile; model-precipitation weighted Kuchera; research-only",
                     "profileHourCount": len(usable_snow_hours),
                     "contextHourCount": len(current_hours) + 1,
                     "modelSnowfallCm": round(sum(float(hour["snowfallCm"]) for hour in usable_snow_hours), 6),
@@ -451,7 +453,7 @@ def backfill_openmeteo_multistation_profiles(
         "limitations": [
             "Historical Forecast coverage is recent and model-dependent; it is not ERA5 or the original operational forecast.",
             "The response does not identify the exact contributing best-match model, so model provenance is incomplete.",
-            "GHCN observation time is treated as the reported America/Denver local clock time and each label is matched to the preceding 24 hours.",
+            f"{profile_alignment_label}; each label is matched to the preceding 24 hours.",
             "Only model-snowfall hours are used; observed events with no aligned modeled snowfall are rejected.",
             "The requested profile lacks dew point and vertical velocity, so it supports exact MySnow Kuchera but not a true Cobb estimate.",
         ],

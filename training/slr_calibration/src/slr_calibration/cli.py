@@ -12,6 +12,8 @@ from .evaluation import evaluate_rockies_station_temporal_holdout, evaluate_temp
 from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
 from .io import read_rows
 from .profiles import backfill_openmeteo_multistation_profiles, backfill_openmeteo_profiles
+from .sierra import SierraImportConfig, import_sierra_ghcn_directory, write_sierra_import
+from .sierra_evaluation import evaluate_sierra_station_water_year_holdout
 from .trainer import TrainingConfig, train_artifact
 
 
@@ -236,6 +238,83 @@ def _evaluate_rockies(args: argparse.Namespace) -> int:
     }, sort_keys=True))
     return 0
 
+def _import_ghcn_sierra(args: argparse.Namespace) -> int:
+    events, rejected, report = import_sierra_ghcn_directory(
+        args.station_directory,
+        args.station_metadata,
+        SierraImportConfig(
+            min_snow_mm=args.min_snow_mm,
+            min_wesf_mm=args.min_wesf_mm,
+            min_observed_slr=args.min_observed_slr,
+            max_observed_slr=args.max_observed_slr,
+        ),
+    )
+    write_sierra_import(events, rejected, report, args.output_events, args.output_rejections, args.output_report)
+    print(json.dumps({
+        "events": str(args.output_events), "report": str(args.output_report),
+        "accepted": report["acceptedEventCount"], "rejected": report["rejectedPairCount"],
+        "stations": report["stationCount"],
+    }, sort_keys=True))
+    return 0
+
+
+def _select_sierra_split(args: argparse.Namespace) -> int:
+    train = {value.strip() for value in args.train_stations.split(",") if value.strip()}
+    held_out = {value.strip() for value in args.held_out_stations.split(",") if value.strip()}
+    if train & held_out:
+        raise ValueError("Train and held-out station sets must be disjoint")
+    with args.input.open("r", encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    selected = []
+    for row in rows:
+        observed = date.fromisoformat(row["observation_date"])
+        water_year = observed.year + 1 if observed.month >= 10 else observed.year
+        if (row["station_id"] in train and water_year == args.train_water_year) or (row["station_id"] in held_out and water_year == args.test_water_year):
+            selected.append(row)
+    missing = (train | held_out) - {row["station_id"] for row in selected}
+    if missing:
+        raise ValueError(f"Selected station/year combinations contain no events: {sorted(missing)}")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with args.output.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(selected)
+    print(json.dumps({"output": str(args.output), "eventCount": len(selected), "stationCount": len({row["station_id"] for row in selected})}, sort_keys=True))
+    return 0
+
+
+def _backfill_openmeteo_sierra(args: argparse.Namespace) -> int:
+    station_ids = {value.strip() for value in args.station_ids.split(",") if value.strip()}
+    report = backfill_openmeteo_multistation_profiles(
+        args.input_events, args.cache_dir, args.output, args.output_report,
+        date.fromisoformat(args.start_date), date.fromisoformat(args.end_date),
+        station_ids, args.sleep_seconds,
+        profile_alignment_label="GHCN 24-hour window ending at reported fixed-PST local-standard observation time",
+    )
+    print(json.dumps({
+        "output": str(args.output), "report": str(args.output_report),
+        "inputEvents": report["inputEventCount"], "alignedEvents": report["alignedEventCount"],
+        "failedRequests": len(report["failedRequests"]),
+    }, sort_keys=True))
+    return 0
+
+
+def _evaluate_sierra_ghcn(args: argparse.Namespace) -> int:
+    held_out = {value.strip() for value in args.held_out_stations.split(",") if value.strip()}
+    _, report = evaluate_sierra_station_water_year_holdout(
+        args.input, args.artifact_output, args.report_output,
+        args.artifact_id, args.artifact_version, held_out,
+        args.train_water_year, args.test_water_year,
+        args.prior_effective_sample_size, args.min_effective_sample_size,
+    )
+    print(json.dumps({
+        "artifact": str(args.artifact_output), "report": str(args.report_output),
+        "trainEvents": report["split"]["trainEventCount"],
+        "testEvents": report["split"]["testEventCount"],
+        "heldOutImprovement": report["improvement"]["heldOutImprovement"],
+        "baselineMae": report["baseline"]["mae"], "calibratedMae": report["calibrated"]["mae"],
+    }, sort_keys=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -337,6 +416,51 @@ def build_parser() -> argparse.ArgumentParser:
     rockies_eval.add_argument("--prior-effective-sample-size", type=float, default=30.0)
     rockies_eval.add_argument("--min-effective-sample-size", type=float, default=5.0)
     rockies_eval.set_defaults(func=_evaluate_rockies)
+    sierra_import = subparsers.add_parser("import-ghcn-sierra", help="normalize strict direct GHCN SNOW+WESF pairs for the audited Sierra station whitelist")
+    sierra_import.add_argument("--station-directory", type=Path, required=True)
+    sierra_import.add_argument("--station-metadata", type=Path, required=True)
+    sierra_import.add_argument("--output-events", type=Path, required=True)
+    sierra_import.add_argument("--output-rejections", type=Path, required=True)
+    sierra_import.add_argument("--output-report", type=Path, required=True)
+    sierra_import.add_argument("--min-snow-mm", type=float, default=25.0)
+    sierra_import.add_argument("--min-wesf-mm", type=float, default=2.5)
+    sierra_import.add_argument("--min-observed-slr", type=float, default=2.0)
+    sierra_import.add_argument("--max-observed-slr", type=float, default=50.0)
+    sierra_import.set_defaults(func=_import_ghcn_sierra)
+
+    sierra_split = subparsers.add_parser("select-sierra-split", help="select disjoint Sierra station/water-year cohorts")
+    sierra_split.add_argument("--input", type=Path, required=True)
+    sierra_split.add_argument("--output", type=Path, required=True)
+    sierra_split.add_argument("--train-stations", required=True)
+    sierra_split.add_argument("--held-out-stations", required=True)
+    sierra_split.add_argument("--train-water-year", type=int, default=2023)
+    sierra_split.add_argument("--test-water-year", type=int, default=2024)
+    sierra_split.set_defaults(func=_select_sierra_split)
+
+    sierra_profiles = subparsers.add_parser("backfill-openmeteo-sierra", help="cache station-water-year profiles for selected Sierra events")
+    sierra_profiles.add_argument("--input-events", type=Path, required=True)
+    sierra_profiles.add_argument("--cache-dir", type=Path, required=True)
+    sierra_profiles.add_argument("--output", type=Path, required=True)
+    sierra_profiles.add_argument("--output-report", type=Path, required=True)
+    sierra_profiles.add_argument("--start-date", required=True)
+    sierra_profiles.add_argument("--end-date", required=True)
+    sierra_profiles.add_argument("--station-ids", required=True)
+    sierra_profiles.add_argument("--sleep-seconds", type=float, default=0.25)
+    sierra_profiles.set_defaults(func=_backfill_openmeteo_sierra)
+
+    sierra_eval = subparsers.add_parser("evaluate-ghcn-sierra", help="evaluate a research-only unseen-station Sierra candidate")
+    sierra_eval.add_argument("--input", type=Path, required=True)
+    sierra_eval.add_argument("--artifact-output", type=Path, required=True)
+    sierra_eval.add_argument("--report-output", type=Path, required=True)
+    sierra_eval.add_argument("--held-out-stations", required=True)
+    sierra_eval.add_argument("--artifact-id", default="regional-slr-research-sierra-nevada-kuchera-v1")
+    sierra_eval.add_argument("--artifact-version", default="research-sierra-nevada-kuchera-v1")
+    sierra_eval.add_argument("--train-water-year", type=int, default=2023)
+    sierra_eval.add_argument("--test-water-year", type=int, default=2024)
+    sierra_eval.add_argument("--prior-effective-sample-size", type=float, default=30.0)
+    sierra_eval.add_argument("--min-effective-sample-size", type=float, default=5.0)
+    sierra_eval.set_defaults(func=_evaluate_sierra_ghcn)
+
     return parser
 
 
