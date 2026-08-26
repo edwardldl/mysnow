@@ -66,3 +66,19 @@ This is one fixed site and a temporal holdout only. It provides no Sierra-wide s
 ### License-blocked reconnaissance
 
 A one-day CoCoRaHS export was inspected only to verify schema and direct fresh-depth/fresh-SWE availability. Three direct pairs were present, but commercial training and redistribution rights were not established. Those records remain gitignored and were not used for fitting or evaluation.
+
+## Swiss Alps research artifact (unvalidated)
+
+`regional-slr-research-swiss-alps-kuchera-v1.json` is a research-only artifact with **actual support limited to the Swiss Alps EnviDat station network**. It is not a European Alps, Europe-wide, or production artifact, is not registered in the runtime catalog, and must remain runtime-rejected.
+
+Source provenance:
+
+- WSL Institute for Snow and Avalanche Research SLF / EnviDat, *Dataset on new snow water equivalent*, version 1.0, DOI `10.16904/envidat.590`, CC BY 4.0.
+- Exact source ZIP SHA-256: `45b33e586fa9b24f6d33e01bf79ae6d3096c4249799ddebf3b9fd6c6a447990a` (126,716 bytes).
+- The README defines HN as observed new-snow depth in cm and HNW as observed new-snow water equivalent in mm. Both tables have identical daily timestamps; timestamps end the observation period at 06:00 CET (fixed UTC+01:00). The importer reads only HN, HNW, and measured station metadata. It never derives labels from HS/SWE changes or modeled estimates.
+- QC requires finite non-missing same-timestamp pairs, HN >= 2.5 cm, HNW >= 2.5 mm, and observed SLR 2-50. Every exclusion receives an explicit reason.
+- CH1903/LV03 station coordinates are converted to WGS84 using the swisstopo polynomial approximation; source elevations are retained.
+
+The full import contains 4,001 accepted events at all 41 stations (2016-11-06 through 2022-04-30). Exact Open-Meteo Historical Forecast pressure-level fields were available for the recent 2021-11-02 through 2022-04-30 slice: all 568 events at 41 stations aligned, and all 568 produced an exact current TypeScript MySnow Kuchera baseline using production interval averaging and below-ground masking. Open-Meteo's exact contributing best-match model is not exposed and hosted commercial-use terms remain uncleared, so use remains research-only.
+
+Evaluation uses 165 events at 29 stations from 2021-11-02 through 2021-12-30 for training and 125 later events at 12 entirely unseen stations from 2022-01-05 through 2022-04-30 for testing. The predeclared elevation/geography-stratified holdout is `SLF.1GT`, `SLF.1LS`, `SLF.2SO`, `SLF.3BR`, `SLF.4LA`, `SLF.4WI`, `SLF.5BI`, `SLF.5PU`, `SLF.5SA`, `SLF.5SE`, `SLF.5WJ`, and `SLF.7SN`. Contiguous-date storm groups and stations are disjoint. Held-out stations span three elevation bands (below 1,400 m, 1,400-1,699 m, and 1,700 m+). Baseline to calibrated held-out metrics: bias 3.9273 to 3.0485, MAE 5.1862 to 4.7159, median AE 4.5119 to 4.1433, RMSE 6.3032 to 5.7544. MAE improved at 9/12 stations and 2/3 elevation bands; below 1,400 m degraded slightly (MAE +0.0732), which is a material caveat. Nominal P10-P90 coverage was only 60.8% (76/125), so uncertainty is undercalibrated. Production switches stay off.

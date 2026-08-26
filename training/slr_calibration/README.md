@@ -183,3 +183,17 @@ The leakage-safe split trained on 103 WY2024 events / 31 regional storm groups /
 MAE improved by 44.8%. The Colorado holdout (17 events) improved from 4.946 to 2.909 MAE. The out-of-Colorado transfer slice contains only four Wyoming events at two stations and improved from 6.176 to 2.639 MAE. The single New Mexico candidate did not survive strict profile alignment, so there is no New Mexico test evidence. Both station slices with at least two test events improved; the one-event Cody slice also improved but is descriptive only.
 
 The approximate nominal P10-P90 interval covered only 13/21 events (61.9%), below the nominal 80%. Trainer shrinkage support is also currently counted by row rather than independent storm, so effective sample size is overstated when stations share a storm. This candidate therefore preserves useful held-out median correction evidence but not calibrated uncertainty. The committed artifact is research-only and `unvalidated`; runtime production enablement remains false.
+
+## Swiss Alps / EnviDat 590 workflow
+
+The Swiss importer is `slr_calibration.swiss.import_swiss_new_snow`; profile pairing is `slr_calibration.profiles.backfill_openmeteo_swiss_profiles`; unseen-station evaluation is `slr_calibration.swiss_evaluation.evaluate_swiss_station_chronological_holdout`.
+
+Raw ZIP, extraction, Open-Meteo responses, paired JSONL/CSV, rejection CSV, and reports live under gitignored `data/swiss-alps-slr/`. Only source, tests, documentation, and the small derived research artifact are committed. The pipeline:
+
+1. Verifies the HN/HNW file descriptions and units (`observed`, cm/mm), exact station columns, identical timestamps, fixed 06:00 CET window, and measured station metadata.
+2. Emits one explicit reason for every rejected station-day pair. It never opens HS/SWE inputs.
+3. Requests `temperature_2m`, precipitation, snowfall, freezing-level height, and temperature/geopotential height at 1000/975/950/925/900/850/800/700/600/500 hPa from Open-Meteo Historical Forecast, caching responses by station/water year.
+4. Runs `training/slr_calibration/scripts/cssl-baseline.ts`, which calls the current production TypeScript Kuchera implementation with calibration disabled and below-ground profile masking.
+5. Fits only the earlier period and evaluates only later events from 12 entirely unseen, elevation-stratified stations (`SLF.1GT,SLF.1LS,SLF.2SO,SLF.3BR,SLF.4LA,SLF.4WI,SLF.5BI,SLF.5PU,SLF.5SA,SLF.5SE,SLF.5WJ,SLF.7SN`; cutoff 2022-01-01). The artifact is written only when overall MAE improves by at least 0.25 SLR, median AE does not worsen, at least half of eligible station and elevation slices improve, and the split includes at least six held-out stations across all three elevation bands.
+
+The committed artifact is `unvalidated`, Swiss-Alps-only, not runtime-registered, and not production-eligible. See `docs/regional-slr-calibration.md` for metrics and limitations. Attribution: Magnusson et al., EnviDat DOI `10.16904/envidat.590`, version 1.0, CC BY 4.0.

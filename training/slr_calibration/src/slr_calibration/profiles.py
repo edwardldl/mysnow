@@ -167,7 +167,7 @@ def backfill_openmeteo_profiles(
             _validate_response(payload)
             payloads[month] = payload
             request_records.append({
-                "period": period,
+                "period": month,
                 "requestStart": request_start.isoformat(),
                 "requestEnd": request_end.isoformat(),
                 "requestUrl": url,
@@ -457,5 +457,59 @@ def backfill_openmeteo_multistation_profiles(
         ],
     }
     output_report.parent.mkdir(parents=True, exist_ok=True)
+    output_report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return report
+
+
+def backfill_openmeteo_swiss_profiles(
+    input_events: Path,
+    cache_dir: Path,
+    output_jsonl: Path,
+    output_report: Path,
+    start_date: date,
+    end_date: date,
+    station_ids: set[str] | None = None,
+    sleep_seconds: float = 0.25,
+) -> dict[str, Any]:
+    """Pair Swiss 06:00 CET measured HN/HNW windows to exact MySnow Kuchera inputs."""
+    report = backfill_openmeteo_multistation_profiles(
+        input_events,
+        cache_dir,
+        output_jsonl,
+        output_report,
+        start_date,
+        end_date,
+        station_ids,
+        sleep_seconds,
+    )
+    records = []
+    for line in output_jsonl.read_text(encoding="utf-8").splitlines():
+        if not line:
+            continue
+        record = json.loads(line)
+        record["profileAlignment"] = (
+            "EnviDat/SLF measured 24-hour fresh-snow window ending 06:00 CET (UTC+01:00); "
+            "production (t-1,t] interval-mean profile with below-ground masking; "
+            "model-precipitation weighted Kuchera; research-only"
+        )
+        records.append(record)
+    with output_jsonl.open("w", encoding="utf-8") as handle:
+        for record in sorted(records, key=lambda row: row["event_id"]):
+            handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+    report["observationSource"] = {
+        "name": "WSL-SLF / EnviDat Dataset on new snow water equivalent",
+        "doi": "10.16904/envidat.590",
+        "version": "1.0",
+        "license": "CC BY 4.0",
+        "measurements": "quality-controlled independently observed HN and HNW; no HS/SWE differencing",
+        "window": "daily period ending 06:00 CET (fixed UTC+01:00 per source README)",
+    }
+    report["limitations"] = [
+        "Historical Forecast coverage is recent and model-dependent; only the supported 2021-2022 temporal slice is used.",
+        "The response does not identify the exact contributing best-match model, so model provenance is incomplete.",
+        "Open-Meteo hosted commercial-use terms remain uncleared; this is research-only.",
+        "Only model-snowfall hours are used; observed events with no aligned modeled snowfall are rejected.",
+        "Pressure-level temperature and geopotential height support exact current MySnow Kuchera with below-ground masking, not Cobb.",
+    ]
     output_report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return report

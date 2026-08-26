@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import csv
+import json
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 from slr_calibration.cssl import CsslImportConfig, import_cssl_directory
-from slr_calibration.profiles import _response_hours
+from slr_calibration.profiles import HOURLY_FIELDS, _response_hours, backfill_openmeteo_profiles
 
 FIXTURE = Path(__file__).parent / "fixtures" / "cssl-wy2024-sample.csv"
 
@@ -60,6 +62,52 @@ class ProfileParserTests(unittest.TestCase):
         self.assertEqual(len(hours), 2)
         self.assertEqual(len(hours[0]["levels"]), 10)
         self.assertEqual(hours[0]["localPstDate"], "2024-03-01")
+
+    def test_single_site_month_request_report_uses_month_period(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = root / "events.csv"
+            with events.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(
+                    handle,
+                    fieldnames=["event_id", "observation_date", "latitude", "longitude", "elevation_m"],
+                )
+                writer.writeheader()
+                writer.writerow({
+                    "event_id": "cssl-2022-01-01",
+                    "observation_date": "2022-01-01",
+                    "latitude": "39.3257",
+                    "longitude": "-120.3681",
+                    "elevation_m": "2100",
+                })
+            cache = root / "cache"
+            cache.mkdir()
+            hourly: dict[str, list[float | str | None]] = {"time": ["2022-01-01T00:00"]}
+            for field in HOURLY_FIELDS:
+                hourly[field] = [0.0]
+            (cache / "2022-01.json").write_text(
+                json.dumps({
+                    "latitude": 39.3257,
+                    "longitude": -120.3681,
+                    "elevation": 2100.0,
+                    "timezone": "GMT",
+                    "utc_offset_seconds": 0,
+                    "hourly": hourly,
+                }),
+                encoding="utf-8",
+            )
+            report = backfill_openmeteo_profiles(
+                events,
+                cache,
+                root / "profiles.jsonl",
+                root / "report.json",
+                date(2022, 1, 1),
+                date(2022, 1, 1),
+                sleep_seconds=0,
+            )
+        self.assertEqual(report["failedMonths"], {})
+        self.assertEqual(report["requests"][0]["period"], "2022-01")
+        self.assertEqual(report["rejectionCounts"], {"INCOMPLETE_LOCAL_DAY": 1})
 
 
 if __name__ == "__main__":
