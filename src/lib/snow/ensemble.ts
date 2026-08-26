@@ -1,4 +1,5 @@
 import { calculateSnowfall } from './snowfall';
+import type { SlrRuntimeCalibrationOptions } from './slr';
 import { MIN_ACCUMULATING_SWE_MM, type EnsembleSnowfallResult, type SlrMethod, type SnowfallInput, type SnowfallResult } from './types';
 
 function quantile(values: number[], probability: number): number {
@@ -13,6 +14,7 @@ function quantile(values: number[], probability: number): number {
 export function calculateEnsembleSnowfall(
   members: Array<SnowfallInput | null>,
   method: SlrMethod,
+  calibrationOptions: SlrRuntimeCalibrationOptions = {},
 ): EnsembleSnowfallResult {
   const memberResults: SnowfallResult[] = [];
   let missingMemberCount = 0;
@@ -21,7 +23,7 @@ export function calculateEnsembleSnowfall(
       missingMemberCount += 1;
       continue;
     }
-    memberResults.push(calculateSnowfall(member, method));
+    memberResults.push(calculateSnowfall(member, method, calibrationOptions));
   }
   return summarizeEnsembleSnowfall(memberResults, missingMemberCount);
 }

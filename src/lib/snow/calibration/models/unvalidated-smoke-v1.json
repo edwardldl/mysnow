@@ -1,0 +1,225 @@
+{
+  "artifactId": "regional-slr-unvalidated-smoke-v1",
+  "artifactVersion": "unvalidated-smoke-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "822687fffffffff": "continental_mountain",
+      "82298ffffffffff": "maritime_mountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "coverage": {
+    "geographicNote": "Coverage is explicit by hierarchy; absent cells fall back to a broader level.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "cobb_2011",
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2024-04-05T00:00:00Z",
+  "methods": {
+    "cobb_2011": {
+      "climate": {
+        "continental_mountain": {
+          "effectiveSampleSize": 8.0,
+          "logBias": 0.08422568,
+          "rawLogBias": 0.12633852,
+          "rawSampleCount": 8,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.66666667
+        },
+        "maritime_mountain": {
+          "effectiveSampleSize": 8.0,
+          "logBias": -0.07912702,
+          "rawLogBias": -0.11869053,
+          "rawSampleCount": 8,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.66666667
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 16.0,
+        "logBias": 0.01529601,
+        "rawLogBias": 0.01912001,
+        "rawSampleCount": 16,
+        "residualStdLog": 0.12714553,
+        "shrinkageWeight": 0.8
+      },
+      "local": {
+        "rockies-a": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.01705143,
+          "rawLogBias": 0.03410286,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "rockies-b": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.00400499,
+          "rawLogBias": 0.00800999,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "sierra-a": {
+          "effectiveSampleSize": 4.0,
+          "logBias": -0.01770686,
+          "rawLogBias": -0.03541372,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "sierra-b": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.00451902,
+          "rawLogBias": 0.00903804,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        }
+      },
+      "region": {
+        "8426817ffffffff": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.03410286,
+          "rawLogBias": 0.06820572,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "8426857ffffffff": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.00800998,
+          "rawLogBias": 0.01601997,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "842989bffffffff": {
+          "effectiveSampleSize": 8.0,
+          "logBias": -0.02637567,
+          "rawLogBias": -0.03956351,
+          "rawSampleCount": 8,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.66666667
+        }
+      }
+    },
+    "kuchera": {
+      "climate": {
+        "continental_mountain": {
+          "effectiveSampleSize": 8.0,
+          "logBias": 0.08422568,
+          "rawLogBias": 0.12633852,
+          "rawSampleCount": 8,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.66666667
+        },
+        "maritime_mountain": {
+          "effectiveSampleSize": 8.0,
+          "logBias": -0.07912702,
+          "rawLogBias": -0.11869053,
+          "rawSampleCount": 8,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.66666667
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 16.0,
+        "logBias": 0.01529601,
+        "rawLogBias": 0.01912001,
+        "rawSampleCount": 16,
+        "residualStdLog": 0.12714553,
+        "shrinkageWeight": 0.8
+      },
+      "local": {
+        "rockies-a": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.01705143,
+          "rawLogBias": 0.03410286,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "rockies-b": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.00400499,
+          "rawLogBias": 0.00800999,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "sierra-a": {
+          "effectiveSampleSize": 4.0,
+          "logBias": -0.01770686,
+          "rawLogBias": -0.03541372,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "sierra-b": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.00451902,
+          "rawLogBias": 0.00903804,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        }
+      },
+      "region": {
+        "8426817ffffffff": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.03410286,
+          "rawLogBias": 0.06820572,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "8426857ffffffff": {
+          "effectiveSampleSize": 4.0,
+          "logBias": 0.00800998,
+          "rawLogBias": 0.01601997,
+          "rawSampleCount": 4,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.5
+        },
+        "842989bffffffff": {
+          "effectiveSampleSize": 8.0,
+          "logBias": -0.02637567,
+          "rawLogBias": -0.03956351,
+          "rawSampleCount": 8,
+          "residualStdLog": 0.05,
+          "shrinkageWeight": 0.66666667
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2024-04-05",
+  "training": {
+    "acceptedEventCount": 32,
+    "leakageGroup": "event_id",
+    "minEffectiveSampleSize": 2.0,
+    "priorEffectiveSampleSize": 4.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "f438ccf69340c95ce45b8db8a1cfc0a7e1b81d6df8b63a3d87719be0c881ad89",
+    "sourceLabel": "synthetic test fixture; not meteorological evidence",
+    "stationCount": 4,
+    "target": "log(observed_slr / physical_baseline_slr)"
+  }
+}

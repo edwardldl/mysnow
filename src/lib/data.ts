@@ -62,7 +62,12 @@ function calcSnowLevel(FL: number, RH: number, precip: number): number {
 /**
  * Applies the shared precipitation → phase → SLR → snowpack pipeline.
  */
-function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: string, elevation: number): BlendedHour[] {
+function processSnowfallVariables(
+    hourly: Partial<BlendedHour>[],
+    algorithm: string,
+    elevation: number,
+    location: Location,
+): BlendedHour[] {
     const out: BlendedHour[] = [];
     let snowLayersOnGround: SnowLayer[] = [];
     const method = toSlrMethod(algorithm);
@@ -94,7 +99,16 @@ function processSnowfallVariables(hourly: Partial<BlendedHour>[], algorithm: str
                 stationElevationM: elevation,
             },
             profile,
-        }, method);
+        }, method, {
+            context: {
+                latitude: point.provenance?.requestedLatitude ?? location.latitude,
+                longitude: point.provenance?.requestedLongitude ?? location.longitude,
+                elevationM: point.provenance?.requestedElevationM ?? elevation,
+                modelId: point.provenance?.modelId ?? point.model ?? null,
+                siteId: location.id,
+                validTime: point.provenance?.validTime ?? point.time ?? null,
+            },
+        });
         const snowpack = advanceSnowpack(
             snowLayersOnGround,
             snowfallResult,
@@ -294,7 +308,7 @@ export function blendForecasts(
     }
 
     const elevation = typeof location.elevationM === 'number' ? location.elevationM : 1000;
-    const blended = processSnowfallVariables(rawHourly, slrAlgorithm, elevation);
+    const blended = processSnowfallVariables(rawHourly, slrAlgorithm, elevation, location);
 
     if (ensembleMembers && ensembleMembers.length > 0) {
         const memberForecasts = ensembleMembers.map(member =>

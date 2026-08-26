@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mysnow-slr-calibration"
+version = "0.1.0"
+description = "Deterministic offline hierarchical SLR residual calibration"
+requires-python = ">=3.11"
+dependencies = [
+  "h3==4.3.1",
+  "pyarrow==25.0.1",
+]
+
+[project.scripts]
+mysnow-slr-calibration = "slr_calibration.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

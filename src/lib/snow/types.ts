@@ -106,6 +106,8 @@ export interface CobbLayerDiagnostic {
   contribution: number;
 }
 
+import type { RegionalSlrCalibrationDiagnostics } from './calibration/types';
+
 export interface SlrDiagnostics {
   validProfileLevels: number;
   sourceMethod: 'fixed_10' | 'kuchera' | 'cobb_2011' | 'open_meteo_snowfall';
@@ -120,6 +122,7 @@ export interface SlrDiagnostics {
     shear: number;
     riming: number;
   };
+  calibration: RegionalSlrCalibrationDiagnostics;
   layers: CobbLayerDiagnostic[];
   warnings: SnowDiagnosticWarning[];
 }

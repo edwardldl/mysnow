@@ -1,24 +1,17 @@
 import { DEFAULT_SLR_CALIBRATION } from '../calibration/coefficients';
+import { applyRegionalSlrCalibration, regionalSlrIdentityDiagnostics } from '../calibration/regional';
+import defaultRegionalArtifact from '../calibration/models/unvalidated-smoke-v1.json';
+import type { RegionalSlrContext } from '../calibration/types';
 import { estimateFixedTenSlr } from './fixed';
 import { estimateKucheraSlr } from './kuchera';
 import { estimateCobb2011Slr } from './cobb2011';
-import { DEFAULT_SLR_METHOD, type SlrDiagnostics, type SlrMethod, type SnowfallInput } from '../types';
+import { DEFAULT_SLR_METHOD, type Quantiles, type SlrDiagnostics, type SlrMethod, type SnowfallInput } from '../types';
 
 const LEGACY_METHOD_MAP: Record<string, SlrMethod> = {
-  standard: 'fixed_10',
-  fixed_10: 'fixed_10',
-  simple: 'kuchera',
-  kuchera: 'kuchera',
-  kuchera_dgz: 'kuchera',
-  kuchera_plus: 'kuchera',
-  hybrid: 'cobb_2011',
-  cobb: 'cobb_2011',
-  kinematic: 'cobb_2011',
-  cobb_2011: 'cobb_2011',
-  krc: 'experimental_krc',
-  dendro: 'experimental_krc',
-  model_native: 'open_meteo_snowfall',
-  open_meteo_snowfall: 'open_meteo_snowfall',
+  standard: 'fixed_10', fixed_10: 'fixed_10', simple: 'kuchera', kuchera: 'kuchera',
+  kuchera_dgz: 'kuchera', kuchera_plus: 'kuchera', hybrid: 'cobb_2011', cobb: 'cobb_2011',
+  kinematic: 'cobb_2011', cobb_2011: 'cobb_2011', krc: 'experimental_krc',
+  dendro: 'experimental_krc', model_native: 'open_meteo_snowfall', open_meteo_snowfall: 'open_meteo_snowfall',
 };
 
 /** Migrates saved legacy selection ids without exposing them in the UI. */
@@ -26,8 +19,17 @@ export function toSlrMethod(method: string | undefined): SlrMethod {
   return LEGACY_METHOD_MAP[method ?? ''] ?? DEFAULT_SLR_METHOD;
 }
 
+export interface SlrRuntimeCalibrationOptions {
+  context?: RegionalSlrContext | null;
+  /** Test/backtest override. Production callers should use the versioned default gate. */
+  enabled?: boolean;
+  allowUnvalidated?: boolean;
+  artifact?: unknown;
+}
+
 export interface SlrEstimate {
   freshSlr: number | null;
+  calibratedQuantiles: Quantiles | null;
   diagnostics: SlrDiagnostics;
 }
 
@@ -41,6 +43,7 @@ function emptyDiagnostics(input: SnowfallInput, sourceMethod: SlrDiagnostics['so
     growthZoneLiftMs: null,
     dominantGrowthLayerHpa: null,
     modifiers: { melting: 1, surfaceWind: 1, shear: 1, riming: 1 },
+    calibration: regionalSlrIdentityDiagnostics(),
     layers: [],
     warnings: [],
   };
@@ -48,31 +51,19 @@ function emptyDiagnostics(input: SnowfallInput, sourceMethod: SlrDiagnostics['so
 
 function windComponents(speedMs: number, directionDeg: number): { u: number; v: number } {
   const directionRad = directionDeg * Math.PI / 180;
-  return {
-    u: -speedMs * Math.sin(directionRad),
-    v: -speedMs * Math.cos(directionRad),
-  };
+  return { u: -speedMs * Math.sin(directionRad), v: -speedMs * Math.cos(directionRad) };
 }
 
-function applySurfaceModifiers(
-  sourceSlr: number,
-  input: SnowfallInput,
-  diagnostics: SlrDiagnostics,
-  warmNoseEnergyCM: number | null,
-): number {
+function applySurfaceModifiers(sourceSlr: number, input: SnowfallInput, diagnostics: SlrDiagnostics, warmNoseEnergyCM: number | null): number {
   const calibration = DEFAULT_SLR_CALIBRATION;
   if (!calibration.modifiersEnabled) return sourceSlr;
-
   const melting = Math.max(0.7, Math.min(1, Math.exp(-calibration.meltCoefficient * (warmNoseEnergyCM ?? 0))));
   const windSpeedMs = input.surface.windSpeedMs ?? 0;
   const surfaceWind = Math.max(0.7, Math.min(1, Math.exp(-calibration.surfaceWindCoefficient * Math.max(windSpeedMs - 5, 0))));
-  const growthLayer = diagnostics.dominantGrowthLayerHpa === null
-    ? null
-    : input.profile.aboveGroundLevels.reduce((closest, level) => {
-      if (closest === null) return level;
-      return Math.abs(level.pressureHpa - diagnostics.dominantGrowthLayerHpa!)
-        < Math.abs(closest.pressureHpa - diagnostics.dominantGrowthLayerHpa!) ? level : closest;
-    }, null as (typeof input.profile.aboveGroundLevels)[number] | null);
+  const growthLayer = diagnostics.dominantGrowthLayerHpa === null ? null : input.profile.aboveGroundLevels.reduce((closest, level) => {
+    if (closest === null) return level;
+    return Math.abs(level.pressureHpa - diagnostics.dominantGrowthLayerHpa!) < Math.abs(closest.pressureHpa - diagnostics.dominantGrowthLayerHpa!) ? level : closest;
+  }, null as (typeof input.profile.aboveGroundLevels)[number] | null);
   let shear = 1;
   if (growthLayer && growthLayer.windSpeedMs !== null && growthLayer.windDirectionDeg !== null
     && input.surface.windSpeedMs !== null && input.surface.windDirectionDeg !== null
@@ -86,37 +77,46 @@ function applySurfaceModifiers(
     }
   }
   const totalWeight = diagnostics.layers.reduce((sum, layer) => sum + layer.weight, 0);
-  const warmWeight = diagnostics.layers
-    .filter(layer => layer.temperatureC > -10 && layer.temperatureC < -2)
-    .reduce((sum, layer) => sum + layer.weight, 0);
-  const riming = totalWeight === 0
-    ? 1
-    : Math.max(0.8, Math.min(1, 1 - calibration.rimingCoefficient * (warmWeight / totalWeight)));
+  const warmWeight = diagnostics.layers.filter(layer => layer.temperatureC > -10 && layer.temperatureC < -2).reduce((sum, layer) => sum + layer.weight, 0);
+  const riming = totalWeight === 0 ? 1 : Math.max(0.8, Math.min(1, 1 - calibration.rimingCoefficient * (warmWeight / totalWeight)));
   diagnostics.modifiers = { melting, surfaceWind, shear, riming };
   return Math.max(3, Math.min(30, sourceSlr * melting * surfaceWind * shear * riming));
+}
+
+function finishWithCalibration(
+  physicalSlr: number,
+  calibrationMethod: SlrMethod,
+  diagnostics: SlrDiagnostics,
+  options: SlrRuntimeCalibrationOptions,
+): SlrEstimate {
+  const calibrated = applyRegionalSlrCalibration(physicalSlr, calibrationMethod, {
+    enabled: options.enabled ?? DEFAULT_SLR_CALIBRATION.regionalBiasEnabled,
+    allowUnvalidated: options.allowUnvalidated ?? DEFAULT_SLR_CALIBRATION.allowUnvalidatedRegionalArtifact,
+    artifact: options.artifact ?? defaultRegionalArtifact,
+    context: options.context,
+  });
+  diagnostics.finalFreshSlr = calibrated.slr;
+  diagnostics.calibration = calibrated.diagnostics;
+  return { freshSlr: calibrated.slr, calibratedQuantiles: calibrated.quantiles, diagnostics };
 }
 
 export function estimateFreshSnowSlr(
   input: SnowfallInput,
   method: SlrMethod,
   warmNoseEnergyCM: number | null = null,
+  calibrationOptions: SlrRuntimeCalibrationOptions = {},
 ): SlrEstimate {
   if (method === 'fixed_10') {
     const freshSlr = estimateFixedTenSlr();
     const diagnostics = emptyDiagnostics(input, 'fixed_10');
     diagnostics.sourceFreshSlr = freshSlr;
-    diagnostics.finalFreshSlr = freshSlr;
-    return { freshSlr, diagnostics };
+    return finishWithCalibration(freshSlr, method, diagnostics, calibrationOptions);
   }
 
   if (method === 'open_meteo_snowfall') {
     const diagnostics = emptyDiagnostics(input, 'open_meteo_snowfall');
-    // Open-Meteo's generic snowfall field uses a fixed conversion. Keep it as
-    // a comparison depth and never reinterpret it as an observed/model SLR.
-    if (input.snowfallCm === null || input.snowfallCm < 0) {
-      diagnostics.warnings.push('MODEL_SNOWFALL_UNAVAILABLE');
-    }
-    return { freshSlr: null, diagnostics };
+    if (input.snowfallCm === null || input.snowfallCm < 0) diagnostics.warnings.push('MODEL_SNOWFALL_UNAVAILABLE');
+    return { freshSlr: null, calibratedQuantiles: null, diagnostics };
   }
 
   if (method === 'cobb_2011') {
@@ -128,26 +128,22 @@ export function estimateFreshSnowSlr(
     diagnostics.layers = cobb.layers;
     if (cobb.freshSlr !== null) {
       diagnostics.sourceFreshSlr = cobb.freshSlr;
-      diagnostics.finalFreshSlr = applySurfaceModifiers(cobb.freshSlr, input, diagnostics, warmNoseEnergyCM);
-      return { freshSlr: diagnostics.finalFreshSlr, diagnostics };
+      const physicalSlr = applySurfaceModifiers(cobb.freshSlr, input, diagnostics, warmNoseEnergyCM);
+      return finishWithCalibration(physicalSlr, 'cobb_2011', diagnostics, calibrationOptions);
     }
     const freshSlr = estimateKucheraSlr(input.profile, input.surface.temperatureC);
     diagnostics.sourceMethod = 'kuchera';
     diagnostics.sourceFreshSlr = freshSlr;
-    diagnostics.finalFreshSlr = freshSlr;
     diagnostics.warnings.push('KUCHERA_FALLBACK');
     if (cobb.fallbackReason === 'SPARSE_PROFILE') diagnostics.warnings.push('SPARSE_PROFILE');
     if (cobb.fallbackReason === 'MISSING_VERTICAL_VELOCITY') diagnostics.warnings.push('MISSING_VERTICAL_VELOCITY');
     if (cobb.fallbackReason === 'MISSING_DEW_POINT_PROFILE') diagnostics.warnings.push('MISSING_DEW_POINT_PROFILE');
-    return { freshSlr, diagnostics };
+    return finishWithCalibration(freshSlr, 'kuchera', diagnostics, calibrationOptions);
   }
 
-  // Experimental KRC now shares the stable, phase-separated baseline until it
-  // has calibration and independent validation.
   const freshSlr = estimateKucheraSlr(input.profile, input.surface.temperatureC);
   const diagnostics = emptyDiagnostics(input, 'kuchera');
   diagnostics.sourceFreshSlr = freshSlr;
-  diagnostics.finalFreshSlr = freshSlr;
   if (method === 'experimental_krc') diagnostics.fallbackReason = 'EXPERIMENTAL_BASELINE';
-  return { freshSlr, diagnostics };
+  return finishWithCalibration(freshSlr, method, diagnostics, calibrationOptions);
 }

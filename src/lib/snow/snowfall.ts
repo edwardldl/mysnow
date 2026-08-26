@@ -1,5 +1,5 @@
 import { estimatePrecipitationPhase } from './phase';
-import { estimateFreshSnowSlr } from './slr';
+import { estimateFreshSnowSlr, type SlrRuntimeCalibrationOptions } from './slr';
 import type { QpfAdjustmentResult, QpfDistribution, Quantiles, SlrMethod, SnowfallInput, SnowfallResult } from './types';
 
 export function adjustPrecipitation(rawPrecipitationMm: number): QpfAdjustmentResult {
@@ -67,7 +67,11 @@ function qpfDistribution(input: SnowfallInput, precipitationMm: number): QpfDist
 }
 
 /** Single source of truth for precipitation → phase → SLR → fresh snow. */
-export function calculateSnowfall(input: SnowfallInput, method: SlrMethod): SnowfallResult {
+export function calculateSnowfall(
+  input: SnowfallInput,
+  method: SlrMethod,
+  calibrationOptions: SlrRuntimeCalibrationOptions = {},
+): SnowfallResult {
   const rawPrecipitationMm = Math.max(0, input.precipitationMm ?? 0);
   const qpfAdjustment = adjustPrecipitation(rawPrecipitationMm);
   const normalizedInput: SnowfallInput = {
@@ -81,17 +85,20 @@ export function calculateSnowfall(input: SnowfallInput, method: SlrMethod): Snow
     normalizedInput,
     method,
     phase.diagnostics.warmNoseEnergyCM,
+    calibrationOptions,
   );
   const isOpenMeteoComparison = method === 'open_meteo_snowfall';
   const freshSlr = !isOpenMeteoComparison && frozenSweMm > 0 ? slrEstimate.freshSlr : null;
   const freshSnowCm = isOpenMeteoComparison
     ? Math.max(0, input.snowfallCm ?? 0)
     : freshSlr === null ? 0 : (frozenSweMm * freshSlr) / 10;
-  const freshSlrQuantiles = freshSlrDistribution(
-    freshSlr,
-    method,
-    slrEstimate.diagnostics.fallbackReason !== null,
-  );
+  const freshSlrQuantiles = freshSlr === null
+    ? null
+    : slrEstimate.calibratedQuantiles ?? freshSlrDistribution(
+      freshSlr,
+      method,
+      slrEstimate.diagnostics.fallbackReason !== null,
+    );
   const freshSnowQuantilesCm = isOpenMeteoComparison
     ? { p10: freshSnowCm * 0.75, p50: freshSnowCm, p90: freshSnowCm * 1.35 }
     : freshSnowDistribution(frozenSweMm, freshSlrQuantiles, phase.confidence);
