@@ -27,6 +27,8 @@ class TrainingConfig:
     min_slr: float = 3.0
     max_slr: float = 30.0
     source_label: str = "normalized storm-event observations"
+    leakage_group: str = "event_id"
+    geographic_note: str = "Coverage is explicit by hierarchy; absent cells fall back to a broader level."
 
 
 @dataclass(frozen=True)
@@ -176,12 +178,12 @@ def train_artifact(rows: list[dict[str, Any]], config: TrainingConfig) -> dict[s
             "stationCount": len(stations),
             "priorEffectiveSampleSize": config.prior_effective_sample_size,
             "minEffectiveSampleSize": config.min_effective_sample_size,
-            "leakageGroup": "event_id",
+            "leakageGroup": config.leakage_group,
             "target": "log(observed_slr / physical_baseline_slr)",
         },
         "coverage": {
             "qualityTier": "unvalidated" if config.status == "unvalidated" else "limited",
-            "geographicNote": "Coverage is explicit by hierarchy; absent cells fall back to a broader level.",
+            "geographicNote": config.geographic_note,
             "supportedMethods": sorted(methods),
         },
         "methods": methods,

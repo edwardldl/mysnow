@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "slr:baseline": "tsx training/slr_calibration/scripts/cssl-baseline.ts"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -31,6 +32,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
+    "tsx": "4.20.6",
     "typescript": "^5",
     "vitest": "^4.1.10"
   }

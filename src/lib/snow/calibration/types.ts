@@ -46,7 +46,7 @@ export interface RegionalSlrArtifact {
     stationCount: number;
     priorEffectiveSampleSize: number;
     minEffectiveSampleSize: number;
-    leakageGroup: 'event_id';
+    leakageGroup: 'event_id' | 'storm_group_id';
     target: 'log(observed_slr / physical_baseline_slr)';
   };
   coverage: {

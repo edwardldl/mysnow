@@ -1,6 +1,7 @@
 import { latLngToCell } from 'h3-js';
 import { describe, expect, it } from 'vitest';
 import defaultArtifact from '../calibration/models/unvalidated-smoke-v1.json';
+import csslResearchArtifact from '../../../../training/slr_calibration/artifacts/regional-slr-research-cssl-kuchera-v1.json';
 import { applyRegionalSlrCalibration, validateRegionalSlrArtifact } from '../calibration/regional';
 import type { RegionalSlrArtifact, RegionalSlrNode } from '../calibration/types';
 import { estimateFreshSnowSlr } from '../slr';
@@ -104,6 +105,17 @@ describe('regional SLR calibration', () => {
       enabled: true,
       artifact: model,
       context: { latitude: LATITUDE, longitude: LONGITUDE },
+    });
+    expect(result.slr).toBe(11);
+    expect(result.diagnostics.reason).toBe('unvalidated_artifact');
+  });
+
+  it('validates but rejects the real CSSL research artifact in normal runtime', () => {
+    expect(validateRegionalSlrArtifact(csslResearchArtifact)).toBe(true);
+    const result = applyRegionalSlrCalibration(11, 'kuchera', {
+      enabled: true,
+      artifact: csslResearchArtifact,
+      context: { latitude: 39.3257, longitude: -120.3681, siteId: 'CSSL' },
     });
     expect(result.slr).toBe(11);
     expect(result.diagnostics.reason).toBe('unvalidated_artifact');

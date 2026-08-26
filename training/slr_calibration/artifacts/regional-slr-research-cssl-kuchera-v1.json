@@ -1,0 +1,87 @@
+{
+  "artifactId": "regional-slr-research-cssl-kuchera-v1",
+  "artifactVersion": "research-cssl-kuchera-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "82298ffffffffff": "maritime_mountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "coverage": {
+    "geographicNote": "One fixed CSSL site at 39.3257,-120.3681; temporal holdout only; not Sierra-regional or worldwide validation.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2024-04-26T00:00:00Z",
+  "methods": {
+    "kuchera": {
+      "climate": {
+        "maritime_mountain": {
+          "effectiveSampleSize": 21.0,
+          "logBias": -0.08677703,
+          "rawLogBias": -0.21074422,
+          "rawSampleCount": 21,
+          "residualStdLog": 0.64847561,
+          "shrinkageWeight": 0.41176471
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 21.0,
+        "logBias": -0.14752095,
+        "rawLogBias": -0.35826517,
+        "rawSampleCount": 21,
+        "residualStdLog": 0.64847561,
+        "shrinkageWeight": 0.41176471
+      },
+      "local": {
+        "CSSL": {
+          "effectiveSampleSize": 21.0,
+          "logBias": -0.03002665,
+          "rawLogBias": -0.07292187,
+          "rawSampleCount": 21,
+          "residualStdLog": 0.64847561,
+          "shrinkageWeight": 0.41176471
+        }
+      },
+      "region": {
+        "842989bffffffff": {
+          "effectiveSampleSize": 21.0,
+          "logBias": -0.05104532,
+          "rawLogBias": -0.12396719,
+          "rawSampleCount": 21,
+          "residualStdLog": 0.64847561,
+          "shrinkageWeight": 0.41176471
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2024-04-26",
+  "training": {
+    "acceptedEventCount": 21,
+    "leakageGroup": "storm_group_id",
+    "minEffectiveSampleSize": 5.0,
+    "priorEffectiveSampleSize": 30.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "76791c43bfbdfba69243eb6daaa35629f8d08c7fa34f5838b18e2bb240f6f0d3",
+    "sourceLabel": "CSSL CC0 direct fresh-snow labels paired to Open-Meteo Historical Forecast profiles; research-only",
+    "stationCount": 1,
+    "target": "log(observed_slr / physical_baseline_slr)"
+  }
+}
