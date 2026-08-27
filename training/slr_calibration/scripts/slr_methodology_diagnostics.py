@@ -1009,7 +1009,12 @@ def write_markdown(path: Path, report: dict[str, Any]) -> None:
         "", "## Limitations", "",
     ]
     lines.extend(f"- {item}" for item in report["limitations"])
-    lines += ["", "Full candidate-grid CV scores, fixed-holdout outcomes, source hashes, exact station lists, bootstrap intervals, and empirical interval details are in [`diagnostics.json`](diagnostics.json).", ""]
+    lines += [
+        "",
+        "Full candidate-grid CV scores, fixed-holdout outcomes, source hashes, exact station lists, bootstrap intervals, and empirical interval details are in [`diagnostics.json`](diagnostics.json).",
+        "The regional failure taxonomy, literature review, and implications are in [`RESEARCH.md`](RESEARCH.md).",
+        "",
+    ]
     path.write_text("\n".join(lines), encoding="utf-8")
 
 

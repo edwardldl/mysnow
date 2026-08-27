@@ -157,3 +157,4 @@ Only retained temperature2mC, freezingLevelHeightM, pressure-level temperature/g
 - No artifact is emitted and production calibration remains disabled.
 
 Full candidate-grid CV scores, fixed-holdout outcomes, source hashes, exact station lists, bootstrap intervals, and empirical interval details are in [`diagnostics.json`](diagnostics.json).
+The regional failure taxonomy, literature review, and implications are in [`RESEARCH.md`](RESEARCH.md).
