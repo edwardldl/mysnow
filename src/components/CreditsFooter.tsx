@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Info, Map as MapIcon, Database, Mountain } from "lucide-react";
+import Link from "next/link";
+import { Info, Map as MapIcon, Database, Mountain, FlaskConical, ArrowRight } from "lucide-react";
 import ModeToggle from "./ModeToggle";
 
 interface CreditsFooterProps {
@@ -55,6 +56,26 @@ export default function CreditsFooter({ mode, setMode }: CreditsFooterProps) {
           </div>
         </div>
 
+      </div>
+
+      <div className="max-w-7xl mx-auto mt-10">
+        <Link
+          href="/research/slr"
+          className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-cyan-300/10 bg-cyan-300/[0.035] px-5 py-4 transition-all hover:border-cyan-300/25 hover:bg-cyan-300/[0.06] focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+        >
+          <div className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-cyan-400/10 text-cyan-200">
+              <FlaskConical className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-cyan-300/70">Model research</p>
+              <p className="mt-1 text-xs font-bold text-white">Explore the regional SLR comparison</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-2 text-[10px] font-bold text-cyan-200 transition group-hover:text-white">
+            Open evaluation <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+          </span>
+        </Link>
       </div>
 
       <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-white/[0.02] flex flex-col md:flex-row items-center justify-between gap-4">
