@@ -6,6 +6,7 @@ import { advanceSnowpack } from './snow/snowpack';
 import { summarizeEnsembleSnowfall } from './snow/ensemble';
 import { toSlrMethod } from './snow/slr';
 import { DEFAULT_SLR_METHOD, type ForecastProvenance, type SnowLayer } from './snow/types';
+import { providerLocalTimeToEpochMs, providerLocalTimesToEpochMs } from './time';
 
 const SEVERITY_WEIGHTS: Record<number, number> = {
     // Thunderstorm
@@ -23,13 +24,8 @@ const SEVERITY_WEIGHTS: Record<number, number> = {
     3: 40, 2: 39, 1: 38, 0: 37
 };
 
-function forecastProvenance(data: OpenMeteoResponse, index: number): ForecastProvenance {
+function forecastProvenance(data: OpenMeteoResponse, index: number, returnedTimeStepMinutes: number): ForecastProvenance {
     const validTime = data.hourly.time[index] ?? '';
-    const firstTime = Date.parse(data.hourly.time[0] ?? '');
-    const secondTime = Date.parse(data.hourly.time[1] ?? '');
-    const returnedTimeStepMinutes = Number.isFinite(firstTime) && Number.isFinite(secondTime)
-        ? Math.max(1, Math.round((secondTime - firstTime) / 60_000))
-        : 60;
     const metadata = data.requestMetadata;
     return {
         modelId: data.modelIdentity ?? 'unknown',
@@ -76,9 +72,10 @@ function processSnowfallVariables(
         const point = hourly[i];
         const previous = i > 0 ? hourly[i - 1] : undefined;
         const representativeSurfacePressure = intervalMean(previous?.surface_pressure, point.surface_pressure);
+        const stationElevationM = point.provenance?.requestedElevationM ?? elevation;
         const profile = normalizeProfile(intervalRepresentativeLayers(previous?.layers, point.layers), {
             surfacePressureHpa: representativeSurfacePressure,
-            stationElevationM: elevation,
+            stationElevationM,
         });
         const snowfallResult = calculateSnowfall({
             time: point.time ?? '',
@@ -96,14 +93,14 @@ function processSnowfallVariables(
                 windSpeedMs: intervalMean(previous?.windSpeed, point.windSpeed),
                 windDirectionDeg: intervalDirectionMean(previous?.windDir, point.windDir),
                 surfacePressureHpa: representativeSurfacePressure,
-                stationElevationM: elevation,
+                stationElevationM,
             },
             profile,
         }, method, {
             context: {
                 latitude: point.provenance?.requestedLatitude ?? location.latitude,
                 longitude: point.provenance?.requestedLongitude ?? location.longitude,
-                elevationM: point.provenance?.requestedElevationM ?? elevation,
+                elevationM: stationElevationM,
                 modelId: point.provenance?.modelId ?? point.model ?? null,
                 siteId: location.id,
                 validTime: point.provenance?.validTime ?? point.time ?? null,
@@ -124,7 +121,7 @@ function processSnowfallVariables(
             snowfall: snowfallResult.freshSnowCm,
             method: snowfallResult.method,
             slrCategory: null,
-            snowDepth: snowpack.depthCm / 100,
+            modeledSnowpackDepthM: snowpack.depthCm / 100,
             snowfallResult,
             snowFraction: snowfallResult.snowFraction,
             frozenSweMm: snowfallResult.frozenSweMm,
@@ -155,6 +152,11 @@ export function blendForecasts(
     const rawHourly: Partial<BlendedHour>[] = [];
     const ecmwfTimes = ecmwf.hourly.time;
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
+    const providerTimezone = ecmwf.timezone || location.timezone || 'UTC';
+    const ecmwfInstants = providerLocalTimesToEpochMs(ecmwfTimes, providerTimezone);
+    const returnedTimeStepMinutes = ecmwfInstants.length >= 2
+        ? Math.max(1, Math.round((ecmwfInstants[1] - ecmwfInstants[0]) / 60_000))
+        : 60;
 
     const extractLayers = (dataSource: OpenMeteoResponse | null, index: number) => {
         if (!dataSource || !dataSource.hourly) return [];
@@ -193,10 +195,11 @@ export function blendForecasts(
 
     for (let i = 0; i < ecmwfTimes.length; i++) {
         const time = ecmwfTimes[i];
-        const dateObj = new Date(time);
+        const instantMs = ecmwfInstants[i] ?? providerLocalTimeToEpochMs(time, providerTimezone);
+        const dateObj = new Date(instantMs);
         const hrrrIdx = hrrrTimes.indexOf(time);
 
-        const point: Partial<BlendedHour> = { time, dateObj };
+        const point: Partial<BlendedHour> = { time, instantMs, dateObj, providerTimezone };
         let pointSource = ecmwf;
 
         if (hrrr && hrrrIdx !== -1 && hrrr.hourly.temperature_2m[hrrrIdx] !== null) {
@@ -208,7 +211,7 @@ export function blendForecasts(
             point.dewPoint = hrrr.hourly.dew_point_2m ? hrrr.hourly.dew_point_2m[hrrrIdx] : null;
             point.windSpeed = hrrr.hourly.wind_speed_10m ? hrrr.hourly.wind_speed_10m[hrrrIdx] : null;
             point.windDir = hrrr.hourly.wind_direction_10m ? hrrr.hourly.wind_direction_10m[hrrrIdx] : null;
-            point.snowDepth = hrrr.hourly.snow_depth ? hrrr.hourly.snow_depth[hrrrIdx] : null;
+            point.providerSnowDepthM = hrrr.hourly.snow_depth ? hrrr.hourly.snow_depth[hrrrIdx] : null;
             point.precipChance = hrrr.hourly.precipitation_probability ? hrrr.hourly.precipitation_probability[hrrrIdx] : null;
             point.feelsLike = hrrr.hourly.apparent_temperature ? hrrr.hourly.apparent_temperature[hrrrIdx] : null;
             point.rh = hrrr.hourly.relative_humidity_2m ? hrrr.hourly.relative_humidity_2m[hrrrIdx] : null;
@@ -216,8 +219,10 @@ export function blendForecasts(
             point.clouds = hrrr.hourly.cloud_cover ? hrrr.hourly.cloud_cover[hrrrIdx] : null;
 
             let FL = hrrr.hourly.freezing_level_height ? hrrr.hourly.freezing_level_height[hrrrIdx] : null;
-            if (FL == null && location && typeof location.elevationM === 'number' && point.temperature != null) {
-                FL = location.elevationM + (point.temperature * (1000 / 6.5));
+            const hrrrElevationM = hrrr.requestMetadata?.requestedElevationM
+                ?? (typeof location.elevationM === 'number' ? location.elevationM : null);
+            if (FL == null && hrrrElevationM != null && point.temperature != null) {
+                FL = hrrrElevationM + (point.temperature * (1000 / 6.5));
             }
 
             if (FL != null) {
@@ -259,7 +264,7 @@ export function blendForecasts(
             point.dewPoint = ecmwf.hourly.dew_point_2m ? ecmwf.hourly.dew_point_2m[i] : null;
             point.windSpeed = ecmwf.hourly.wind_speed_10m ? ecmwf.hourly.wind_speed_10m[i] : null;
             point.windDir = ecmwf.hourly.wind_direction_10m ? ecmwf.hourly.wind_direction_10m[i] : null;
-            point.snowDepth = ecmwf.hourly.snow_depth ? ecmwf.hourly.snow_depth[i] : null;
+            point.providerSnowDepthM = ecmwf.hourly.snow_depth ? ecmwf.hourly.snow_depth[i] : null;
             point.precipChance = ecmwf.hourly.precipitation_probability ? ecmwf.hourly.precipitation_probability[i] : null;
             point.feelsLike = ecmwf.hourly.apparent_temperature ? ecmwf.hourly.apparent_temperature[i] : null;
             point.rh = ecmwf.hourly.relative_humidity_2m ? ecmwf.hourly.relative_humidity_2m[i] : null;
@@ -267,8 +272,10 @@ export function blendForecasts(
             point.clouds = ecmwf.hourly.cloud_cover ? ecmwf.hourly.cloud_cover[i] : null;
 
             let ecmwfFL = ecmwf.hourly.freezing_level_height ? ecmwf.hourly.freezing_level_height[i] : null;
-            if (ecmwfFL == null && location && typeof location.elevationM === 'number' && point.temperature != null) {
-                ecmwfFL = location.elevationM + (point.temperature * (1000 / 6.5));
+            const ecmwfElevationM = ecmwf.requestMetadata?.requestedElevationM
+                ?? (typeof location.elevationM === 'number' ? location.elevationM : null);
+            if (ecmwfFL == null && ecmwfElevationM != null && point.temperature != null) {
+                ecmwfFL = ecmwfElevationM + (point.temperature * (1000 / 6.5));
             }
 
             if (ecmwfFL != null) {
@@ -303,7 +310,7 @@ export function blendForecasts(
             point.layers = extractLayers(ecmwf, i);
         }
 
-        point.provenance = forecastProvenance(pointSource, pointSource === hrrr ? hrrrIdx : i);
+        point.provenance = forecastProvenance(pointSource, pointSource === hrrr ? hrrrIdx : i, returnedTimeStepMinutes);
         rawHourly.push(point);
     }
 
@@ -328,11 +335,19 @@ export function blendForecasts(
             const meanRainMm = memberResults.reduce((sum, result) => sum + result.rainMm, 0) / memberResults.length;
             const meanSnowFraction = memberResults.reduce((sum, result) => sum + result.snowFraction, 0) / memberResults.length;
             const medianResult = [...memberResults].sort((a, b) => a.freshSnowCm - b.freshSnowCm)[Math.floor(memberResults.length / 2)];
-            const meanDepthM = memberHours.reduce((sum, memberHour) => sum + (memberHour.snowDepth ?? 0), 0) / memberHours.length;
+            const modeledDepths = memberHours.map(memberHour => memberHour.modeledSnowpackDepthM);
+            const providerDepths = memberHours
+                .map(memberHour => memberHour.providerSnowDepthM)
+                .filter((depth): depth is number => depth !== null);
+            const meanModeledDepthM = modeledDepths.reduce((sum, depth) => sum + depth, 0) / modeledDepths.length;
+            const meanProviderDepthM = providerDepths.length > 0
+                ? providerDepths.reduce((sum, depth) => sum + depth, 0) / providerDepths.length
+                : null;
 
             hour.snowfall = ensembleSnowfall.meanSnowCm;
             hour.slr = meanFrozenSweMm > 0 ? (ensembleSnowfall.meanSnowCm * 10) / meanFrozenSweMm : null;
-            hour.snowDepth = meanDepthM;
+            hour.modeledSnowpackDepthM = meanModeledDepthM;
+            hour.providerSnowDepthM = meanProviderDepthM;
             hour.snowfallResult = medianResult;
             hour.snowFraction = meanSnowFraction;
             hour.frozenSweMm = meanFrozenSweMm;
@@ -396,7 +411,9 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
                 models: new Set(),
                 hourly: [],
                 windows: [],
-                snowDepthValues: [],
+                providerSnowDepthValuesM: [],
+                modeledSnowpackDepthValuesM: [],
+                modeledSnowpackHorizonStart: hourly[0]?.time,
                 snowLayersOnGround: [],
                 minTemp: 100,
                 maxTemp: -100,
@@ -410,7 +427,8 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
         days[dateStr].models.add(point.model);
         if (point.snowfall > 0) days[dateStr].totalSnowfall += point.snowfall;
         if (point.precipitation > 0) days[dateStr].totalPrecipitation += point.precipitation;
-        if (point.snowDepth != null) days[dateStr].snowDepthValues.push(point.snowDepth);
+        if (point.providerSnowDepthM != null) days[dateStr].providerSnowDepthValuesM.push(point.providerSnowDepthM);
+        days[dateStr].modeledSnowpackDepthValuesM.push(point.modeledSnowpackDepthM);
         if (point.snowpackStep) days[dateStr].snowLayersOnGround = point.snowpackStep.layers;
 
         if (point.temperature != null) {
@@ -426,8 +444,14 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
     const result = Object.values(days).sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 
     result.forEach(day => {
-        const lastDepth = day.snowDepthValues.length ? day.snowDepthValues[day.snowDepthValues.length - 1] : null;
-        day.snowDepth = lastDepth != null ? (lastDepth * 100).toFixed(0) + ' cm' : '--';
+        const lastProviderDepth = day.providerSnowDepthValuesM.length
+            ? day.providerSnowDepthValuesM[day.providerSnowDepthValuesM.length - 1]
+            : null;
+        const lastModeledDepth = day.modeledSnowpackDepthValuesM.length
+            ? day.modeledSnowpackDepthValuesM[day.modeledSnowpackDepthValuesM.length - 1]
+            : null;
+        day.providerSnowDepth = lastProviderDepth != null ? `${(lastProviderDepth * 100).toFixed(0)} cm` : '--';
+        day.modeledRollingSnowpackDepth = lastModeledDepth != null ? `${(lastModeledDepth * 100).toFixed(0)} cm` : '--';
 
         for (let i = 0; i < 8; i++) {
             day.windows.push({
@@ -535,8 +559,8 @@ export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteo
 /**
  * Calculates rolling snowfall and SLR for the last 24 and 48 hours relative to a reference time.
  */
-export function calculateRollingStats(allHourly: BlendedHour[], nowISO: string): RollingStats {
-    const nowTs = new Date(nowISO).getTime();
+export function calculateRollingStats(allHourly: BlendedHour[], referenceInstantMs: number): RollingStats {
+    const nowTs = referenceInstantMs;
     const ts24 = nowTs - 24 * 60 * 60 * 1000;
     const ts48 = nowTs - 48 * 60 * 60 * 1000;
 
@@ -548,12 +572,12 @@ export function calculateRollingStats(allHourly: BlendedHour[], nowISO: string):
     };
 
     const h24 = allHourly.filter(h => {
-        const t = new Date(h.time).getTime();
+        const t = h.instantMs;
         return t <= nowTs && t > ts24;
     });
 
     const h48 = allHourly.filter(h => {
-        const t = new Date(h.time).getTime();
+        const t = h.instantMs;
         return t <= nowTs && t > ts48;
     });
 

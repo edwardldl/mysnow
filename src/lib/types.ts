@@ -87,8 +87,12 @@ export interface Location {
 }
 
 export interface BlendedHour {
+    /** Provider-local timestamp, kept for labels and resort-local day grouping. */
     time: string;
+    /** Absolute instant derived from `time` with `providerTimezone`. */
+    instantMs: number;
     dateObj: Date;
+    providerTimezone: string;
     model: string;
     precipitation: number;
     liquidMM: number;
@@ -96,7 +100,10 @@ export interface BlendedHour {
     dewPoint: number | null;
     windSpeed: number | null;
     windDir: number | null;
-    snowDepth: number | null;
+    /** Provider/model total snow depth in metres. */
+    providerSnowDepthM: number | null;
+    /** MySnow rolling layer-model depth in metres, initialized at the response horizon. */
+    modeledSnowpackDepthM: number;
     precipChance: number | null;
     feelsLike: number | null;
     rh: number | null;
@@ -187,8 +194,11 @@ export interface DayData {
     modelString?: string;
     hourly: BlendedHour[];
     windows: WindowData[];
-    snowDepthValues: number[];
-    snowDepth?: string;
+    providerSnowDepthValuesM: number[];
+    modeledSnowpackDepthValuesM: number[];
+    providerSnowDepth?: string;
+    modeledRollingSnowpackDepth?: string;
+    modeledSnowpackHorizonStart?: string;
     snowLayersOnGround: SnowLayer[];
     maxHourlySnowfall?: number;
     maxWindowSnowfall?: number;
@@ -207,4 +217,8 @@ export interface WeatherDataResult {
     location: Location;
     mode: string;
     status: WeatherDataStatus;
+    /** Time the provider response was fetched, also used as the cache timestamp. */
+    fetchedAtMs: number;
+    /** Age at the moment this result was read from cache; zero for a network response. */
+    cacheAgeMs: number;
 }

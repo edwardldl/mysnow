@@ -1,4 +1,5 @@
 import type { BlendedHour, DayData, Location } from '../../types';
+import { nextResortOpening } from '../../time';
 import { evolveToOpening } from '../snowpack/opening';
 import type { PhaseDistribution, Quantiles } from '../types';
 import { assessDrift } from '../terrain/drift';
@@ -88,33 +89,68 @@ function circularMean(values: Array<number | null>): number | null {
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 }
 
-function nextOpeningTime(date: string): string {
-  const nextDay = new Date(`${date}T00:00:00Z`);
-  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-  return `${nextDay.toISOString().slice(0, 10)}T08:00`;
+interface IntervalEvolution {
+  freshDepthCm: number;
+  openingDepthCm: number;
+  openingSweMm: number;
+  settlementCm: number;
+  windCompactionOrLossCm: number;
+  meltDepthCm: number;
 }
 
-function referenceForecast(point: ResortReferencePoint, day: DayData): ReferencePointForecast {
+function evolveHourlySnowToOpening(
+  hourly: BlendedHour[],
+  openingInstantMs: number,
+  options: { exposed: boolean; sweScale?: number; slrScale?: number },
+): IntervalEvolution {
+  return hourly.reduce<IntervalEvolution>((totals, hour) => {
+    const frozenSweMm = hour.frozenSweMm ?? 0;
+    if (frozenSweMm <= 0) return totals;
+    const evolved = evolveToOpening({
+      frozenSweMm: frozenSweMm * (options.sweScale ?? 1),
+      freshSlr: (hour.slr ?? 10) * (options.slrScale ?? 1),
+      elapsedHours: Math.max(0, (openingInstantMs - hour.instantMs) / 3_600_000),
+      meanTemperatureC: hour.temperature ?? 0,
+      meanWindSpeedMs: hour.windSpeed ?? 0,
+      exposed: options.exposed,
+    });
+    totals.freshDepthCm += evolved.freshDepthCm;
+    totals.openingDepthCm += evolved.state.depthCm;
+    totals.openingSweMm += evolved.state.sweMm;
+    totals.settlementCm += evolved.settlementCm;
+    totals.windCompactionOrLossCm += evolved.windCompactionOrLossCm;
+    totals.meltDepthCm += evolved.meltDepthCm;
+    return totals;
+  }, {
+    freshDepthCm: 0,
+    openingDepthCm: 0,
+    openingSweMm: 0,
+    settlementCm: 0,
+    windCompactionOrLossCm: 0,
+    meltDepthCm: 0,
+  });
+}
+
+function weightedSlr(hours: BlendedHour[]): number | null {
+  const totalSwe = hours.reduce((sum, hour) => sum + Math.max(0, hour.frozenSweMm ?? 0), 0);
+  if (totalSwe <= 0) return null;
+  return hours.reduce((sum, hour) => sum + (hour.slr ?? 10) * Math.max(0, hour.frozenSweMm ?? 0), 0) / totalSwe;
+}
+
+function referenceForecast(point: ResortReferencePoint, day: DayData, openingInstantMs: number): ReferencePointForecast {
   const freshSnowCm = sumFreshSnowQuantiles(day);
   const frozenSweMm = sumFrozenSweQuantiles(day);
   const isComparison = day.hourly.some(hour => hour.snowfallResult?.method === 'open_meteo_snowfall');
   const medianSlr = !isComparison && frozenSweMm.p50 > 0 ? freshSnowCm.p50 * 10 / frozenSweMm.p50 : null;
-  const evolution = evolveToOpening({
-    frozenSweMm: frozenSweMm.p50,
-    freshSlr: medianSlr ?? 10,
-    elapsedHours: 8,
-    meanTemperatureC: mean(day.hourly.map(hour => hour.temperature)),
-    meanWindSpeedMs: mean(day.hourly.map(hour => hour.windSpeed)),
-    exposed: false,
-  });
-  const remainingFraction = freshSnowCm.p50 > 0 ? evolution.state.depthCm / freshSnowCm.p50 : 1;
+  const evolution = evolveHourlySnowToOpening(day.hourly, openingInstantMs, { exposed: false });
+  const remainingFraction = freshSnowCm.p50 > 0 ? evolution.openingDepthCm / freshSnowCm.p50 : 1;
   return {
     point,
     freshSnowCm,
     frozenSweMm,
     openingSnowCm: isComparison ? { p10: 0, p50: 0, p90: 0 } : {
         p10: freshSnowCm.p10 * remainingFraction * 0.9,
-        p50: evolution.state.depthCm,
+        p50: evolution.openingDepthCm,
         p90: freshSnowCm.p90 * Math.min(1, remainingFraction * 1.08),
       },
     phase: precipitationWeightedPhase(day.hourly),
@@ -165,25 +201,33 @@ export function buildResortSnowForecasts(
       return day ? [{ input: reference, day }] : [];
     });
     if (available.length === 0) continue;
-    const referencePoints = available.map(({ input, day }) => referenceForecast(input.point, day));
+    const timeZone = location.timezone || available[0].day.hourly[0]?.providerTimezone || 'UTC';
+    const opening = nextResortOpening(date, timeZone);
+    const referencePoints = available.map(({ input, day }) => referenceForecast(input.point, day, opening.epochMs));
     const comparisonOnly = available.every(({ day }) => day.hourly.some(hour => hour.snowfallResult?.method === 'open_meteo_snowfall'));
     const allHours = available.flatMap(({ day }) => day.hourly);
     const windFromDeg = circularMean(allHours.map(hour => hour.windDir));
     const meanWindSpeedMs = mean(allHours.map(hour => hour.windSpeed));
-    const meanTemperatureC = mean(allHours.map(hour => hour.temperature));
     const baselines: TerrainBaseline[] = slopeUnits.map(unit => ({ unit, ...interpolateReference(referencePoints, unit.meanElevationM) }));
     const deposited = comparisonOnly ? [] : distributeTerrainSnow(baselines, windFromDeg);
     const slopeForecasts: SlopeUnitForecast[] = deposited.map(deposition => {
-      const evolution = evolveToOpening({
-        frozenSweMm: deposition.depositedFrozenSweMm,
-        freshSlr: baselines.find(baseline => baseline.unit.id === deposition.unit.id)?.freshSlr ?? 10,
-        elapsedHours: 8,
-        meanTemperatureC,
-        meanWindSpeedMs,
+      const baseline = baselines.find(candidate => candidate.unit.id === deposition.unit.id);
+      const source = available.reduce((closest, candidate) => (
+        Math.abs(candidate.input.point.elevationM - deposition.unit.meanElevationM)
+          < Math.abs(closest.input.point.elevationM - deposition.unit.meanElevationM)
+          ? candidate
+          : closest
+      ), available[0]);
+      const sourceSweMm = source.day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
+      const sourceSlr = weightedSlr(source.day.hourly) ?? 10;
+      const targetSlr = baseline?.freshSlr ?? 10;
+      const evolution = evolveHourlySnowToOpening(source.day.hourly, opening.epochMs, {
         exposed: deposition.unit.exposure === 'exposed',
+        sweScale: sourceSweMm > 0 ? deposition.depositedFrozenSweMm / sourceSweMm : 0,
+        slrScale: sourceSlr > 0 ? targetSlr / sourceSlr : 1,
       });
       const openingScale = deposition.freshSnowCm.p50 > 0
-        ? evolution.state.depthCm / deposition.freshSnowCm.p50
+        ? evolution.openingDepthCm / deposition.freshSnowCm.p50
         : 1;
       return {
         unit: deposition.unit,
@@ -192,7 +236,7 @@ export function buildResortSnowForecasts(
         freshSnowCm: deposition.freshSnowCm,
         openingSnowCm: {
           p10: deposition.freshSnowCm.p10 * openingScale * 0.85,
-          p50: evolution.state.depthCm,
+          p50: evolution.openingDepthCm,
           p90: deposition.freshSnowCm.p90 * Math.min(1, openingScale * 1.1),
         },
         settlementCm: evolution.settlementCm,
@@ -203,7 +247,9 @@ export function buildResortSnowForecasts(
           windSpeedMs: meanWindSpeedMs,
           windFromDeg,
           exposure: deposition.unit.exposure,
-          freshSnowDensityKgM3: evolution.state.densityKgM3,
+          freshSnowDensityKgM3: evolution.openingDepthCm > 0
+            ? 100 * evolution.openingSweMm / evolution.openingDepthCm
+            : 100,
         }),
       };
     });
@@ -219,7 +265,8 @@ export function buildResortSnowForecasts(
     const phaseConfidence = Math.min(base.phase.confidence, summit.phase.confidence);
     forecasts[date] = {
       generatedAt: new Date().toISOString(),
-      openingTime: nextOpeningTime(date),
+      openingTime: opening.localTime,
+      openingTimeZone: timeZone,
       referencePoints,
       slopeUnits: slopeForecasts,
       resortSummary: {

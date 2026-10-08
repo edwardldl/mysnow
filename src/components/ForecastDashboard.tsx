@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData, WeatherDataStatus } from "@/lib/types";
 import { formatCalendarDate, getSlrColor } from "@/lib/utils";
+import { formatDataAge } from "@/lib/time";
 
 const getTimeColor = (hour: number) => {
   if (hour === 9 || hour === 16) return `hsl(45, 100%, 65%)`; // Yellow
@@ -19,9 +20,10 @@ interface ForecastDashboardProps {
   selectedDate: string | null;
   timezone?: string;
   dataStatus?: WeatherDataStatus;
+  dataFetchedAtMs?: number | null;
 }
 
-export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles', dataStatus = 'fresh' }: ForecastDashboardProps) {
+export default function ForecastDashboard({ days, isLoading, selectedDate, timezone = 'America/Los_Angeles', dataStatus = 'fresh', dataFetchedAtMs = null }: ForecastDashboardProps) {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isSyncingRef = useRef(false);
   const rafIdRef = useRef<number | null>(null);
@@ -51,6 +53,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   };
 
   const [currentHourISO, setCurrentHourISO] = React.useState<string | null>(null);
+  const [currentTimeMs, setCurrentTimeMs] = React.useState<number | null>(null);
   const [showDisplaySettings, setShowDisplaySettings] = React.useState(false);
 
   // Chart Visibility State
@@ -94,6 +97,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
         timeZone: timezone
       });
       setCurrentHourISO(`${today}T${fmt.format(now)}`);
+      setCurrentTimeMs(now.getTime());
     };
 
     updateCurrentHour();
@@ -180,12 +184,16 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
               <div className="flex items-center">
                 <span className="text-[10px] uppercase font-black text-slate-500 mr-2">Core Engine</span>
                 <span className="text-xs font-bold text-accent-cyan">{selectedDay.modelString}</span>
-                {dataStatus !== 'fresh' && (
+                {dataFetchedAtMs !== null && currentTimeMs !== null && (
                   <div className={cn(
                     "ml-2 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider",
-                    dataStatus === 'cached' ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    dataStatus === 'fresh'
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      : dataStatus === 'cached'
+                        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                        : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
                   )}>
-                    {dataStatus}
+                    {dataStatus} · {formatDataAge(currentTimeMs - dataFetchedAtMs)}
                   </div>
                 )}
               </div>
@@ -228,10 +236,17 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
           </AnimatePresence>
 
           {/* Redone Stats Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
             <StatBox label="Reference Fresh Snow" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Selected sheltered reference site" />
             <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
-            <StatBox label="Total Natural Snowpack" value={selectedDay.snowDepth || "--"} trend="Old and new snow after evolution" />
+            <StatBox label="Provider Snow Depth" value={selectedDay.providerSnowDepth || "--"} trend="Provider/model total depth" />
+            <StatBox
+              label="MySnow Rolling Pack"
+              value={selectedDay.modeledRollingSnowpackDepth || "--"}
+              trend={selectedDay.modeledSnowpackHorizonStart
+                ? `Modeled since ${selectedDay.modeledSnowpackHorizonStart.split('T')[0]}; excludes earlier base`
+                : "Forecast-horizon layers only; excludes earlier base"}
+            />
             <StatBox label="Solar Events" value={selectedDay.sunrise ? `${selectedDay.sunrise.split('T')[1].substring(0, 5)} / ${selectedDay.sunset?.split('T')[1].substring(0, 5)}` : '--'} trend="Sunrise / Sunset" />
           </div>
 

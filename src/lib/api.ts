@@ -308,18 +308,13 @@ async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
     }
 }
 
-type WeatherCacheItem = {
-    hrrrData: OpenMeteoResponse | null;
-    ecmwfData: OpenMeteoResponse;
-    ensembleMembers?: OpenMeteoResponse[];
-    location: Location;
-    mode: string;
-    timestamp: number;
-};
+type WeatherCachePayload = Omit<WeatherDataResult, 'status' | 'fetchedAtMs' | 'cacheAgeMs'>;
+type WeatherCacheItem = WeatherCachePayload & { timestamp: number };
 
-const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
+export const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
+export const STALE_IF_ERROR_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 hours
 const WEATHER_CACHE_NAMESPACE = 'mysnow_weather_cache_';
-const WEATHER_CACHE_PREFIX = `${WEATHER_CACHE_NAMESPACE}v2_`;
+const WEATHER_CACHE_PREFIX = `${WEATHER_CACHE_NAMESPACE}v3_`;
 
 function isWeatherCacheItem(value: unknown): value is WeatherCacheItem {
     if (!isRecord(value) || typeof value.timestamp !== 'number' || !Number.isFinite(value.timestamp) || typeof value.mode !== 'string') {
@@ -336,7 +331,7 @@ function isWeatherCacheItem(value: unknown): value is WeatherCacheItem {
     return hasValidHrrrData && hasValidEnsembleMembers;
 }
 
-function getCachedData(key: string, allowExpired = false): WeatherCacheItem | null {
+function getCachedData(key: string, maxAgeMs = CACHE_EXPIRATION_MS): WeatherCacheItem | null {
     if (typeof window === 'undefined') return null;
     try {
         const cached = localStorage.getItem(WEATHER_CACHE_PREFIX + key);
@@ -347,7 +342,7 @@ function getCachedData(key: string, allowExpired = false): WeatherCacheItem | nu
             return null;
         }
         const age = Date.now() - item.timestamp;
-        if (!allowExpired && age > CACHE_EXPIRATION_MS) {
+        if (age < 0 || age > maxAgeMs) {
             return null;
         }
         return item;
@@ -397,7 +392,7 @@ function evictOldestCacheEntries(neededEntries = 5): boolean {
     }
 }
 
-function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): void {
+function setCachedData(key: string, data: WeatherCachePayload): void {
     if (typeof window === 'undefined') return;
     try {
         const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
@@ -420,6 +415,25 @@ function setCachedData(key: string, data: Omit<WeatherCacheItem, 'timestamp'>): 
         }
         console.error("Error writing weather cache:", error);
     }
+}
+
+
+function cachedResult(item: WeatherCacheItem, status: 'cached' | 'stale'): WeatherDataResult {
+    const cacheAgeMs = Math.max(0, Date.now() - item.timestamp);
+    return {
+        hrrrData: item.hrrrData,
+        ecmwfData: item.ecmwfData,
+        ensembleMembers: item.ensembleMembers,
+        location: item.location,
+        mode: item.mode,
+        status,
+        fetchedAtMs: item.timestamp,
+        cacheAgeMs,
+    };
+}
+
+function freshResult(data: WeatherCachePayload): WeatherDataResult {
+    return { ...data, status: 'fresh', fetchedAtMs: Date.now(), cacheAgeMs: 0 };
 }
 
 interface EnsembleFetchData {
@@ -764,7 +778,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
     const cacheKey = `${locationKey}|${modelMode}|${elevationMode}`;
     if (!forceRefresh) {
         const cached = getCachedData(cacheKey);
-        if (cached) return { ...cached, status: 'cached' as const };
+        if (cached) return cachedResult(cached, 'cached');
     }
 
     const locs = getLocations();
@@ -802,13 +816,13 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
             updateCustomLocationMetadata(loc, data);
 
-            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match', status: 'fresh' as const };
+            const result = freshResult({ hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' });
             setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error("Error fetching Best Match data:", error);
-            const stale = getCachedData(cacheKey, true);
-            if (stale) return { ...stale, status: 'stale' as const };
+            const stale = getCachedData(cacheKey, STALE_IF_ERROR_MAX_AGE_MS);
+            if (stale) return cachedResult(stale, 'stale');
             throw error;
         }
     } else if (modelMode === 'hrrr_ecmwf') {
@@ -855,13 +869,13 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
             updateCustomLocationMetadata(loc, ecmwfData);
 
-            const result = { hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf', status: 'fresh' as const };
+            const result = freshResult({ hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' });
             setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error("Error fetching weather data:", error);
-            const stale = getCachedData(cacheKey, true);
-            if (stale) return { ...stale, status: 'stale' as const };
+            const stale = getCachedData(cacheKey, STALE_IF_ERROR_MAX_AGE_MS);
+            if (stale) return cachedResult(stale, 'stale');
             throw error;
         }
     } else {
@@ -899,13 +913,13 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 if (!res.ok) throw new Error(`ECMWF High-Res fetch failed: ${res.status}`);
                 const data = attachResponseMetadata(await res.json(), 'ecmwf', lastRunAvailabilityTime);
                 updateCustomLocationMetadata(loc, data);
-                const result = { hrrrData: null, ecmwfData: data, location: loc, mode: 'ecmwf', status: 'fresh' as const };
+                const result = freshResult({ hrrrData: null, ecmwfData: data, location: loc, mode: 'ecmwf' });
                 setCachedData(cacheKey, result);
                 return result;
             } catch (error) {
                 console.error("Error fetching ECMWF High-Res data:", error);
-                const stale = getCachedData(cacheKey, true);
-                if (stale) return { ...stale, status: 'stale' as const };
+                const stale = getCachedData(cacheKey, STALE_IF_ERROR_MAX_AGE_MS);
+                if (stale) return cachedResult(stale, 'stale');
                 throw error;
             }
         }
@@ -929,13 +943,13 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 console.timeEnd(`fetchWeatherData:${modelMode}`);
                 
                 updateCustomLocationMetadata(loc, displayData);
-                const result = { hrrrData: null, ecmwfData: displayData, ensembleMembers: members, location: loc, mode: modelMode, status: 'fresh' as const };
+                const result = freshResult({ hrrrData: null, ecmwfData: displayData, ensembleMembers: members, location: loc, mode: modelMode });
                 setCachedData(cacheKey, result);
                 return result;
             } catch (error) {
                 console.error(`Error fetching ensemble data ${omModel}:`, error);
-                const stale = getCachedData(cacheKey, true);
-                if (stale) return { ...stale, status: 'stale' as const };
+                const stale = getCachedData(cacheKey, STALE_IF_ERROR_MAX_AGE_MS);
+                if (stale) return cachedResult(stale, 'stale');
                 throw error;
             }
         }
@@ -981,13 +995,13 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
 
             updateCustomLocationMetadata(loc, data);
 
-            const result = { hrrrData: null, ecmwfData: data, location: loc, mode: modelMode, status: 'fresh' as const };
+            const result = freshResult({ hrrrData: null, ecmwfData: data, location: loc, mode: modelMode });
             setCachedData(cacheKey, result);
             return result;
         } catch (error) {
             console.error(`Error fetching ${omModel} data:`, error);
-            const stale = getCachedData(cacheKey, true);
-            if (stale) return { ...stale, status: 'stale' as const };
+            const stale = getCachedData(cacheKey, STALE_IF_ERROR_MAX_AGE_MS);
+            if (stale) return cachedResult(stale, 'stale');
             throw error;
         }
     }

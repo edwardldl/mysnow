@@ -16,6 +16,7 @@ import { DEFAULT_SLR_METHOD } from "@/lib/snow/types";
 import { DEFAULT_FORECAST_MODE } from "@/lib/snow/openmeteo/capabilities";
 import { referencePointForMode } from "@/lib/snow/resort/geometry";
 import { buildResortSnowForecasts } from "@/lib/snow/resort/forecast";
+import { providerLocalTimeToEpochMs } from "@/lib/time";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -59,6 +60,7 @@ export default function Home() {
   const [isOffline, setIsOffline] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [dataStatus, setDataStatus] = useState<WeatherDataStatus>("fresh");
+  const [dataFetchedAtMs, setDataFetchedAtMs] = useState<number | null>(null);
   const [, setNowTick] = useState(0);
 
   useEffect(() => {
@@ -166,7 +168,8 @@ export default function Home() {
       if (requestId !== latestDataRequestRef.current) return;
 
       setForecastDays(grouped);
-      setDataStatus(!cached || force ? 'fresh' : data.status);
+      setDataStatus(data.status);
+      setDataFetchedAtMs(data.fetchedAtMs);
       setLocations(getLocations()); // Refresh locations to pick up backfilled metadata (elevation, timezone)
       setIsOffline(false);
 
@@ -359,11 +362,16 @@ export default function Home() {
     // Logic: If Today, use current hour. 
     // If not Today, use start of the selected Day (to look back at preceding 24h/48h).
     const isTodaySelected = activeSelectedDate === todayStr;
-    const refTime = (isTodaySelected && mode === "forecast") ? currentHourData?.time : activeSelectedDate + "T00:00:00";
+    const timezone = locations[currentLocationId]?.timezone || 'America/Los_Angeles';
+    const referenceInstantMs = isTodaySelected && mode === "forecast"
+      ? currentHourData?.instantMs
+      : activeSelectedDate
+        ? providerLocalTimeToEpochMs(`${activeSelectedDate}T00:00`, timezone)
+        : undefined;
 
-    if (!refTime) return null;
-    return calculateRollingStats(allHourly, refTime);
-  }, [activeDays, displayData, currentHourData, activeSelectedDate, todayStr, mode]);
+    if (referenceInstantMs === undefined) return null;
+    return calculateRollingStats(allHourly, referenceInstantMs);
+  }, [activeDays, displayData, currentHourData, activeSelectedDate, todayStr, mode, locations, currentLocationId]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -473,6 +481,7 @@ export default function Home() {
                   selectedDate={activeSelectedDate}
                   timezone={locations[currentLocationId]?.timezone}
                   dataStatus={dataStatus}
+                  dataFetchedAtMs={dataFetchedAtMs}
                 />
               )}
             </motion.div>

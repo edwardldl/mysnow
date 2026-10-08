@@ -68,6 +68,7 @@ export interface SlopeUnitForecast {
 export interface ResortSnowForecast {
   generatedAt: string;
   openingTime: string;
+  openingTimeZone: string;
   referencePoints: ReferencePointForecast[];
   slopeUnits: SlopeUnitForecast[];
   resortSummary: {
