@@ -154,6 +154,9 @@ export function blendForecasts(
     const hrrrTimes = hrrr ? hrrr.hourly.time : [];
     const providerTimezone = ecmwf.timezone || location.timezone || 'UTC';
     const ecmwfInstants = providerLocalTimesToEpochMs(ecmwfTimes, providerTimezone);
+    const hrrrTimezone = hrrr?.timezone || location.timezone || providerTimezone;
+    const hrrrInstants = hrrr ? providerLocalTimesToEpochMs(hrrrTimes, hrrrTimezone) : [];
+    const hrrrIndexByInstant = new Map(hrrrInstants.map((instantMs, index) => [instantMs, index]));
     const returnedTimeStepMinutes = ecmwfInstants.length >= 2
         ? Math.max(1, Math.round((ecmwfInstants[1] - ecmwfInstants[0]) / 60_000))
         : 60;
@@ -197,7 +200,7 @@ export function blendForecasts(
         const time = ecmwfTimes[i];
         const instantMs = ecmwfInstants[i] ?? providerLocalTimeToEpochMs(time, providerTimezone);
         const dateObj = new Date(instantMs);
-        const hrrrIdx = hrrrTimes.indexOf(time);
+        const hrrrIdx = hrrrIndexByInstant.get(instantMs) ?? -1;
 
         const point: Partial<BlendedHour> = { time, instantMs, dateObj, providerTimezone };
         let pointSource = ecmwf;

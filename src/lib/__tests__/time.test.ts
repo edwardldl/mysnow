@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatDataAge,
+  isCurrentForecastHour,
   nextResortOpening,
   providerLocalTimeToEpochMs,
   providerLocalTimesToEpochMs,
@@ -51,5 +52,21 @@ describe('data age labels', () => {
     expect(formatDataAge(25_000)).toBe('less than 1 min old');
     expect(formatDataAge(12 * 60_000)).toBe('12 min old');
     expect(formatDataAge((2 * 60 + 15) * 60_000)).toBe('2 hr 15 min old');
+  });
+});
+
+
+describe('absolute current-hour matching', () => {
+  it('marks only the second repeated fall-back hour when now is in that interval', () => {
+    const instants = providerLocalTimesToEpochMs([
+      '2026-11-01T00:00',
+      '2026-11-01T01:00',
+      '2026-11-01T01:00',
+      '2026-11-01T02:00',
+    ], 'America/Los_Angeles');
+    const now = instants[2] + 30 * 60_000;
+
+    expect(isCurrentForecastHour(instants[1], now)).toBe(false);
+    expect(isCurrentForecastHour(instants[2], now)).toBe(true);
   });
 });

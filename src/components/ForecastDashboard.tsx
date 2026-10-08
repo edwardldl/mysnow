@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData, WeatherDataStatus } from "@/lib/types";
 import { formatCalendarDate, getSlrColor } from "@/lib/utils";
-import { formatDataAge } from "@/lib/time";
+import { formatDataAge, isCurrentForecastHour } from "@/lib/time";
 
 const getTimeColor = (hour: number) => {
   if (hour === 9 || hour === 16) return `hsl(45, 100%, 65%)`; // Yellow
@@ -52,7 +52,6 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
     });
   };
 
-  const [currentHourISO, setCurrentHourISO] = React.useState<string | null>(null);
   const [currentTimeMs, setCurrentTimeMs] = React.useState<number | null>(null);
   const [showDisplaySettings, setShowDisplaySettings] = React.useState(false);
 
@@ -88,22 +87,11 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   };
 
   React.useEffect(() => {
-    const updateCurrentHour = () => {
-      const now = new Date();
-      const today = now.toLocaleDateString('en-CA', { timeZone: timezone });
-      const fmt = new Intl.DateTimeFormat('en-US', {
-        hour: '2-digit',
-        hourCycle: 'h23',
-        timeZone: timezone
-      });
-      setCurrentHourISO(`${today}T${fmt.format(now)}`);
-      setCurrentTimeMs(now.getTime());
-    };
-
+    const updateCurrentHour = () => setCurrentTimeMs(Date.now());
     updateCurrentHour();
     const intervalId = window.setInterval(updateCurrentHour, 60 * 1000);
     return () => window.clearInterval(intervalId);
-  }, [timezone]);
+  }, []);
 
   const nowRef = React.useRef<HTMLDivElement>(null);
 
@@ -259,7 +247,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 <motion.div key="snow" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <HourlySnowChartFromScratch
                     day={selectedDay}
-                    currentHourISO={currentHourISO}
+                    currentTimeMs={currentTimeMs}
                     nowRef={nowRef}
                     scrollRef={(el) => {
                       scrollRefs.current[0] = el;
@@ -272,7 +260,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 <motion.div key="temp" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <HourlyTempChartFromScratch
                     day={selectedDay}
-                    currentHourISO={currentHourISO}
+                    currentTimeMs={currentTimeMs}
                     scrollRef={(el) => (scrollRefs.current[1] = el)}
                     onScroll={(e) => handleScroll(e, 1)}
                   />
@@ -282,7 +270,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 <motion.div key="wind" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <HourlyWindChartFromScratch
                     day={selectedDay}
-                    currentHourISO={currentHourISO}
+                    currentTimeMs={currentTimeMs}
                     scrollRef={(el) => (scrollRefs.current[2] = el)}
                     onScroll={(e) => handleScroll(e, 2)}
                   />
@@ -292,7 +280,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 <motion.div key="uv" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <HourlyUVChartFromScratch
                     day={selectedDay}
-                    currentHourISO={currentHourISO}
+                    currentTimeMs={currentTimeMs}
                     scrollRef={(el) => (scrollRefs.current[3] = el)}
                     onScroll={(e) => handleScroll(e, 3)}
                   />
@@ -302,7 +290,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 <motion.div key="vis" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <HourlyVisibilityChartFromScratch
                     day={selectedDay}
-                    currentHourISO={currentHourISO}
+                    currentTimeMs={currentTimeMs}
                     scrollRef={(el) => (scrollRefs.current[4] = el)}
                     onScroll={(e) => handleScroll(e, 4)}
                   />
@@ -312,7 +300,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
                 <motion.div key="telemetry" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <TelemetryRows
                     day={selectedDay}
-                    currentHourISO={currentHourISO}
+                    currentTimeMs={currentTimeMs}
                     scrollRef={(el) => (scrollRefs.current[5] = el)}
                     onScroll={(e) => handleScroll(e, 5)}
                   />
@@ -421,13 +409,13 @@ function StatBox({ label, value, trend }: { label: string, value: string, trend:
 
 interface ChartRowProps {
   day: DayData;
-  currentHourISO: string | null;
+  currentTimeMs: number | null;
   nowRef?: React.RefObject<HTMLDivElement | null>;
   scrollRef: (el: HTMLDivElement | null) => void;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
 }
 
-function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, onScroll }: ChartRowProps) {
+function HourlySnowChartFromScratch({ day, currentTimeMs, nowRef, scrollRef, onScroll }: ChartRowProps) {
   const chartHeight = 160;
   // USER: snow bar should max out at 10cm of snowfall
   const safeMax = 10;
@@ -474,7 +462,7 @@ function HourlySnowChartFromScratch({ day, currentHourISO, nowRef, scrollRef, on
             const peakText = getTimeColor(hour);
             const cumValue = cumulativeData[i];
 
-            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const isCurrent = currentTimeMs !== null && isCurrentForecastHour(h.instantMs, currentTimeMs);
 
             return (
               <div
@@ -582,7 +570,7 @@ function SnowfallDiagnostics({ day }: { day: DayData }) {
   );
 }
 
-function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+function HourlyTempChartFromScratch({ day, currentTimeMs, scrollRef, onScroll }: ChartRowProps) {
   const temps = day.hourly.map(h => h.temperature).filter(t => t !== null) as number[];
   const feels = day.hourly.map(h => h.feelsLike).filter(t => t !== null) as number[];
   const allTemps = [...temps, ...feels];
@@ -648,7 +636,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
             const peakText = getTimeColor(hour);
 
-            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const isCurrent = currentTimeMs !== null && isCurrentForecastHour(h.instantMs, currentTimeMs);
             return (
               <div
                 key={i}
@@ -737,7 +725,7 @@ function HourlyTempChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
   );
 }
 
-function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+function HourlyWindChartFromScratch({ day, currentTimeMs, scrollRef, onScroll }: ChartRowProps) {
   const chartHeight = 120;
   // Convert m/s to km/h and find max for scaling
   const getSpeedKmH = (ms: number | null) => (ms != null ? ms * 3.6 : 0);
@@ -780,7 +768,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
             const gustHeight = (gust / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const isCurrent = currentTimeMs !== null && isCurrentForecastHour(h.instantMs, currentTimeMs);
             const peakText = getTimeColor(hour);
 
             return (
@@ -859,7 +847,7 @@ function HourlyWindChartFromScratch({ day, currentHourISO, scrollRef, onScroll }
   );
 }
 
-function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+function HourlyUVChartFromScratch({ day, currentTimeMs, scrollRef, onScroll }: ChartRowProps) {
   const chartHeight = 100;
   const safeMax = 12; // Standard UV scale usually goes up to 11+
 
@@ -911,7 +899,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
             const height = (Math.min(uv, safeMax) / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const isCurrent = currentTimeMs !== null && isCurrentForecastHour(h.instantMs, currentTimeMs);
             const peakText = getTimeColor(hour);
 
             return (
@@ -970,7 +958,7 @@ function HourlyUVChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: 
   );
 }
 
-function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onScroll }: ChartRowProps) {
+function HourlyVisibilityChartFromScratch({ day, currentTimeMs, scrollRef, onScroll }: ChartRowProps) {
   const chartHeight = 100;
   const safeMax = 25; // Max visibility usually around 24km (15 miles)
 
@@ -1006,7 +994,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
             const height = (Math.min(visKm, safeMax) / safeMax) * chartHeight;
 
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const isCurrent = currentTimeMs !== null && isCurrentForecastHour(h.instantMs, currentTimeMs);
             const peakText = getTimeColor(hour);
 
             return (
@@ -1062,7 +1050,7 @@ function HourlyVisibilityChartFromScratch({ day, currentHourISO, scrollRef, onSc
   );
 }
 
-function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayData, currentHourISO: string | null, scrollRef: (el: HTMLDivElement | null) => void, onScroll: (e: React.UIEvent<HTMLDivElement>) => void }) {
+function TelemetryRows({ day, currentTimeMs, scrollRef, onScroll }: { day: DayData, currentTimeMs: number | null, scrollRef: (el: HTMLDivElement | null) => void, onScroll: (e: React.UIEvent<HTMLDivElement>) => void }) {
 
   return (
     <div className="flex flex-col gap-1">
@@ -1082,7 +1070,7 @@ function TelemetryRows({ day, currentHourISO, scrollRef, onScroll }: { day: DayD
         >
           {day.hourly.map((h, i) => {
             const hour = parseInt(h.time.split('T')[1].split(':')[0]);
-            const isCurrent = currentHourISO && h.time.startsWith(currentHourISO);
+            const isCurrent = currentTimeMs !== null && isCurrentForecastHour(h.instantMs, currentTimeMs);
             const peakText = getTimeColor(hour);
 
             return (

@@ -6,8 +6,13 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    // Existing effects deliberately hydrate/reset client-only state; refactoring them is
-    // outside this security patch and can change persistence/request-cancellation behavior.
+    // These existing client-only hydration/reset effects predate the Next 16.4 preset.
+    // Keep the compatibility exception confined to the three known persistence files.
+    files: [
+      "src/app/page.tsx",
+      "src/components/ForecastDashboard.tsx",
+      "src/components/HistorySection.tsx",
+    ],
     rules: { "react-hooks/set-state-in-effect": "off" },
   },
   // Override default ignores of eslint-config-next.

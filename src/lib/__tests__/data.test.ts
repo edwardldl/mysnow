@@ -105,3 +105,40 @@ describe('snowpack semantics', () => {
     expect(grouped[0].modeledSnowpackHorizonStart).toBe('2026-01-15T12:00');
   });
 });
+
+
+describe('provider-local model blending', () => {
+  it('matches repeated fall-back hours by absolute instant rather than the duplicate wall-clock label', () => {
+    const times = [
+      '2026-11-01T00:00',
+      '2026-11-01T01:00',
+      '2026-11-01T01:00',
+      '2026-11-01T02:00',
+    ];
+    const makeRepeatedResponse = (temperatures: number[]) => {
+      const data = response(2499);
+      data.hourly = {
+        ...data.hourly,
+        time: times,
+        temperature_2m: temperatures,
+        precipitation: [0, 0, 0, 0],
+        snowfall: [0, 0, 0, 0],
+        snow_depth: [2.4, 2.4, 2.4, 2.4],
+        relative_humidity_2m: [90, 90, 90, 90],
+        surface_pressure: [750, 750, 750, 750],
+      };
+      return data;
+    };
+
+    const forecast = blendForecasts(
+      makeRepeatedResponse([10, 11, 12, 13]),
+      makeRepeatedResponse([-10, -11, -12, -13]),
+      location,
+      'fixed_10',
+      'hrrr_ecmwf',
+    );
+
+    expect(forecast.hourly.map(hour => hour.temperature)).toEqual([10, 11, 12, 13]);
+    expect(forecast.hourly[2].instantMs - forecast.hourly[1].instantMs).toBe(3_600_000);
+  });
+});

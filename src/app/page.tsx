@@ -16,7 +16,7 @@ import { DEFAULT_SLR_METHOD } from "@/lib/snow/types";
 import { DEFAULT_FORECAST_MODE } from "@/lib/snow/openmeteo/capabilities";
 import { referencePointForMode } from "@/lib/snow/resort/geometry";
 import { buildResortSnowForecasts } from "@/lib/snow/resort/forecast";
-import { providerLocalTimeToEpochMs } from "@/lib/time";
+import { isCurrentForecastHour, providerLocalTimeToEpochMs } from "@/lib/time";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -61,10 +61,12 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [dataStatus, setDataStatus] = useState<WeatherDataStatus>("fresh");
   const [dataFetchedAtMs, setDataFetchedAtMs] = useState<number | null>(null);
-  const [, setNowTick] = useState(0);
+  const [currentTimeMs, setCurrentTimeMs] = useState<number | null>(null);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => setNowTick(tick => tick + 1), 60 * 1000);
+    const updateCurrentTime = () => setCurrentTimeMs(Date.now());
+    updateCurrentTime();
+    const intervalId = window.setInterval(updateCurrentTime, 60 * 1000);
     return () => window.clearInterval(intervalId);
   }, []);
 
@@ -265,39 +267,20 @@ export default function Home() {
     }
   };
 
-  const timeInfo = (() => {
-    const now = new Date();
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      hourCycle: 'h23',
-      timeZone: locations[currentLocationId]?.timezone || 'America/Los_Angeles'
-    });
-
-    const parts = fmt.formatToParts(now);
-    const y = parts.find(p => p.type === 'year')?.value;
-    const m = parts.find(p => p.type === 'month')?.value;
-    const d = parts.find(p => p.type === 'day')?.value;
-    const h = parts.find(p => p.type === 'hour')?.value;
-
-    return {
-      currentHourISO: `${y}-${m}-${d}T${h}:00`,
-      todayStr: `${y}-${m}-${d}`
-    };
-  })();
-
-  const { currentHourISO, todayStr } = timeInfo;
+  const todayStr = new Date().toLocaleDateString('en-CA', {
+    timeZone: locations[currentLocationId]?.timezone || 'America/Los_Angeles',
+  });
 
   // Find current hour data for the header
   const currentHourData = React.useMemo(() => {
     if (forecastDays.length === 0) return null;
 
-    // Search across all days for the current hour
+    // Search across all days by absolute instant so a repeated DST hour is unambiguous.
     let found = null;
     for (const day of forecastDays) {
-      found = day.hourly.find(pt => pt.time.startsWith(currentHourISO));
+      found = currentTimeMs === null
+        ? null
+        : day.hourly.find(pt => isCurrentForecastHour(pt.instantMs, currentTimeMs));
       if (found) break;
     }
 
@@ -308,7 +291,7 @@ export default function Home() {
     }
 
     return found;
-  }, [forecastDays, currentHourISO, todayStr]);
+  }, [forecastDays, currentTimeMs, todayStr]);
 
   const activeDays = mode === "forecast" ? forecastDays : historyDays;
   const activeSelectedDate = mode === "forecast" ? selectedDate : historySelectedDate;

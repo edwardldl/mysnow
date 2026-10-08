@@ -128,3 +128,8 @@ export function formatDataAge(ageMs: number): string {
   const minutes = totalMinutes % 60;
   return minutes === 0 ? `${hours} hr old` : `${hours} hr ${minutes} min old`;
 }
+
+/** True only for the absolute forecast interval containing the supplied instant. */
+export function isCurrentForecastHour(hourInstantMs: number, currentTimeMs: number): boolean {
+  return currentTimeMs >= hourInstantMs && currentTimeMs < hourInstantMs + 3_600_000;
+}
