@@ -49,3 +49,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# HRRR dataset: commit outputs, never the resumable API cache
+!/data/hrrr-dataset/
+!/data/hrrr-dataset/**
+/data/hrrr-dataset/cache/

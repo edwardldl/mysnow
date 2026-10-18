@@ -12,6 +12,8 @@ from .evaluation import evaluate_rockies_station_temporal_holdout, evaluate_temp
 from .forecast_snapshot import SNAPSHOT_MODELS, run_snapshots
 from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
 from .ghcn_track import ingest_ghcn
+from .hrrr_dataset import OBS_START_DEFAULT as HRRR_OBS_START_DEFAULT
+from .hrrr_dataset import build_dataset as build_hrrr_dataset
 from .io import read_rows
 from .profiles import backfill_openmeteo_multistation_profiles, backfill_openmeteo_profiles
 from .sierra import SierraImportConfig, import_sierra_ghcn_directory, write_sierra_import
@@ -483,6 +485,28 @@ def _track_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _build_hrrr_dataset(args: argparse.Namespace) -> int:
+    report = build_hrrr_dataset(
+        ski_areas_path=args.ski_areas,
+        dataset_dir=args.dataset_dir,
+        obs_start=date.fromisoformat(args.obs_start) if args.obs_start else HRRR_OBS_START_DEFAULT,
+        obs_end=date.fromisoformat(args.obs_end) if args.obs_end else date.today(),
+        awdb_interval_s=args.awdb_interval,
+        open_meteo_interval_s=args.open_meteo_interval,
+    )
+    print(json.dumps({
+        "stations": report["stations"]["count"],
+        "rows": report["output"]["total_rows"],
+        "rowsByWaterYear": report["output"]["rows_by_water_year"],
+        "qcPassedEventDays": report["output"]["qc_passed_event_days"],
+        "awdbRequests": report["requests"]["awdb"]["logical_requests"],
+        "openMeteoRequests": report["requests"]["open_meteo"]["logical_requests"],
+        "failedChunks": len(report["observations"]["failed_chunks"]) + len(report["hrrr"]["failed_chunks"]),
+        "elapsedSeconds": report["elapsed_seconds"],
+    }, sort_keys=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -692,6 +716,18 @@ def build_parser() -> argparse.ArgumentParser:
     track_run.add_argument("--water-years", type=int, default=2)
     track_run.add_argument("--coefficients", type=Path, default=Path("src/lib/snow/calibration/coefficients.ts"))
     track_run.set_defaults(func=_track_run)
+
+    hrrr_dataset = subparsers.add_parser(
+        "build-hrrr-dataset",
+        help="build the daily SNOTEL observations + HRRR forecast dataset for near-resort stations (rate-limited, resumable)",
+    )
+    hrrr_dataset.add_argument("--dataset-dir", type=Path, default=Path("data/hrrr-dataset"))
+    hrrr_dataset.add_argument("--ski-areas", type=Path, default=Path("src/data/ski-areas.json"))
+    hrrr_dataset.add_argument("--obs-start", default="2023-10-01")
+    hrrr_dataset.add_argument("--obs-end", help="YYYY-MM-DD; default today")
+    hrrr_dataset.add_argument("--awdb-interval", type=float, default=1.5)
+    hrrr_dataset.add_argument("--open-meteo-interval", type=float, default=2.0)
+    hrrr_dataset.set_defaults(func=_build_hrrr_dataset)
 
     return parser
 
