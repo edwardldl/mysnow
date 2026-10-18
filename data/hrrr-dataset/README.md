@@ -1,45 +1,76 @@
 # Daily SNOTEL observations + HRRR forecast dataset
 
 One row per station-day joining **observed** snow (USDA AWDB SNOTEL daily
-data) with **forecast** snow (NOAA HRRR via the Open-Meteo historical
-forecast archive) for the 499 active SNOTEL stations whose nearest ski
-area in `src/data/ski-areas.json` is within 25 km.
+data) with **forecast** snow (NOAA HRRR, extracted directly from NOAA's
+operational GRIB2 archive on AWS) for the 499 active SNOTEL stations
+whose nearest ski area in `src/data/ski-areas.json` is within 25 km.
 
 Built by `mysnow-slr-calibration build-hrrr-dataset`
-(`training/slr_calibration/src/slr_calibration/hrrr_dataset.py`).
-`validation_report.json` next to this file is the machine-readable report
-of the build that produced the committed Parquet.
+(`training/slr_calibration/src/slr_calibration/hrrr_dataset.py`);
+forecasts are populated by `extract-noaa-months`
+(`training/slr_calibration/src/slr_calibration/noaa_hrrr.py`).
+`validation_report.json` next to this file is the machine-readable
+report of the build that produced the committed Parquet.
 
 ## Status of this build (2026-10-18) — read first
 
 - **Observations: complete.** All 499 stations, 2023-10-01 → 2026-10-18
-  (370/370 AWDB chunks fetched and cached).
-- **HRRR forecasts: partial.** Only the months **2024-10, 2024-11,
-  2024-12** are included (60/60 chunks). Every CONUS station-day in those
-  months has `hrrr_status = "ok"` (43,792 station-days = 476 CONUS
-  stations × 92 days, 100% coverage). All other station-days carry
-  `hrrr_status = "not_requested"` and null forecast fields.
-- **Why:** Open-Meteo enforces a daily request limit per egress IP
-  ("Daily API request limit exceeded. Please try again tomorrow.",
-  HTTP 429, confirmed 2026-10-18 09:37 UTC). 66 of the 500 planned
-  Open-Meteo chunks (25 locations × one month each) were fetched before
-  the limit stopped further requests; the remaining chunks were recorded
-  and skipped, never hot-looped. 6 additional cached Jan-2025 chunks are
-  already on disk in the (git-ignored) cache and will be reused.
-- **Resume (after the daily quota resets):**
+  (370/370 AWDB chunks fetched and cached; rebuilds make zero AWDB
+  requests).
+- **Forecasts (NOAA): extracted for 2024-10, 2024-11, 2024-12 so far.**
+  Every CONUS station-day in those months has `hrrr_status = "ok"`
+  (43,792 station-days = 476 CONUS stations × 92 days, 100% coverage).
+  The remaining planned months (2025-01 → 2025-05, 2025-10 → 2026-05,
+  2026-10, 2023-10 → 2024-05) are being extracted in plan order; their
+  station-days carry `hrrr_status = "not_requested"` and null forecast
+  fields until they land. Per-month extraction state (completeness,
+  files, bytes, wall time) lives in `noaa-monthly/manifest.json`.
+- **Oct 2026 caveat:** a month extraction needs GRIB cycles through the
+  day after the month ends, so 2026-10 can only complete on/after
+  2026-11-01. Cycles that already exist are fetched and cached in the
+  meantime; the manifest stays incomplete until then.
+- **Resume the campaign** (safe to repeat; completed months and files
+  are skipped from cache at zero network cost):
 
   ```
   cd /home/coder/mysnow
-  training/slr_calibration/.venv/bin/mysnow-slr-calibration build-hrrr-dataset
+  training/slr_calibration/.venv/bin/mysnow-slr-calibration extract-noaa-months
+  training/slr_calibration/.venv/bin/mysnow-slr-calibration build-hrrr-dataset --obs-end 2026-10-18
   ```
 
-  The build is fully cache-resumed: cached chunks cost zero requests, so
-  the rerun fetches only the missing months (Jan 2025 → May 2025,
-  Oct 2025 → May 2026, Oct 2026, then Oct 2023 → May 2024 — 434 chunks)
-  and rewrites the Parquet + this report for the full plan. At the
-  observed daily quota burn (~66 heavy chunks/day from this IP), the
-  remainder may itself span more than one day; each rerun is safe to
-  repeat and keeps prior progress.
+## Why the forecast source is NOAA GRIB (switched 2026-10-18)
+
+The dataset originally joined Open-Meteo historical-forecast values for
+`ncep_hrrr_conus`. Open-Meteo enforces a daily request limit per egress
+IP ("Daily API request limit exceeded. Please try again tomorrow.",
+HTTP 429, confirmed 2026-10-18 09:37 UTC): 66 of the 500 planned
+Open-Meteo chunks were fetched before the limit stopped the build,
+leaving ~7 days of quota resets for the backlog. NOAA publishes the
+HRRR output itself in the AWS Open Data bucket `noaa-hrrr-bdp-pds`
+(anonymous, no daily quota); the extractor fetches only the needed
+variables via each file's `.grib2.idx` byte ranges and decodes them
+with ecCodes — whole GRIB files are never downloaded.
+
+Before switching, December 2024 (a month Open-Meteo already covered
+completely) was extracted both ways and benchmarked — see
+`noaa-prototype/comparison_report.json` and `noaa-prototype/summary.md`:
+
+- Kuchera SLR agreement r = 0.974 (MAE 0.90); precip r = 0.910
+  (bias +1.47 mm) on 14,756 identical station-days.
+- Against SNOTEL observations (QC-passed weak-label days), daily
+  snowfall MAE tied: NOAA 6.48 cm vs Open-Meteo 6.46 cm.
+- **The snowfall quantities differ:** NOAA `fcst_snowfall_cm` is HRRR's
+  native ASNOW diagnostic differenced from its run accumulation;
+  Open-Meteo's was its hourly snowfall field. ASNOW ran +2.25 cm/day
+  higher in December 2024. They are not interchangeable — one reason
+  the dataset is uniformly single-source NOAA, with Oct–Dec 2024
+  re-extracted rather than kept from Open-Meteo.
+
+NOAA also gives exact per-run provenance: a fixed 00Z cycle at leads
+1–24 h (recorded per row), instead of the Open-Meteo archive's opaque
+run blending. The Open-Meteo fetch path remains in code
+(`build-hrrr-dataset --forecast-source open-meteo`) for reproducibility
+but no longer feeds the committed dataset.
 
 ## Files
 
@@ -52,9 +83,22 @@ of the build that produced the committed Parquet.
   spring year). 550,052 rows in this build: WY2024 179,457 · WY2025
   181,251 · WY2026 181,402 · WY2027 7,942 (Oct 1–18, 2026 only).
 - `validation_report.json` — request counts, chunk outcomes, coverage
-  and null-rate statistics for the producing build.
-- `cache/` — per-chunk API response cache (git-ignored, ~165 MB). Kept
-  in the workspace so resume runs make no redundant requests.
+  and null-rate statistics for the producing build, including
+  `forecast_source`, `hrrr.months_fed` and `hrrr.months_missing`.
+- `noaa-monthly/` — one `daily_YYYY-MM.parquet` of NOAA daily
+  aggregates per extracted month (476 CONUS stations) plus
+  `manifest.json`. Only manifest-complete months (zero failed files,
+  full 24 h on every station-day) feed the build.
+- `noaa-prototype/` — the December 2024 NOAA-vs-Open-Meteo benchmark
+  that validated the source switch (`comparison_report.json`,
+  `summary.md`, the prototype month Parquet).
+- `cache/` — per-chunk AWDB + legacy Open-Meteo response cache
+  (git-ignored, ~165 MB). Kept in the workspace so resume runs make no
+  redundant requests.
+- `noaa-cache/` — per-file extracted NOAA station point values
+  (git-ignored, ~46 MB/month) plus cached grid indices. A rerun of a
+  completed month performs zero network requests (verified on
+  2024-12: 0 requests, 0 bytes, 1,584/1,584 files from cache).
 
 ## Columns and semantics
 
@@ -82,34 +126,38 @@ fresh-snow SLR — and QC-passed days carry weight 0.25 for that reason.
 21,994 station-days pass the gates in the full observation window.
 
 Forecast (HRRR, aggregated to station-local days, see caveats):
-`fcst_snowfall_cm`, `fcst_precip_mm` (sums), `fcst_kuchera_slr`
+`fcst_snowfall_cm` (HRRR native ASNOW, differenced hourly and summed),
+`fcst_precip_mm` (APCP differenced and summed), `fcst_kuchera_slr`
 (precip-weighted daily Kuchera ratio from the exact shared
 implementation, using the HRRR pressure-level temperature/geopotential
 profile), `fcst_kuchera_hours`, `fcst_kuchera_weight_mm`,
-`fcst_t2m_mean_c` / `min` / `max`, `fcst_freezing_level_m`, and
-`hrrr_hours` (hourly records aggregated into the day, so partial
-coverage is visible). `hrrr_available` is per-station (true iff the
-station has any HRRR hours in the months included in the build);
-`hrrr_status` is per-day: `ok`, `no_coverage`, `fetch_failed`,
-`not_requested`.
+`fcst_t2m_mean_c` / `min` / `max`, and `hrrr_hours` (hourly records
+aggregated into the day, so partial coverage is visible).
+`fcst_freezing_level_m` is always null in the NOAA build (not in the
+extractor's trimmed variable set). Provenance: `hrrr_source` is
+`noaa_grib_00z` on every forecast-fed row (null when no forecast was
+fed), and `hrrr_lead_min_h` / `hrrr_lead_max_h` record the day's
+forecast-lead range (1 / 24 for full days). `hrrr_available` is
+per-station (true iff the station has any HRRR hours in the months
+included in the build); `hrrr_status` is per-day: `ok`, `no_coverage`,
+`fetch_failed`, `not_requested`.
 
 ## Caveats
 
-- **Archived-forecast provenance.** Forecast values are the archived
-  values the Open-Meteo historical-forecast API serves for
-  `ncep_hrrr_conus`. They are not a per-run operational control record;
-  treat them as "the forecast Open-Meteo archived for that valid time",
-  suitable for retrospective SLR evaluation, not as proof of what any
-  specific operational run issued.
+- **Per-run forecast provenance.** Each valid hour comes from exactly
+  one operational run: the 00Z cycle, lead 1–24 h. The dataset
+  therefore measures ~1-day-lead HRRR skill, not analysis quality, and
+  (unlike the old Open-Meteo build) the run behind every value is
+  known exactly.
 - **Fixed-offset day boundaries.** Hourly values are assigned to
   station-local days using each station's fixed AWDB `dataTimeZone`
   offset. This ignores DST transitions (≤ 1 h boundary shift on two days
   per year) and is a deliberate simplification; intervals follow the
   (t−1, t] daily convention of the underlying AWDB daily values.
-- **Season window.** HRRR is fetched only for Oct–May of each water
+- **Season window.** HRRR is extracted only for Oct–May of each water
   year (plus Oct 2026); Jun–Sep station-days are observations-only by
   design.
-- **Alaska.** HRRR is CONUS-only: the 23 AK stations keep their
+- **Alaska.** HRRR here is CONUS-only: the 23 AK stations keep their
   observations and always have `hrrr_available = false`.
 - **Reading the Parquet.** `water_year` is stored both as a column and
   as the hive partition key; a plain `pq.read_table("daily/")` can hit a
@@ -124,5 +172,12 @@ station has any HRRR hours in the months included in the build);
 - Spot-check 784:CA:SNTL (Palisades Tahoe), 2025-01-10 → 16, against the
   raw cached AWDB rows: **0 mismatches** (SWE 464.82 mm; snow depth
   1117.6 → 1092.2 mm; precip accumulation 538.48 mm).
-- Requests used by the producing (cache-only) build: AWDB 0,
-  Open-Meteo 0 — every chunk was served from cache, as designed.
+- NOAA spot-check 784:CA:SNTL, 2024-12-29 (the benchmark storm day):
+  rebuilt row reproduces the prototype exactly — snowfall 7.968 cm,
+  precip 60.1 mm, Kuchera 14.483931, leads 1/24, source
+  `noaa_grib_00z`. Days in un-extracted months carry
+  `hrrr_status = "not_requested"` with null forecast fields.
+- Requests used by the producing build: AWDB 0, Open-Meteo 0 — every
+  observation chunk was served from cache and forecasts from the
+  NOAA monthly store, as designed. Extraction accounting is in
+  `noaa-monthly/manifest.json`.

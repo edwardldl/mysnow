@@ -1,0 +1,58 @@
+{
+ "kind": "noaa_monthly_manifest",
+ "months": {
+  "2024-10": {
+   "bytes_transferred": 18714666731,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 3462,
+   "extracted_at_utc": "2026-10-18T22:53:37.983741Z",
+   "files_cached": 0,
+   "files_failed": [],
+   "files_fetched": 1584,
+   "files_planned": 1584,
+   "month": "2024-10",
+   "requests": 19027,
+   "retries": 19,
+   "station_days": 14756,
+   "wall_seconds": 2469.4
+  },
+  "2024-11": {
+   "bytes_transferred": 16561193295,
+   "complete": true,
+   "days_with_any_hours": 14280,
+   "days_with_full_24h": 14280,
+   "days_with_kuchera": 8403,
+   "extracted_at_utc": "2026-10-18T23:25:08.227243Z",
+   "files_cached": 192,
+   "files_failed": [],
+   "files_fetched": 1344,
+   "files_planned": 1536,
+   "month": "2024-11",
+   "requests": 16151,
+   "retries": 23,
+   "station_days": 14280,
+   "wall_seconds": 1878.8
+  },
+  "2024-12": {
+   "bytes_transferred": 0,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 7567,
+   "extracted_at_utc": "2026-10-18T22:12:17.218922Z",
+   "files_cached": 1584,
+   "files_failed": [],
+   "files_fetched": 0,
+   "files_planned": 1584,
+   "month": "2024-12",
+   "requests": 0,
+   "retries": 0,
+   "station_days": 14756,
+   "wall_seconds": 12.3
+  }
+ },
+ "source": "noaa_grib_00z",
+ "updated_at_utc": "2026-10-18T23:25:08.227243Z"
+}
