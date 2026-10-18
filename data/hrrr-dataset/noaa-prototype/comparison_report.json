@@ -1,0 +1,113 @@
+{
+  "backlog_extrapolation": {
+    "backlog": {
+      "blocks": 4,
+      "cycles": 673,
+      "days": 669
+    },
+    "basis_cycles_measured": 31.0,
+    "bytes_per_cycle": 604118137,
+    "estimated_backlog_bytes": 406571506266,
+    "estimated_backlog_wall_seconds_at_prototype_rate": 99500
+  },
+  "comparison": {
+    "noaa_vs_open_meteo": {
+      "kuchera_slr": {
+        "correlation": 0.9736,
+        "mae": 0.8974,
+        "mean_bias": 0.249,
+        "n": 4439
+      },
+      "precip_mm": {
+        "correlation": 0.9099,
+        "mae": 1.892,
+        "mean_bias": 1.4672,
+        "n": 14756
+      },
+      "snowfall_cm": {
+        "correlation": 0.7635,
+        "mae": 2.3796,
+        "mean_bias": 2.2538,
+        "n": 14756
+      }
+    },
+    "shared_station_days": 14756,
+    "vs_snotel_observations_qc_passed": {
+      "noaa": {
+        "correlation": 0.6023,
+        "mae": 6.4751,
+        "mean_bias": 3.2276,
+        "metric": "daily snowfall cm vs differenced SNOTEL depth change (weak labels, qc_weight 0.25)",
+        "n": 1559
+      },
+      "open_meteo": {
+        "correlation": 0.6338,
+        "mae": 6.4595,
+        "mean_bias": -6.2051,
+        "metric": "daily snowfall cm vs differenced SNOTEL depth change (weak labels, qc_weight 0.25)",
+        "n": 1559
+      }
+    }
+  },
+  "coverage": {
+    "days_with_any_hours": 14756,
+    "days_with_full_24h": 14756,
+    "days_with_kuchera": 7567,
+    "station_days": 14756
+  },
+  "cycles": [
+    "2024-11-30",
+    "2025-01-01"
+  ],
+  "files": {
+    "cached": 96,
+    "failed": [],
+    "fetched": 1488,
+    "planned": 1584
+  },
+  "generated_at_utc": "2026-10-18T20:49:28.220221Z",
+  "operations": {
+    "assembly": {
+      "missing_hours": 0,
+      "negative_clamps": 2069
+    },
+    "bytes_transferred": 18727662250,
+    "cache_bytes_on_disk": 46021521,
+    "requests": 17888,
+    "retries": 29,
+    "wall_seconds": 4583.2
+  },
+  "output_month": "2024-12",
+  "semantic_differences": [
+    "NOAA prototype: single fixed 00Z cycle, exact leads 1-24 h per day; Open-Meteo archive blends runs opaquely.",
+    "NOAA snowfall: HRRR native ASNOW differenced from run accumulation; Open-Meteo: its hourly snowfall field summed.",
+    "fcst_freezing_level_m is null in the NOAA output (not in the trimmed variable set).",
+    "Kuchera levels identical (profiles.PRESSURE_LEVELS_HPA subset of the extracted 13 levels)."
+  ],
+  "source": "NOAA HRRR, AWS Open Data bucket noaa-hrrr-bdp-pds, 00Z cycle f01-f24, wrfsfc+wrfprs",
+  "spot_check_palisades": {
+    "date": "2024-12-29",
+    "noaa": {
+      "fcst_kuchera_slr": 14.483931,
+      "fcst_precip_mm": 60.1,
+      "fcst_snowfall_cm": 7.968,
+      "fcst_t2m_mean_c": -1.7298,
+      "hrrr_hours": 24,
+      "noaa_lead_max_h": 24,
+      "noaa_lead_min_h": 1
+    },
+    "open_meteo": {
+      "fcst_kuchera_slr": 15.047126,
+      "fcst_precip_mm": 61.3,
+      "fcst_snowfall_cm": 27.51,
+      "fcst_t2m_mean_c": -2.2583,
+      "hrrr_hours": 24
+    },
+    "selection": "largest Open-Meteo fcst_snowfall_cm day for the station in the month",
+    "snotel_delta_depth_mm": -25.4,
+    "snotel_delta_swe_mm": 0.0,
+    "station_triplet": "784:CA:SNTL",
+    "weak_qc_passed": false
+  },
+  "stations": 476
+}
