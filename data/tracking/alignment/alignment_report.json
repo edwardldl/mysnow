@@ -1,0 +1,247 @@
+{
+  "alignedRowCount": 140,
+  "backfillReport": {
+    "alignedEventCount": 140,
+    "alignedStationCount": 8,
+    "byState": {
+      "CA": {
+        "alignedEventCount": 18,
+        "alignedStationCount": 1,
+        "inputEventCount": 18,
+        "inputStationCount": 1
+      },
+      "CO": {
+        "alignedEventCount": 28,
+        "alignedStationCount": 2,
+        "inputEventCount": 45,
+        "inputStationCount": 2
+      },
+      "MT": {
+        "alignedEventCount": 19,
+        "alignedStationCount": 1,
+        "inputEventCount": 26,
+        "inputStationCount": 1
+      },
+      "UT": {
+        "alignedEventCount": 19,
+        "alignedStationCount": 1,
+        "inputEventCount": 20,
+        "inputStationCount": 1
+      },
+      "WA": {
+        "alignedEventCount": 32,
+        "alignedStationCount": 2,
+        "inputEventCount": 32,
+        "inputStationCount": 2
+      },
+      "WY": {
+        "alignedEventCount": 24,
+        "alignedStationCount": 1,
+        "inputEventCount": 25,
+        "inputStationCount": 1
+      }
+    },
+    "downloadedRequestCount": 8,
+    "failedRequests": {},
+    "inputEventCount": 166,
+    "limitations": [
+      "Historical Forecast coverage is recent and model-dependent; it is not ERA5 or the original operational forecast.",
+      "The response does not identify the exact contributing best-match model, so model provenance is incomplete.",
+      "MySnow tracking 24-hour window ending at reported local observation time; each label is matched to the preceding 24 hours.",
+      "Only model-snowfall hours are used; observed events with no aligned modeled snowfall are rejected.",
+      "The requested profile lacks dew point and vertical velocity, so it supports exact MySnow Kuchera but not a true Cobb estimate."
+    ],
+    "rejectedEventCount": 26,
+    "rejectionCounts": {
+      "NO_MODEL_SNOWFALL_ALIGNMENT": 26
+    },
+    "requestedPeriod": [
+      "2025-10-14",
+      "2026-05-27"
+    ],
+    "requestedStationCount": 8,
+    "requestedStations": [
+      "1308:UT:SNTL",
+      "1326:CO:SNTL",
+      "590:MT:SNTL",
+      "689:WY:SNTL",
+      "784:CA:SNTL",
+      "791:WA:SNTL",
+      "909:WA:SNTL",
+      "US1COGN0018"
+    ],
+    "requests": [
+      {
+        "cacheFile": "1308:UT:SNTL/wy2026.json",
+        "cacheSha256": "f4b6c22aaa5ba400f7f34ca1ee298c4342c1353da16dcd5818bbd7b8c4577baa",
+        "eventCount": 20,
+        "period": "wy2026",
+        "requestEnd": "2026-04-29",
+        "requestStart": "2025-10-26",
+        "returnedElevationM": 2684.0,
+        "returnedLatitude": 40.615543,
+        "returnedLongitude": -111.6266,
+        "state": "UT",
+        "stationId": "1308:UT:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=40.5912&longitude=-111.6377&start_date=2025-10-26&end_date=2026-04-29&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "1326:CO:SNTL/wy2026.json",
+        "cacheSha256": "6bd3d65a4095f801b7ca42e06ea764a1f3e226087f821d156662d4536c4400e8",
+        "eventCount": 7,
+        "period": "wy2026",
+        "requestEnd": "2026-03-07",
+        "requestStart": "2025-12-01",
+        "returnedElevationM": 3508.0,
+        "returnedLatitude": 38.993702,
+        "returnedLongitude": -106.825096,
+        "state": "CO",
+        "stationId": "1326:CO:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=39.0007&longitude=-106.8391&start_date=2025-12-01&end_date=2026-03-07&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "590:MT:SNTL/wy2026.json",
+        "cacheSha256": "81be15bab578c21294e735cd6ef4f1a8f81183115af285a90d3fd8f16ee489b9",
+        "eventCount": 26,
+        "period": "wy2026",
+        "requestEnd": "2026-04-25",
+        "requestStart": "2025-11-23",
+        "returnedElevationM": 2690.0,
+        "returnedLatitude": 45.28656,
+        "returnedLongitude": -111.45558,
+        "state": "MT",
+        "stationId": "590:MT:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=45.2741&longitude=-111.4269&start_date=2025-11-23&end_date=2026-04-25&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "689:WY:SNTL/wy2026.json",
+        "cacheSha256": "ee58e71e75a8d8e60dbd61076d6e944986c6678ae9688bbc8aa73f932d6396b1",
+        "eventCount": 25,
+        "period": "wy2026",
+        "requestEnd": "2026-04-18",
+        "requestStart": "2025-10-26",
+        "returnedElevationM": 2503.0,
+        "returnedLatitude": 43.528606,
+        "returnedLongitude": -110.8973,
+        "state": "WY",
+        "stationId": "689:WY:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=43.5169&longitude=-110.9126&start_date=2025-10-26&end_date=2026-04-18&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "784:CA:SNTL/wy2026.json",
+        "cacheSha256": "737bc2abbb82085d2544c16bdcc02818cf5e67f557d10ffb1333174d7145de8d",
+        "eventCount": 18,
+        "period": "wy2026",
+        "requestEnd": "2026-05-29",
+        "requestStart": "2025-10-13",
+        "returnedElevationM": 2443.0,
+        "returnedLatitude": 39.180756,
+        "returnedLongitude": -120.29035,
+        "state": "CA",
+        "stationId": "784:CA:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=39.1899&longitude=-120.2658&start_date=2025-10-13&end_date=2026-05-29&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "791:WA:SNTL/wy2026.json",
+        "cacheSha256": "44c86d078e3424fe36bb9972a5440a0bdb5d3f5b792348826e46e39212d52637",
+        "eventCount": 16,
+        "period": "wy2026",
+        "requestEnd": "2026-03-15",
+        "requestStart": "2025-11-02",
+        "returnedElevationM": 1216.0,
+        "returnedLatitude": 47.765564,
+        "returnedLongitude": -121.08227,
+        "state": "WA",
+        "stationId": "791:WA:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=47.7461&longitude=-121.0929&start_date=2025-11-02&end_date=2026-03-15&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "909:WA:SNTL/wy2026.json",
+        "cacheSha256": "2d63e9ceee65b158b424c0ec2bd667b897be19b1fb04691ffaf965c78384ea17",
+        "eventCount": 16,
+        "period": "wy2026",
+        "requestEnd": "2026-04-16",
+        "requestStart": "2025-11-01",
+        "returnedElevationM": 1229.0,
+        "returnedLatitude": 48.872818,
+        "returnedLongitude": -121.81495,
+        "state": "WA",
+        "stationId": "909:WA:SNTL",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=48.8661&longitude=-121.7898&start_date=2025-11-01&end_date=2026-04-16&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      },
+      {
+        "cacheFile": "US1COGN0018/wy2026.json",
+        "cacheSha256": "006465909674461d18d3bbc222364c566620d31aa17687e23c3cbdccc2ef6094",
+        "eventCount": 38,
+        "period": "wy2026",
+        "requestEnd": "2026-05-20",
+        "requestStart": "2025-10-22",
+        "returnedElevationM": 2915.0,
+        "returnedLatitude": 38.95309,
+        "returnedLongitude": -106.99415,
+        "state": "CO",
+        "stationId": "US1COGN0018",
+        "timezone": "GMT",
+        "url": "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=38.9603&longitude=-106.9908&start_date=2025-10-22&end_date=2026-05-20&hourly=temperature_2m%2Cprecipitation%2Csnowfall%2Cfreezing_level_height%2Ctemperature_1000hPa%2Ctemperature_975hPa%2Ctemperature_950hPa%2Ctemperature_925hPa%2Ctemperature_900hPa%2Ctemperature_850hPa%2Ctemperature_800hPa%2Ctemperature_700hPa%2Ctemperature_600hPa%2Ctemperature_500hPa%2Cgeopotential_height_1000hPa%2Cgeopotential_height_975hPa%2Cgeopotential_height_950hPa%2Cgeopotential_height_925hPa%2Cgeopotential_height_900hPa%2Cgeopotential_height_850hPa%2Cgeopotential_height_800hPa%2Cgeopotential_height_700hPa%2Cgeopotential_height_600hPa%2Cgeopotential_height_500hPa&timezone=UTC",
+        "utcOffsetSeconds": 0
+      }
+    ],
+    "reusedCacheRequestCount": 0,
+    "source": {
+      "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+      "hourlyFields": [
+        "temperature_2m",
+        "precipitation",
+        "snowfall",
+        "freezing_level_height",
+        "temperature_1000hPa",
+        "temperature_975hPa",
+        "temperature_950hPa",
+        "temperature_925hPa",
+        "temperature_900hPa",
+        "temperature_850hPa",
+        "temperature_800hPa",
+        "temperature_700hPa",
+        "temperature_600hPa",
+        "temperature_500hPa",
+        "geopotential_height_1000hPa",
+        "geopotential_height_975hPa",
+        "geopotential_height_950hPa",
+        "geopotential_height_925hPa",
+        "geopotential_height_900hPa",
+        "geopotential_height_850hPa",
+        "geopotential_height_800hPa",
+        "geopotential_height_700hPa",
+        "geopotential_height_600hPa",
+        "geopotential_height_500hPa"
+      ],
+      "modelIdentification": "best-match archive; exact contributing model not exposed by response",
+      "name": "Open-Meteo Historical Forecast API"
+    },
+    "stationWaterYearRequestCount": 8
+  },
+  "eventsPath": "data/tracking/events/events.csv",
+  "inputEventCount": 166,
+  "leakageRule": "snapshot issue time must precede event end; otherwise the historical-forecast archive backfill is used",
+  "outputPath": "data/tracking/alignment/trainer_rows.csv",
+  "rejectionCounts": {
+    "BACKFILL_PROFILE_REJECTED": 26
+  },
+  "sourceCounts": {
+    "open-meteo-historical-forecast": 140
+  }
+}

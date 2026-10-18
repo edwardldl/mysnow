@@ -1,0 +1,11 @@
+pilot_name,resort_slug,catalog_name,state,timezone,climate_regime,latitude,longitude,min_elevation_m,max_elevation_m,forecast_point_ids,snotel_station_triplet,snotel_distance_km,snotel_elevation_delta_m,ghcn_station_ids
+Palisades Tahoe,palisades-tahoe,"Palisades Tahoe (app default location, src/lib/api.ts)",CA,America/Los_Angeles,sierra_maritime_mountain,39.1868,-120.2559,1889.0,2708.0,palisades-tahoe-base;palisades-tahoe-mid_mountain;palisades-tahoe-summit,784:CA:SNTL,0.915,-57.6,
+Mammoth Mountain,mammoth-mountain,Mammoth Mountain,CA,America/Los_Angeles,sierra_maritime_mountain,37.64013,-119.019104,2461.0,3365.0,mammoth-mountain-base;mammoth-mountain-mid_mountain;mammoth-mountain-summit,,,,
+Alta,alta,Alta Ski Area,UT,America/Denver,continental_mountain,40.579932,-111.622327,2605.0,3219.0,alta-base;alta-mid_mountain;alta-summit,1308:UT:SNTL,1.81,-245.0,
+Jackson Hole,jackson-hole,Jackson Hole Mountain Resort,WY,America/Denver,continental_mountain,43.603245,-110.849982,1931.0,3169.0,jackson-hole-base;jackson-hole-mid_mountain;jackson-hole-summit,689:WY:SNTL,10.848,-59.8,
+Aspen,aspen,Aspen Mountain,CO,America/Denver,continental_mountain,39.165589,-106.819323,2429.0,3438.0,aspen-base;aspen-mid_mountain;aspen-summit,1326:CO:SNTL,18.41,574.7,US1COGN0018;US1COEG0006
+Big Sky,big-sky,Big Sky Resort,MT,America/Denver,continental_mountain,45.273921,-111.419449,2080.0,3400.0,big-sky-base;big-sky-mid_mountain;big-sky-summit,590:MT:SNTL,0.585,-51.7,
+Mt. Baker,mt-baker,Mt Baker,WA,America/Los_Angeles,pnw_maritime_mountain,48.857115,-121.665157,1109.0,1554.0,mt-baker-base;mt-baker-mid_mountain;mt-baker-summit,909:WA:SNTL,9.17,-100.1,
+Stevens Pass,stevens-pass,Stevens Pass Ski Area,WA,America/Los_Angeles,pnw_maritime_mountain,47.737573,-121.09043,1168.0,1731.0,stevens-pass-base;stevens-pass-mid_mountain;stevens-pass-summit,791:WA:SNTL,0.962,-248.6,
+Stowe,stowe,Stowe Mountain Resort,VT,America/New_York,northeast_cold_orographic,44.53036,-72.788162,397.0,1109.0,stowe-base;stowe-mid_mountain;stowe-summit,,,,
+Sugarloaf,sugarloaf,Sugarloaf,ME,America/New_York,northeast_cold_orographic,45.046037,-70.31471,425.0,1268.0,sugarloaf-base;sugarloaf-mid_mountain;sugarloaf-summit,,,,

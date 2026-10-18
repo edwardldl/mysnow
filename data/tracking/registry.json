@@ -1,0 +1,535 @@
+{
+  "active_snotel_station_count": 919,
+  "awdb_stations_url": "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations",
+  "generated_for_date": "2026-10-18",
+  "resorts": [
+    {
+      "catalog_name": "Palisades Tahoe (app default location, src/lib/api.ts)",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1889.0,
+          "geometry_source": "curated",
+          "latitude": 39.1969,
+          "longitude": -120.2379,
+          "name": "Base (Granite Chief)",
+          "point_id": "palisades-tahoe-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2499.0,
+          "geometry_source": "curated",
+          "latitude": 39.1868,
+          "longitude": -120.2559,
+          "name": "Mid-mountain (Siberia Express top)",
+          "point_id": "palisades-tahoe-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2708.0,
+          "geometry_source": "curated",
+          "latitude": 39.1834,
+          "longitude": -120.2727,
+          "name": "Summit (Palisades Peak)",
+          "point_id": "palisades-tahoe-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.1868,
+      "longitude": -120.2559,
+      "match_note": "Curated app default location in src/lib/api.ts; catalog entries 'Palisades Tahoe Olympic Valley'/'Palisades Tahoe Alpine Meadows' not used.",
+      "max_elevation_m": 2708.0,
+      "min_elevation_m": 1889.0,
+      "pilot_name": "Palisades Tahoe",
+      "resort_slug": "palisades-tahoe",
+      "snotel_station": {
+        "distance_km": 0.915,
+        "elevation_delta_m": -57.6,
+        "elevation_m": 2441.4,
+        "latitude": 39.18986,
+        "longitude": -120.26576,
+        "state": "CA",
+        "station_name": "Palisades Tahoe",
+        "station_triplet": "784:CA:SNTL"
+      },
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Mammoth Mountain",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2461.0,
+          "geometry_source": "estimated",
+          "latitude": 37.64013,
+          "longitude": -119.019104,
+          "name": "Base estimate",
+          "point_id": "mammoth-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2913.0,
+          "geometry_source": "estimated",
+          "latitude": 37.64013,
+          "longitude": -119.019104,
+          "name": "Mid-mountain estimate",
+          "point_id": "mammoth-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3365.0,
+          "geometry_source": "estimated",
+          "latitude": 37.64013,
+          "longitude": -119.019104,
+          "name": "Summit estimate",
+          "point_id": "mammoth-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 37.64013,
+      "longitude": -119.019104,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California).",
+      "max_elevation_m": 3365.0,
+      "min_elevation_m": 2461.0,
+      "pilot_name": "Mammoth Mountain",
+      "resort_slug": "mammoth-mountain",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Alta Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2605.0,
+          "geometry_source": "estimated",
+          "latitude": 40.579932,
+          "longitude": -111.622327,
+          "name": "Base estimate",
+          "point_id": "alta-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2912.0,
+          "geometry_source": "estimated",
+          "latitude": 40.579932,
+          "longitude": -111.622327,
+          "name": "Mid-mountain estimate",
+          "point_id": "alta-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3219.0,
+          "geometry_source": "estimated",
+          "latitude": 40.579932,
+          "longitude": -111.622327,
+          "name": "Summit estimate",
+          "point_id": "alta-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.579932,
+      "longitude": -111.622327,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 3219.0,
+      "min_elevation_m": 2605.0,
+      "pilot_name": "Alta",
+      "resort_slug": "alta",
+      "snotel_station": {
+        "distance_km": 1.81,
+        "elevation_delta_m": -245.0,
+        "elevation_m": 2667.0,
+        "latitude": 40.59124,
+        "longitude": -111.63775,
+        "state": "UT",
+        "station_name": "Atwater",
+        "station_triplet": "1308:UT:SNTL"
+      },
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Jackson Hole Mountain Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1931.0,
+          "geometry_source": "estimated",
+          "latitude": 43.603245,
+          "longitude": -110.849982,
+          "name": "Base estimate",
+          "point_id": "jackson-hole-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2550.0,
+          "geometry_source": "estimated",
+          "latitude": 43.603245,
+          "longitude": -110.849982,
+          "name": "Mid-mountain estimate",
+          "point_id": "jackson-hole-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3169.0,
+          "geometry_source": "estimated",
+          "latitude": 43.603245,
+          "longitude": -110.849982,
+          "name": "Summit estimate",
+          "point_id": "jackson-hole-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.603245,
+      "longitude": -110.849982,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Wyoming).",
+      "max_elevation_m": 3169.0,
+      "min_elevation_m": 1931.0,
+      "pilot_name": "Jackson Hole",
+      "resort_slug": "jackson-hole",
+      "snotel_station": {
+        "distance_km": 10.848,
+        "elevation_delta_m": -59.8,
+        "elevation_m": 2490.2,
+        "latitude": 43.51687,
+        "longitude": -110.91258,
+        "state": "WY",
+        "station_name": "Phillips Bench",
+        "station_triplet": "689:WY:SNTL"
+      },
+      "state": "WY",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Aspen Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2429.0,
+          "geometry_source": "estimated",
+          "latitude": 39.165589,
+          "longitude": -106.819323,
+          "name": "Base estimate",
+          "point_id": "aspen-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2933.5,
+          "geometry_source": "estimated",
+          "latitude": 39.165589,
+          "longitude": -106.819323,
+          "name": "Mid-mountain estimate",
+          "point_id": "aspen-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3438.0,
+          "geometry_source": "estimated",
+          "latitude": 39.165589,
+          "longitude": -106.819323,
+          "name": "Summit estimate",
+          "point_id": "aspen-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [
+        {
+          "distance_km": 27.208,
+          "elevation_m": 2927.9,
+          "latitude": 38.9603,
+          "longitude": -106.9908,
+          "network": "CoCoRaHS",
+          "paired_records": 873,
+          "state": "CO",
+          "station_id": "US1COGN0018",
+          "station_name": "CRESTED BUTTE 6.2 N"
+        },
+        {
+          "distance_km": 25.442,
+          "elevation_m": 2183.6,
+          "latitude": 39.3793,
+          "longitude": -106.9249,
+          "network": "CoCoRaHS",
+          "paired_records": 228,
+          "state": "CO",
+          "station_id": "US1COEG0006",
+          "station_name": "BASALT 5.8 E"
+        }
+      ],
+      "latitude": 39.165589,
+      "longitude": -106.819323,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3438.0,
+      "min_elevation_m": 2429.0,
+      "pilot_name": "Aspen",
+      "resort_slug": "aspen",
+      "snotel_station": {
+        "distance_km": 18.41,
+        "elevation_delta_m": 574.7,
+        "elevation_m": 3508.2,
+        "latitude": 39.00074,
+        "longitude": -106.83912,
+        "state": "CO",
+        "station_name": "Castle Peak",
+        "station_triplet": "1326:CO:SNTL"
+      },
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Big Sky Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2080.0,
+          "geometry_source": "estimated",
+          "latitude": 45.273921,
+          "longitude": -111.419449,
+          "name": "Base estimate",
+          "point_id": "big-sky-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2740.0,
+          "geometry_source": "estimated",
+          "latitude": 45.273921,
+          "longitude": -111.419449,
+          "name": "Mid-mountain estimate",
+          "point_id": "big-sky-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3400.0,
+          "geometry_source": "estimated",
+          "latitude": 45.273921,
+          "longitude": -111.419449,
+          "name": "Summit estimate",
+          "point_id": "big-sky-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.273921,
+      "longitude": -111.419449,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Montana).",
+      "max_elevation_m": 3400.0,
+      "min_elevation_m": 2080.0,
+      "pilot_name": "Big Sky",
+      "resort_slug": "big-sky",
+      "snotel_station": {
+        "distance_km": 0.585,
+        "elevation_delta_m": -51.7,
+        "elevation_m": 2688.3,
+        "latitude": 45.27412,
+        "longitude": -111.42692,
+        "state": "MT",
+        "station_name": "Lone Mountain",
+        "station_triplet": "590:MT:SNTL"
+      },
+      "state": "MT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Mt Baker",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1109.0,
+          "geometry_source": "estimated",
+          "latitude": 48.857115,
+          "longitude": -121.665157,
+          "name": "Base estimate",
+          "point_id": "mt-baker-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1331.5,
+          "geometry_source": "estimated",
+          "latitude": 48.857115,
+          "longitude": -121.665157,
+          "name": "Mid-mountain estimate",
+          "point_id": "mt-baker-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1554.0,
+          "geometry_source": "estimated",
+          "latitude": 48.857115,
+          "longitude": -121.665157,
+          "name": "Summit estimate",
+          "point_id": "mt-baker-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 48.857115,
+      "longitude": -121.665157,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Washington).",
+      "max_elevation_m": 1554.0,
+      "min_elevation_m": 1109.0,
+      "pilot_name": "Mt. Baker",
+      "resort_slug": "mt-baker",
+      "snotel_station": {
+        "distance_km": 9.17,
+        "elevation_delta_m": -100.1,
+        "elevation_m": 1231.4,
+        "latitude": 48.8661,
+        "longitude": -121.78976,
+        "state": "WA",
+        "station_name": "Wells Creek",
+        "station_triplet": "909:WA:SNTL"
+      },
+      "state": "WA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Stevens Pass Ski Area",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1168.0,
+          "geometry_source": "estimated",
+          "latitude": 47.737573,
+          "longitude": -121.09043,
+          "name": "Base estimate",
+          "point_id": "stevens-pass-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1449.5,
+          "geometry_source": "estimated",
+          "latitude": 47.737573,
+          "longitude": -121.09043,
+          "name": "Mid-mountain estimate",
+          "point_id": "stevens-pass-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1731.0,
+          "geometry_source": "estimated",
+          "latitude": 47.737573,
+          "longitude": -121.09043,
+          "name": "Summit estimate",
+          "point_id": "stevens-pass-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.737573,
+      "longitude": -121.09043,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Washington).",
+      "max_elevation_m": 1731.0,
+      "min_elevation_m": 1168.0,
+      "pilot_name": "Stevens Pass",
+      "resort_slug": "stevens-pass",
+      "snotel_station": {
+        "distance_km": 0.962,
+        "elevation_delta_m": -248.6,
+        "elevation_m": 1200.9,
+        "latitude": 47.74607,
+        "longitude": -121.09288,
+        "state": "WA",
+        "station_name": "Stevens Pass",
+        "station_triplet": "791:WA:SNTL"
+      },
+      "state": "WA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Stowe Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 397.0,
+          "geometry_source": "estimated",
+          "latitude": 44.53036,
+          "longitude": -72.788162,
+          "name": "Base estimate",
+          "point_id": "stowe-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 753.0,
+          "geometry_source": "estimated",
+          "latitude": 44.53036,
+          "longitude": -72.788162,
+          "name": "Mid-mountain estimate",
+          "point_id": "stowe-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1109.0,
+          "geometry_source": "estimated",
+          "latitude": 44.53036,
+          "longitude": -72.788162,
+          "name": "Summit estimate",
+          "point_id": "stowe-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.53036,
+      "longitude": -72.788162,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1109.0,
+      "min_elevation_m": 397.0,
+      "pilot_name": "Stowe",
+      "resort_slug": "stowe",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Sugarloaf",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 425.0,
+          "geometry_source": "estimated",
+          "latitude": 45.046037,
+          "longitude": -70.31471,
+          "name": "Base estimate",
+          "point_id": "sugarloaf-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 846.5,
+          "geometry_source": "estimated",
+          "latitude": 45.046037,
+          "longitude": -70.31471,
+          "name": "Mid-mountain estimate",
+          "point_id": "sugarloaf-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1268.0,
+          "geometry_source": "estimated",
+          "latitude": 45.046037,
+          "longitude": -70.31471,
+          "name": "Summit estimate",
+          "point_id": "sugarloaf-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.046037,
+      "longitude": -70.31471,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Maine).",
+      "max_elevation_m": 1268.0,
+      "min_elevation_m": 425.0,
+      "pilot_name": "Sugarloaf",
+      "resort_slug": "sugarloaf",
+      "snotel_station": null,
+      "state": "ME",
+      "timezone": "America/New_York"
+    }
+  ],
+  "schema_version": 1,
+  "station_search_radius_km": 40.0
+}

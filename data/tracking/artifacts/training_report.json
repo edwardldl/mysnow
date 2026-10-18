@@ -1,0 +1,22 @@
+{
+  "acceptedEventCount": 140,
+  "artifactId": "regional-slr-tracking-kuchera-v1",
+  "artifactPath": "data/tracking/artifacts/tracking-candidate-v1.json",
+  "artifactVersion": "tracking-kuchera-v1",
+  "baseline": null,
+  "calibrated": null,
+  "holdoutComputable": false,
+  "holdoutNote": "Temporal holdout not computable (needs >=10 rows, a test water year with >=5 rows, and >=5 earlier-year training rows); candidate fit on all rows without holdout metrics.",
+  "input": "data/tracking/alignment/trainer_rows.csv",
+  "productionEnablement": false,
+  "rowCount": 140,
+  "split": {
+    "method": "none (insufficient data for a temporal holdout)",
+    "stationCount": 8,
+    "trainEventCount": 140,
+    "waterYears": {
+      "2026": 140
+    }
+  },
+  "status": "unvalidated"
+}

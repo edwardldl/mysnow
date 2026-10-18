@@ -1,0 +1,221 @@
+{
+  "artifactId": "regional-slr-tracking-kuchera-v1",
+  "artifactVersion": "tracking-kuchera-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "822687fffffffff": "continental_mountain",
+      "822697fffffffff": "continental_mountain",
+      "82269ffffffffff": "continental_mountain",
+      "8226b7fffffffff": "continental_mountain",
+      "822897fffffffff": "continental_mountain",
+      "8228d7fffffffff": "pnw_maritime_mountain",
+      "82298ffffffffff": "sierra_maritime_mountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "coverage": {
+    "geographicNote": "Pilot-resort tracking coverage only (Sierra, Rockies, PNW, Northeast); absent cells fall back to broader hierarchy levels. Not validated for production.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2026-05-28T00:00:00Z",
+  "methods": {
+    "kuchera": {
+      "climate": {
+        "continental_mountain": {
+          "effectiveSampleSize": 58.5484,
+          "logBias": -0.05432656,
+          "rawLogBias": -0.0821633,
+          "rawSampleCount": 90,
+          "residualStdLog": 0.45172968,
+          "shrinkageWeight": 0.66120219
+        },
+        "pnw_maritime_mountain": {
+          "effectiveSampleSize": 32.0,
+          "logBias": -0.04813253,
+          "rawLogBias": -0.09325678,
+          "rawSampleCount": 32,
+          "residualStdLog": 0.47025934,
+          "shrinkageWeight": 0.51612903
+        },
+        "sierra_maritime_mountain": {
+          "effectiveSampleSize": 18.0,
+          "logBias": -0.27403942,
+          "rawLogBias": -0.73077178,
+          "rawSampleCount": 18,
+          "residualStdLog": 0.39799617,
+          "shrinkageWeight": 0.375
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 89.7573,
+        "logBias": -0.41323213,
+        "rawLogBias": -0.55134866,
+        "rawSampleCount": 140,
+        "residualStdLog": 0.48465268,
+        "shrinkageWeight": 0.74949331
+      },
+      "local": {
+        "1308:UT:SNTL": {
+          "effectiveSampleSize": 19.0,
+          "logBias": -0.10307913,
+          "rawLogBias": -0.26583565,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.32981105,
+          "shrinkageWeight": 0.3877551
+        },
+        "1326:CO:SNTL": {
+          "effectiveSampleSize": 3.0,
+          "logBias": -0.04430991,
+          "rawLogBias": -0.487409,
+          "rawSampleCount": 3,
+          "residualStdLog": 0.09573337,
+          "shrinkageWeight": 0.09090909
+        },
+        "590:MT:SNTL": {
+          "effectiveSampleSize": 19.0,
+          "logBias": -0.06747713,
+          "rawLogBias": -0.17401997,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.45852477,
+          "shrinkageWeight": 0.3877551
+        },
+        "689:WY:SNTL": {
+          "effectiveSampleSize": 24.0,
+          "logBias": -0.08469013,
+          "rawLogBias": -0.19055279,
+          "rawSampleCount": 24,
+          "residualStdLog": 0.54431272,
+          "shrinkageWeight": 0.44444444
+        },
+        "784:CA:SNTL": {
+          "effectiveSampleSize": 18.0,
+          "logBias": -0.10704665,
+          "rawLogBias": -0.28545773,
+          "rawSampleCount": 18,
+          "residualStdLog": 0.39799617,
+          "shrinkageWeight": 0.375
+        },
+        "791:WA:SNTL": {
+          "effectiveSampleSize": 16.0,
+          "logBias": -0.04660058,
+          "rawLogBias": -0.13397668,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.40955211,
+          "shrinkageWeight": 0.34782609
+        },
+        "909:WA:SNTL": {
+          "effectiveSampleSize": 16.0,
+          "logBias": 0.02612833,
+          "rawLogBias": 0.07511896,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.47239635,
+          "shrinkageWeight": 0.34782609
+        },
+        "US1COGN0018": {
+          "effectiveSampleSize": 25.0,
+          "logBias": 0.04685319,
+          "rawLogBias": 0.10307702,
+          "rawSampleCount": 25,
+          "residualStdLog": 0.28677837,
+          "shrinkageWeight": 0.45454545
+        }
+      },
+      "region": {
+        "8426833ffffffff": {
+          "effectiveSampleSize": 3.0,
+          "logBias": -0.0487409,
+          "rawLogBias": -0.5361499,
+          "rawSampleCount": 3,
+          "residualStdLog": 0.09573337,
+          "shrinkageWeight": 0.09090909
+        },
+        "842696bffffffff": {
+          "effectiveSampleSize": 19.0,
+          "logBias": -0.16836258,
+          "rawLogBias": -0.43419823,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.32981105,
+          "shrinkageWeight": 0.3877551
+        },
+        "84269d9ffffffff": {
+          "effectiveSampleSize": 25.0,
+          "logBias": 0.08589752,
+          "rawLogBias": 0.18897454,
+          "rawSampleCount": 25,
+          "residualStdLog": 0.28677837,
+          "shrinkageWeight": 0.45454545
+        },
+        "8426b61ffffffff": {
+          "effectiveSampleSize": 24.0,
+          "logBias": -0.15244223,
+          "rawLogBias": -0.34299502,
+          "rawSampleCount": 24,
+          "residualStdLog": 0.54431272,
+          "shrinkageWeight": 0.44444444
+        },
+        "842892bffffffff": {
+          "effectiveSampleSize": 19.0,
+          "logBias": -0.11021265,
+          "rawLogBias": -0.28423262,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.45852477,
+          "shrinkageWeight": 0.3877551
+        },
+        "8428d0dffffffff": {
+          "effectiveSampleSize": 16.0,
+          "logBias": -0.07145423,
+          "rawLogBias": -0.20543091,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.40955211,
+          "shrinkageWeight": 0.34782609
+        },
+        "8428d39ffffffff": {
+          "effectiveSampleSize": 16.0,
+          "logBias": 0.04006344,
+          "rawLogBias": 0.1151824,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.47239635,
+          "shrinkageWeight": 0.34782609
+        },
+        "842989bffffffff": {
+          "effectiveSampleSize": 18.0,
+          "logBias": -0.17127463,
+          "rawLogBias": -0.45673236,
+          "rawSampleCount": 18,
+          "residualStdLog": 0.39799617,
+          "shrinkageWeight": 0.375
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2026-05-28",
+  "training": {
+    "acceptedEventCount": 140,
+    "leakageGroup": "storm_group_id",
+    "minEffectiveSampleSize": 5.0,
+    "priorEffectiveSampleSize": 30.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "d021ffc8bee07d00a0cdb23de431814c909ea7c80922c238ad79e3d72eb5ac65",
+    "sourceLabel": "MySnow tracking loop: GHCN direct SNOW+WESF labels and clearly flagged weak SNOTEL total-pack differencing labels, paired with production Kuchera baselines; research-only",
+    "stationCount": 8,
+    "target": "log(observed_slr / physical_baseline_slr)"
+  }
+}
