@@ -328,6 +328,7 @@ class BuildDatasetEndToEndTests(unittest.TestCase):
             awdb_interval_s=0.0,
             open_meteo_interval_s=0.0,
             hrrr_months=[(2025, 1)],
+            forecast_source="open-meteo",
             today=date(2026, 10, 17),
             progress=lambda _msg: None,
         )
@@ -354,6 +355,8 @@ class BuildDatasetEndToEndTests(unittest.TestCase):
             self.assertTrue(utah["hrrr_available"])
             self.assertEqual(utah["hrrr_status"], "ok")
             self.assertEqual(utah["hrrr_hours"], 24)
+            self.assertEqual(utah["hrrr_source"], "open_meteo_historical")
+            self.assertIsNone(utah["hrrr_lead_min_h"])
             self.assertAlmostEqual(utah["fcst_snowfall_cm"], 2.4)
             self.assertEqual(utah["fcst_kuchera_slr"], 12.0)
             self.assertAlmostEqual(utah["swe_mm"], (10.0 + 0.3) * INCH)
@@ -410,6 +413,7 @@ class BuildDatasetEndToEndTests(unittest.TestCase):
                 awdb_interval_s=0.0,
                 open_meteo_interval_s=0.0,
                 hrrr_months=[(2025, 1)],
+                forecast_source="open-meteo",
                 today=date(2026, 10, 17),
                 progress=lambda _msg: None,
             )

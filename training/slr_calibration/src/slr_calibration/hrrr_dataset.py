@@ -7,12 +7,26 @@ Builds one row per station-day joining:
   deltas, a differenced daily precipitation estimate, and the tracking
   loop's weak-event QC verdict (see tracking_events.evaluate_weak_candidate)
   plus the differenced observed SLR when those gates pass.
-- Open-Meteo Historical Forecast API values for ``models=ncep_hrrr_conus``
-  (the archived forecast values Open-Meteo serves, not per-run operational
-  control), aggregated from hourly to station-local days using each
-  station's fixed AWDB ``dataTimeZone`` UTC offset, including a
+- HRRR forecast values aggregated from hourly to station-local days using
+  each station's fixed AWDB ``dataTimeZone`` UTC offset, including a
   precipitation-weighted daily Kuchera SLR computed by the exact shared
   implementation in tracking_align.compute_baseline_slr.
+
+Forecast source (since 2026-10-18): NOAA HRRR GRIB2 files from the AWS
+Open Data bucket ``noaa-hrrr-bdp-pds``, extracted by
+``slr_calibration.noaa_hrrr`` (00Z cycle, f01-f24, exact per-day lead
+times) into the ``noaa-monthly/`` store that build_dataset joins.  The
+switch was made because Open-Meteo's per-IP daily quota capped the
+historical-forecast build at ~66 chunks/day (~7 days for the backlog),
+while the Dec-2024 head-to-head benchmark (data/hrrr-dataset/
+noaa-prototype/) showed parity where it matters: Kuchera r=0.974,
+precip r=0.910, and a tie on snowfall MAE against SNOTEL observations.
+The legacy Open-Meteo path (``fetch_hrrr_daily``, models=ncep_hrrr_conus
+via the historical-forecast API) is retained behind
+``forecast_source="open-meteo"`` for reproducibility; it no longer feeds
+the committed dataset.  Every row records its provenance in
+``hrrr_source`` (plus ``hrrr_lead_min_h`` / ``hrrr_lead_max_h`` for the
+NOAA source).
 
 Rate-limit discipline is a hard requirement of this module: AWDB requests
 carry at most 50 station triplets for one calendar month with >= 1.5 s
@@ -21,7 +35,9 @@ calendar month (plus/minus one padding day) with >= 2 s between requests.
 Every response is cached on disk, HTTP 429 is honored with Retry-After and
 exponential backoff, chunks that fail persistently are recorded and skipped
 (never hot-looped), and a rerun with a complete cache performs zero network
-requests.  Execution is sequential only.
+requests.  Execution is sequential only.  The NOAA extractor has no daily
+quota but keeps the same politeness discipline (byte-range requests only,
+<= 4 concurrent files, backoff retries, full point-value caching).
 """
 from __future__ import annotations
 
@@ -46,6 +62,10 @@ from .tracking_events import WEAK_QC_WEIGHT, evaluate_weak_candidate
 from .tracking_registry import AWDB_STATIONS_URL, filter_active_snotel
 
 HRRR_MODEL = "ncep_hrrr_conus"
+FORECAST_SOURCE_NOAA = "noaa"
+FORECAST_SOURCE_OPEN_METEO = "open-meteo"
+HRRR_SOURCE_NOAA = "noaa_grib_00z"
+HRRR_SOURCE_OPEN_METEO = "open_meteo_historical"
 MAX_RESORT_DISTANCE_KM = 25.0
 AWDB_BATCH_STATIONS = 50
 OPEN_METEO_BATCH_LOCATIONS = 25
@@ -74,6 +94,7 @@ DAILY_COLUMNS = [
     "fcst_kuchera_hours", "fcst_kuchera_weight_mm",
     "fcst_t2m_mean_c", "fcst_t2m_min_c", "fcst_t2m_max_c",
     "fcst_freezing_level_m",
+    "hrrr_source", "hrrr_lead_min_h", "hrrr_lead_max_h",
 ]
 
 
@@ -765,6 +786,9 @@ def _parquet_schema() -> Any:
         ("fcst_t2m_min_c", pa.float64()),
         ("fcst_t2m_max_c", pa.float64()),
         ("fcst_freezing_level_m", pa.float64()),
+        ("hrrr_source", pa.string()),
+        ("hrrr_lead_min_h", pa.int32()),
+        ("hrrr_lead_max_h", pa.int32()),
     ])
 
 
@@ -796,10 +820,13 @@ def build_dataset(
     awdb_interval_s: float = AWDB_MIN_INTERVAL_S,
     open_meteo_interval_s: float = OPEN_METEO_MIN_INTERVAL_S,
     hrrr_months: list[tuple[int, int]] | None = None,
+    forecast_source: str = FORECAST_SOURCE_NOAA,
     today: date | None = None,
     progress: Callable[[str], None] = print,
 ) -> dict[str, Any]:
     """Build the full joined dataset; returns the validation report dict."""
+    if forecast_source not in (FORECAST_SOURCE_NOAA, FORECAST_SOURCE_OPEN_METEO):
+        raise ValueError(f"unknown forecast_source: {forecast_source!r}")
     started = time.monotonic()
     today = today or date.today()
     obs_end = obs_end or today
@@ -812,12 +839,20 @@ def build_dataset(
     # --- request budget (printed before the bulk fetching starts) ---
     obs_month_count = len(months_between(obs_start, obs_end))
     plan = hrrr_months if hrrr_months is not None else hrrr_month_plan()
-    progress(
-        "Request budget: AWDB stations list <= 1 request; "
-        f"AWDB data <= {math.ceil(499 / AWDB_BATCH_STATIONS)} batches x {obs_month_count} months; "
-        f"Open-Meteo <= {math.ceil(499 / OPEN_METEO_BATCH_LOCATIONS)} batches x {len(plan)} months "
-        "(exact counts follow once the station set is known; cached chunks cost 0)."
-    )
+    if forecast_source == FORECAST_SOURCE_NOAA:
+        progress(
+            "Request budget: AWDB stations list <= 1 request; "
+            f"AWDB data <= {math.ceil(499 / AWDB_BATCH_STATIONS)} batches x {obs_month_count} months "
+            "(cached chunks cost 0). Forecast source: NOAA GRIB monthly store "
+            "(no build-time forecast requests; populate it with extract-noaa-months)."
+        )
+    else:
+        progress(
+            "Request budget: AWDB stations list <= 1 request; "
+            f"AWDB data <= {math.ceil(499 / AWDB_BATCH_STATIONS)} batches x {obs_month_count} months; "
+            f"Open-Meteo <= {math.ceil(499 / OPEN_METEO_BATCH_LOCATIONS)} batches x {len(plan)} months "
+            "(exact counts follow once the station set is known; cached chunks cost 0)."
+        )
 
     # --- station set ---
     stations_path = dataset_dir / "stations.csv"
@@ -843,11 +878,18 @@ def build_dataset(
     conus_count = sum(1 for station in stations if station["state"] != "AK")
     awdb_batches = math.ceil(len(stations) / AWDB_BATCH_STATIONS) if stations else 0
     om_batches = math.ceil(conus_count / OPEN_METEO_BATCH_LOCATIONS) if conus_count else 0
-    progress(
-        f"Planned chunks: AWDB {awdb_batches} batches x {obs_month_count} months = "
-        f"{awdb_batches * obs_month_count} requests max; Open-Meteo {om_batches} batches x "
-        f"{len(plan)} months = {om_batches * len(plan)} requests max (plus any 400-bisection retries)."
-    )
+    if forecast_source == FORECAST_SOURCE_NOAA:
+        progress(
+            f"Planned chunks: AWDB {awdb_batches} batches x {obs_month_count} months = "
+            f"{awdb_batches * obs_month_count} requests max; forecasts read from the "
+            f"noaa-monthly store for {len(plan)} planned months (no forecast requests)."
+        )
+    else:
+        progress(
+            f"Planned chunks: AWDB {awdb_batches} batches x {obs_month_count} months = "
+            f"{awdb_batches * obs_month_count} requests max; Open-Meteo {om_batches} batches x "
+            f"{len(plan)} months = {om_batches * len(plan)} requests max (plus any 400-bisection retries)."
+        )
 
     # --- observations ---
     rows_by_triplet, awdb_report = fetch_awdb_observations(
@@ -855,9 +897,42 @@ def build_dataset(
     )
 
     # --- HRRR daily aggregates ---
-    hrrr_daily, hrrr_report = fetch_hrrr_daily(stations, cache_dir, om_client, plan, progress)
     hrrr_month_set = {f"{year:04d}-{month:02d}" for year, month in plan}
-    failed_om = {f"{chunk['batch']}|{chunk['month']}" for chunk in hrrr_report["failed_chunks"]}
+    if forecast_source == FORECAST_SOURCE_NOAA:
+        # The committed dataset's forecast source: NOAA GRIB monthly
+        # store populated by extract-noaa-months.  Months not yet
+        # extracted (or not manifest-complete) feed nothing and their
+        # station-days are marked not_requested below -- partial NOAA
+        # coverage is never presented as complete.
+        from .noaa_hrrr import load_noaa_monthly_daily
+
+        hrrr_daily, noaa_report = load_noaa_monthly_daily(dataset_dir, stations, plan, progress)
+        hrrr_source_id: str | None = HRRR_SOURCE_NOAA
+        missing_forecast_months = set(noaa_report["months_missing"])
+        no_data_by_triplet: dict[str, list[str]] = {}
+        failed_om: set[str] = set()
+        hrrr_report = {
+            "planned_chunks": 0,
+            "fetched_chunks": 0,
+            "cached_chunks": 0,
+            "failed_chunks": [],
+            "stations_with_data": noaa_report["stations_with_data"],
+            "source": noaa_report["source"],
+            "months_fed": noaa_report["months_fed"],
+            "months_missing": noaa_report["months_missing"],
+        }
+    else:
+        # Legacy path (reproducibility only): Open-Meteo historical
+        # forecast archive.  No longer feeds the committed dataset.
+        hrrr_daily, om_report = fetch_hrrr_daily(stations, cache_dir, om_client, plan, progress)
+        hrrr_source_id = HRRR_SOURCE_OPEN_METEO
+        missing_forecast_months = set()
+        no_data_by_triplet = om_report["no_data_months"]
+        failed_om = {f"{chunk['batch']}|{chunk['month']}" for chunk in om_report["failed_chunks"]}
+        hrrr_report = {
+            key: om_report[key]
+            for key in ("planned_chunks", "fetched_chunks", "cached_chunks", "failed_chunks", "stations_with_data")
+        }
     failed_awdb = {f"{chunk['batch']}|{chunk['month']}" for chunk in awdb_report["failed_chunks"]}
     # Batch membership for failure attribution.
     sorted_triplets = sorted(station["station_triplet"] for station in stations)
@@ -877,7 +952,7 @@ def build_dataset(
         triplet = station["station_triplet"]
         derived = derive_station_days(station, rows_by_triplet.get(triplet, []))
         forecast_days = hrrr_daily.get(triplet, {})
-        no_data_months = set(hrrr_report["no_data_months"].get(triplet, []))
+        no_data_months = set(no_data_by_triplet.get(triplet, []))
         all_dates = sorted(set(derived) | set(forecast_days))
         for date_text in all_dates:
             day = date.fromisoformat(date_text)
@@ -894,7 +969,7 @@ def build_dataset(
                 status = "no_coverage"
             elif triplet in om_batch_of and f"{om_batch_of[triplet]}|{month_key}" in failed_om:
                 status = "fetch_failed"
-            elif month_key not in hrrr_month_set or station["state"] == "AK":
+            elif month_key not in hrrr_month_set or station["state"] == "AK" or month_key in missing_forecast_months:
                 status = "not_requested"
             else:
                 status = "no_coverage"
@@ -929,6 +1004,9 @@ def build_dataset(
                 "fcst_t2m_min_c": agg.get("fcst_t2m_min_c"),
                 "fcst_t2m_max_c": agg.get("fcst_t2m_max_c"),
                 "fcst_freezing_level_m": agg.get("fcst_freezing_level_m"),
+                "hrrr_source": hrrr_source_id if agg else None,
+                "hrrr_lead_min_h": agg.get("hrrr_lead_min_h") if agg else None,
+                "hrrr_lead_max_h": agg.get("hrrr_lead_max_h") if agg else None,
             }
             if obs is not None:
                 for column in (
@@ -967,10 +1045,8 @@ def build_dataset(
             ),
         },
         "observations": awdb_report,
-        "hrrr": {
-            key: hrrr_report[key]
-            for key in ("planned_chunks", "fetched_chunks", "cached_chunks", "failed_chunks", "stations_with_data")
-        },
+        "forecast_source": forecast_source,
+        "hrrr": hrrr_report,
         "requests": {
             "awdb": awdb_client.stats(),
             "open_meteo": om_client.stats(),

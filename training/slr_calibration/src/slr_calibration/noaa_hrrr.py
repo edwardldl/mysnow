@@ -1,14 +1,21 @@
-"""NOAA HRRR GRIB2 extractor prototype: AWS archive vs Open-Meteo aggregates.
+"""NOAA HRRR GRIB2 extractor: AWS archive as the dataset's forecast source.
 
 Motivation: the Open-Meteo historical-forecast build (hrrr_dataset.py) is
 bounded by Open-Meteo's per-IP daily quota (~66 heavy chunks/day), so the
 remaining HRRR backlog takes about a week of quota resets.  NOAA publishes
 the operational HRRR output itself, anonymously, in the AWS Open Data
-bucket ``noaa-hrrr-bdp-pds`` with no daily call quota.  This prototype
-extracts the same daily station aggregates directly from those GRIB2
-files for December 2024 -- a month the Open-Meteo dataset already covers
-completely -- and benchmarks the two sources head-to-head on identical
-station-days plus against the SNOTEL observations in the dataset.
+bucket ``noaa-hrrr-bdp-pds`` with no daily call quota.  This module was
+built as a prototype extracting December 2024 -- a month the Open-Meteo
+dataset already covered completely -- and benchmarking the two sources
+head-to-head on identical station-days plus against the SNOTEL
+observations in the dataset (see ``data/hrrr-dataset/noaa-prototype/``:
+Kuchera r=0.974, precip r=0.910, vs-observation snowfall MAE tied).
+On 2026-10-18 the dataset switched to this source for every planned
+month: ``extract_noaa_month`` / ``extract_noaa_months`` extract any month
+into the ``noaa-monthly/`` store (gated by ``manifest.json``), and
+``hrrr_dataset.build_dataset`` joins those monthly aggregates by
+default.  The Open-Meteo fetch path remains in hrrr_dataset for
+reproducibility but no longer feeds the committed dataset.
 
 Source layout (verified live 2026-10-18):
 ``https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.YYYYMMDD/conus/hrrr.t00z.{product}f{FF}.grib2``
@@ -17,11 +24,14 @@ GRIB2 file has a ``.grib2.idx`` sidecar listing each message's byte offset;
 the extractor fetches only the byte ranges of the wanted messages (HTTP
 Range) and decodes them with ecCodes -- whole files are never downloaded.
 
-Forecast selection (fixed): the 00Z cycle, forecast hours f01-f24, cycles
-2024-11-30 .. 2025-01-01, so every station-local December 2024 day is
-covered.  Each UTC instant comes from exactly one (cycle, fxx) pair, so
-lead times are known exactly (1-24 h) -- unlike the Open-Meteo archive,
-which blends runs opaquely.  Daily lead min/max are recorded per row.
+Forecast selection (fixed): the 00Z cycle, forecast hours f01-f24.  For a
+calendar month the extracted cycles run from the day before the month
+starts through the day after it ends (e.g. December 2024: cycles
+2024-11-30 .. 2025-01-01), so every station-local day of the month is
+covered at every CONUS fixed offset.  Each UTC instant comes from
+exactly one (cycle, fxx) pair, so lead times are known exactly (1-24 h)
+-- unlike the Open-Meteo archive, which blends runs opaquely.  Daily
+lead min/max are recorded per row.
 
 Variables (trimmed): surface TMP / DPT at 2 m, APCP, ASNOW, WEASD, PRES,
 HGT; pressure TMP and HGT at 1000, 975, 950, 925, 900, 850, 800, 750, 700,
@@ -63,12 +73,22 @@ with exponential backoff on transient errors, and a per-file cache of
 extracted station point values (gzipped JSON) under
 ``data/hrrr-dataset/noaa-cache/`` (git-ignored).  Raw GRIB slices are
 deterministically reproducible from S3, so the resumability layer caches
-the extracted values; a rerun with a complete cache performs zero
-network requests.
+the extracted values; the station grid indices are cached alongside
+(``grid_indices_v1.json``), so a rerun with a complete cache performs
+zero network requests.
+
+Monthly store: ``extract_noaa_month`` writes one Parquet of daily
+aggregates per month under ``data/hrrr-dataset/noaa-monthly/`` plus a
+``manifest.json`` entry.  A month is marked complete only when every
+planned file was fetched or cached and every station-day aggregated a
+full 24 hours; ``load_noaa_monthly_daily`` feeds only complete months
+to the dataset build, so partial extraction is never presented as
+coverage.
 """
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import math
 import os
@@ -88,6 +108,9 @@ from .tracking_align import compute_baseline_slr
 from .tracking_common import iso_z, utc_now, write_json
 
 S3_BASE = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com"
+NOAA_SOURCE_ID = "noaa_grib_00z"
+MONTHLY_DIRNAME = "noaa-monthly"
+MANIFEST_KIND = "noaa_monthly_manifest"
 CYCLE_HOUR_UTC = 0
 FORECAST_HOURS = tuple(range(1, 25))
 PRODUCTS = ("wrfsfc", "wrfprs")
@@ -505,6 +528,71 @@ def build_grid_indices(
     return nearest_grid_indices(latitudes, longitudes, stations)
 
 
+def _grid_cache_key(stations: list[dict[str, Any]]) -> str:
+    payload = json.dumps(
+        [
+            [str(station["station_triplet"]), round(float(station["latitude"]), 5), round(float(station["longitude"]), 5)]
+            for station in sorted(stations, key=lambda s: str(s["station_triplet"]))
+        ],
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def load_or_build_grid_indices(
+    fetcher: RangeFetcher,
+    cache_dir: Path,
+    sample_cycle: date,
+    sample_fxx: int,
+    stations: list[dict[str, Any]],
+) -> dict[str, int]:
+    """Grid indices from the point cache when possible (zero network).
+
+    The HRRR grid and the station set are both fixed, so the nearest-
+    gridpoint mapping is cached under ``grid_indices_v1.json`` keyed by a
+    hash of the station coordinates.  A cache hit makes a rerun of a
+    fully cached month perform literally zero network requests.
+    """
+    cache_path = cache_dir / "grid_indices_v1.json"
+    key = _grid_cache_key(stations)
+    if cache_path.exists():
+        try:
+            payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = None
+        if (
+            isinstance(payload, dict)
+            and payload.get("kind") == "noaa_grid_indices"
+            and payload.get("stations_sha256") == key
+            and isinstance(payload.get("indices"), dict)
+        ):
+            return {str(triplet): int(index) for triplet, index in payload["indices"].items()}
+    indices = build_grid_indices(fetcher, sample_cycle, sample_fxx, stations)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    tmp = cache_path.with_suffix(cache_path.suffix + ".tmp")
+    tmp.write_text(
+        json.dumps(
+            {"kind": "noaa_grid_indices", "stations_sha256": key, "indices": indices},
+            separators=(",", ":"),
+        ),
+        encoding="utf-8",
+    )
+    os.replace(tmp, cache_path)
+    return indices
+
+
+def month_cycle_days(year: int, month: int) -> list[date]:
+    """Cycles covering one calendar month: month_start - 1d .. month_end + 1d."""
+    month_start, month_end = date(year, month, 1), date(year, month, monthrange(year, month)[1])
+    days: list[date] = []
+    cursor = month_start - timedelta(days=1)
+    last = month_end + timedelta(days=1)
+    while cursor <= last:
+        days.append(cursor)
+        cursor += timedelta(days=1)
+    return days
+
+
 # ---------------------------------------------------------------------------
 # Hourly assembly + daily aggregation (pure)
 # ---------------------------------------------------------------------------
@@ -784,43 +872,29 @@ def backlog_cycle_estimate() -> dict[str, Any]:
     return {"days": days, "cycles": days + len(BACKLOG_BLOCKS), "blocks": len(BACKLOG_BLOCKS)}
 
 
-def extract_noaa_hrrr(
+def _extract_month_rows(
     *,
-    dataset_dir: Path,
-    start_cycle: date = date(2024, 11, 30),
-    end_cycle: date = date(2025, 1, 1),
-    output_year: int = 2024,
-    output_month: int = 12,
+    stations: list[dict[str, Any]],
+    month_days: list[date],
+    cycle_days: list[date],
+    fetcher: RangeFetcher,
+    cache_dir: Path,
     max_workers: int = MAX_WORKERS,
     max_files: int | None = None,
-    fetcher: RangeFetcher | None = None,
     progress: Callable[[str], None] = print,
-) -> dict[str, Any]:
-    """Extract one month of NOAA HRRR daily aggregates and benchmark them."""
-    started = time.monotonic()
-    fetcher = fetcher or UrllibRangeFetcher()
-    cache_dir = dataset_dir / "noaa-cache"
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    prototype_dir = dataset_dir / "noaa-prototype"
-    prototype_dir.mkdir(parents=True, exist_ok=True)
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Extraction core shared by the prototype benchmark and the monthly store.
 
-    stations = [
-        station for station in load_stations_csv(dataset_dir / "stations.csv")
-        if station["state"] != "AK"
-    ]
-    progress(f"Stations: {len(stations)} CONUS (AK excluded: CONUS HRRR domain only)")
-    month_days = [date(output_year, output_month, d) for d in range(1, monthrange(output_year, output_month)[1] + 1)]
-
-    cycle_days: list[date] = []
-    cursor = start_cycle
-    while cursor <= end_cycle:
-        cycle_days.append(cursor)
-        cursor += timedelta(days=1)
+    Fetches (or reuses from the point cache) every planned GRIB file for
+    the given cycles and progressively aggregates station-local days for
+    ``month_days``.  Returns (rows, stats); rows are NOAA_DAILY_COLUMNS-
+    shaped daily aggregates sorted by (station, date).
+    """
     total_planned = len(cycle_days) * len(PRODUCTS) * len(FORECAST_HOURS)
     progress(f"Planned GRIB files: {total_planned} ({len(cycle_days)} cycles x {len(PRODUCTS)} products x {len(FORECAST_HOURS)} fxx)")
 
-    grid_indices = build_grid_indices(fetcher, cycle_days[0], FORECAST_HOURS[0], stations)
-    progress("Grid indices built from sample file")
+    grid_indices = load_or_build_grid_indices(fetcher, cache_dir, cycle_days[0], FORECAST_HOURS[0], stations)
+    progress("Grid indices ready")
 
     fetched_files = 0
     cached_files = 0
@@ -917,6 +991,64 @@ def extract_noaa_hrrr(
                 **agg,
             })
     rows.sort(key=lambda row: (row["station_triplet"], row["date"]))
+    core_stats = {
+        "planned_files": total_planned,
+        "fetched_files": fetched_files,
+        "cached_files": cached_files,
+        "failed_files": failed_files,
+        "assembly": assembly_stats,
+    }
+    return rows, core_stats
+
+
+def extract_noaa_hrrr(
+    *,
+    dataset_dir: Path,
+    start_cycle: date = date(2024, 11, 30),
+    end_cycle: date = date(2025, 1, 1),
+    output_year: int = 2024,
+    output_month: int = 12,
+    max_workers: int = MAX_WORKERS,
+    max_files: int | None = None,
+    fetcher: RangeFetcher | None = None,
+    progress: Callable[[str], None] = print,
+) -> dict[str, Any]:
+    """Prototype entry point: extract one month and benchmark it vs Open-Meteo."""
+    started = time.monotonic()
+    fetcher = fetcher or UrllibRangeFetcher()
+    cache_dir = dataset_dir / "noaa-cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    prototype_dir = dataset_dir / "noaa-prototype"
+    prototype_dir.mkdir(parents=True, exist_ok=True)
+
+    stations = [
+        station for station in load_stations_csv(dataset_dir / "stations.csv")
+        if station["state"] != "AK"
+    ]
+    progress(f"Stations: {len(stations)} CONUS (AK excluded: CONUS HRRR domain only)")
+    month_days = [date(output_year, output_month, d) for d in range(1, monthrange(output_year, output_month)[1] + 1)]
+
+    cycle_days: list[date] = []
+    cursor = start_cycle
+    while cursor <= end_cycle:
+        cycle_days.append(cursor)
+        cursor += timedelta(days=1)
+    total_planned = len(cycle_days) * len(PRODUCTS) * len(FORECAST_HOURS)
+
+    rows, core_stats = _extract_month_rows(
+        stations=stations,
+        month_days=month_days,
+        cycle_days=cycle_days,
+        fetcher=fetcher,
+        cache_dir=cache_dir,
+        max_workers=max_workers,
+        max_files=max_files,
+        progress=progress,
+    )
+    fetched_files = core_stats["fetched_files"]
+    cached_files = core_stats["cached_files"]
+    failed_files = core_stats["failed_files"]
+    assembly_stats = core_stats["assembly"]
     parquet_path = prototype_dir / f"daily_{output_year:04d}-{output_month:02d}.parquet"
     write_noaa_parquet(parquet_path, rows)
 
@@ -1042,3 +1174,224 @@ def render_summary_md(report: dict[str, Any]) -> str:
     lines += [f"- {item}" for item in report["semantic_differences"]]
     lines.append("")
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Monthly store: the dataset build's NOAA forecast source
+# ---------------------------------------------------------------------------
+
+def monthly_dir(dataset_dir: Path) -> Path:
+    return dataset_dir / MONTHLY_DIRNAME
+
+
+def monthly_parquet_path(dataset_dir: Path, year: int, month: int) -> Path:
+    return monthly_dir(dataset_dir) / f"daily_{year:04d}-{month:02d}.parquet"
+
+
+def read_noaa_manifest(dataset_dir: Path) -> dict[str, Any]:
+    """The noaa-monthly manifest; an empty one when nothing is extracted yet."""
+    path = monthly_dir(dataset_dir) / "manifest.json"
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = None
+        if (
+            isinstance(payload, dict)
+            and payload.get("kind") == MANIFEST_KIND
+            and isinstance(payload.get("months"), dict)
+        ):
+            return payload
+    return {"kind": MANIFEST_KIND, "source": NOAA_SOURCE_ID, "months": {}}
+
+
+def _write_noaa_manifest(dataset_dir: Path, manifest: dict[str, Any]) -> None:
+    directory = monthly_dir(dataset_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / "manifest.json"
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def extract_noaa_month(
+    year: int,
+    month: int,
+    *,
+    dataset_dir: Path,
+    fetcher: RangeFetcher | None = None,
+    max_workers: int = MAX_WORKERS,
+    max_files: int | None = None,
+    progress: Callable[[str], None] = print,
+) -> dict[str, Any]:
+    """Extract one calendar month into the noaa-monthly store.
+
+    Writes the month's daily-aggregate Parquet unconditionally (partial
+    coverage stays visible through hrrr_hours) but marks the manifest
+    entry complete only when nothing failed and every station-day has a
+    full 24 hours; the dataset build consumes complete months only.
+    """
+    started = time.monotonic()
+    fetcher = fetcher or UrllibRangeFetcher()
+    before = fetcher.stats() if isinstance(fetcher, UrllibRangeFetcher) else {}
+    cache_dir = dataset_dir / "noaa-cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    stations = [
+        station for station in load_stations_csv(dataset_dir / "stations.csv")
+        if station["state"] != "AK"
+    ]
+    month_days = [date(year, month, d) for d in range(1, monthrange(year, month)[1] + 1)]
+    rows, core_stats = _extract_month_rows(
+        stations=stations,
+        month_days=month_days,
+        cycle_days=month_cycle_days(year, month),
+        fetcher=fetcher,
+        cache_dir=cache_dir,
+        max_workers=max_workers,
+        max_files=max_files,
+        progress=progress,
+    )
+    full_days = sum(1 for row in rows if row["hrrr_hours"] == 24)
+    complete = (
+        max_files is None
+        and not core_stats["failed_files"]
+        and full_days == len(rows)
+    )
+    write_noaa_parquet(monthly_parquet_path(dataset_dir, year, month), rows)
+    after = fetcher.stats() if isinstance(fetcher, UrllibRangeFetcher) else {}
+
+    def delta(key: str) -> int | None:
+        return None if key not in after else int(after[key]) - int(before.get(key, 0))
+
+    entry: dict[str, Any] = {
+        "month": f"{year:04d}-{month:02d}",
+        "complete": complete,
+        "station_days": len(rows),
+        "days_with_full_24h": full_days,
+        "days_with_any_hours": sum(1 for row in rows if (row["hrrr_hours"] or 0) > 0),
+        "days_with_kuchera": sum(1 for row in rows if row["fcst_kuchera_slr"] is not None),
+        "files_planned": core_stats["planned_files"],
+        "files_fetched": core_stats["fetched_files"],
+        "files_cached": core_stats["cached_files"],
+        "files_failed": core_stats["failed_files"],
+        "requests": delta("requests"),
+        "bytes_transferred": delta("bytes_transferred"),
+        "retries": delta("retries"),
+        "wall_seconds": round(time.monotonic() - started, 1),
+        "extracted_at_utc": iso_z(utc_now()),
+    }
+    manifest = read_noaa_manifest(dataset_dir)
+    manifest["months"][entry["month"]] = entry
+    manifest["source"] = NOAA_SOURCE_ID
+    manifest["updated_at_utc"] = entry["extracted_at_utc"]
+    _write_noaa_manifest(dataset_dir, manifest)
+    progress(
+        f"NOAA month {entry['month']}: complete={complete}, {len(rows)} station-days, "
+        f"{core_stats['fetched_files']} fetched / {core_stats['cached_files']} cached files, "
+        f"{entry['bytes_transferred']} bytes, {entry['wall_seconds']}s"
+    )
+    return entry
+
+
+def extract_noaa_months(
+    months: list[tuple[int, int]],
+    *,
+    dataset_dir: Path,
+    fetcher: RangeFetcher | None = None,
+    max_workers: int = MAX_WORKERS,
+    progress: Callable[[str], None] = print,
+) -> dict[str, Any]:
+    """Campaign driver: extract each month, skipping ones already complete."""
+    fetcher = fetcher or UrllibRangeFetcher()
+    entries: dict[str, Any] = {}
+    for year, month in months:
+        key = f"{year:04d}-{month:02d}"
+        existing = read_noaa_manifest(dataset_dir)["months"].get(key)
+        if (
+            existing is not None
+            and existing.get("complete")
+            and monthly_parquet_path(dataset_dir, year, month).exists()
+        ):
+            entries[key] = {**existing, "skipped": True}
+            progress(f"NOAA month {key}: already complete, skipped (zero requests)")
+            continue
+        entries[key] = extract_noaa_month(
+            year, month,
+            dataset_dir=dataset_dir,
+            fetcher=fetcher,
+            max_workers=max_workers,
+            progress=progress,
+        )
+    ran = [entry for entry in entries.values() if not entry.get("skipped")]
+    totals = {
+        "months_run": len(ran),
+        "months_skipped": len(entries) - len(ran),
+        "months_complete": sum(1 for entry in entries.values() if entry.get("complete")),
+        "bytes_transferred": sum(entry.get("bytes_transferred") or 0 for entry in ran),
+        "wall_seconds": round(sum(entry.get("wall_seconds") or 0 for entry in ran), 1),
+    }
+    return {"months": entries, "totals": totals}
+
+
+def load_noaa_monthly_daily(
+    dataset_dir: Path,
+    stations: list[dict[str, Any]],
+    months: list[tuple[int, int]],
+    progress: Callable[[str], None] = lambda _msg: None,
+) -> tuple[dict[str, dict[str, dict[str, Any]]], dict[str, Any]]:
+    """Load daily forecast aggregates from the noaa-monthly store.
+
+    Same return shape as hrrr_dataset.fetch_hrrr_daily
+    ({triplet: {date: agg}}, report).  Only manifest-complete months are
+    fed; any other planned month is reported missing and contributes no
+    days (the build marks those station-days not_requested).  Aggregate
+    dicts rename the NOAA lead columns to hrrr_lead_min_h /
+    hrrr_lead_max_h so the join is source-agnostic.  Alaska stations are
+    absent from the store by construction (CONUS HRRR domain only).
+    """
+    import pyarrow.parquet as pq
+
+    manifest = read_noaa_manifest(dataset_dir)
+    daily: dict[str, dict[str, dict[str, Any]]] = {
+        station["station_triplet"]: {} for station in stations
+    }
+    fed: list[str] = []
+    missing: list[str] = []
+    for year, month in months:
+        key = f"{year:04d}-{month:02d}"
+        entry = manifest["months"].get(key) or {}
+        path = monthly_parquet_path(dataset_dir, year, month)
+        if not entry.get("complete") or not path.exists():
+            missing.append(key)
+            continue
+        fed.append(key)
+        for row in pq.read_table(path).to_pylist():
+            triplet = row["station_triplet"]
+            if triplet not in daily:
+                continue
+            daily[triplet][row["date"]] = {
+                "hrrr_hours": row["hrrr_hours"],
+                "fcst_snowfall_cm": row["fcst_snowfall_cm"],
+                "fcst_precip_mm": row["fcst_precip_mm"],
+                "fcst_kuchera_slr": row["fcst_kuchera_slr"],
+                "fcst_kuchera_hours": row["fcst_kuchera_hours"],
+                "fcst_kuchera_weight_mm": row["fcst_kuchera_weight_mm"],
+                "fcst_t2m_mean_c": row["fcst_t2m_mean_c"],
+                "fcst_t2m_min_c": row["fcst_t2m_min_c"],
+                "fcst_t2m_max_c": row["fcst_t2m_max_c"],
+                "fcst_freezing_level_m": row["fcst_freezing_level_m"],
+                "hrrr_lead_min_h": row["noaa_lead_min_h"],
+                "hrrr_lead_max_h": row["noaa_lead_max_h"],
+            }
+    report: dict[str, Any] = {
+        "source": NOAA_SOURCE_ID,
+        "months_fed": fed,
+        "months_missing": missing,
+        "failed_chunks": [],
+        "stations_with_data": sum(
+            1 for days in daily.values()
+            if any(int(agg.get("hrrr_hours") or 0) > 0 for agg in days.values())
+        ),
+    }
+    progress(f"NOAA monthly store: fed months {fed}; missing {missing}")
+    return daily, report

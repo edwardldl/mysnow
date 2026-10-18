@@ -14,8 +14,9 @@ from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
 from .ghcn_track import ingest_ghcn
 from .hrrr_dataset import OBS_START_DEFAULT as HRRR_OBS_START_DEFAULT
 from .hrrr_dataset import build_dataset as build_hrrr_dataset
+from .hrrr_dataset import hrrr_month_plan
 from .io import read_rows
-from .noaa_hrrr import extract_noaa_hrrr
+from .noaa_hrrr import extract_noaa_hrrr, extract_noaa_months
 from .profiles import backfill_openmeteo_multistation_profiles, backfill_openmeteo_profiles
 from .sierra import SierraImportConfig, import_sierra_ghcn_directory, write_sierra_import
 from .sierra_evaluation import evaluate_sierra_station_water_year_holdout
@@ -494,16 +495,51 @@ def _build_hrrr_dataset(args: argparse.Namespace) -> int:
         obs_end=date.fromisoformat(args.obs_end) if args.obs_end else date.today(),
         awdb_interval_s=args.awdb_interval,
         open_meteo_interval_s=args.open_meteo_interval,
+        forecast_source=args.forecast_source,
     )
     print(json.dumps({
         "stations": report["stations"]["count"],
         "rows": report["output"]["total_rows"],
         "rowsByWaterYear": report["output"]["rows_by_water_year"],
         "qcPassedEventDays": report["output"]["qc_passed_event_days"],
+        "forecastSource": report["forecast_source"],
         "awdbRequests": report["requests"]["awdb"]["logical_requests"],
         "openMeteoRequests": report["requests"]["open_meteo"]["logical_requests"],
         "failedChunks": len(report["observations"]["failed_chunks"]) + len(report["hrrr"]["failed_chunks"]),
         "elapsedSeconds": report["elapsed_seconds"],
+    }, sort_keys=True))
+    return 0
+
+
+def _extract_noaa_months(args: argparse.Namespace) -> int:
+    if args.months:
+        months = []
+        for token in args.months.split(","):
+            token = token.strip()
+            if not token:
+                continue
+            year_text, month_text = token.split("-", 1)
+            months.append((int(year_text), int(month_text)))
+    else:
+        months = hrrr_month_plan()
+    summary = extract_noaa_months(
+        months,
+        dataset_dir=args.dataset_dir,
+        max_workers=args.max_workers,
+    )
+    print(json.dumps({
+        "months": {
+            key: {
+                "complete": entry.get("complete"),
+                "skipped": bool(entry.get("skipped")),
+                "stationDays": entry.get("station_days"),
+                "filesFailed": len(entry.get("files_failed") or []),
+                "bytesTransferred": entry.get("bytes_transferred"),
+                "wallSeconds": entry.get("wall_seconds"),
+            }
+            for key, entry in summary["months"].items()
+        },
+        "totals": summary["totals"],
     }, sort_keys=True))
     return 0
 
@@ -750,7 +786,22 @@ def build_parser() -> argparse.ArgumentParser:
     hrrr_dataset.add_argument("--obs-end", help="YYYY-MM-DD; default today")
     hrrr_dataset.add_argument("--awdb-interval", type=float, default=1.5)
     hrrr_dataset.add_argument("--open-meteo-interval", type=float, default=2.0)
+    hrrr_dataset.add_argument(
+        "--forecast-source",
+        choices=("noaa", "open-meteo"),
+        default="noaa",
+        help="forecast source feeding the dataset (default noaa: NOAA GRIB monthly store; open-meteo is the legacy path)",
+    )
     hrrr_dataset.set_defaults(func=_build_hrrr_dataset)
+
+    noaa_months = subparsers.add_parser(
+        "extract-noaa-months",
+        help="extract NOAA HRRR GRIB2 daily aggregates into the noaa-monthly store that build-hrrr-dataset joins (resumable; skips complete months)",
+    )
+    noaa_months.add_argument("--dataset-dir", type=Path, default=Path("data/hrrr-dataset"))
+    noaa_months.add_argument("--months", help="comma-separated YYYY-MM list; default is the full dataset plan order")
+    noaa_months.add_argument("--max-workers", type=int, default=4)
+    noaa_months.set_defaults(func=_extract_noaa_months)
 
     noaa_hrrr = subparsers.add_parser(
         "extract-noaa-hrrr",
