@@ -103,6 +103,15 @@ class TrackingRegistryTests(unittest.TestCase):
         palisades = resorts["Palisades Tahoe"]
         self.assertEqual([point["elevation_m"] for point in palisades["forecast_points"]], [1889.0, 2499.0, 2708.0])
         self.assertTrue(all(point["geometry_source"] == "curated" for point in palisades["forecast_points"]))
+        # Exact curated coordinates/names from src/lib/api.ts DEFAULT_LOCATIONS.
+        self.assertEqual(
+            [(point["name"], point["latitude"], point["longitude"]) for point in palisades["forecast_points"]],
+            [
+                ("Village base", 39.196999, -120.24313),
+                ("High Camp", 39.195899, -120.260845),
+                ("Upper mountain", 39.181764, -120.266494),
+            ],
+        )
         mammoth = resorts["Mammoth Mountain"]
         assert mammoth["snotel_station"] is not None
         self.assertEqual(mammoth["snotel_station"]["station_triplet"], "777:CA:SNTL")

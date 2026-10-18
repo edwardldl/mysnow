@@ -49,14 +49,15 @@ PILOT_RESORTS: list[dict[str, Any]] = [
      "timezone": "America/New_York", "climate_regime": "northeast_cold_orographic"},
 ]
 
-# Curated Palisades Tahoe reference points, copied from the app default
-# location in src/lib/api.ts (geometrySource "curated").
+# Curated Palisades Tahoe reference points, copied verbatim from the app
+# default location in src/lib/api.ts DEFAULT_LOCATIONS["palisades"]
+# (geometrySource "curated"); the anchor is the mid-mountain point.
 PALISADES_CURATED_POINTS: list[dict[str, Any]] = [
-    {"role": "base", "name": "Base (Granite Chief)", "latitude": 39.1969, "longitude": -120.2379, "elevation_m": 1889.0},
-    {"role": "mid_mountain", "name": "Mid-mountain (Siberia Express top)", "latitude": 39.1868, "longitude": -120.2559, "elevation_m": 2499.0},
-    {"role": "summit", "name": "Summit (Palisades Peak)", "latitude": 39.1834, "longitude": -120.2727, "elevation_m": 2708.0},
+    {"role": "base", "name": "Village base", "latitude": 39.196999, "longitude": -120.24313, "elevation_m": 1889.0},
+    {"role": "mid_mountain", "name": "High Camp", "latitude": 39.195899, "longitude": -120.260845, "elevation_m": 2499.0},
+    {"role": "summit", "name": "Upper mountain", "latitude": 39.181764, "longitude": -120.266494, "elevation_m": 2708.0},
 ]
-PALISADES_ANCHOR = {"latitude": 39.1868, "longitude": -120.2559, "elevation_m": 2499.0}
+PALISADES_ANCHOR = {"latitude": 39.195899, "longitude": -120.260845, "elevation_m": 2499.0}
 
 
 def slugify(name: str) -> str:
