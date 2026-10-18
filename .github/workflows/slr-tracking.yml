@@ -1,0 +1,75 @@
+name: SLR tracking loop
+
+# Daily: refresh the pilot registry, snapshot forecasts, ingest SNOTEL/GHCN
+# observations, rebuild events, and publish the status report.
+# Weekly (Mondays): additionally align events to Kuchera baselines and train
+# an unvalidated candidate artifact.  Production calibration stays disabled;
+# this workflow never touches src/ or the production gates.
+on:
+  schedule:
+    - cron: "30 12 * * *"
+    - cron: "45 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: slr-tracking
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    if: github.event.schedule == '30 12 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the SLR calibration package
+        run: pip install -e training/slr_calibration
+      - name: Refresh the tracking registry
+        run: mysnow-slr-calibration track-registry
+      - name: Run the daily tracking loop
+        run: mysnow-slr-calibration track-run
+      - name: Commit tracking data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/tracking
+          if git diff --cached --quiet; then
+            echo "No tracking changes to commit."
+          else
+            git commit -m "data: daily SLR tracking update"
+            git push
+          fi
+
+  weekly:
+    if: github.event.schedule == '45 13 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the SLR calibration package
+        run: pip install -e training/slr_calibration
+      - name: Align events to Kuchera baselines
+        run: mysnow-slr-calibration track-align
+      - name: Train the unvalidated candidate
+        run: mysnow-slr-calibration track-train
+      - name: Refresh the status report
+        run: mysnow-slr-calibration track-report
+      - name: Commit artifacts and reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add data/tracking
+          if git diff --cached --quiet; then
+            echo "No tracking changes to commit."
+          else
+            git commit -m "data: weekly SLR alignment and candidate training"
+            git push
+          fi

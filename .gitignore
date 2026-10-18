@@ -21,7 +21,10 @@
 /build
 
 # offline SLR training inputs and local Python environments
-/data/
+/data/*
+# the SLR tracking loop commits its data directory (see data/tracking/README.md)
+!/data/tracking/
+!/data/tracking/**
 /training/slr_calibration/.venv/
 __pycache__/
 *.py[cod]
