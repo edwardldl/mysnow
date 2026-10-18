@@ -1,0 +1,108 @@
+{
+  "dataset_dir": "data/hrrr-dataset",
+  "elapsed_seconds": 10.4,
+  "generated_at_utc": "2026-10-18T09:37:59.996471Z",
+  "hrrr": {
+    "cached_chunks": 60,
+    "failed_chunks": [],
+    "fetched_chunks": 0,
+    "planned_chunks": 60,
+    "stations_with_data": 476
+  },
+  "hrrr_months": [
+    "2024-10",
+    "2024-11",
+    "2024-12"
+  ],
+  "obs_window": [
+    "2023-10-01",
+    "2026-10-18"
+  ],
+  "observations": {
+    "cached_chunks": 370,
+    "failed_chunks": [],
+    "fetched_chunks": 0,
+    "planned_chunks": 370,
+    "row_count": 549763
+  },
+  "output": {
+    "days_with_hrrr": 43792,
+    "null_rates": {
+      "delta_swe_mm": 0.0122,
+      "fcst_kuchera_slr": 0.9798,
+      "fcst_snowfall_cm": 0.9204,
+      "fcst_t2m_mean_c": 0.9204,
+      "observed_slr_diff": 0.96,
+      "precip_mm": 0.0125,
+      "snow_depth_mm": 0.0049,
+      "swe_mm": 0.0111
+    },
+    "qc_passed_event_days": 21994,
+    "rows_by_water_year": {
+      "2024": 179457,
+      "2025": 181251,
+      "2026": 181402,
+      "2027": 7942
+    },
+    "stations_with_obs_days": 499,
+    "total_rows": 550052
+  },
+  "requests": {
+    "awdb": {
+      "attempts": 0,
+      "logical_requests": 0,
+      "retries": 0
+    },
+    "open_meteo": {
+      "attempts": 0,
+      "logical_requests": 0,
+      "retries": 0
+    }
+  },
+  "stations": {
+    "by_state": {
+      "AK": 23,
+      "AZ": 8,
+      "CA": 22,
+      "CO": 101,
+      "ID": 48,
+      "MT": 40,
+      "NM": 17,
+      "NV": 10,
+      "OR": 47,
+      "SD": 2,
+      "UT": 69,
+      "WA": 57,
+      "WY": 55
+    },
+    "count": 499,
+    "no_coverage_stations": [],
+    "non_conus_stations": [
+      "1003:AK:SNTL",
+      "1035:AK:SNTL",
+      "1062:AK:SNTL",
+      "1070:AK:SNTL",
+      "1073:AK:SNTL",
+      "1091:AK:SNTL",
+      "1092:AK:SNTL",
+      "1095:AK:SNTL",
+      "1103:AK:SNTL",
+      "1176:AK:SNTL",
+      "1260:AK:SNTL",
+      "1285:AK:SNTL",
+      "1302:AK:SNTL",
+      "1332:AK:SNTL",
+      "2044:AK:SNTL",
+      "641:AK:SNTL",
+      "768:AK:SNTL",
+      "946:AK:SNTL",
+      "954:AK:SNTL",
+      "955:AK:SNTL",
+      "956:AK:SNTL",
+      "964:AK:SNTL",
+      "967:AK:SNTL"
+    ],
+    "source": "stations.csv (cached)",
+    "with_hrrr_data": 476
+  }
+}

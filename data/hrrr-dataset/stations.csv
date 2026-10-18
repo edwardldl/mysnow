@@ -1,0 +1,500 @@
+station_triplet,station_name,state,latitude,longitude,elevation_m,data_tz_offset_hours,nearest_resort,nearest_resort_region,nearest_resort_country,distance_km
+1000:OR:SNTL,Annie Springs,OR,42.87007,-122.16518,1834.9,-8.0,Crater Lake Ski Bowl,Oregon,United States,4.501
+1003:AK:SNTL,Mcneil Canyon,AK,59.74521,-151.25839,411.5,-9.0,,Alaska,United States,0.776
+1008:MT:SNTL,Onion Park,MT,46.91348,-110.8536,2261.6,-8.0,Showdown,Montana,United States,13.999
+1009:MT:SNTL,Stringer Creek,MT,46.9269,-110.90198,1996.4,-8.0,Showdown,Montana,United States,17.848
+1011:WA:SNTL,MF Nooksack,WA,48.82441,-121.92947,1505.7,-8.0,Salmon Ridge Sno-Park,Washington,United States,19.278
+1012:WA:SNTL,Swift Creek,WA,46.1638,-122.18402,1353.3,-8.0,,Washington,United States,3.07
+1013:UT:SNTL,Temple Fork,UT,41.793,-111.54605,2261.6,-8.0,,Utah,United States,11.2
+1014:CO:SNTL,Middle Fork Camp,CO,39.79565,-106.02802,2731.0,-8.0,Loveland Basin Ski Area,Colorado,United States,16.583
+1016:ID:SNTL,Long Valley,ID,44.78835,-116.08878,1490.5,-8.0,Jug Mountain Ranch Winter Trails,Idaho,United States,7.479
+1030:CO:SNTL,Arapaho Ridge,CO,40.35098,-106.38141,3340.6,-8.0,Bluebird Backcountry,Colorado,United States,11.684
+1031:CO:SNTL,Never Summer,CO,40.40392,-105.95567,3139.4,-8.0,Cameron Pass,Colorado,United States,14.612
+1032:CO:SNTL,Rawah,CO,40.70794,-106.00727,2773.7,-8.0,Cameron Pass,Colorado,United States,22.544
+1034:NM:SNTL,Sierra Blanca,NM,33.40682,-105.79467,3124.2,-8.0,Ski Apache,New Mexico,United States,1.521
+1035:AK:SNTL,Moraine,AK,61.37727,-148.99917,612.6,-9.0,,Alaska,United States,2.74
+1039:UT:SNTL,Cascade Mountain,UT,40.283,-111.60992,2362.2,-8.0,Sundance Resort,Utah,United States,11.064
+1040:CO:SNTL,Mccoy Park,CO,39.60231,-106.544,2895.6,-8.0,Beaver Creek,Colorado,United States,1.416
+1041:CO:SNTL,Beaver Ck Village,CO,39.59871,-106.51113,2599.9,-8.0,Beaver Creek,Colorado,United States,2.673
+1042:CO:SNTL,Wild Basin,CO,40.201,-105.6025,2868.2,-8.0,Haugen’s Hill/Allenspark,Colorado,United States,6.108
+1043:WA:SNTL,Sentinel Butte,WA,48.86133,-118.39843,1426.5,-8.0,,Washington,United States,0.264
+1044:OR:SNTL,Toketee Airstrip,OR,43.22718,-122.42537,987.6,-8.0,,Oregon,United States,22.019
+1045:WY:SNTL,Crow Creek,WY,41.22824,-105.38571,2535.9,-8.0,Happy Jack Winter Trails,Wyoming,United States,3.257
+1046:WY:SNTL,Cinnabar Park,WY,41.23843,-106.23101,2947.4,-8.0,,Wyoming,United States,11.255
+1047:WY:SNTL,Little Snake River,WY,41.07051,-106.94284,2721.9,-8.0,Green Mountain,Wyoming,United States,8.148
+1049:CA:SNTL,Forestdale Creek,CA,38.68245,-119.9597,2453.6,-8.0,Kirkwood Mountain Resort,California,United States,9.36
+1050:CA:SNTL,Horse Meadow,CA,38.83652,-119.88732,2615.2,-8.0,Heavenly Mountain Resort,California;Nevada,United States,11.407
+1051:CA:SNTL,Burnside Lake,CA,38.71943,-119.8942,2493.3,-8.0,,California,United States,15.56
+1054:UT:SNTL,Farmington Lower,UT,40.992,-111.81702,2087.9,-8.0,Wasatch Peaks Ranch,Utah,United States,11.708
+1056:UT:SNTL,Lightning Ridge,UT,41.35891,-111.48749,2499.4,-8.0,Powder Mountain Ski Resort,Utah,United States,22.991
+1057:CO:SNTL,Glen Cove,CO,38.87602,-105.07605,3477.8,-8.0,Glen Cove,Colorado,United States,0.356
+1058:CO:SNTL,Grayback,CO,37.47051,-106.5379,3541.8,-8.0,,Colorado,United States,21.229
+1060:CO:SNTL,Sharkstooth,CO,37.50356,-108.11405,3270.5,-8.0,Stoner,Colorado,United States,20.25
+1061:CO:SNTL,Bear River,CO,40.06152,-107.00948,2773.7,-8.0,Airport Hill,Colorado,United States,12.917
+1062:AK:SNTL,Anchor River Divide,AK,59.8608,-151.31494,502.9,-9.0,,Alaska,United States,12.481
+1067:CA:SNTL,Carson Pass,CA,38.6927,-120.0022,2548.1,-8.0,,California,United States,5.803
+1068:WA:SNTL,Sawmill Ridge,WA,47.15992,-121.42172,1414.3,-8.0,,Washington,United States,10.52
+1070:AK:SNTL,Anchorage Hillside,AK,61.11315,-149.68345,582.2,-9.0,Hilltop Ski Area,Alaska,United States,4.328
+1073:AK:SNTL,Mt. Eyak,AK,60.55648,-145.72201,442.0,-9.0,Mount Eyak Ski Area,Alaska,United States,1.114
+1078:OR:SNTL,Sun Pass,OR,42.78637,-121.97715,1645.9,-8.0,Crater Lake Ski Bowl,Oregon,United States,18.981
+1079:OR:SNTL,Milk Shakes,OR,45.9821,-117.94883,1700.8,-8.0,Bluewood,Washington,United States,12.912
+1081:ID:SNTL,Ragged Mountain,ID,47.85583,-117.03667,1283.2,-8.0,Mont Spokane State Park Nordic,Idaho;Washington,United States,5.031
+1082:WY:SNTL,Grand Targhee,WY,43.77933,-110.92783,2822.4,-8.0,Grand Targhee Resort,Wyoming,United States,1.783
+1083:NM:SNTL,Tres Ritos,NM,36.1279,-105.52706,2664.0,-8.0,Sipapu Ski and Summer Resort,New Mexico,United States,3.267
+1085:WA:SNTL,Cayuse Pass,WA,46.86956,-121.53434,1603.2,-8.0,Crystal Mountain,Washington,United States,7.995
+1091:AK:SNTL,Independence Mine,AK,61.79001,-149.2839,1051.6,-9.0,,Alaska,United States,0.175
+1092:AK:SNTL,Exit Glacier,AK,60.18957,-149.6228,109.7,-9.0,,Alaska,United States,11.514
+1095:AK:SNTL,Sugarloaf Mtn,AK,61.08042,-146.30202,161.5,-9.0,Salmonberry Hill,Alaska,United States,9.039
+1098:UT:SNTL,Usu Doc Daniel,UT,41.86425,-111.50603,2624.3,-8.0,,Utah,United States,7.904
+1100:CO:SNTL,Saint Elmo,CO,38.69985,-106.36805,3176.0,-8.0,Monarch Mountain,Colorado,United States,20.451
+1101:CO:SNTL,Chapman Tunnel,CO,39.2621,-106.62944,3075.4,-8.0,,Colorado,United States,17.501
+1103:AK:SNTL,Mt. Alyeska,AK,60.95842,-149.08858,457.2,-9.0,Alyeska Resort,Alaska,United States,0.391
+1104:WA:SNTL,Pepper Creek,WA,46.10242,-121.95555,652.3,-8.0,,Washington,United States,11.816
+1110:NV:SNTL,Rainbow Canyon,NV,36.2493,-115.62972,2389.6,-8.0,Lee Canyon,Nevada,United States,7.294
+1111:NV:SNTL,Bristlecone Trail,NV,36.31575,-115.69543,2712.7,-8.0,Lee Canyon,Nevada,United States,2.162
+1112:NV:SNTL,Lee Canyon,NV,36.30537,-115.67508,2627.4,-8.0,Lee Canyon,Nevada,United States,0.572
+1113:UT:SNTL,Tony Grove RS,UT,41.88573,-111.56918,1926.3,-8.0,,Utah,United States,2.283
+1114:UT:SNTL,Garden City Summit,UT,41.9215,-111.4693,2340.9,-8.0,,Utah,United States,5.043
+1115:UT:SNTL,Klondike Narrows,UT,41.96769,-111.59713,2218.9,-8.0,,Utah,United States,2.4
+1119:WY:SNTL,Blackhall Mtn,WY,41.05623,-106.714,2996.2,-8.0,Green Mountain,Wyoming,United States,18.086
+1121:AZ:SNTL,Fort Valley,AZ,35.26773,-111.74479,2243.3,-8.0,,Arizona,United States,4.086
+1122:CO:SNTL,Hourglass Lake,CO,40.57717,-105.62584,2859.0,-8.0,Ski Estes Park (Hidden Valley),Colorado,United States,20.424
+1123:CO:SNTL,Long Draw Resv,CO,40.51154,-105.7654,3041.9,-8.0,Cameron Pass,Colorado,United States,10.688
+1132:WY:SNTL,Soldier Park,WY,44.34847,-107.0136,2645.7,-8.0,,Wyoming,United States,17.978
+1135:UT:SNTL,Burts Miller Ranch,UT,40.98492,-110.85075,2407.9,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,11.614
+1139:AZ:SNTL,Chalender,AZ,35.26238,-112.06221,2139.7,-8.0,Oak Hill,Arizona,United States,4.663
+1141:CO:SNTL,Upper Taylor,CO,38.99071,-106.74504,3264.4,-8.0,Montezuma Basin,Colorado,United States,10.11
+1142:ID:SNTL,Pierce R.S.,ID,46.49597,-115.7957,938.8,-8.0,Bald Mountain Ski Area,Idaho,United States,9.99
+1144:MT:SNTL,Blacktail Mtn,MT,47.98317,-114.35443,1725.2,-8.0,Blacktail Mountain Ski Area,Montana,United States,4.642
+1148:UT:SNTL,Panguitch Lake RS,UT,37.70463,-112.65037,2529.8,-8.0,Brian Head Resort,Utah,United States,17.28
+1153:UT:SNTL,Buckboard Flat,UT,37.86943,-109.44717,2718.8,-8.0,,Utah,United States,1.217
+1154:UT:SNTL,Brian Head,UT,37.67994,-112.85674,3060.2,-8.0,Brian Head Resort,Utah,United States,1.413
+1158:OR:SNTL,Howard Prairie,OR,42.215,-122.3713,1396.0,-8.0,,Oregon,United States,8.293
+1159:WA:SNTL,Gold Axe Camp,WA,48.9516,-118.9864,1639.8,-8.0,Sitzmark Ski Hill,Washington,United States,16.12
+1160:CO:SNTL,Weminuche Creek,CO,37.51968,-107.32139,3270.5,-8.0,,Colorado,United States,23.692
+1161:CO:SNTL,Black Mountain,CO,40.8879,-105.66404,2724.9,-8.0,Beaver Meadows,Colorado,United States,5.263
+1162:UT:SNTL,Blacks Fork Jct,UT,40.95814,-110.5828,2706.6,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,20.796
+1163:UT:SNTL,EF Blacks Fork GS,UT,40.88472,-110.54056,2852.9,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,22.7
+1164:UT:SNTL,Wolf Creek Peak,UT,40.47733,-111.04469,2977.9,-8.0,,Utah,United States,14.402
+1166:OR:SNTL,Bear Grass,OR,44.3253,-122.0938,1438.7,-8.0,,Oregon,United States,18.24
+1167:OR:SNTL,Smith Ridge,OR,44.30325,-122.04053,996.7,-8.0,,Oregon,United States,16.127
+1168:NM:SNTL,Taos Powderhorn,NM,36.58195,-105.45617,3358.9,-8.0,Taos Ski Valley,New Mexico,United States,0.649
+1169:NM:SNTL,Shuree,NM,36.78765,-105.2392,3069.3,-8.0,Enchanted Forest Cross Country Ski Area,New Mexico,United States,14.343
+1170:NM:SNTL,Palo,NM,36.40869,-105.33038,2843.8,-8.0,Val Verde Ski Basin,New Mexico,United States,4.393
+1173:NM:SNTL,Garita Peak,NM,36.00469,-106.54805,3078.5,-8.0,Cañada Bonita,New Mexico,United States,17.62
+1176:AK:SNTL,Moore Creek Bridge,AK,59.58668,-135.19455,685.8,-9.0,Log Cabin Cross Country Ski Trails,British Columbia,Canada,24.443
+1186:CO:SNTL,Fool Creek,CO,39.86866,-105.86765,3392.4,-8.0,Winter Park Resort,Colorado,United States,7.558
+1187:CO:SNTL,High Lonesome,CO,40.0359,-105.75472,3240.0,-8.0,Devil's Thumb,Colorado,United States,7.944
+1188:CO:SNTL,Wager Gulch,CO,37.88248,-107.36428,3386.3,-8.0,Lake City Ski Hill,Colorado,United States,14.889
+1192:UT:SNTL,Buck Pasture,UT,40.84456,-110.66068,2935.2,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,13.383
+1196:WY:SNTL,Med Bow,WY,41.37833,-106.34697,3200.4,-8.0,,Wyoming,United States,12.146
+1197:UT:SNTL,Yankee Reservoir,UT,37.74797,-112.77495,2645.7,-8.0,Brian Head Resort,Utah,United States,9.026
+1215:UT:SNTL,Lasal Mountain-Lower,UT,38.48167,-109.29164,2676.1,-8.0,,Utah,United States,3.127
+1216:UT:SNTL,Huntington Horse,UT,39.61774,-111.30576,2941.3,-8.0,Snowland,Utah,United States,5.391
+1225:UT:SNTL,Redden Mine Lwr,UT,40.67505,-111.21765,2603.0,-8.0,,Utah,United States,12.673
+1227:UT:SNTL,Upper Joes Valley,UT,39.4155,-111.2491,2621.3,-8.0,Aspen Hills,Utah,United States,20.382
+1242:NV:SNTL,Little Valley,NV,39.25259,-119.8771,1981.2,-8.0,Diamond Peak,Nevada,United States,3.356
+1248:UT:SNTL,Suu Ranch,UT,37.59711,-112.92949,2453.6,-8.0,,Utah,United States,9.48
+1251:CO:SNTL,Sawtooth,CO,40.13632,-105.58486,2938.3,-8.0,Rock Creek,Colorado,United States,4.821
+1252:CO:SNTL,Elkhead Divide,CO,40.79637,-107.10113,2676.1,-8.0,Meaden Peak Ski Area,Colorado,United States,3.815
+1254:NM:SNTL,Rio Santa Barbara,NM,36.07196,-105.62949,3243.1,-8.0,Sipapu Ski and Summer Resort,New Mexico,United States,11.157
+1257:WA:SNTL,Skate Creek,WA,46.64336,-121.83044,1149.1,-8.0,,Washington,United States,14.919
+1259:WA:SNTL,Muckamuck,WA,48.58526,-119.86624,1362.5,-8.0,Loup Loup Ski Bowl,Washington,United States,21.734
+1260:AK:SNTL,Chena Lakes,AK,64.75793,-147.21823,152.4,-9.0,Iceman Falls,Alaska,United States,16.544
+1263:WA:SNTL,Pinto Rock,WA,46.32318,-121.94219,1356.4,-8.0,,Washington,United States,21.824
+1271:AZ:SNTL,Hawley Lake,AZ,33.97121,-109.76531,2526.8,-8.0,Sunrise Park Resort,Arizona,United States,18.381
+1285:AK:SNTL,Flower Mountain,AK,59.39617,-136.28123,774.2,-9.0,,Alaska,United States,16.212
+1299:ID:SNTL,Pebble Creek,ID,42.7674,-112.10648,1987.3,-8.0,Pebble Creek,Idaho,United States,3.757
+1300:UT:SNTL,Powder Mountain,UT,41.37428,-111.76673,2587.8,-8.0,Powder Mountain Ski Resort,Utah,United States,0.408
+1302:AK:SNTL,Creamers Field,AK,64.86534,-147.73617,134.1,-9.0,,Alaska,United States,1.588
+1304:UT:SNTL,Gold Basin,UT,38.46516,-109.26332,3069.3,-8.0,,Utah,United States,1.802
+1305:ID:SNTL,Fish Ck,ID,43.55545,-113.71931,1944.6,-8.0,Blizzard Mountain,Idaho,United States,13.7
+1306:ID:SNTL,Couch Summit,ID,43.51762,-114.80214,2066.5,-8.0,Soldier Mountain Ski Area,Idaho,United States,4.623
+1307:NM:SNTL,Taos Pueblo,NM,36.54099,-105.35944,3349.8,-8.0,Taos Ski Valley,New Mexico,United States,9.147
+1308:UT:SNTL,Atwater,UT,40.59124,-111.63775,2667.0,-8.0,Alta Ski Area,Utah,United States,1.81
+1310:NV:SNTL,Lamoille Upper,NV,40.59965,-115.37902,2740.2,-8.0,Ruby Mountain Ranch,Nevada,United States,13.108
+1311:MT:SNTL,Stryker Basin,MT,48.68005,-114.66365,1889.8,-8.0,Dog Creek Lodge & Nordic Center,Montana,United States,10.837
+1314:OR:SNTL,Fifteenmile,OR,45.35265,-121.53,1819.7,-8.0,,Oregon,United States,8.348
+1321:UT:SNTL,Mill Creek Canyon,UT,40.69656,-111.67712,2121.4,-8.0,,Utah,United States,0.335
+1324:CO:SNTL,Rat Creek,CO,37.93571,-106.98192,3560.1,-8.0,Ski Creede,Colorado,United States,19.078
+1325:CO:SNTL,Elwood Pass,CO,37.40563,-106.64136,3560.1,-8.0,,Colorado,United States,14.135
+1326:CO:SNTL,Castle Peak,CO,39.00074,-106.83912,3508.2,-8.0,Montezuma Basin,Colorado,United States,2.455
+1331:CA:SNTL,Lost Lakes,CA,38.64745,-119.95141,2633.5,-8.0,Kirkwood Mountain Resort,California,United States,10.666
+1332:AK:SNTL,Elmendorf Field,AK,61.24777,-149.82331,51.8,-9.0,Hillberg Ski Area,Alaska,United States,2.976
+1338:WA:SNTL,Icicle Creek,WA,47.59404,-120.88255,1386.8,-8.0,,Washington,United States,15.967
+1344:CO:SNTL,Alta Lakes,CO,37.88929,-107.84484,3441.2,-8.0,Telluride Ski Area,Colorado,United States,3.49
+1350:NV:SNTL,Lee Canyon Upper,NV,36.29604,-115.6843,2862.1,-8.0,Lee Canyon,Nevada,United States,0.754
+2044:AK:SNTL,Spring Creek,AK,61.65653,-149.12926,179.8,-9.0,,Alaska,United States,5.029
+302:OR:SNTL,Aneroid Lake #2,OR,45.21332,-117.19255,2264.7,-8.0,High Wallowas,Oregon,United States,7.191
+303:CO:SNTL,Apishapa,CO,37.33067,-105.06766,3048.0,-8.0,Cuchara Mountain Resort,Colorado,United States,5.694
+310:AZ:SNTL,Baldy,AZ,33.97845,-109.50357,2807.2,-8.0,Greer,Arizona,United States,4.671
+311:MT:SNTL,Banfield Mountain,MT,48.5712,-115.44573,1700.8,-8.0,Turner Mountain,Montana,United States,14.916
+312:ID:SNTL,Banner Summit,ID,44.30342,-115.23447,2145.8,-8.0,,Idaho,United States,16.03
+313:MT:SNTL,Barker Lakes,MT,46.09713,-113.13038,2514.6,-8.0,Wraith Hill,Montana,United States,10.487
+314:WY:SNTL,Base Camp,WY,43.94019,-110.44544,2145.8,-8.0,,Wyoming,United States,16.671
+315:MT:SNTL,Basin Creek,MT,45.79737,-112.52047,2170.2,-8.0,Z Bar T,Montana,United States,11.462
+317:WY:SNTL,Battle Mountain,WY,41.05402,-107.26674,2273.8,-8.0,Three Forks Ranch,Colorado,United States,18.681
+319:ID:SNTL,Bear Basin,ID,44.95222,-116.14293,1630.7,-8.0,Bear Basin Nordic Center,Idaho,United States,1.005
+322:CO:SNTL,Bear Lake,CO,40.31176,-105.6467,2892.6,-8.0,Ski Estes Park (Hidden Valley),Colorado,United States,9.158
+324:ID:SNTL,Bear Saddle,ID,44.60533,-116.98097,1880.6,-8.0,Hitt Mountain,Idaho,United States,4.968
+326:WY:SNTL,Beartooth Lake,WY,44.94307,-109.56743,2852.9,-8.0,Beartooth Basin Summer Ski Area,Wyoming,United States,11.078
+327:CO:SNTL,Beartown,CO,37.71433,-107.5124,3529.6,-8.0,Kendall Mountain Recreation Area,Colorado,United States,16.633
+330:UT:SNTL,Beaver Divide,UT,40.61233,-111.09782,2508.5,-8.0,,Utah,United States,1.798
+331:OR:SNTL,Beaver Reservoir,OR,45.14532,-118.219,1566.7,-8.0,Anthony Lakes Mountain Resort,Oregon,United States,20.548
+332:UT:SNTL,Ben Lomond Peak,UT,41.37603,-111.94405,2343.9,-8.0,Ogden Nordic,Utah,United States,2.602
+333:UT:SNTL,Ben Lomond Trail,UT,41.38291,-111.92103,1819.7,-8.0,Ogden Nordic,Utah,United States,1.239
+335:CO:SNTL,Berthoud Summit,CO,39.80364,-105.77786,3444.2,-8.0,Berthoud Pass,Colorado,United States,0.606
+338:ID:SNTL,Big Creek Summit,ID,44.62621,-115.79561,1996.4,-8.0,,Idaho,United States,23.236
+339:UT:SNTL,Big Flat,UT,38.30183,-112.35672,3145.5,-8.0,Eagle Point,Utah,United States,2.932
+340:NV:SNTL,Big Meadow,NV,39.455,-119.9422,2511.6,-8.0,Tannanbaum,Nevada,United States,13.993
+341:OR:SNTL,Big Red Mountain,OR,42.05257,-122.85487,1847.1,-8.0,,Oregon,United States,11.138
+344:OR:SNTL,Billie Creek Divide,OR,42.40717,-122.26617,1609.3,-8.0,,Oregon,United States,0.924
+345:CO:SNTL,Bison Lake,CO,39.76458,-107.35628,3337.6,-8.0,Red Mountain,Colorado,United States,24.517
+347:MT:SNTL,Black Bear,MT,44.50832,-111.12803,2487.2,-8.0,Rendezvous trails,Montana,United States,16.729
+349:MT:SNTL,Black Pine,MT,46.414,-113.43095,2185.4,-8.0,Discovery Ski Area,Montana,United States,21.565
+350:WY:SNTL,Blackwater,WY,44.37667,-109.79333,2996.2,-8.0,Sleeping Giant Winter Sports Area,Wyoming,United States,17.393
+351:OR:SNTL,Blazed Alder,OR,45.4287,-121.85605,1115.6,-8.0,Timberline Lodge Ski Area,Oregon,United States,16.001
+352:WA:SNTL,Blewett Pass,WA,47.35037,-120.6796,1292.4,-8.0,,Washington,United States,8.695
+353:WY:SNTL,Blind Bull Sum,WY,42.96413,-110.60992,2706.6,-8.0,,Wyoming,United States,6.419
+354:SD:SNTL,Blind Park,SD,44.10772,-103.97688,2103.1,-8.0,,South Dakota,United States,15.782
+356:CA:SNTL,Blue Lakes,CA,38.60801,-119.92455,2456.7,-8.0,Kirkwood Mountain Resort,California,United States,14.706
+358:WY:SNTL,Bone Springs Div,WY,44.67881,-107.5811,2846.8,-8.0,Antelope Butte Ski Area,Wyoming,United States,9.144
+359:ID:SNTL,Bostetter R.S.,ID,42.16442,-114.19272,2295.1,-8.0,Magic Mountain Resort,Idaho,United States,8.013
+361:OR:SNTL,Bourne,OR,44.83052,-118.18787,1783.1,-8.0,,Oregon,United States,14.704
+362:OR:SNTL,Bowman Springs,OR,45.36428,-118.46715,1386.8,-8.0,Tip Top (Kamela),Oregon,United States,10.286
+365:MT:SNTL,Brackett Creek,MT,45.89107,-110.93851,2246.4,-8.0,Bridger Bowl,Montana,United States,8.377
+366:UT:SNTL,Brighton,UT,40.59936,-111.58167,2679.2,-8.0,Brighton Resort,Utah,United States,0.534
+367:WY:SNTL,Brooklyn Lake,WY,41.36038,-106.23038,3124.2,-8.0,,Wyoming,United States,2.895
+369:CO:SNTL,Brumley,CO,39.08758,-106.54231,3221.7,-8.0,Mount Massive Golf Course,Colorado,United States,23.035
+370:ID:SNTL,Brundage Reservoir,ID,45.04315,-116.13253,1914.1,-8.0,Brundage Mountain,Idaho,United States,4.886
+375:WA:SNTL,Bumping Ridge,WA,46.81003,-121.33058,1402.1,-8.0,,Washington,United States,18.354
+376:WA:SNTL,Bunchgrass Mdw,WA,48.68688,-117.17633,1530.1,-8.0,,Idaho,United States,19.476
+377:WY:SNTL,Burgess Junction,WY,44.78765,-107.52917,2411.0,-8.0,,Wyoming,United States,7.267
+379:WY:SNTL,Burroughs Creek,WY,43.69733,-109.67021,2670.0,-8.0,,Wyoming,United States,23.174
+380:CO:SNTL,Butte,CO,38.89435,-106.95327,3105.9,-8.0,Crested Butte Mountain Resort,Colorado,United States,0.636
+381:MT:SNTL,Calvert Creek,MT,45.8838,-113.32553,1953.8,-8.0,Deep Creek,Montana,United States,16.513
+383:UT:SNTL,Camp Jackson,UT,37.81333,-109.48723,2694.4,-8.0,Blue Mountain,Utah,United States,7.209
+387:CO:SNTL,Cascade #2,CO,37.65751,-107.80287,2740.2,-8.0,Durango Nordic Center,Colorado,United States,1.746
+388:OR:SNTL,Cascade Summit,OR,43.59042,-122.0601,1554.5,-8.0,Willamette Pass,Oregon,United States,3.553
+389:WY:SNTL,Casper Mtn.,WY,42.73362,-106.31789,2420.1,-8.0,Casper Nordic Center,Wyoming,United States,1.064
+390:UT:SNTL,Castle Valley,UT,37.66098,-112.74093,2926.1,-8.0,,Utah,United States,8.611
+391:CA:SNTL,Cedar Pass,CA,41.58216,-120.30253,2151.9,-8.0,Cedar Pass,California,United States,4.289
+392:UT:SNTL,Chalk Creek #1,UT,40.85464,-111.04765,2792.0,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,20.217
+393:UT:SNTL,Chalk Creek #2,UT,40.88529,-111.06954,2499.4,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,21.769
+394:NM:SNTL,Chamita,NM,36.95606,-106.65723,2548.1,-8.0,,Colorado,United States,18.18
+398:OR:SNTL,Clackamas Lake,OR,45.09658,-121.75443,1036.3,-8.0,Mt. Hood Skibowl,Oregon,United States,21.982
+399:UT:SNTL,Clear Creek #1,UT,39.86671,-111.28363,2731.0,-8.0,Snowland,Utah,United States,23.034
+401:OR:SNTL,Clear Lake,OR,45.18832,-121.6916,1161.3,-8.0,,Oregon,United States,13.048
+406:OR:SNTL,Cold Springs Camp,OR,42.53305,-122.17683,1810.5,-8.0,Tomahawk Ski Bowl,Oregon,United States,11.218
+407:MT:SNTL,Cole Creek,MT,45.19405,-109.34548,2411.0,-8.0,Red Lodge Mountain,Montana,United States,1.232
+408:CO:SNTL,Columbine,CO,40.39591,-106.60437,2795.0,-8.0,Baker Mountain,Colorado,United States,2.231
+410:MT:SNTL,Combination,MT,46.46523,-113.39358,1713.0,-8.0,Discovery Ski Area,Montana,United States,24.802
+412:CO:SNTL,Copeland Lake,CO,40.20733,-105.5695,2612.1,-8.0,Haugen’s Hill/Allenspark,Colorado,United States,3.612
+415:CO:SNTL,Copper Mountain,CO,39.48917,-106.17154,3200.4,-8.0,Copper Mountain,Colorado,United States,1.161
+418:WA:SNTL,Corral Pass,WA,47.01872,-121.46464,1770.9,-8.0,Crystal Mountain,Washington,United States,9.528
+419:WY:SNTL,Cottonwood Creek,WY,42.6459,-110.81482,2350.0,-8.0,Sno-Shoe Hollow,Wyoming,United States,12.161
+420:WA:SNTL,Cougar Mountain,WA,47.27666,-121.67138,978.4,-8.0,Three Summits,Washington,United States,23.947
+424:ID:SNTL,Crab Creek,ID,44.437,-111.99384,2094.0,-8.0,Lakeview,Montana,United States,22.214
+426:CO:SNTL,Crosho,CO,40.16749,-107.05769,2731.0,-8.0,Airport Hill,Colorado,United States,12.619
+428:CA:SNTL,Css Lab,CA,39.32565,-120.36807,2100.1,-8.0,Soda Springs,California,United States,1.417
+430:CO:SNTL,Culebra #2,CO,37.20939,-105.19988,3218.7,-8.0,Cuchara Mountain Resort,Colorado,United States,16.221
+431:CO:SNTL,Cumbres Trestle,CO,37.01877,-106.45275,3057.1,-8.0,,Colorado,United States,1.275
+434:OR:SNTL,Daly Lake,OR,44.52147,-122.08718,1124.7,-8.0,,Oregon,United States,11.292
+437:MT:SNTL,Deadman Creek,MT,46.79279,-110.67545,1962.9,-8.0,Showdown,Montana,United States,5.425
+438:CO:SNTL,Deadman Hill,CO,40.80572,-105.77018,3121.2,-8.0,Beaver Meadows,Colorado,United States,10.583
+442:OR:SNTL,Diamond Lake,OR,43.18787,-122.14003,1609.3,-8.0,,Oregon,United States,3.526
+450:ID:SNTL,Dollarhide Summit,ID,43.6025,-114.67417,2557.3,-8.0,Soldier Mountain Ski Area,Idaho,United States,18.597
+451:WY:SNTL,Dome Lake,WY,44.57462,-107.29537,2709.7,-8.0,Antelope Butte Ski Area,Wyoming,United States,17.85
+455:UT:SNTL,Dry Bread Pond,UT,41.41289,-111.5377,2526.8,-8.0,Powder Mountain Ski Resort,Utah,United States,19.176
+457:CO:SNTL,Dry Lake,CO,40.5337,-106.7814,2511.6,-8.0,Bowes Ski Hill,Colorado,United States,5.061
+458:MT:SNTL,Dupuyer Creek,MT,48.06341,-112.7573,1749.6,-8.0,Teton Pass Ski Resort,Montana,United States,15.284
+462:CA:SNTL,Ebbetts Pass,CA,38.5497,-119.80468,2639.6,-8.0,Bear Valley,California,United States,22.583
+463:CA:SNTL,Echo Peak,CA,38.849,-120.0795,2331.7,-8.0,Sierra-at-Tahoe Ski Resort,California,United States,5.738
+464:OR:SNTL,Eilertson Meadows,OR,44.86887,-118.11387,1679.4,-8.0,,Oregon,United States,13.323
+465:CO:SNTL,El Diente Peak,CO,37.78607,-108.02235,3112.0,-8.0,,Colorado,United States,11.349
+466:ID:SNTL,Elk Butte,ID,46.83998,-116.12233,1731.3,-8.0,,Idaho,United States,9.621
+467:CO:SNTL,Elk River,CO,40.84758,-106.96861,2654.8,-8.0,,Colorado,United States,4.877
+468:WY:SNTL,Elkhart Park G.S.,WY,43.00657,-109.75893,2868.2,-8.0,White Pine Resort,Wyoming,United States,3.788
+469:MT:SNTL,Emery Creek,MT,48.43412,-113.93725,1322.8,-8.0,,Montana,United States,20.572
+470:OR:SNTL,Emigrant Springs,OR,45.55808,-118.45385,1155.2,-8.0,Tip Top (Kamela),Oregon,United States,12.491
+472:WY:SNTL,Evening Star,WY,44.65258,-109.78422,2752.3,-8.0,,Wyoming,United States,21.957
+473:CA:SNTL,Fallen Leaf,CA,38.93403,-120.0545,1905.0,-8.0,Heavenly Ski Resort,Nevada,United States,12.193
+474:UT:SNTL,Farmington,UT,40.97462,-111.80975,2414.0,-8.0,Wasatch Peaks Ranch,Utah,United States,13.696
+478:WA:SNTL,Fish Lake,WA,47.53565,-121.08553,1048.5,-8.0,,Washington,United States,15.009
+479:OR:SNTL,Fish Lk.,OR,42.3801,-122.34943,1420.4,-8.0,,Oregon,United States,3.182
+483:OR:SNTL,Fourmile Lake,OR,42.43933,-122.2288,1819.7,-8.0,,Oregon,United States,0.403
+484:ID:SNTL,Franklin Basin,ID,42.0505,-111.6012,2481.1,-8.0,Beaver Mountain,Utah,United States,9.717
+485:CO:SNTL,Fremont Pass,CO,39.38014,-106.19784,3447.3,-8.0,Climax,Colorado,United States,1.389
+489:ID:SNTL,Galena,ID,43.87722,-114.6725,2276.9,-8.0,Galena Lodge Trails,Idaho,United States,1.539
+490:ID:SNTL,Galena Summit,ID,43.87497,-114.71363,2679.2,-8.0,Galena Lodge Trails,Idaho,United States,4.758
+491:NM:SNTL,Gallegos Peak,NM,36.19418,-105.55742,2883.4,-8.0,Sipapu Ski and Summer Resort,New Mexico,United States,4.959
+494:OR:SNTL,Gold Center,OR,44.7638,-118.3117,1645.9,-8.0,Anthony Lakes Mountain Resort,Oregon,United States,22.646
+497:WY:SNTL,Granite Creek,WY,43.34298,-110.43495,2063.5,-8.0,,Wyoming,United States,19.411
+502:WA:SNTL,Green Lake,WA,46.54741,-121.17093,1804.4,-8.0,White Pass Ski Area,Washington,United States,19.26
+504:OR:SNTL,Greenpoint,OR,45.62237,-121.70415,1011.9,-8.0,,Oregon,United States,23.618
+505:CO:SNTL,Grizzly Peak,CO,39.64646,-105.8694,3386.3,-8.0,Arapahoe Basin Ski Area,Colorado,United States,1.735
+506:WY:SNTL,Gros Ventre Summit,WY,43.38939,-110.12943,2670.0,-8.0,,Wyoming,United States,0.464
+507:WA:SNTL,Grouse Camp,WA,47.28107,-120.48771,1642.9,-8.0,,Washington,United States,5.368
+508:CA:SNTL,Hagans Meadow,CA,38.8519,-119.9374,2359.2,-8.0,Echo Summit,California,United States,9.442
+509:WY:SNTL,Hams Fork,WY,42.146,-110.67833,2395.7,-8.0,Pine Creek Ski Area,Wyoming,United States,13.303
+512:WY:SNTL,Hanson Sawmill,WY,44.25602,-106.97983,2548.1,-8.0,,Wyoming,United States,7.522
+513:UT:SNTL,Lakefork Basin,UT,40.73785,-110.62121,3319.3,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,22.84
+514:UT:SNTL,Harris Flat,UT,37.48997,-112.57602,2377.4,-8.0,Deer Hollow Non-Motorized Winter Recreation Area,Utah,United States,19.741
+515:WA:SNTL,Harts Pass,WA,48.72047,-120.6586,1978.2,-8.0,,Washington,United States,15.715
+517:UT:SNTL,Hayden Fork,UT,40.79669,-110.88472,2795.0,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,11.631
+518:CA:SNTL,Heavenly Valley,CA,38.92431,-119.91641,2603.0,-8.0,Heavenly Mountain Resort,California;Nevada,United States,1.541
+520:ID:SNTL,Hemlock Butte,ID,46.48111,-115.63361,1767.8,-8.0,Bald Mountain Ski Area,Idaho,United States,20.638
+523:OR:SNTL,High Ridge,OR,45.69682,-118.10657,1493.5,-8.0,Horseshoe Prairie Nordic Ski Area,Oregon,United States,5.099
+526:OR:SNTL,Hogg Pass,OR,44.42042,-121.85655,1463.0,-8.0,,Oregon,United States,1.061
+531:CO:SNTL,Hoosier Pass,CO,39.36092,-106.05999,3535.7,-8.0,Hoosier Pass,Colorado,United States,1.052
+534:ID:SNTL,Howell Canyon,ID,42.32029,-113.61587,2441.4,-8.0,Pomerelle Mountain Resort,Idaho,United States,0.77
+535:ID:SNTL,Humboldt Gulch,ID,47.53178,-115.77643,1298.4,-8.0,Lookout Pass,Idaho;Montana,United States,9.986
+537:ID:SNTL,Hyndman,ID,43.71077,-114.15894,2313.4,-8.0,,Idaho,United States,11.415
+538:CO:SNTL,Idarado,CO,37.93389,-107.6762,2980.9,-8.0,Ironton Park Cross-Country Ski Area,Colorado,United States,0.27
+539:CA:SNTL,Independence Camp,CA,39.45269,-120.29367,2124.5,-8.0,Independence Lake,California,United States,0.853
+540:CA:SNTL,Independence Creek,CA,39.49001,-120.28226,1962.9,-8.0,Independence Lake,California,United States,4.145
+541:CA:SNTL,Independence Lake,CA,39.42752,-120.31342,2542.0,-8.0,Independence Lake,California,United States,3.321
+542:CO:SNTL,Independence Pass,CO,39.07543,-106.61154,3221.7,-8.0,Little Annie,Colorado,United States,18.425
+545:OR:SNTL,Irish Taylor,OR,43.80368,-121.94793,1688.6,-8.0,,Oregon,United States,22.343
+546:ID:SNTL,Island Park,ID,44.4203,-111.38512,1920.2,-8.0,,Idaho,United States,10.578
+547:CO:SNTL,Ivanhoe,CO,39.29228,-106.54907,3212.6,-8.0,Mount Massive Golf Course,Colorado,United States,16.961
+550:ID:SNTL,Jackson Peak,ID,44.05092,-115.44322,2151.9,-8.0,,Idaho,United States,13.308
+551:CO:SNTL,Joe Wright,CO,40.53285,-105.88747,3090.7,-8.0,Cameron Pass,Colorado,United States,0.844
+552:OR:SNTL,Jump Off Joe,OR,44.38605,-122.16683,1075.9,-8.0,,Oregon,United States,18.709
+553:WA:SNTL,June Lake,WA,46.14778,-122.15413,1048.5,-8.0,,Washington,United States,0.529
+554:WY:SNTL,Kelley R.S.,WY,42.26554,-110.80181,2511.6,-8.0,Pine Creek Ski Area,Wyoming,United States,18.214
+555:WY:SNTL,Kendall R.S.,WY,43.24922,-110.01671,2374.4,-8.0,,Wyoming,United States,13.504
+556:CO:SNTL,Kiln,CO,39.3172,-106.61501,2929.1,-8.0,,Colorado,United States,22.379
+557:UT:SNTL,Kimberly Mine,UT,38.48383,-112.39273,2776.7,-8.0,Eagle Point,Utah,United States,18.015
+559:UT:SNTL,Kings Cabin,UT,40.71632,-109.54401,2664.0,-8.0,Mico Ski Resort,Utah,United States,5.784
+560:WY:SNTL,Kirwin,WY,43.86067,-109.32163,2920.0,-8.0,Wood River Valley Ski Touring Park,Wyoming,United States,18.292
+561:UT:SNTL,Kolob,UT,37.52664,-113.05386,2819.4,-8.0,,Utah,United States,22.753
+564:CO:SNTL,Lake Eldora,CO,39.93659,-105.59031,2956.6,-8.0,Eldora,Colorado,United States,0.385
+565:CO:SNTL,Lake Irene,CO,40.41446,-105.81941,3255.3,-8.0,Cameron Pass,Colorado,United States,13.744
+568:MT:SNTL,Lakeview Ridge,MT,44.58907,-111.82498,2237.2,-8.0,Lakeview,Montana,United States,0.989
+570:NV:SNTL,Lamoille #3,NV,40.6448,-115.3812,2450.6,-8.0,Ruby Mountain Ranch,Nevada,United States,11.99
+572:UT:SNTL,Lasal Mountain,UT,38.48226,-109.27198,2920.0,-8.0,,Utah,United States,1.43
+578:MT:SNTL,Lick Creek,MT,45.5041,-110.96625,2097.0,-8.0,Hyalite Canyon Nordic Ski Trails,Montana,United States,3.112
+579:UT:SNTL,Lily Lake,UT,40.86493,-110.79813,2782.8,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,2.463
+580:CO:SNTL,Lily Pond,CO,37.38028,-106.54823,3374.1,-8.0,,Colorado,United States,22.709
+582:UT:SNTL,Little Bear,UT,41.40562,-111.82607,1993.4,-8.0,Powder Mountain Ski Resort,Utah,United States,6.3
+586:CO:SNTL,Lizard Head Pass,CO,37.79895,-107.92475,3105.9,-8.0,,Colorado,United States,2.801
+588:ID:SNTL,Lolo Pass,ID,46.63448,-114.58072,1609.3,-8.0,,Idaho;Montana,United States,2.619
+589:CO:SNTL,Lone Cone,CO,37.89169,-108.19636,2965.7,-8.0,,Colorado,United States,22.84
+590:MT:SNTL,Lone Mountain,MT,45.27412,-111.42692,2688.3,-8.0,Big Sky Resort,Montana,United States,0.585
+591:WA:SNTL,Lone Pine,WA,46.27143,-121.96288,1200.9,-8.0,,Washington,United States,16.335
+594:ID:SNTL,Lookout,ID,47.45749,-115.70457,1578.9,-8.0,Lookout Pass,Idaho;Montana,United States,1.063
+596:UT:SNTL,Lookout Peak,UT,40.83731,-111.70965,2484.1,-8.0,,Utah,United States,4.13
+597:WY:SNTL,Loomis Park,WY,43.17387,-110.14007,2511.6,-8.0,,Wyoming,United States,21.637
+601:ID:SNTL,Lost-Wood Divide,ID,43.82441,-114.26404,2398.8,-8.0,,Idaho,United States,10.606
+602:CO:SNTL,Loveland Basin,CO,39.67428,-105.90264,3477.8,-8.0,Loveland Basin Ski Area,Colorado,United States,0.683
+604:MT:SNTL,Lubrecht Flume,MT,46.88293,-113.32228,1429.5,-8.0,,Montana,United States,8.546
+607:CO:SNTL,Lynx Pass,CO,40.07832,-106.67095,2715.8,-8.0,Elk Island Ranch,Colorado,United States,17.427
+609:MT:SNTL,Madison Plateau,MT,44.58623,-111.11627,2350.0,-8.0,Rendezvous trails,Montana,United States,8.018
+610:ID:SNTL,Magic Mountain,ID,42.18071,-114.28665,2115.3,-8.0,Magic Mountain Resort,Idaho,United States,0.609
+612:UT:SNTL,Mammoth-Cottonwood,UT,39.68338,-111.31818,2654.8,-8.0,Snowland,Utah,United States,2.509
+614:OR:SNTL,Marion Forks,OR,44.59397,-121.97365,789.4,-8.0,,Oregon,United States,13.685
+615:NV:SNTL,Marlette Lake,NV,39.16395,-119.89672,2395.7,-8.0,Diamond Peak,Nevada,United States,10.106
+617:AZ:SNTL,Maverick Fork,AZ,33.92123,-109.45872,2807.2,-8.0,Greer,Arizona,United States,8.665
+618:CO:SNTL,Mc Clure Pass,CO,39.12899,-107.28834,2670.0,-8.0,Redstone,Colorado,United States,6.413
+619:OR:SNTL,Mckenzie,OR,44.2103,-121.87292,1453.9,-8.0,,Oregon,United States,21.157
+621:UT:SNTL,Merchant Valley,UT,38.30285,-112.43637,2654.8,-8.0,Eagle Point,Utah,United States,5.528
+622:CO:SNTL,Mesa Lakes,CO,39.05738,-108.05756,3096.8,-8.0,,Colorado,United States,1.723
+626:UT:SNTL,Midway Valley,UT,37.56933,-112.83849,2996.2,-8.0,Deer Hollow Non-Motorized Winter Recreation Area,Utah,United States,5.342
+627:ID:SNTL,Mill Creek Summit,ID,44.47212,-114.48992,2676.1,-8.0,Big Hill Nordic,Idaho,United States,10.393
+628:UT:SNTL,Mill-D North,UT,40.65883,-111.63683,2724.9,-8.0,,Utah,United States,2.041
+629:CO:SNTL,Mineral Creek,CO,37.84737,-107.72657,3057.1,-8.0,Silverton Mountain,Colorado,United States,7.015
+632:CO:SNTL,Molas Lake,CO,37.74929,-107.68933,3233.9,-8.0,Kendall Mountain Recreation Area,Colorado,United States,7.502
+634:UT:SNTL,Monte Cristo,UT,41.46547,-111.49688,2721.9,-8.0,Powder Mountain Ski Resort,Utah,United States,24.274
+637:ID:SNTL,Mores Creek Summit,ID,43.932,-115.66588,1856.2,-8.0,,Idaho,United States,9.839
+638:ID:SNTL,Moose Creek,ID,45.67008,-113.95315,1880.6,-8.0,Lost Trail,Idaho;Montana,United States,2.917
+641:AK:SNTL,Frostbite Bottom,AK,61.74699,-149.26769,819.9,-9.0,Skeetawk,Alaska,United States,1.637
+642:WA:SNTL,Morse Lake,WA,46.90585,-121.4827,1645.9,-8.0,Crystal Mountain,Washington,United States,3.271
+649:MT:SNTL,Mount Lockhart,MT,47.91727,-112.8238,1959.9,-8.0,Teton Pass Ski Resort,Montana,United States,1.792
+651:OR:SNTL,Mt Hood Test Site,OR,45.32097,-121.7158,1639.8,-8.0,Timberline Lodge Ski Area,Oregon,United States,0.274
+652:NV:SNTL,Mt Rose Ski Area,NV,39.31573,-119.89473,2685.3,-8.0,Mount Rose Ski Tahoe,Nevada,United States,1.052
+653:OR:SNTL,Mt. Howard,OR,45.26514,-117.17377,2389.6,-8.0,High Wallowas,Oregon,United States,2.937
+655:OR:SNTL,Mud Ridge,OR,45.25362,-121.73673,1240.5,-8.0,Mt. Hood Skibowl,Oregon,United States,5.224
+656:MT:SNTL,Mule Creek,MT,45.40957,-112.95927,2529.8,-8.0,Maverick Mountain Ski Area,Montana,United States,13.423
+657:MT:SNTL,N Fk Elk Creek,MT,46.8716,-113.27725,1883.7,-8.0,,Montana,United States,12.089
+658:CO:SNTL,Nast Lake,CO,39.29695,-106.60786,2654.8,-8.0,,Colorado,United States,21.313
+660:OR:SNTL,New Crescent Lake,OR,43.51185,-121.97982,1496.6,-8.0,Willamette Pass,Oregon,United States,11.302
+661:WY:SNTL,New Fork Lake,WY,43.11265,-109.94947,2554.2,-8.0,,Wyoming,United States,22.063
+663:CO:SNTL,Niwot,CO,40.03581,-105.5452,3029.7,-8.0,Cardinal Hill,Colorado,United States,7.463
+664:MT:SNTL,Noisy Basin,MT,48.15668,-113.9463,1850.1,-8.0,Bigfork Community Nordic Center,Montana,United States,4.241
+665:NM:SNTL,North Costilla,NM,36.99396,-105.25988,3221.7,-8.0,Ski Rio,New Mexico,United States,22.2
+667:MT:SNTL,North Fork Jocko,MT,47.27258,-113.75631,1862.3,-8.0,,Montana,United States,22.484
+668:WY:SNTL,North French Creek,WY,41.33087,-106.37558,3093.7,-8.0,Brush Creek Cross-Country Ski Trail System,Wyoming,United States,10.357
+669:CO:SNTL,North Lost Trail,CO,39.07818,-107.14388,2801.1,-8.0,Marble Ski Area,Colorado,United States,3.55
+672:WA:SNTL,Olallie Meadows,WA,47.37406,-121.44213,1222.2,-8.0,Three Summits,Washington,United States,3.888
+673:WY:SNTL,Old Battle,WY,41.15426,-106.96926,2999.2,-8.0,Green Mountain,Wyoming,United States,5.998
+679:WA:SNTL,Paradise,WA,46.78266,-121.74767,1569.7,-8.0,Paradise,Washington,United States,0.955
+680:CO:SNTL,Park Cone,CO,38.81982,-106.58962,2926.1,-8.0,,Colorado,United States,19.157
+681:WA:SNTL,Park Creek Ridge,WA,48.44488,-120.91551,1405.1,-8.0,,Washington,United States,21.412
+682:CO:SNTL,Park Reservoir,CO,39.04433,-107.87951,3045.0,-8.0,Cedaredge/Rimrock,Colorado,United States,7.61
+684:UT:SNTL,Parleys Summit,UT,40.76184,-111.62917,2313.4,-8.0,,Utah,United States,2.777
+688:CO:SNTL,Phantom Valley,CO,40.39803,-105.84606,2752.3,-8.0,Cameron Pass,Colorado,United States,14.676
+689:WY:SNTL,Phillips Bench,WY,43.51687,-110.91258,2490.2,-8.0,,Wyoming,United States,2.94
+692:WA:SNTL,Pigtail Peak,WA,46.62153,-121.38643,1767.8,-8.0,White Pass Ski Area,Washington,United States,0.85
+695:ID:SNTL,Pine Creek Pass,ID,43.56998,-111.21157,2045.2,-8.0,,Idaho,United States,0.751
+699:WA:SNTL,Pope Ridge,WA,47.9909,-120.56622,1094.2,-8.0,Chiwawa Sno-Park,Washington,United States,21.643
+701:CO:SNTL,Porphyry Creek,CO,38.48864,-106.33967,3288.8,-8.0,Monarch Mountain,Colorado,United States,3.165
+702:WA:SNTL,Potato Hill,WA,46.3497,-121.51415,1365.5,-8.0,,Washington,United States,22.483
+703:WY:SNTL,Powder River Pass,WY,44.16188,-107.12622,2889.5,-8.0,Meadowlark Ski Lodge (Big Horn Ski Resort),Wyoming,United States,7.267
+707:WA:SNTL,Quartz Peak,WA,47.87927,-117.08938,1435.6,-8.0,Mont Spokane State Park Nordic,Idaho;Washington,United States,1.713
+708:NM:SNTL,Quemazon,NM,35.92195,-106.39179,2895.6,-8.0,Cañada Bonita,New Mexico,United States,1.575
+709:CO:SNTL,Rabbit Ears,CO,40.36735,-106.74118,2862.1,-8.0,,Colorado,United States,2.308
+710:OR:SNTL,Railroad Overpass,OR,43.65887,-122.21272,816.9,-8.0,,Oregon,United States,9.864
+711:WA:SNTL,Rainy Pass,WA,48.51865,-120.7358,1487.4,-8.0,,Washington,United States,6.236
+712:OR:SNTL,Red Hill,OR,45.4643,-121.70428,1344.2,-8.0,Cooper Spur Ski Area,Oregon,United States,9.628
+713:CO:SNTL,Red Mountain Pass,CO,37.89168,-107.71389,3371.1,-8.0,Silverton Mountain,Colorado,United States,5.31
+714:UT:SNTL,Red Pine Ridge,UT,39.45197,-111.27221,2740.2,-8.0,Aspen Hills,Utah,United States,15.873
+715:NM:SNTL,Red River Pass #2,NM,36.69935,-105.34145,2999.2,-8.0,Enchanted Forest Cross Country Ski Area,New Mexico,United States,1.253
+716:WY:SNTL,Reno Hill,WY,42.57089,-106.08969,2563.4,-8.0,Shirley Basin Ski Area,Wyoming,United States,23.126
+718:CO:SNTL,Roach,CO,40.87498,-106.04675,2959.6,-8.0,Chimney Park Nordic Trails,Wyoming,United States,21.987
+724:CA:SNTL,Rubicon #2,CA,38.99927,-120.13139,2304.3,-8.0,,California,United States,5.467
+727:MT:SNTL,Saddle Mtn.,MT,45.69259,-113.96828,2404.9,-8.0,Lost Trail,Idaho;Montana,United States,1.05
+729:OR:SNTL,Salt Creek Falls,OR,43.61193,-122.11758,1286.3,-8.0,,Oregon,United States,2.977
+730:WY:SNTL,Salt River Summit,WY,42.5075,-110.9099,2325.6,-8.0,Sno-Shoe Hollow,Wyoming,United States,24.055
+731:WY:SNTL,Sand Lake,WY,41.4625,-106.281,3072.4,-8.0,,Wyoming,United States,14.952
+732:WY:SNTL,Sandstone RS,WY,41.11179,-107.17043,2484.1,-8.0,Three Forks Ranch,Colorado,United States,16.244
+733:OR:SNTL,Santiam Jct.,OR,44.43503,-121.94502,1140.0,-8.0,,Oregon,United States,4.272
+734:WA:SNTL,Sasse Ridge,WA,47.38485,-121.06323,1322.8,-8.0,,Washington,United States,3.278
+735:ID:SNTL,Savage Pass,ID,46.46633,-114.63333,1880.6,-8.0,,Idaho;Montana,United States,19.285
+736:OR:SNTL,Schneider Meadows,OR,45.00107,-117.16522,1645.9,-8.0,,Oregon,United States,24.154
+737:CO:SNTL,Schofield Pass,CO,39.01467,-107.04933,3243.1,-8.0,,Colorado,United States,4.781
+738:ID:SNTL,Schweitzer Basin,ID,48.37428,-116.63917,1856.2,-8.0,Schweitzer Mountain Resort,Idaho,United States,1.888
+739:CO:SNTL,Scotch Creek,CO,37.64562,-108.00833,2792.0,-8.0,Purgatory Resort,Colorado,United States,16.16
+740:ID:SNTL,Secesh Summit,ID,45.18848,-115.97152,1990.3,-8.0,Brundage Mountain,Idaho,United States,24.911
+745:OR:SNTL,Sevenmile Marsh,OR,42.69825,-122.14165,1734.3,-8.0,Crater Lake Ski Bowl,Oregon,United States,23.195
+747:ID:SNTL,Shanghi Summit,ID,46.56603,-115.74216,1399.0,-8.0,Bald Mountain Ski Area,Idaho,United States,9.846
+748:WA:SNTL,Sheep Canyon,WA,46.19325,-122.25393,1216.2,-8.0,,Washington,United States,5.024
+749:ID:SNTL,Sheep Mtn.,ID,43.2103,-111.68792,2020.8,-8.0,Taylor Mountain,Idaho,United States,23.601
+751:WY:SNTL,Shell Creek,WY,44.50012,-107.42947,2916.9,-8.0,Antelope Butte Ski Area,Wyoming,United States,14.106
+752:ID:SNTL,Sherwin,ID,46.95028,-116.33972,972.3,-8.0,,Idaho,United States,23.51
+754:MT:SNTL,Shower Falls,MT,45.40125,-110.95758,2456.7,-8.0,Hyalite Canyon Nordic Ski Trails,Montana,United States,8.346
+762:CO:SNTL,Slumgullion,CO,37.99076,-107.20392,3523.5,-8.0,Lake City Ski Hill,Colorado,United States,9.865
+763:UT:SNTL,Smith  Morehouse,UT,40.78931,-111.09192,2328.7,-8.0,,Utah,United States,21.332
+766:UT:SNTL,Snowbird,UT,40.56914,-111.65852,2795.0,-8.0,Snowbird,Utah,United States,0.82
+768:AK:SNTL,Look Eyrie,AK,63.32192,-145.59655,1536.2,-9.0,Northern Warfare Training Center,Alaska,United States,24.895
+769:ID:SNTL,Soldier R.S.,ID,43.48407,-114.82692,1761.7,-8.0,Soldier Mountain Ski Area,Idaho,United States,1.305
+772:WY:SNTL,South Brush Creek,WY,41.3295,-106.5025,2584.7,-8.0,Brush Creek Cross-Country Ski Trail System,Wyoming,United States,1.162
+773:CO:SNTL,South Colony,CO,37.96647,-105.53671,3288.8,-8.0,Conquistador Ski Resort,Colorado,United States,17.355
+775:WY:SNTL,South Pass,WY,42.57314,-108.84324,2755.4,-8.0,Beaver Creek Nordic Ski Area,Wyoming,United States,11.38
+776:WA:SNTL,Spencer Meadow,WA,46.1795,-121.92661,1036.3,-8.0,,Washington,United States,13.933
+777:WA:SNTL,Spirit Lake,WA,46.26113,-122.1772,1072.9,-8.0,,Washington,United States,12.222
+778:CA:SNTL,Spratt Creek,CA,38.66627,-119.81741,1847.1,-8.0,Kirkwood Mountain Resort,California,United States,21.751
+780:CO:SNTL,Spud Mountain,CO,37.69883,-107.77841,3249.2,-8.0,Durango Nordic Center,Colorado,United States,6.749
+781:MT:SNTL,Spur Park,MT,46.77962,-110.62165,2462.8,-8.0,Showdown,Montana,United States,9.108
+782:ID:SNTL,Puhi Flat,ID,44.77091,-116.24805,1902.0,-8.0,Tamarack Resort,Idaho,United States,12.931
+784:CA:SNTL,Palisades Tahoe,CA,39.18986,-120.26576,2441.4,-8.0,Palisades Tahoe Olympic Valley,California,United States,1.798
+788:WA:SNTL,Stampede Pass,WA,47.27427,-121.34162,1173.5,-8.0,Meany Lodge,Washington,United States,1.731
+791:WA:SNTL,Stevens Pass,WA,47.74607,-121.09288,1200.9,-8.0,Stevens Pass Ski Area,Washington,United States,0.962
+792:ID:SNTL,Stickney Mill,ID,43.86117,-114.20902,2267.7,-8.0,,Idaho,United States,16.015
+793:CO:SNTL,Stillwater Creek,CO,40.22532,-105.9198,2670.0,-8.0,Ski Trail Mountain (King Ranch),Colorado,United States,4.365
+797:CO:SNTL,Stump Lakes,CO,37.47647,-107.63348,3422.9,-8.0,,Colorado,United States,12.419
+798:WY:SNTL,Sucker Creek,WY,44.72279,-107.40035,2694.4,-8.0,,Wyoming,United States,5.907
+801:OR:SNTL,Summit Lake,OR,43.44907,-122.13808,1709.9,-8.0,Willamette Pass,Oregon,United States,19.976
+802:CO:SNTL,Summit Ranch,CO,39.71803,-106.1577,2849.9,-8.0,Frisco Nordic Center,Colorado,United States,16.831
+803:ID:SNTL,Sunset,ID,47.55545,-115.82422,1697.7,-8.0,Lookout Pass,Idaho;Montana,United States,14.105
+804:WA:SNTL,Surprise Lakes,WA,46.09497,-121.76345,1304.5,-8.0,,Washington,United States,14.672
+806:WY:SNTL,Sylvan Lake,WY,44.47764,-110.15651,2572.5,-8.0,,Wyoming,United States,15.59
+807:WY:SNTL,Sylvan Road,WY,44.47825,-110.03808,2176.3,-8.0,,Wyoming,United States,6.506
+809:CA:SNTL,Tahoe City Cross,CA,39.17162,-120.15362,2060.4,-8.0,Granlibakken Ski Resort,California,United States,1.919
+813:MT:SNTL,Tepee Creek,MT,44.78562,-111.71,2423.2,-8.0,Lakeview,Montana,United States,23.288
+814:UT:SNTL,Thaynes Canyon,UT,40.6235,-111.53322,2822.4,-8.0,Park City Mountain Resort,Utah,United States,3.735
+815:OR:SNTL,Three Creeks Meadow,OR,44.14425,-121.64095,1731.3,-8.0,Mt. Bachelor,Oregon,United States,17.053
+817:WA:SNTL,Thunder Basin,WA,48.52753,-120.9895,1313.7,-8.0,,Washington,United States,24.87
+818:WY:SNTL,Tie Creek,WY,44.81243,-107.41017,2148.8,-8.0,,Wyoming,United States,5.634
+819:WY:SNTL,Timber Creek,WY,44.0274,-109.17879,2411.0,-8.0,Wood River Valley Ski Touring Park,Wyoming,United States,12.433
+820:UT:SNTL,Timpanogos Divide,UT,40.42817,-111.61633,2493.3,-8.0,,Utah,United States,4.081
+821:OR:SNTL,Tipton,OR,44.65567,-118.42617,1569.7,-8.0,Dixie Summit,Oregon,United States,18.842
+822:WY:SNTL,Togwotee Pass,WY,43.74902,-110.0578,2923.0,-8.0,,Wyoming,United States,5.052
+823:UT:SNTL,Tony Grove Lake,UT,41.89833,-111.62957,2575.6,-8.0,,Utah,United States,3.025
+824:WA:SNTL,Touchet,WA,46.11868,-117.8505,1682.5,-8.0,Bluewood,Washington,United States,4.704
+825:CO:SNTL,Tower,CO,40.5374,-106.67655,3233.9,-8.0,Steamboat Ski Resort,Colorado,United States,11.405
+826:WY:SNTL,Townsend Creek,WY,42.69525,-108.89572,2657.9,-8.0,,Wyoming,United States,19.875
+828:UT:SNTL,Trial Lake,UT,40.678,-110.94873,3038.9,-8.0,,Utah,United States,16.072
+829:CO:SNTL,Trinchera,CO,37.35296,-105.23259,3310.1,-8.0,Cuchara Mountain Resort,Colorado,United States,9.14
+831:WY:SNTL,Triple Peak,WY,42.76393,-110.5914,2596.9,-8.0,,Wyoming,United States,17.823
+832:WA:SNTL,Trough,WA,47.23328,-120.29412,1670.3,-8.0,Mission Ridge,Washington,United States,10.269
+833:UT:SNTL,Trout Creek,UT,40.739,-109.6728,2877.3,-8.0,Grizzly Ridge,Utah,United States,15.676
+834:CA:SNTL,Truckee #2,CA,39.30087,-120.18407,1981.2,-8.0,Northstar at Tahoe Resort,California,United States,6.07
+838:CO:SNTL,University Camp,CO,40.03307,-105.57562,3148.6,-8.0,Cardinal Hill,Colorado,United States,7.82
+840:CO:SNTL,Upper San Juan,CO,37.48563,-106.83528,3090.7,-8.0,Wolf Creek Ski Area,Colorado,United States,4.676
+841:WA:SNTL,Upper Wheeler,WA,47.28734,-120.37015,1319.8,-8.0,Mission Ridge,Washington,United States,3.165
+842:CO:SNTL,Vail Mountain,CO,39.61765,-106.38019,3136.4,-8.0,Vail,Colorado,United States,1.435
+843:CO:SNTL,Vallecito,CO,37.48524,-107.50748,3273.6,-8.0,,Colorado,United States,10.481
+845:ID:SNTL,Vienna Mine,ID,43.79942,-114.85273,2721.9,-8.0,,Idaho,United States,16.281
+847:MT:SNTL,Waldron,MT,47.91998,-112.79087,1719.1,-8.0,Teton Pass Ski Resort,Montana,United States,1.872
+848:CA:SNTL,Ward Creek #3,CA,39.13545,-120.21865,2057.4,-8.0,Twin Peaks Ski Resort,California,United States,1.786
+850:MT:SNTL,Warm Springs,MT,46.27368,-113.164,2389.6,-8.0,Discovery Ski Area,Montana,United States,6.763
+852:WY:SNTL,Webber Springs,WY,41.1591,-106.92809,2819.4,-8.0,Green Mountain,Wyoming,United States,3.332
+853:UT:SNTL,Webster Flat,UT,37.575,-112.90155,2788.9,-8.0,,Utah,United States,8.609
+854:NM:SNTL,Wesner Springs,NM,35.77584,-105.54337,3386.3,-8.0,"Ski Santa Fe, Santa Fe, Q38555",New Mexico,United States,22.376
+856:UT:SNTL,Parleys Upper,UT,40.70194,-111.60619,2539.0,-8.0,Utah Olympic Park,Utah,United States,3.872
+857:CO:SNTL,Whiskey Ck,CO,37.21423,-105.12262,3127.2,-8.0,Cuchara Mountain Resort,Colorado,United States,14.464
+858:MT:SNTL,Whiskey Creek,MT,44.61088,-111.14998,2069.6,-8.0,Rendezvous trails,Montana,United States,6.175
+859:WY:SNTL,Whiskey Park,WY,41.00368,-106.90795,2728.0,-8.0,Three Forks Ranch,Colorado,United States,12.819
+860:ID:SNTL,White Elephant,ID,44.53267,-111.41085,2337.8,-8.0,Sunset Lodge,Idaho,United States,13.301
+861:AZ:SNTL,White Horse Lake,AZ,35.14189,-112.14966,2191.5,-8.0,Elk Ridge,Arizona,United States,9.008
+863:WA:SNTL,White Pass E.S.,WA,46.64142,-121.38153,1353.3,-8.0,,Washington,United States,0.798
+866:AZ:SNTL,Wildcat,AZ,33.74347,-109.48078,2392.7,-8.0,Sunrise Park Resort,Arizona,United States,24.878
+867:ID:SNTL,Wildhorse Divide,ID,42.75743,-112.47783,1975.1,-8.0,Caribou,Idaho,United States,16.692
+868:WY:SNTL,Willow Creek,WY,42.81513,-110.83515,2456.7,-8.0,Sno-Shoe Hollow,Wyoming,United States,12.271
+869:CO:SNTL,Willow Creek Pass,CO,40.34734,-106.0952,2901.7,-8.0,Ski Trail Mountain (King Ranch),Colorado,United States,20.919
+870:CO:SNTL,Willow Park,CO,40.43397,-105.73588,3264.4,-8.0,Ski Estes Park (Hidden Valley),Colorado,United States,9.653
+873:OR:SNTL,Wolf Creek,OR,45.06704,-118.15185,1746.5,-8.0,,Oregon,United States,13.114
+874:CO:SNTL,Wolf Creek Summit,CO,37.47903,-106.80234,3331.5,-8.0,Wolf Creek Ski Area,Colorado,United States,2.048
+895:ID:SNTL,Chocolate Gulch,ID,43.7685,-114.41812,1923.3,-8.0,,Idaho,United States,4.591
+896:UT:SNTL,Hardscrabble,UT,40.86833,-111.71865,2215.9,-8.0,,Utah,United States,7.058
+897:WA:SNTL,Meadows Pass,WA,47.28312,-121.47197,984.5,-8.0,Meany Lodge,Washington,United States,11.507
+898:WA:SNTL,Mount Gardner,WA,47.35768,-121.56812,893.1,-8.0,Three Summits,Washington,United States,12.63
+899:WA:SNTL,Tinkham Creek,WA,47.33198,-121.46975,914.4,-8.0,Three Summits,Washington,United States,8.988
+901:MT:SNTL,Stuart Mountain,MT,46.99521,-113.92667,2215.9,-8.0,,Montana,United States,5.434
+903:MT:SNTL,Nevada Ridge,MT,46.84234,-112.50787,2142.7,-8.0,Great Divide Ski Area,Montana,United States,17.038
+904:CO:SNTL,Columbus Basin,CO,37.44146,-108.02468,3285.7,-8.0,Hesperus Ski Area,Colorado,United States,16.343
+905:CO:SNTL,Mancos,CO,37.43109,-108.17005,3054.1,-8.0,Hesperus Ski Area,Colorado,United States,17.954
+907:UT:SNTL,Agua Canyon,UT,37.52217,-112.27118,2709.7,-8.0,,Utah,United States,17.66
+909:WA:SNTL,Wells Creek,WA,48.8661,-121.78976,1231.4,-8.0,Salmon Ridge Sno-Park,Washington,United States,8.084
+910:WA:SNTL,Elbow Lake,WA,48.69092,-121.90893,929.6,-8.0,,Washington,United States,20.115
+911:WA:SNTL,Rex River,WA,47.30218,-121.60475,1161.3,-8.0,Three Summits,Washington,United States,18.229
+913:CO:SNTL,Buffalo Park,CO,40.22838,-106.5962,2816.4,-8.0,Bluebird Backcountry,Colorado,United States,11.612
+917:MT:SNTL,Rocky Boy,MT,48.17478,-109.64728,1441.7,-8.0,Bear Paw Ski Bowl,Montana,United States,2.065
+920:SD:SNTL,North Rapid Creek,SD,44.20617,-103.78758,1874.5,-8.0,Ski Mystic Deer Mountain,South Dakota,United States,11.634
+921:NM:SNTL,Elk Cabin,NM,35.7073,-105.80584,2505.5,-8.0,"Ski Santa Fe, Santa Fe, Q38555",New Mexico,United States,9.491
+922:NM:SNTL,Santa Fe,NM,35.77154,-105.78487,3499.1,-8.0,"Ski Santa Fe, Santa Fe, Q38555",New Mexico,United States,2.308
+923:WY:SNTL,Deer Park,WY,42.59076,-108.90273,2953.5,-8.0,Beaver Creek Nordic Ski Area,Wyoming,United States,16.572
+924:MT:SNTL,West Yellowstone,MT,44.65866,-111.09199,2036.1,-8.0,Rendezvous trails,Montana,United States,1.349
+927:AZ:SNTL,Snowslide Canyon,AZ,35.34179,-111.65084,2962.7,-8.0,Arizona Snowbowl,Arizona,United States,4.48
+928:WA:SNTL,Huckleberry Creek,WA,47.06565,-121.58778,685.8,-8.0,Crystal Mountain,Washington,United States,16.322
+929:MT:SNTL,Sacajawea,MT,45.87395,-110.92783,2014.7,-8.0,Bridger Bowl,Montana,United States,6.339
+930:MT:SNTL,Peterson Meadows,MT,46.12588,-113.30792,2191.5,-8.0,Wraith Hill,Montana,United States,9.215
+934:NM:SNTL,Tolby,NM,36.47498,-105.19534,3112.0,-8.0,Val Verde Ski Basin,New Mexico,United States,10.874
+935:CO:SNTL,Jackwhacker Gulch,CO,39.57096,-105.80355,3361.9,-8.0,Duck Lake,Colorado,United States,6.533
+936:CO:SNTL,Echo Lake,CO,39.65539,-105.59358,3249.2,-8.0,Echo Mountain,Colorado,United States,7.119
+937:CO:SNTL,Michigan Creek,CO,39.43579,-105.91072,3261.4,-8.0,Carter Park Hill,Colorado,United States,11.989
+938:CO:SNTL,Buckskin Joe,CO,39.30378,-106.11316,3401.6,-8.0,Hoosier Pass,Colorado,United States,8.794
+940:CO:SNTL,Lost Dog,CO,40.81557,-106.74833,2849.9,-8.0,Steamboat Lake,Colorado,United States,13.524
+941:WA:SNTL,Mowich,WA,46.92833,-121.95232,966.2,-8.0,,Washington,United States,16.941
+944:WY:SNTL,Gunsight Pass,WY,43.38332,-109.87815,2993.1,-8.0,,Wyoming,United States,16.147
+946:AK:SNTL,Indian Pass,AK,61.06577,-149.48543,731.5,-9.0,,Alaska,United States,8.185
+954:AK:SNTL,Turnagain Pass,AK,60.78043,-149.18325,566.9,-9.0,,Alaska,United States,0.837
+955:AK:SNTL,Summit Creek,AK,60.61713,-149.53128,408.4,-9.0,Manitoba Mountain,Alaska,United States,8.56
+956:AK:SNTL,Grandview,AK,60.60832,-149.06313,326.1,-9.0,,Alaska,United States,15.666
+964:AK:SNTL,Grouse Creek Divide,AK,60.25965,-149.34228,219.5,-9.0,,Alaska,United States,4.978
+967:AK:SNTL,Susitna Valley High,AK,62.13245,-150.04391,109.7,-9.0,,Alaska,United States,17.644
+970:CO:SNTL,Jones Pass,CO,39.7645,-105.90655,3179.1,-8.0,Loveland Valley Ski Area,Colorado,United States,9.448
+971:UT:SNTL,Parrish Creek,UT,40.93417,-111.81372,2365.2,-8.0,,Utah,United States,17.827
+972:UT:SNTL,Louis Meadow,UT,40.83033,-111.76457,2054.4,-8.0,Little Mountain,Utah,United States,7.205
+974:WA:SNTL,Waterhole,WA,47.94485,-123.42594,1527.0,-8.0,Hurricane Ridge,Washington,United States,5.873
+975:WA:SNTL,Swamp Creek,WA,48.57142,-120.78267,1197.9,-8.0,,Washington,United States,10.058
+978:ID:SNTL,Bogus Basin,ID,43.76377,-116.09685,1941.6,-8.0,Bogus Basin Mountain Recreation Area,Idaho,United States,0.869
+981:MT:SNTL,Burnt Mtn,MT,45.2401,-109.45961,1804.4,-8.0,Red Lodge Mountain,Montana,United States,9.816
+982:WY:SNTL,Cole Canyon,WY,44.48632,-104.41057,1807.5,-8.0,Sundance Mountain,Wyoming,United States,10.999
+985:WA:SNTL,Sourdough Gulch,WA,46.23713,-117.39435,1207.0,-8.0,,Washington,United States,24.601
+989:ID:SNTL,Moscow Mountain,ID,46.805,-116.8535,1432.6,-8.0,Tamarack (Moscow Mtn),Idaho,United States,1.817
+991:WA:SNTL,Hozomeen Camp,WA,48.98075,-121.07976,512.1,-8.0,Manning Park Resort,British Columbia,Canada,20.599
+992:UT:SNTL,Bear River RS,UT,40.8852,-110.8277,2593.8,-8.0,Lily Lake Winter Non-Motorized Area,Utah,United States,1.439
+998:WA:SNTL,Easy Pass,WA,48.85933,-121.43895,1609.3,-8.0,,Washington,United States,15.573
+999:WA:SNTL,Marten Ridge,WA,48.76292,-121.69823,1072.9,-8.0,,Washington,United States,10.318
