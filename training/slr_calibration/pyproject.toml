@@ -12,6 +12,16 @@ dependencies = [
   "pyarrow==25.0.1",
 ]
 
+# NOAA HRRR GRIB2 extraction prototype (slr_calibration.noaa_hrrr):
+# ecCodes does the decoding; Herbie/cfgrib are installed alongside for
+# ad-hoc retrieval and cross-checks. Verified installable on Python 3.14.
+[project.optional-dependencies]
+noaa = [
+  "eccodes==2.50.0",
+  "cfgrib==0.9.15.1",
+  "herbie-data==2026.9.2",
+]
+
 [project.scripts]
 mysnow-slr-calibration = "slr_calibration.cli:main"
 

@@ -15,6 +15,7 @@ from .ghcn_track import ingest_ghcn
 from .hrrr_dataset import OBS_START_DEFAULT as HRRR_OBS_START_DEFAULT
 from .hrrr_dataset import build_dataset as build_hrrr_dataset
 from .io import read_rows
+from .noaa_hrrr import extract_noaa_hrrr
 from .profiles import backfill_openmeteo_multistation_profiles, backfill_openmeteo_profiles
 from .sierra import SierraImportConfig, import_sierra_ghcn_directory, write_sierra_import
 from .sierra_evaluation import evaluate_sierra_station_water_year_holdout
@@ -507,6 +508,28 @@ def _build_hrrr_dataset(args: argparse.Namespace) -> int:
     return 0
 
 
+def _extract_noaa_hrrr(args: argparse.Namespace) -> int:
+    report = extract_noaa_hrrr(
+        dataset_dir=args.dataset_dir,
+        start_cycle=date.fromisoformat(args.start_cycle),
+        end_cycle=date.fromisoformat(args.end_cycle),
+        output_year=int(args.output_month.split("-")[0]),
+        output_month=int(args.output_month.split("-")[1]),
+        max_workers=args.max_workers,
+        max_files=args.max_files,
+    )
+    print(json.dumps({
+        "stations": report["stations"],
+        "stationDays": report["coverage"]["station_days"],
+        "filesFetched": report["files"]["fetched"],
+        "filesCached": report["files"]["cached"],
+        "filesFailed": len(report["files"]["failed"]),
+        "bytesTransferred": report["operations"]["bytes_transferred"],
+        "elapsedSeconds": report["operations"]["wall_seconds"],
+    }, sort_keys=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -728,6 +751,18 @@ def build_parser() -> argparse.ArgumentParser:
     hrrr_dataset.add_argument("--awdb-interval", type=float, default=1.5)
     hrrr_dataset.add_argument("--open-meteo-interval", type=float, default=2.0)
     hrrr_dataset.set_defaults(func=_build_hrrr_dataset)
+
+    noaa_hrrr = subparsers.add_parser(
+        "extract-noaa-hrrr",
+        help="prototype: extract NOAA HRRR GRIB2 daily aggregates from AWS S3 and benchmark them against the Open-Meteo dataset month",
+    )
+    noaa_hrrr.add_argument("--dataset-dir", type=Path, default=Path("data/hrrr-dataset"))
+    noaa_hrrr.add_argument("--start-cycle", default="2024-11-30")
+    noaa_hrrr.add_argument("--end-cycle", default="2025-01-01")
+    noaa_hrrr.add_argument("--output-month", default="2024-12")
+    noaa_hrrr.add_argument("--max-workers", type=int, default=4)
+    noaa_hrrr.add_argument("--max-files", type=int, help="debug cap on GRIB files processed")
+    noaa_hrrr.set_defaults(func=_extract_noaa_hrrr)
 
     return parser
 
