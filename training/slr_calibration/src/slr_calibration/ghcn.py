@@ -21,6 +21,13 @@ class GhcnRockiesConfig:
     min_wesf_mm: float = 2.5
     min_observed_slr: float = 2.0
     max_observed_slr: float = 50.0
+    # Generalization knobs for the tracking importer.  Defaults reproduce the
+    # original Rockies research behavior exactly; the tracking loop disables
+    # the domain mask and supplies each resort's timezone/regime instead.
+    apply_domain_mask: bool = True
+    timezone_name: str = "America/Denver"
+    climate_regime: str = "continental_mountain"
+    storm_group_prefix: str = "rockies"
 
 
 @dataclass(frozen=True)
@@ -87,7 +94,7 @@ def is_rockies_station(state: str, latitude: float, longitude: float, elevation_
     return False
 
 
-def _assign_storm_groups(rows: list[dict[str, Any]]) -> None:
+def _assign_storm_groups(rows: list[dict[str, Any]], prefix: str = "rockies") -> None:
     unique_dates = sorted({date.fromisoformat(str(row["observation_date"])) for row in rows})
     group_by_date: dict[date, str] = {}
     start: date | None = None
@@ -96,7 +103,7 @@ def _assign_storm_groups(rows: list[dict[str, Any]]) -> None:
         if previous is None or (value - previous).days > 1:
             start = value
         assert start is not None
-        group_by_date[value] = f"rockies-{start.isoformat()}"
+        group_by_date[value] = f"{prefix}-{start.isoformat()}"
         previous = value
     for row in rows:
         row["storm_group_id"] = group_by_date[date.fromisoformat(str(row["observation_date"]))]
@@ -136,7 +143,7 @@ def import_ghcn_rockies(
             if not station_id or observation_date is None or latitude is None or longitude is None or elevation_m is None:
                 reject("INVALID_METADATA", "station/date/coordinate/elevation is missing or invalid")
                 continue
-            if not is_rockies_station(state, latitude, longitude, elevation_m, config.min_elevation_m):
+            if config.apply_domain_mask and not is_rockies_station(state, latitude, longitude, elevation_m, config.min_elevation_m):
                 reject("OUTSIDE_ROCKIES_DOMAIN", f"state={state}; lat={latitude}; lon={longitude}; elev_m={elevation_m}")
                 continue
             if str(row.get("qc_status") or "").strip().lower() != "passed":
@@ -170,7 +177,7 @@ def import_ghcn_rockies(
                 reject("INVALID_OBSERVATION_TIME", str(row.get("obs_time") or ""))
                 continue
             hour, minute = obs_time
-            valid_local = datetime(observation_date.year, observation_date.month, observation_date.day, hour, minute, tzinfo=MOUNTAIN_LOCAL_TIME)
+            valid_local = datetime(observation_date.year, observation_date.month, observation_date.day, hour, minute, tzinfo=ZoneInfo(config.timezone_name))
             accepted.append({
                 "event_id": f"ghcn:{station_id}:{observation_date.isoformat()}",
                 "storm_group_id": "pending",
@@ -189,7 +196,7 @@ def import_ghcn_rockies(
                 "fresh_swe_mm": wesf_mm,
                 "observed_slr": round(computed_slr, 6),
                 "baseline_method": "kuchera",
-                "climate_regime": "continental_mountain",
+                "climate_regime": config.climate_regime,
                 "qc_passed": True,
                 "qc_weight": qc_weight,
                 "source": "NOAA GHCN-Daily direct SNOW+WESF",
@@ -198,7 +205,7 @@ def import_ghcn_rockies(
             })
 
     accepted.sort(key=lambda row: (str(row["observation_date"]), str(row["station_id"])))
-    _assign_storm_groups(accepted)
+    _assign_storm_groups(accepted, config.storm_group_prefix)
     counts = Counter(item.reason for item in rejected)
     by_state: dict[str, dict[str, Any]] = {}
     state_rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -223,6 +230,7 @@ def import_ghcn_rockies(
         "endDate": max((str(row["observation_date"]) for row in accepted), default=None),
         "byState": by_state,
         "domain": {
+            "applied": config.apply_domain_mask,
             "statesConsidered": sorted(ROCKIES_STATES),
             "minimumElevationM": config.min_elevation_m,
             "bounds": {
@@ -236,7 +244,7 @@ def import_ghcn_rockies(
             "note": "Explicit research mask for elevated Rockies/foothill stations; not an official physiographic polygon.",
         },
         "label": "same-date GHCN-Daily SNOW / WESF only; no SNWD/WESD or total-pack differencing",
-        "timezone": "GHCN observation time interpreted as America/Denver local station clock time, including DST.",
+        "timezone": f"GHCN observation time interpreted as {config.timezone_name} local station clock time, including DST.",
     }
     return accepted, rejected, report
 

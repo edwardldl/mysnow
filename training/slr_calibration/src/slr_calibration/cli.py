@@ -3,17 +3,26 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from statistics import mean, median
 
 from .cssl import CsslImportConfig, write_cssl_outputs
 from .evaluation import evaluate_rockies_station_temporal_holdout, evaluate_temporal_holdout
+from .forecast_snapshot import SNAPSHOT_MODELS, run_snapshots
 from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
+from .ghcn_track import ingest_ghcn
 from .io import read_rows
 from .profiles import backfill_openmeteo_multistation_profiles, backfill_openmeteo_profiles
 from .sierra import SierraImportConfig, import_sierra_ghcn_directory, write_sierra_import
 from .sierra_evaluation import evaluate_sierra_station_water_year_holdout
+from .snotel_track import ingest_snotel
+from .tracking_align import align_events
+from .tracking_common import fetch_json
+from .tracking_events import build_events
+from .tracking_registry import build_registry, write_registry
+from .tracking_report import build_status
+from .tracking_train import train_tracking
 from .trainer import TrainingConfig, train_artifact
 
 
@@ -315,6 +324,165 @@ def _evaluate_sierra_ghcn(args: argparse.Namespace) -> int:
     return 0
 
 
+def _track_registry(args: argparse.Namespace) -> int:
+    registry = build_registry(
+        args.ski_areas,
+        args.station_registry,
+        fetcher=fetch_json,
+        max_station_km=args.max_station_km,
+    )
+    json_path = args.tracking_dir / "registry.json"
+    csv_path = args.tracking_dir / "registry.csv"
+    write_registry(registry, json_path, csv_path)
+    print(json.dumps({
+        "output": str(json_path),
+        "resorts": len(registry["resorts"]),
+        "resortsWithSnotel": sum(1 for resort in registry["resorts"] if resort["snotel_station"]),
+        "resortsWithGhcn": sum(1 for resort in registry["resorts"] if resort["ghcn_stations"]),
+        "activeSnotelStationsConsidered": registry["active_snotel_station_count"],
+    }, sort_keys=True))
+    return 0
+
+
+def _track_snapshot(args: argparse.Namespace) -> int:
+    models = tuple(value.strip() for value in args.models.split(",") if value.strip()) or SNAPSHOT_MODELS
+    report = run_snapshots(
+        args.tracking_dir / "registry.json",
+        args.tracking_dir / "snapshots",
+        models=models,
+        force=args.force,
+    )
+    print(json.dumps({
+        "date": report["date"],
+        "stored": report["storedCount"],
+        "skipped": report["skippedCount"],
+        "failed": report["failedCount"],
+    }, sort_keys=True))
+    return 0
+
+
+def _snotel_range(args: argparse.Namespace) -> tuple[date, date]:
+    end = date.fromisoformat(args.end) if args.end else date.today()
+    start = date.fromisoformat(args.start) if args.start else end - timedelta(days=13)
+    return start, end
+
+
+def _track_ingest_snotel(args: argparse.Namespace) -> int:
+    start, end = _snotel_range(args)
+    report = ingest_snotel(
+        args.tracking_dir / "registry.json",
+        args.tracking_dir / "observations" / "snotel_daily.csv",
+        start,
+        end,
+        fetch_json,
+    )
+    print(json.dumps({
+        "output": report["output"],
+        "stations": report["stationCount"],
+        "fetchedRows": report["fetchedRowCount"],
+        "added": report["added"],
+        "updated": report["updated"],
+        "total": report["total"],
+    }, sort_keys=True))
+    return 0
+
+
+def _track_ingest_ghcn(args: argparse.Namespace) -> int:
+    report = ingest_ghcn(
+        args.tracking_dir / "registry.json",
+        args.tracking_dir / "observations" / "ghcn_daily.csv",
+        water_years=args.water_years,
+    )
+    print(json.dumps({
+        "output": report["output"],
+        "stations": report["stationCount"],
+        "rows": report["rowCount"],
+        "windowStart": report["windowStart"],
+        "failures": len(report["failures"]),
+    }, sort_keys=True))
+    return 0
+
+
+def _track_build_events(args: argparse.Namespace) -> int:
+    report = build_events(
+        args.tracking_dir / "observations" / "ghcn_daily.csv",
+        args.tracking_dir / "observations" / "snotel_daily.csv",
+        args.tracking_dir / "registry.json",
+        args.tracking_dir / "events" / "events.csv",
+        args.tracking_dir / "events" / "build_report.json",
+    )
+    print(json.dumps({
+        "events": report["eventCount"],
+        "byLabelQuality": report["labelQualityCounts"],
+        "weakRejectedCandidates": report["weakSnotelDiff"]["rejectedCandidateCount"],
+    }, sort_keys=True))
+    return 0
+
+
+def _track_align(args: argparse.Namespace) -> int:
+    report = align_events(
+        args.tracking_dir / "events" / "events.csv",
+        args.tracking_dir / "registry.json",
+        args.tracking_dir / "snapshots",
+        args.tracking_dir / "alignment" / "trainer_rows.csv",
+        args.tracking_dir / "alignment" / "alignment_report.json",
+        args.tracking_dir / "alignment" / "profile_cache",
+        sleep_seconds=args.sleep_seconds,
+    )
+    print(json.dumps({
+        "inputEvents": report["inputEventCount"],
+        "alignedRows": report["alignedRowCount"],
+        "sourceCounts": report["sourceCounts"],
+    }, sort_keys=True))
+    return 0
+
+
+def _track_train(args: argparse.Namespace) -> int:
+    report = train_tracking(
+        args.tracking_dir / "alignment" / "trainer_rows.csv",
+        args.tracking_dir / "artifacts" / "tracking-candidate-v1.json",
+        args.tracking_dir / "artifacts" / "training_report.json",
+    )
+    print(json.dumps({
+        "rows": report["rowCount"],
+        "holdoutComputable": report["holdoutComputable"],
+        "status": report["status"],
+        "productionEnablement": report["productionEnablement"],
+    }, sort_keys=True))
+    return 0
+
+
+def _track_report(args: argparse.Namespace) -> int:
+    status = build_status(
+        args.tracking_dir,
+        args.coefficients,
+        args.tracking_dir / "reports" / "status.json",
+        args.tracking_dir / "reports" / "status.md",
+    )
+    print(json.dumps({
+        "events": status["events"]["eventCount"],
+        "byLabelQuality": status["events"]["byLabelQuality"],
+        "snapshotDays": status["snapshots"]["dayCount"],
+        "trainerRows": status["alignment"]["trainerRowCount"],
+        "productionCalibrationEnabled": status["productionGates"]["productionCalibrationEnabled"],
+    }, sort_keys=True))
+    return 0
+
+
+def _track_run(args: argparse.Namespace) -> int:
+    """Daily loop: snapshot -> ingest SNOTEL -> ingest GHCN -> events -> report."""
+    registry_path = args.tracking_dir / "registry.json"
+    if not registry_path.exists():
+        print(json.dumps({"note": "registry missing; building it first"}))
+        _track_registry(args)
+    _track_snapshot(args)
+    _track_ingest_snotel(args)
+    _track_ingest_ghcn(args)
+    _track_build_events(args)
+    _track_report(args)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -460,6 +628,70 @@ def build_parser() -> argparse.ArgumentParser:
     sierra_eval.add_argument("--prior-effective-sample-size", type=float, default=30.0)
     sierra_eval.add_argument("--min-effective-sample-size", type=float, default=5.0)
     sierra_eval.set_defaults(func=_evaluate_sierra_ghcn)
+
+    def _add_tracking_dir(parser_: argparse.ArgumentParser) -> None:
+        parser_.add_argument("--tracking-dir", type=Path, default=Path("data/tracking"))
+
+    def _add_registry_args(parser_: argparse.ArgumentParser) -> None:
+        parser_.add_argument("--ski-areas", type=Path, default=Path("src/data/ski-areas.json"))
+        parser_.add_argument(
+            "--station-registry", type=Path,
+            default=Path("data/slr-training-data/normalized/station_metadata/unified_station_registry.csv"),
+        )
+        parser_.add_argument("--max-station-km", type=float, default=40.0)
+
+    def _add_snotel_args(parser_: argparse.ArgumentParser) -> None:
+        parser_.add_argument("--start", help="YYYY-MM-DD; default 14 days before --end")
+        parser_.add_argument("--end", help="YYYY-MM-DD; default today")
+
+    track_registry = subparsers.add_parser("track-registry", help="build the pilot resort/station tracking registry")
+    _add_tracking_dir(track_registry)
+    _add_registry_args(track_registry)
+    track_registry.set_defaults(func=_track_registry)
+
+    track_snapshot = subparsers.add_parser("track-snapshot", help="store today's Open-Meteo forecast snapshots for registry points")
+    _add_tracking_dir(track_snapshot)
+    track_snapshot.add_argument("--models", default=",".join(SNAPSHOT_MODELS))
+    track_snapshot.add_argument("--force", action="store_true")
+    track_snapshot.set_defaults(func=_track_snapshot)
+
+    track_snotel = subparsers.add_parser("track-ingest-snotel", help="ingest AWDB SNOTEL daily totals for registry stations")
+    _add_tracking_dir(track_snotel)
+    _add_snotel_args(track_snotel)
+    track_snotel.set_defaults(func=_track_ingest_snotel)
+
+    track_ghcn = subparsers.add_parser("track-ingest-ghcn", help="ingest NCEI GHCN daily rows for registry stations")
+    _add_tracking_dir(track_ghcn)
+    track_ghcn.add_argument("--water-years", type=int, default=2)
+    track_ghcn.set_defaults(func=_track_ingest_ghcn)
+
+    track_events = subparsers.add_parser("track-build-events", help="build normalized direct + weak tracking events")
+    _add_tracking_dir(track_events)
+    track_events.set_defaults(func=_track_build_events)
+
+    track_align = subparsers.add_parser("track-align", help="pair events with Kuchera baselines (snapshots preferred, backfill fallback)")
+    _add_tracking_dir(track_align)
+    track_align.add_argument("--sleep-seconds", type=float, default=0.25)
+    track_align.set_defaults(func=_track_align)
+
+    track_train = subparsers.add_parser("track-train", help="train an unvalidated candidate and run the temporal holdout when computable")
+    _add_tracking_dir(track_train)
+    track_train.set_defaults(func=_track_train)
+
+    track_report = subparsers.add_parser("track-report", help="write the tracking status report (JSON + Markdown)")
+    _add_tracking_dir(track_report)
+    track_report.add_argument("--coefficients", type=Path, default=Path("src/lib/snow/calibration/coefficients.ts"))
+    track_report.set_defaults(func=_track_report)
+
+    track_run = subparsers.add_parser("track-run", help="daily loop: snapshot + ingest + events + report")
+    _add_tracking_dir(track_run)
+    _add_registry_args(track_run)
+    _add_snotel_args(track_run)
+    track_run.add_argument("--models", default=",".join(SNAPSHOT_MODELS))
+    track_run.add_argument("--force", action="store_true")
+    track_run.add_argument("--water-years", type=int, default=2)
+    track_run.add_argument("--coefficients", type=Path, default=Path("src/lib/snow/calibration/coefficients.ts"))
+    track_run.set_defaults(func=_track_run)
 
     return parser
 
