@@ -31,6 +31,7 @@ from .tracking_registry import build_registry, write_registry
 from .tracking_report import build_status
 from .tracking_train import train_tracking
 from .trainer import TrainingConfig, train_artifact
+from .weak_label_investigation import run_weak_label_investigation
 
 
 def _write_json(path: Path, value: object) -> None:
@@ -612,6 +613,34 @@ def _transfer_ecmwf(args: argparse.Namespace) -> int:
     return 0
 
 
+def _investigate_weak_labels(args: argparse.Namespace) -> int:
+    results = run_weak_label_investigation(
+        events_path=args.events,
+        evaluation_report_path=args.evaluation_report,
+        rockies_baseline=args.direct_rockies,
+        rockies_events=args.rockies_events,
+        sierra_baseline=args.direct_sierra,
+        sierra_events=args.sierra_events,
+        cssl_baseline=args.direct_cssl,
+        cssl_profile_events=args.cssl_profile_events,
+        cssl_raw_dir=args.cssl_raw_dir,
+        dataset_dir=args.dataset_dir,
+        regimes_path=args.regimes,
+        report_json_path=args.report_json,
+        report_md_path=args.report_md,
+    )
+    reproduction = {
+        region_id: {
+            "directMae": entry["directMae"],
+            "directMaePublished": entry["directMaePublished"],
+            "directKucheraMae": entry["directKucheraMae"],
+        }
+        for region_id, entry in results["reproduction"].items()
+    }
+    print(json.dumps({"status": results["status"], "reproduction": reproduction}, sort_keys=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -887,6 +916,22 @@ def build_parser() -> argparse.ArgumentParser:
     transfer.add_argument("--max-stations-per-region", type=int, default=4)
     transfer.add_argument("--sleep-seconds", type=float, default=1.2)
     transfer.set_defaults(func=_transfer_ecmwf)
+
+    investigate = subparsers.add_parser("investigate-weak-labels", help="diagnose why weak-label regional corrections fail on direct labels (research-only, no artifacts)")
+    investigate.add_argument("--events", type=Path, default=Path("data/hrrr-dataset/model-evaluation/events.parquet"))
+    investigate.add_argument("--evaluation-report", type=Path, default=Path("data/hrrr-dataset/model-evaluation/evaluation_report.json"))
+    investigate.add_argument("--direct-rockies", type=Path, default=Path("data/slr-training-data/normalized/baseline/ghcn_rockies_kuchera.csv"))
+    investigate.add_argument("--rockies-events", type=Path, default=Path("data/slr-training-data/normalized/observations/ghcn_rockies_events.csv"))
+    investigate.add_argument("--direct-sierra", type=Path, default=Path("data/sierra-slr-research/normalized/sierra_kuchera.csv"))
+    investigate.add_argument("--sierra-events", type=Path, default=Path("data/sierra-slr-research/normalized/sierra_events.csv"))
+    investigate.add_argument("--direct-cssl", type=Path, default=Path("data/cssl/v13/research/cssl-aligned-baselines.csv"))
+    investigate.add_argument("--cssl-profile-events", type=Path, default=Path("data/cssl/v13/research/cssl-profile-events.jsonl"))
+    investigate.add_argument("--cssl-raw-dir", type=Path, default=Path("data/cssl/v13/raw"))
+    investigate.add_argument("--dataset-dir", type=Path, default=Path("data/hrrr-dataset"))
+    investigate.add_argument("--regimes", type=Path, default=Path("training/slr_calibration/regions/station_regimes.csv"))
+    investigate.add_argument("--report-json", type=Path, default=Path("data/hrrr-dataset/model-evaluation/weak_label_investigation.json"))
+    investigate.add_argument("--report-md", type=Path, default=Path("data/hrrr-dataset/model-evaluation/weak-label-investigation.md"))
+    investigate.set_defaults(func=_investigate_weak_labels)
 
     return parser
 

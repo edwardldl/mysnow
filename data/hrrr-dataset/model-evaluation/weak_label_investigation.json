@@ -1,0 +1,840 @@
+{
+  "h1LevelBias": {
+    "colorado-ranges": {
+      "degradation": 0.4563,
+      "directBiasFullArtifact": -4.8602,
+      "directImpliedGlobalMean": -0.257,
+      "directLogRatio": {
+        "mean": -0.2461,
+        "median": -0.2856,
+        "n": 120,
+        "p10": -0.5818,
+        "p90": 0.1137,
+        "std": 0.2733,
+        "weightedMean": -0.2744
+      },
+      "directMaeFullArtifact": 4.9695,
+      "directMaeKuchera": 4.5132,
+      "fittedGlobalFactor": 0.3725,
+      "fittedGlobalLogBias": -0.98749805,
+      "fittedGlobalRawLogBias": -0.99565021,
+      "variantLooRecalibrated": {
+        "mae": 2.9204,
+        "recoveredMae": 2.0491,
+        "shareOfDegradation": 4.4907
+      },
+      "variantNoGlobal": {
+        "mae": 4.3306,
+        "recoveredMae": 0.6389,
+        "shareOfDegradation": 1.4002
+      },
+      "variantOracleIntercept": {
+        "intercept": -0.257,
+        "mae": 2.8979,
+        "note": "in-sample upper bound, not an honest score"
+      },
+      "variantSplitHalfRecalibrated": {
+        "kucheraMaeOnScoreHalves": 4.5141,
+        "maeMean": 2.9395,
+        "maeStd": 0.2301,
+        "recoveredMae": 2.03,
+        "shareOfDegradation": 4.4489
+      },
+      "weakMinusDirectMeanLogRatio": -0.7213,
+      "weakTestLogRatio": {
+        "mean": -0.898,
+        "median": -0.8797,
+        "n": 1078,
+        "p10": -1.5942,
+        "p90": -0.2524,
+        "std": 0.5205,
+        "weightedMean": -0.898
+      },
+      "weakTrainLogRatio": {
+        "mean": -0.9957,
+        "median": -0.9631,
+        "n": 3634,
+        "p10": -1.7117,
+        "p90": -0.352,
+        "std": 0.5326,
+        "weightedMean": -0.9957
+      }
+    },
+    "sierra-nevada": {
+      "degradation": 1.2058,
+      "directBiasFullArtifact": -5.1828,
+      "directImpliedGlobalMean": -0.0614,
+      "directLogRatio": {
+        "mean": -0.1024,
+        "median": -0.0694,
+        "n": 260,
+        "p10": -0.7432,
+        "p90": 0.4216,
+        "std": 0.491,
+        "weightedMean": -0.1024
+      },
+      "directMaeFullArtifact": 5.556,
+      "directMaeKuchera": 4.3502,
+      "fittedGlobalFactor": 0.3886,
+      "fittedGlobalLogBias": -0.94523366,
+      "fittedGlobalRawLogBias": -0.99472233,
+      "variantLooRecalibrated": {
+        "mae": 4.0886,
+        "recoveredMae": 1.4674,
+        "shareOfDegradation": 1.217
+      },
+      "variantNoGlobal": {
+        "mae": 4.2063,
+        "recoveredMae": 1.3497,
+        "shareOfDegradation": 1.1193
+      },
+      "variantOracleIntercept": {
+        "intercept": -0.0614,
+        "mae": 4.0726,
+        "note": "in-sample upper bound, not an honest score"
+      },
+      "variantSplitHalfRecalibrated": {
+        "kucheraMaeOnScoreHalves": 4.3562,
+        "maeMean": 4.1156,
+        "maeStd": 0.2501,
+        "recoveredMae": 1.4404,
+        "shareOfDegradation": 1.1945
+      },
+      "weakMinusDirectMeanLogRatio": -0.8923,
+      "weakTestLogRatio": {
+        "mean": -0.9566,
+        "median": -0.863,
+        "n": 216,
+        "p10": -1.6518,
+        "p90": -0.4663,
+        "std": 0.4675,
+        "weightedMean": -0.9566
+      },
+      "weakTrainLogRatio": {
+        "mean": -0.9947,
+        "median": -0.9933,
+        "n": 573,
+        "p10": -1.5669,
+        "p90": -0.4159,
+        "std": 0.4421,
+        "weightedMean": -0.9947
+      }
+    }
+  },
+  "h2Provenance": {
+    "baselineDistributions": {
+      "colorado-ranges": {
+        "byElevationBand": [
+          {
+            "band": "2500-3000",
+            "directMeanBaseline": 16.0116,
+            "directN": 98,
+            "logDirectOverWeak": -0.1202,
+            "weakMeanBaseline": 18.0566,
+            "weakN": 1125
+          },
+          {
+            "band": "3000-3500",
+            "directMeanBaseline": 20.7964,
+            "directN": 22,
+            "logDirectOverWeak": -0.1064,
+            "weakMeanBaseline": 23.1312,
+            "weakN": 2309
+          }
+        ],
+        "directBaseline": {
+          "mean": 16.8888,
+          "median": 16.5386,
+          "n": 120,
+          "p10": 11.9317,
+          "p90": 23.3049,
+          "std": 4.6004
+        },
+        "weakTrainBaseline": {
+          "mean": 21.5727,
+          "median": 21.8194,
+          "n": 3634,
+          "p10": 15.4706,
+          "p90": 27.4388,
+          "std": 4.4408
+        }
+      },
+      "sierra-nevada": {
+        "byElevationBand": [
+          {
+            "band": "2000-2500",
+            "directMeanBaseline": 17.7669,
+            "directN": 54,
+            "logDirectOverWeak": -0.0159,
+            "weakMeanBaseline": 18.052,
+            "weakN": 336
+          }
+        ],
+        "directBaseline": {
+          "mean": 12.5116,
+          "median": 12.6896,
+          "n": 260,
+          "p10": 5.6321,
+          "p90": 19.2308,
+          "std": 5.205
+        },
+        "weakTrainBaseline": {
+          "mean": 17.6312,
+          "median": 17.7832,
+          "n": 573,
+          "p10": 14.0123,
+          "p90": 21.3826,
+          "std": 2.9501
+        }
+      }
+    },
+    "csslDecomposition": {
+      "alignedBaselineDelta": {
+        "factorTsOverNoaa": 1.0534,
+        "labelDeltaOnAlignedDays": {
+          "mean": 0.6107,
+          "median": 0.6578,
+          "n": 12,
+          "p10": -0.1468,
+          "p90": 1.2809,
+          "std": 0.5665
+        },
+        "logTsOverNoaaBaseline": {
+          "mean": 0.052,
+          "median": 0.0461,
+          "n": 35,
+          "p10": -0.0665,
+          "p90": 0.203,
+          "std": 0.1624
+        },
+        "matchedAlignedEvents": 35
+      },
+      "boardDaysTotal": 86,
+      "chosenShiftDays": -1,
+      "depthComponentLogBoardDepthOverDeltaDepth": {
+        "mean": 0.236,
+        "median": 0.1664,
+        "n": 27,
+        "p10": -0.1868,
+        "p90": 0.8483,
+        "std": 0.4619
+      },
+      "labelDeltaFactor": 1.515,
+      "labelDeltaLogBoardOverDiff": {
+        "mean": 0.4154,
+        "median": 0.2624,
+        "n": 27,
+        "p10": -0.0902,
+        "p90": 1.1254,
+        "std": 0.4803
+      },
+      "matchedBoardEventDays": 27,
+      "note": "log(board/differenced) = log(board depth / delta depth) - log(fresh SWE / delta SWE) per day; means of the components need not sum exactly to the mean of the ratio.",
+      "ofWhichWeakQcPassed": 27,
+      "shiftStats": {
+        "-1": {
+          "freshSweVsDeltaSwePearson": 0.8685,
+          "matchedBoardEventDays": 27,
+          "meanLogBoardOverDiff": 0.4154
+        },
+        "0": {
+          "freshSweVsDeltaSwePearson": 0.5111,
+          "matchedBoardEventDays": 17,
+          "meanLogBoardOverDiff": 0.8152
+        },
+        "1": {
+          "freshSweVsDeltaSwePearson": 0.4407,
+          "matchedBoardEventDays": 11,
+          "meanLogBoardOverDiff": 0.8663
+        }
+      },
+      "sweComponentLogFreshSweOverDeltaSwe": {
+        "mean": -0.1794,
+        "median": -0.08,
+        "n": 27,
+        "p10": -0.7785,
+        "p90": 0.2109,
+        "std": 0.3361
+      }
+    }
+  },
+  "h3EventMix": {
+    "colorado-ranges": {
+      "direct": {
+        "baselineSlr": {
+          "mean": 16.8888,
+          "median": 16.5386,
+          "n": 120,
+          "p10": 11.9317,
+          "p90": 23.3049,
+          "std": 4.6004
+        },
+        "elevationM": {
+          "mean": 2817.6842,
+          "median": 2927.9,
+          "n": 120,
+          "p10": 2523.1,
+          "p90": 3168.1,
+          "std": 222.7522
+        },
+        "eventSizeSweMm": {
+          "mean": 11.455,
+          "median": 8.4,
+          "n": 120,
+          "p10": 4.07,
+          "p90": 20.67,
+          "std": 9.3013
+        },
+        "months": {
+          "1": 16,
+          "10": 9,
+          "11": 14,
+          "12": 15,
+          "2": 16,
+          "3": 24,
+          "4": 14,
+          "5": 11,
+          "9": 1
+        },
+        "n": 120,
+        "observedSlr": {
+          "mean": 13.3175,
+          "median": 12.6366,
+          "n": 120,
+          "p10": 9.3088,
+          "p90": 19.4019,
+          "std": 4.3977
+        },
+        "stations": 5,
+        "waterYears": {
+          "2024": 103,
+          "2025": 17
+        }
+      },
+      "directFull": {
+        "artifactMae": 4.9695,
+        "degradation": 0.4563,
+        "kucheraMae": 4.5132,
+        "n": 120
+      },
+      "directInsideEnvelope": {
+        "artifactMae": 4.1257,
+        "degradation": -1.0719,
+        "kucheraMae": 5.1976,
+        "n": 82
+      },
+      "envelopeP1P99": {
+        "baseline_slr": [
+          12.512,
+          29.988
+        ],
+        "delta_swe_mm": [
+          5.08,
+          45.72
+        ],
+        "elevation_m": [
+          2511.6,
+          3541.8
+        ]
+      },
+      "weakTrain": {
+        "baselineSlr": {
+          "mean": 21.5727,
+          "median": 21.8194,
+          "n": 3634,
+          "p10": 15.4706,
+          "p90": 27.4388,
+          "std": 4.4408
+        },
+        "elevationM": {
+          "mean": 3119.7452,
+          "median": 3148.6,
+          "n": 3634,
+          "p10": 2731.0,
+          "p90": 3444.2,
+          "std": 255.0885
+        },
+        "eventSizeSweMm": {
+          "mean": 11.9395,
+          "median": 10.16,
+          "n": 3634,
+          "p10": 5.08,
+          "p90": 22.86,
+          "std": 8.7679
+        },
+        "months": {
+          "1": 713,
+          "10": 106,
+          "11": 474,
+          "12": 533,
+          "2": 801,
+          "3": 614,
+          "4": 297,
+          "5": 96
+        },
+        "n": 3634,
+        "observedSlr": {
+          "mean": 8.8453,
+          "median": 8.0,
+          "n": 3634,
+          "p10": 4.0,
+          "p90": 15.0,
+          "std": 4.6393
+        },
+        "stations": 100,
+        "waterYears": {
+          "2024": 1874,
+          "2025": 1760
+        }
+      }
+    },
+    "sierra-nevada": {
+      "direct": {
+        "baselineSlr": {
+          "mean": 12.5116,
+          "median": 12.6896,
+          "n": 260,
+          "p10": 5.6321,
+          "p90": 19.2308,
+          "std": 5.205
+        },
+        "elevationM": {
+          "mean": 1834.6196,
+          "median": 1927.9,
+          "n": 260,
+          "p10": 1226.2,
+          "p90": 2100.0,
+          "std": 294.03
+        },
+        "eventSizeSweMm": {
+          "mean": 17.595,
+          "median": 12.7,
+          "n": 260,
+          "p10": 4.1,
+          "p90": 34.92,
+          "std": 15.6002
+        },
+        "months": {
+          "1": 62,
+          "11": 21,
+          "12": 36,
+          "2": 49,
+          "3": 74,
+          "4": 14,
+          "5": 4
+        },
+        "n": 260,
+        "observedSlr": {
+          "mean": 11.519,
+          "median": 11.087,
+          "n": 260,
+          "p10": 4.9757,
+          "p90": 18.4006,
+          "std": 5.5676
+        },
+        "stations": 12,
+        "waterYears": {
+          "2023": 206,
+          "2024": 40,
+          "2025": 14
+        }
+      },
+      "directFull": {
+        "artifactMae": 5.556,
+        "degradation": 1.2058,
+        "kucheraMae": 4.3502,
+        "n": 260
+      },
+      "directInsideEnvelope": {
+        "artifactMae": 5.5051,
+        "degradation": 0.3915,
+        "kucheraMae": 5.1136,
+        "n": 114
+      },
+      "envelopeP1P99": {
+        "baseline_slr": [
+          10.729,
+          23.838
+        ],
+        "delta_swe_mm": [
+          5.08,
+          108.102
+        ],
+        "elevation_m": [
+          1905.0,
+          2639.6
+        ]
+      },
+      "weakTrain": {
+        "baselineSlr": {
+          "mean": 17.6312,
+          "median": 17.7832,
+          "n": 573,
+          "p10": 14.0123,
+          "p90": 21.3826,
+          "std": 2.9501
+        },
+        "elevationM": {
+          "mean": 2389.3171,
+          "median": 2453.6,
+          "n": 573,
+          "p10": 2100.1,
+          "p90": 2615.2,
+          "std": 204.1544
+        },
+        "eventSizeSweMm": {
+          "mean": 26.7919,
+          "median": 17.78,
+          "n": 573,
+          "p10": 7.62,
+          "p90": 60.96,
+          "std": 22.5033
+        },
+        "months": {
+          "1": 93,
+          "10": 3,
+          "11": 43,
+          "12": 58,
+          "2": 147,
+          "3": 190,
+          "4": 37,
+          "5": 2
+        },
+        "n": 573,
+        "observedSlr": {
+          "mean": 7.1748,
+          "median": 6.4,
+          "n": 573,
+          "p10": 3.3333,
+          "p90": 11.6667,
+          "std": 3.5756
+        },
+        "stations": 22,
+        "waterYears": {
+          "2024": 300,
+          "2025": 273
+        }
+      }
+    }
+  },
+  "h4HierarchyDepth": {
+    "colorado-ranges": {
+      "direct": {
+        "deepestLevelCounts": {
+          "climate": 39,
+          "region": 81
+        },
+        "depth1_global": 4.9695,
+        "depth2_climate": 4.9695,
+        "depth3_region": 4.9695,
+        "depth4_local": 4.9695,
+        "factorFloorShare": 1.0,
+        "identity": 4.5132,
+        "meanLogBiasByLevel": {
+          "climate": -0.0081,
+          "global": -0.9875,
+          "region": -0.0135
+        },
+        "meanTotalLogBias": -1.0047,
+        "walkDepthCounts": {
+          "2": 39,
+          "3": 81
+        }
+      },
+      "weakTest": {
+        "deepestLevelCounts": {
+          "local": 1065,
+          "region": 13
+        },
+        "depth1_global": 3.8595,
+        "depth2_climate": 3.8595,
+        "depth3_region": 3.8595,
+        "depth4_local": 3.8595,
+        "factorFloorShare": 1.0,
+        "identity": 11.4901,
+        "meanLogBiasByLevel": {
+          "climate": -0.0081,
+          "global": -0.9875,
+          "local": -0.0056,
+          "region": -0.003
+        },
+        "meanTotalLogBias": -1.0041,
+        "walkDepthCounts": {
+          "3": 13,
+          "4": 1065
+        }
+      }
+    },
+    "sierra-nevada": {
+      "direct": {
+        "deepestLevelCounts": {
+          "climate": 47,
+          "global": 30,
+          "region": 183
+        },
+        "depth1_global": 5.556,
+        "depth2_climate": 5.556,
+        "depth3_region": 5.556,
+        "depth4_local": 5.556,
+        "factorFloorShare": 1.0,
+        "identity": 4.3502,
+        "meanLogBiasByLevel": {
+          "climate": -0.0449,
+          "global": -0.9452,
+          "region": -0.0018
+        },
+        "meanTotalLogBias": -0.9862,
+        "walkDepthCounts": {
+          "1": 30,
+          "2": 47,
+          "3": 183
+        }
+      },
+      "weakTest": {
+        "deepestLevelCounts": {
+          "climate": 2,
+          "local": 214
+        },
+        "depth1_global": 2.8149,
+        "depth2_climate": 2.8149,
+        "depth3_region": 2.8149,
+        "depth4_local": 2.8149,
+        "factorFloorShare": 1.0,
+        "identity": 10.3935,
+        "meanLogBiasByLevel": {
+          "climate": -0.0328,
+          "global": -0.9452,
+          "local": 0.0064,
+          "region": -0.0071
+        },
+        "meanTotalLogBias": -0.9787,
+        "walkDepthCounts": {
+          "2": 2,
+          "4": 214
+        }
+      }
+    }
+  },
+  "h5QcCensoring": {
+    "colorado-ranges": {
+      "directObservedSlr": {
+        "mean": 13.3175,
+        "median": 12.6366,
+        "n": 120,
+        "p10": 9.3088,
+        "p90": 19.4019,
+        "std": 4.3977
+      },
+      "qcEvaluatedDays": 108815,
+      "qcPassRateOverall": 0.0439,
+      "qcPassedDays": 4775,
+      "rejectionCounts": {
+        "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 24856,
+        "INSUFFICIENT_DEPTH_GAIN": 1276,
+        "INSUFFICIENT_SWE_GAIN": 73197,
+        "MISSING_MEASUREMENT": 741,
+        "NON_CONSECUTIVE_DAYS": 12,
+        "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 1588,
+        "RAIN_PHASE_SUSPECTED_TMAX": 1748,
+        "SLR_OUT_OF_RANGE": 97,
+        "WARM_DAY": 525
+      },
+      "settlementCensoredDays": 1191,
+      "settlementCensoredMedianDeltaDepthMm": -25.4,
+      "slrPreQcComputable": {
+        "mean": 8.878,
+        "median": 8.0,
+        "n": 8773,
+        "p10": 3.3333,
+        "p90": 15.0,
+        "std": 5.1627
+      },
+      "slrQcPassed": {
+        "mean": 8.8809,
+        "median": 8.1818,
+        "n": 4775,
+        "p10": 4.0,
+        "p90": 15.0,
+        "std": 4.5808
+      },
+      "slrWarmCensored": {
+        "mean": 7.783,
+        "median": 6.6667,
+        "n": 2273,
+        "p10": 3.3333,
+        "p90": 14.4127,
+        "std": 5.1895
+      },
+      "stationDays": 110146,
+      "sweGainByTempBand": {
+        "tavg_-3_0": {
+          "qcPassRate": 0.1686,
+          "shareDepthDecreased": 0.1136,
+          "sweGainDays": 2183
+        },
+        "tavg_-8_-3": {
+          "qcPassRate": 0.5296,
+          "shareDepthDecreased": 0.1016,
+          "sweGainDays": 4636
+        },
+        "tavg_0_0.5": {
+          "qcPassRate": 0.0037,
+          "shareDepthDecreased": 0.1536,
+          "sweGainDays": 267
+        },
+        "tavg_gt0.5": {
+          "qcPassRate": 0.0,
+          "shareDepthDecreased": 0.1143,
+          "sweGainDays": 805
+        },
+        "tavg_lt-8": {
+          "qcPassRate": 0.5891,
+          "shareDepthDecreased": 0.1024,
+          "sweGainDays": 3312
+        },
+        "tavg_missing": {
+          "qcPassRate": 0.0,
+          "shareDepthDecreased": 0.0227,
+          "sweGainDays": 44
+        }
+      },
+      "sweGainDays": 11247,
+      "sweGainSurvivalRate": 0.4246
+    },
+    "sierra-nevada": {
+      "directObservedSlr": {
+        "mean": 11.519,
+        "median": 11.087,
+        "n": 260,
+        "p10": 4.9757,
+        "p90": 18.4006,
+        "std": 5.5676
+      },
+      "qcEvaluatedDays": 23737,
+      "qcPassRateOverall": 0.0334,
+      "qcPassedDays": 792,
+      "rejectionCounts": {
+        "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 6055,
+        "INSUFFICIENT_DEPTH_GAIN": 196,
+        "INSUFFICIENT_SWE_GAIN": 15638,
+        "MISSING_MEASUREMENT": 22,
+        "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 193,
+        "RAIN_PHASE_SUSPECTED_TMAX": 497,
+        "SLR_OUT_OF_RANGE": 35,
+        "WARM_DAY": 309
+      },
+      "settlementCensoredDays": 321,
+      "settlementCensoredMedianDeltaDepthMm": -50.8,
+      "slrPreQcComputable": {
+        "mean": 6.9596,
+        "median": 6.25,
+        "n": 1826,
+        "p10": 2.8571,
+        "p90": 11.6667,
+        "std": 3.8996
+      },
+      "slrQcPassed": {
+        "mean": 7.1652,
+        "median": 6.6667,
+        "n": 792,
+        "p10": 3.3333,
+        "p90": 11.25,
+        "std": 3.4004
+      },
+      "slrWarmCensored": {
+        "mean": 6.7801,
+        "median": 5.6571,
+        "n": 806,
+        "p10": 2.5,
+        "p90": 11.6667,
+        "std": 4.0686
+      },
+      "stationDays": 24003,
+      "sweGainByTempBand": {
+        "tavg_-3_0": {
+          "qcPassRate": 0.3492,
+          "shareDepthDecreased": 0.1171,
+          "sweGainDays": 905
+        },
+        "tavg_-8_-3": {
+          "qcPassRate": 0.58,
+          "shareDepthDecreased": 0.1314,
+          "sweGainDays": 700
+        },
+        "tavg_0_0.5": {
+          "qcPassRate": 0.0479,
+          "shareDepthDecreased": 0.0959,
+          "sweGainDays": 146
+        },
+        "tavg_gt0.5": {
+          "qcPassRate": 0.0,
+          "shareDepthDecreased": 0.1922,
+          "sweGainDays": 489
+        },
+        "tavg_lt-8": {
+          "qcPassRate": 0.6117,
+          "shareDepthDecreased": 0.1456,
+          "sweGainDays": 103
+        }
+      },
+      "sweGainDays": 2343,
+      "sweGainSurvivalRate": 0.338
+    }
+  },
+  "reproduction": {
+    "colorado-ranges": {
+      "directEvents": 120,
+      "directKucheraMae": 4.5132,
+      "directKucheraMaePublished": 4.5132,
+      "directMae": 4.9695,
+      "directMaePublished": 4.9695,
+      "weakSplit1KucheraMae": 11.4901,
+      "weakSplit1KucheraMaePublished": 11.4901,
+      "weakSplit1Mae": 3.8595,
+      "weakSplit1MaePublished": 3.8595
+    },
+    "sierra-nevada": {
+      "directEvents": 260,
+      "directKucheraMae": 4.3502,
+      "directKucheraMaePublished": 4.3502,
+      "directMae": 5.556,
+      "directMaePublished": 5.556,
+      "weakSplit1KucheraMae": 10.3935,
+      "weakSplit1KucheraMaePublished": 10.3935,
+      "weakSplit1Mae": 2.8149,
+      "weakSplit1MaePublished": 2.8149
+    }
+  },
+  "salvageOffsetRefits": {
+    "colorado-ranges": {
+      "directMaeKuchera": 4.5132,
+      "directMaeOriginal": 4.9695,
+      "directMaeShifted": 4.1895,
+      "originalGlobalLogBias": -0.98749805,
+      "shiftedGlobalLogBias": -0.57807493
+    },
+    "offsetFactor": 1.515,
+    "offsetLog": 0.4154,
+    "sierra-nevada": {
+      "csslOnlyNotIndependent": {
+        "kucheraMae": 8.771,
+        "n": 35,
+        "originalMae": 6.4058,
+        "shiftedMae": 6.2017
+      },
+      "directMaeKuchera": 4.3502,
+      "directMaeOriginal": 5.556,
+      "directMaeShifted": 5.0109,
+      "originalGlobalLogBias": -0.94523366,
+      "shiftedGlobalLogBias": -0.55050032,
+      "sierraGhcnOnly": {
+        "kucheraMae": 3.6625,
+        "n": 225,
+        "originalMae": 5.4238,
+        "shiftedMae": 4.8257
+      }
+    }
+  },
+  "scope": "Refit Candidate A artifacts for colorado-ranges and sierra-nevada on the build's weak training slice (WY2024-2025, SNOTEL-differenced labels, NOAA HRRR baselines); direct sets are the build's section 6.4 sets with identical routing. Candidate B is not studied: it cannot be applied to the direct sets (no stored portable features), and the demotion was incurred by Candidate A.",
+  "status": "diagnostic-only-no-artifact-no-gate-change"
+}
