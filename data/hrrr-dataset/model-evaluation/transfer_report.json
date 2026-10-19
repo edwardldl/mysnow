@@ -1,0 +1,67 @@
+{
+  "blockingReason": "Open-Meteo historical-forecast API returns null for every ECMWF IFS pressure-level variable (hourly_units reports 'undefined' for temperature_*hPa / geopotential_height_*hPa) while surface fields are populated. The Python Kuchera path requires the temperature/geopotential profile, so no ECMWF baseline can be computed from this source.",
+  "cacheHits": 28,
+  "eventsAttempted": 677,
+  "eventsBackfilled": 0,
+  "eventsBaselineFailed": 677,
+  "model": "ecmwf_ifs via Open-Meteo historical-forecast API (explicit models=ecmwf_ifs)",
+  "networkRequests": 0,
+  "perRegion": {},
+  "quotaMessage": null,
+  "retainedRegions": [
+    "montana-ranges",
+    "nevada",
+    "oregon-cascades",
+    "southwest",
+    "utah-wasatch-uinta",
+    "washington-cascades",
+    "wyoming-ranges"
+  ],
+  "sampledStationsPerRegion": {
+    "montana-ranges": [
+      "1311:MT:SNTL",
+      "901:MT:SNTL",
+      "727:MT:SNTL",
+      "667:MT:SNTL"
+    ],
+    "nevada": [
+      "652:NV:SNTL",
+      "1310:NV:SNTL",
+      "615:NV:SNTL",
+      "340:NV:SNTL"
+    ],
+    "oregon-cascades": [
+      "1314:OR:SNTL",
+      "651:OR:SNTL",
+      "1079:OR:SNTL",
+      "1000:OR:SNTL"
+    ],
+    "southwest": [
+      "922:NM:SNTL",
+      "1254:NM:SNTL",
+      "1307:NM:SNTL",
+      "1168:NM:SNTL"
+    ],
+    "utah-wasatch-uinta": [
+      "828:UT:SNTL",
+      "1154:UT:SNTL",
+      "513:UT:SNTL",
+      "1216:UT:SNTL"
+    ],
+    "washington-cascades": [
+      "998:WA:SNTL",
+      "1085:WA:SNTL",
+      "515:WA:SNTL",
+      "692:WA:SNTL"
+    ],
+    "wyoming-ranges": [
+      "822:WY:SNTL",
+      "350:WY:SNTL",
+      "472:WY:SNTL",
+      "1196:WY:SNTL"
+    ]
+  },
+  "stationsAttempted": 28,
+  "stationsCompleted": 0,
+  "status": "blocked-profile-levels-unavailable"
+}

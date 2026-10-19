@@ -37,3 +37,22 @@ Eligible events: 20922 (train WY[2024, 2025], holdout WY2026). All artifacts are
 - Weak-label artifacts for regions without a direct-label check carry labelTier 'weak-only' and a lower promotion ceiling (design section 7).
 - Context for the headline MAEs: differenced SNOTEL labels are noisy, so raw-Kuchera MAE on weak labels (6.5-13.2) is far above its direct-label MAE (4.4-4.5 where measured). Region x month climatology -- printed in the summary table -- captures much of the same variance reduction and beats both candidates in Colorado, Sierra Nevada, and Nevada split 1; the section 6.3 gate compares candidates against raw Kuchera only, so retention stands as designed, but climatology is the honest bar any promotion decision should also clear.
 - Regime sensitivity: refitting retained regions with the climate level disabled changes split-1 MAE by at most 0.004 -- regions are regime-homogeneous by construction, so the climate level is nearly redundant inside a region (it still differentiates the WA/OR/CA interior stations).
+
+## ECMWF transfer test (design section 8) -- addendum
+
+Status: **blocked-profile-levels-unavailable** (full detail in
+transfer_report.json). All 28 sampled stations (4 per retained region,
+677 WY2026 holdout events) were fetched from the Open-Meteo
+historical-forecast API with explicit models=ecmwf_ifs. Surface fields
+are populated, but every pressure-level variable
+(temperature_*hPa / geopotential_height_*hPa) is null with
+hourly_units 'undefined', so the Python Kuchera baseline -- which needs
+the temperature/geopotential profile -- cannot be computed for any
+event (677 attempted, 0 baselines). Levels ARE fully populated in the
+same API's best-match archive (verified 192/192 non-null on a probe),
+but the contributing model is not exposed there, so best-match profiles
+cannot honestly be labelled ECMWF IFS and were not substituted. The
+transfer question (does the HRRR-trained correction carry to ECMWF
+features?) remains open pending a profile source with attributable
+ECMWF output; the per-station API responses are cached on disk under
+data/hrrr-dataset/model-evaluation/ecmwf-cache/ (git-ignored).

@@ -56,3 +56,4 @@ next-env.d.ts
 /data/hrrr-dataset/cache/
 /data/hrrr-dataset/noaa-cache/
 /data/hrrr-dataset/noaa-monthly/logs/
+/data/hrrr-dataset/model-evaluation/ecmwf-cache/
