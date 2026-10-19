@@ -17,11 +17,13 @@ report of the build that produced the committed Parquet.
 - **Observations: complete.** All 499 stations, 2023-10-01 → 2026-10-18
   (370/370 AWDB chunks fetched and cached; rebuilds make zero AWDB
   requests).
-- **Forecasts (NOAA): the full WY2025 season is extracted**
-  (2024-10 → 2025-05). Every CONUS station-day in those months has
-  `hrrr_status = "ok"` (115,668 station-days = 476 CONUS stations ×
-  243 days, 100% coverage). The remaining planned months
-  (2025-10 → 2026-05, 2026-10, 2023-10 → 2024-05) are being extracted
+- **Forecasts (NOAA): the full WY2025 and WY2026 seasons are
+  extracted** (2024-10 → 2025-05 and 2025-10 → 2026-05), plus
+  2023-10. Every CONUS station-day in those months has
+  `hrrr_status = "ok"` (246,092 station-days = 115,668 per full
+  Oct-May season (476 CONUS stations × 243 days) plus 14,756 for
+  2023-10, 100% coverage). The remaining planned months
+  (2023-11 → 2024-05, 2026-10) are being extracted
   in plan order; their station-days carry
   `hrrr_status = "not_requested"` and null forecast fields until they
   land. Per-month extraction state (completeness, files, bytes, wall
@@ -81,8 +83,8 @@ but no longer feeds the committed dataset.
   `dataTimeZone` UTC offset, nearest resort name/region, distance (km).
 - `daily/water_year=YYYY/data.parquet` — the joined daily rows,
   partitioned by water year (water year = Oct 1 → Sep 30, named by the
-  spring year). 550,517 rows in this build: WY2024 179,457 · WY2025
-  181,716 · WY2026 181,402 · WY2027 7,942 (Oct 1–18, 2026 only). The
+  spring year). 551,272 rows in this build: WY2024 179,705 · WY2025
+  181,716 · WY2026 181,909 · WY2027 7,942 (Oct 1–18, 2026 only). The
   row set is the union of observed station-days and forecast-covered
   station-days: a station-day inside an extracted forecast month with
   no AWDB observation row (dead or gapped stations) still appears,
@@ -175,7 +177,7 @@ included in the build); `hrrr_status` is per-day: `ok`, `no_coverage`,
 ## Validation (this build)
 
 - Parquet round-trips with pyarrow; per-partition row counts sum to the
-  report total (550,517).
+  report total (551,272).
 - Spot-check 784:CA:SNTL (Palisades Tahoe), 2025-01-10 → 16, against the
   raw cached AWDB rows: **0 mismatches** (SWE 464.82 mm; snow depth
   1117.6 → 1092.2 mm; precip accumulation 538.48 mm).

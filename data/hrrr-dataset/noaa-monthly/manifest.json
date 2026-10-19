@@ -1,6 +1,23 @@
 {
  "kind": "noaa_monthly_manifest",
  "months": {
+  "2023-10": {
+   "bytes_transferred": 18922880758,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 3525,
+   "extracted_at_utc": "2026-10-19T08:44:52.063869Z",
+   "files_cached": 0,
+   "files_failed": [],
+   "files_fetched": 1584,
+   "files_planned": 1584,
+   "month": "2023-10",
+   "requests": 19037,
+   "retries": 29,
+   "station_days": 14756,
+   "wall_seconds": 2418.5
+  },
   "2024-10": {
    "bytes_transferred": 18714666731,
    "complete": true,
@@ -136,8 +153,2658 @@
    "retries": 47,
    "station_days": 14756,
    "wall_seconds": 3201.9
+  },
+  "2025-10": {
+   "bytes_transferred": 11967786876,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 4834,
+   "extracted_at_utc": "2026-10-19T03:09:24.601876Z",
+   "files_cached": 600,
+   "files_failed": [],
+   "files_fetched": 984,
+   "files_planned": 1584,
+   "month": "2025-10",
+   "requests": 11912,
+   "retries": 8,
+   "station_days": 14756,
+   "wall_seconds": 1238.1
+  },
+  "2025-11": {
+   "bytes_transferred": 17559370247,
+   "complete": true,
+   "days_with_any_hours": 14280,
+   "days_with_full_24h": 14280,
+   "days_with_kuchera": 5516,
+   "extracted_at_utc": "2026-10-19T03:45:46.212079Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1440,
+   "files_planned": 1536,
+   "month": "2025-11",
+   "requests": 17301,
+   "retries": 21,
+   "station_days": 14280,
+   "wall_seconds": 2181.6
+  },
+  "2025-12": {
+   "bytes_transferred": 18908136991,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 7838,
+   "extracted_at_utc": "2026-10-19T04:28:34.899790Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1488,
+   "files_planned": 1584,
+   "month": "2025-12",
+   "requests": 17884,
+   "retries": 28,
+   "station_days": 14756,
+   "wall_seconds": 2568.7
+  },
+  "2026-01": {
+   "bytes_transferred": 18892631977,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 6429,
+   "extracted_at_utc": "2026-10-19T05:07:10.750841Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1488,
+   "files_planned": 1584,
+   "month": "2026-01",
+   "requests": 17880,
+   "retries": 24,
+   "station_days": 14756,
+   "wall_seconds": 2315.8
+  },
+  "2026-02": {
+   "bytes_transferred": 16919390736,
+   "complete": true,
+   "days_with_any_hours": 13328,
+   "days_with_full_24h": 13328,
+   "days_with_kuchera": 6130,
+   "extracted_at_utc": "2026-10-19T05:44:53.081127Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1344,
+   "files_planned": 1440,
+   "month": "2026-02",
+   "requests": 16159,
+   "retries": 31,
+   "station_days": 13328,
+   "wall_seconds": 2262.3
+  },
+  "2026-03": {
+   "bytes_transferred": 18485824835,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 5413,
+   "extracted_at_utc": "2026-10-19T06:24:11.471507Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1488,
+   "files_planned": 1584,
+   "month": "2026-03",
+   "requests": 17877,
+   "retries": 21,
+   "station_days": 14756,
+   "wall_seconds": 2358.4
+  },
+  "2026-04": {
+   "bytes_transferred": 17645121367,
+   "complete": true,
+   "days_with_any_hours": 14280,
+   "days_with_full_24h": 14280,
+   "days_with_kuchera": 6525,
+   "extracted_at_utc": "2026-10-19T07:00:16.216928Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1440,
+   "files_planned": 1536,
+   "month": "2026-04",
+   "requests": 17300,
+   "retries": 20,
+   "station_days": 14280,
+   "wall_seconds": 2164.7
+  },
+  "2026-05": {
+   "bytes_transferred": 17965202817,
+   "complete": true,
+   "days_with_any_hours": 14756,
+   "days_with_full_24h": 14756,
+   "days_with_kuchera": 3775,
+   "extracted_at_utc": "2026-10-19T07:41:20.291631Z",
+   "files_cached": 96,
+   "files_failed": [],
+   "files_fetched": 1488,
+   "files_planned": 1584,
+   "month": "2026-05",
+   "requests": 17881,
+   "retries": 25,
+   "station_days": 14756,
+   "wall_seconds": 2464.1
+  },
+  "2026-10": {
+   "bytes_transferred": 11510101825,
+   "complete": false,
+   "days_with_any_hours": 9044,
+   "days_with_full_24h": 8568,
+   "days_with_kuchera": 1588,
+   "extracted_at_utc": "2026-10-19T08:04:33.588412Z",
+   "files_cached": 0,
+   "files_failed": [
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-20 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-20 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-20 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-20 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-20 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-20 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-20 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-20 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-20 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-20 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-20 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-20 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-20 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-20 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-20 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-20 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-20 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-20 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-20 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-20 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-20 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-20 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-20 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-20 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-20 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-20 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-20 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-20 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-20 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-20 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-20 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-20 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-20 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-20 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-20 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-20 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-20 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-20 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-20 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-20 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-20 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-20 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-20 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-20 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-20 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-20 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-20 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261020/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-20 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-21 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-21 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-21 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-21 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-21 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-21 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-21 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-21 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-21 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-21 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-21 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-21 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-21 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-21 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-21 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-21 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-21 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-21 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-21 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-21 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-21 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-21 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-21 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-21 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-21 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-21 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-21 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-21 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-21 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-21 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-21 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-21 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-21 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-21 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-21 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-21 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-21 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-21 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-21 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-21 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-21 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-21 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-21 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-21 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-21 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-21 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-21 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261021/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-21 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-22 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-22 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-22 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-22 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-22 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-22 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-22 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-22 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-22 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-22 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-22 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-22 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-22 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-22 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-22 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-22 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-22 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-22 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-22 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-22 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-22 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-22 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-22 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-22 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-22 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-22 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-22 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-22 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-22 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-22 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-22 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-22 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-22 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-22 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-22 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-22 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-22 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-22 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-22 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-22 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-22 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-22 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-22 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-22 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-22 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-22 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-22 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261022/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-22 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-23 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-23 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-23 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-23 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-23 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-23 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-23 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-23 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-23 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-23 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-23 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-23 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-23 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-23 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-23 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-23 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-23 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-23 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-23 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-23 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-23 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-23 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-23 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-23 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-23 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-23 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-23 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-23 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-23 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-23 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-23 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-23 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-23 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-23 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-23 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-23 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-23 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-23 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-23 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-23 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-23 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-23 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-23 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-23 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-23 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-23 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-23 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261023/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-23 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-24 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-24 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-24 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-24 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-24 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-24 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-24 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-24 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-24 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-24 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-24 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-24 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-24 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-24 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-24 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-24 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-24 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-24 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-24 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-24 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-24 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-24 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-24 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-24 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-24 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-24 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-24 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-24 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-24 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-24 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-24 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-24 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-24 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-24 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-24 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-24 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-24 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-24 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-24 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-24 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-24 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-24 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-24 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-24 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-24 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-24 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-24 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261024/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-24 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-25 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-25 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-25 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-25 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-25 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-25 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-25 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-25 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-25 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-25 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-25 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-25 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-25 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-25 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-25 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-25 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-25 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-25 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-25 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-25 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-25 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-25 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-25 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-25 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-25 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-25 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-25 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-25 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-25 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-25 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-25 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-25 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-25 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-25 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-25 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-25 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-25 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-25 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-25 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-25 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-25 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-25 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-25 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-25 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-25 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-25 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-25 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261025/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-25 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-26 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-26 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-26 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-26 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-26 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-26 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-26 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-26 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-26 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-26 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-26 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-26 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-26 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-26 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-26 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-26 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-26 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-26 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-26 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-26 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-26 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-26 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-26 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-26 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-26 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-26 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-26 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-26 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-26 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-26 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-26 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-26 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-26 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-26 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-26 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-26 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-26 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-26 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-26 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-26 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-26 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-26 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-26 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-26 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-26 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-26 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-26 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261026/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-26 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-27 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-27 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-27 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-27 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-27 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-27 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-27 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-27 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-27 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-27 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-27 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-27 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-27 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-27 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-27 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-27 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-27 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-27 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-27 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-27 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-27 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-27 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-27 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-27 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-27 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-27 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-27 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-27 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-27 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-27 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-27 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-27 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-27 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-27 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-27 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-27 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-27 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-27 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-27 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-27 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-27 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-27 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-27 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-27 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-27 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-27 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-27 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261027/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-27 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-28 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-28 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-28 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-28 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-28 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-28 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-28 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-28 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-28 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-28 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-28 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-28 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-28 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-28 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-28 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-28 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-28 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-28 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-28 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-28 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-28 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-28 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-28 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-28 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-28 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-28 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-28 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-28 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-28 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-28 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-28 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-28 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-28 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-28 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-28 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-28 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-28 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-28 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-28 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-28 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-28 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-28 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-28 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-28 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-28 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-28 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-28 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261028/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-28 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-29 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-29 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-29 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-29 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-29 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-29 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-29 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-29 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-29 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-29 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-29 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-29 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-29 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-29 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-29 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-29 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-29 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-29 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-29 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-29 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-29 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-29 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-29 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-29 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-29 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-29 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-29 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-29 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-29 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-29 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-29 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-29 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-29 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-29 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-29 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-29 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-29 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-29 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-29 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-29 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-29 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-29 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-29 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-29 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-29 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-29 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-29 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261029/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-29 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-30 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-30 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-30 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-30 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-30 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-30 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-30 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-30 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-30 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-30 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-30 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-30 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-30 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-30 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-30 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-30 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-30 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-30 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-30 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-30 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-30 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-30 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-30 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-30 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-30 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-30 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-30 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-30 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-30 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-30 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-30 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-30 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-30 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-30 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-30 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-30 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-30 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-30 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-30 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-30 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-30 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-30 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-30 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-30 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-30 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-30 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-30 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261030/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-30 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-10-31 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-10-31 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-10-31 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-10-31 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-10-31 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-10-31 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-10-31 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-10-31 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-10-31 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-10-31 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-10-31 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-10-31 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-10-31 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-10-31 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-10-31 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-10-31 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-10-31 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-10-31 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-10-31 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-10-31 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-10-31 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-10-31 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-10-31 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-10-31 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-10-31 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-10-31 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-10-31 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-10-31 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-10-31 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-10-31 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-10-31 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-10-31 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-10-31 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-10-31 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-10-31 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-10-31 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-10-31 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-10-31 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-10-31 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-10-31 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-10-31 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-10-31 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-10-31 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-10-31 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-10-31 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-10-31 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-10-31 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261031/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-10-31 wrfprs f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf01.grib2.idx",
+     "file": "2026-11-01 wrfsfc f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf03.grib2.idx",
+     "file": "2026-11-01 wrfsfc f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf04.grib2.idx",
+     "file": "2026-11-01 wrfsfc f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf02.grib2.idx",
+     "file": "2026-11-01 wrfsfc f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf05.grib2.idx",
+     "file": "2026-11-01 wrfsfc f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf06.grib2.idx",
+     "file": "2026-11-01 wrfsfc f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf07.grib2.idx",
+     "file": "2026-11-01 wrfsfc f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf08.grib2.idx",
+     "file": "2026-11-01 wrfsfc f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf10.grib2.idx",
+     "file": "2026-11-01 wrfsfc f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf11.grib2.idx",
+     "file": "2026-11-01 wrfsfc f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf09.grib2.idx",
+     "file": "2026-11-01 wrfsfc f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf12.grib2.idx",
+     "file": "2026-11-01 wrfsfc f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf14.grib2.idx",
+     "file": "2026-11-01 wrfsfc f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf15.grib2.idx",
+     "file": "2026-11-01 wrfsfc f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf13.grib2.idx",
+     "file": "2026-11-01 wrfsfc f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf16.grib2.idx",
+     "file": "2026-11-01 wrfsfc f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf17.grib2.idx",
+     "file": "2026-11-01 wrfsfc f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf18.grib2.idx",
+     "file": "2026-11-01 wrfsfc f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf19.grib2.idx",
+     "file": "2026-11-01 wrfsfc f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf21.grib2.idx",
+     "file": "2026-11-01 wrfsfc f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf20.grib2.idx",
+     "file": "2026-11-01 wrfsfc f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf22.grib2.idx",
+     "file": "2026-11-01 wrfsfc f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf23.grib2.idx",
+     "file": "2026-11-01 wrfsfc f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfsfcf24.grib2.idx",
+     "file": "2026-11-01 wrfsfc f24"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf01.grib2.idx",
+     "file": "2026-11-01 wrfprs f01"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf02.grib2.idx",
+     "file": "2026-11-01 wrfprs f02"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf03.grib2.idx",
+     "file": "2026-11-01 wrfprs f03"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf04.grib2.idx",
+     "file": "2026-11-01 wrfprs f04"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf08.grib2.idx",
+     "file": "2026-11-01 wrfprs f08"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf07.grib2.idx",
+     "file": "2026-11-01 wrfprs f07"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf05.grib2.idx",
+     "file": "2026-11-01 wrfprs f05"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf06.grib2.idx",
+     "file": "2026-11-01 wrfprs f06"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf09.grib2.idx",
+     "file": "2026-11-01 wrfprs f09"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf10.grib2.idx",
+     "file": "2026-11-01 wrfprs f10"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf12.grib2.idx",
+     "file": "2026-11-01 wrfprs f12"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf11.grib2.idx",
+     "file": "2026-11-01 wrfprs f11"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf13.grib2.idx",
+     "file": "2026-11-01 wrfprs f13"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf14.grib2.idx",
+     "file": "2026-11-01 wrfprs f14"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf17.grib2.idx",
+     "file": "2026-11-01 wrfprs f17"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf15.grib2.idx",
+     "file": "2026-11-01 wrfprs f15"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf16.grib2.idx",
+     "file": "2026-11-01 wrfprs f16"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf20.grib2.idx",
+     "file": "2026-11-01 wrfprs f20"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf19.grib2.idx",
+     "file": "2026-11-01 wrfprs f19"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf21.grib2.idx",
+     "file": "2026-11-01 wrfprs f21"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf18.grib2.idx",
+     "file": "2026-11-01 wrfprs f18"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf22.grib2.idx",
+     "file": "2026-11-01 wrfprs f22"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf23.grib2.idx",
+     "file": "2026-11-01 wrfprs f23"
+    },
+    {
+     "error": "NoaaFetchError: HTTP 404 for https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20261101/conus/hrrr.t00z.wrfprsf24.grib2.idx",
+     "file": "2026-11-01 wrfprs f24"
+    }
+   ],
+   "files_fetched": 960,
+   "files_planned": 1584,
+   "month": "2026-10",
+   "requests": 12156,
+   "retries": 12,
+   "station_days": 14756,
+   "wall_seconds": 1393.3
   }
  },
  "source": "noaa_grib_00z",
- "updated_at_utc": "2026-10-19T02:48:46.514181Z"
+ "updated_at_utc": "2026-10-19T08:44:52.063869Z"
 }
