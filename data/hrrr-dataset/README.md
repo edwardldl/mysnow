@@ -12,19 +12,20 @@ forecasts are populated by `extract-noaa-months`
 `validation_report.json` next to this file is the machine-readable
 report of the build that produced the committed Parquet.
 
-## Status of this build (2026-10-18) — read first
+## Status of this build (2026-10-19) — read first
 
 - **Observations: complete.** All 499 stations, 2023-10-01 → 2026-10-18
   (370/370 AWDB chunks fetched and cached; rebuilds make zero AWDB
   requests).
-- **Forecasts (NOAA): extracted for 2024-10, 2024-11, 2024-12 so far.**
-  Every CONUS station-day in those months has `hrrr_status = "ok"`
-  (43,792 station-days = 476 CONUS stations × 92 days, 100% coverage).
-  The remaining planned months (2025-01 → 2025-05, 2025-10 → 2026-05,
-  2026-10, 2023-10 → 2024-05) are being extracted in plan order; their
-  station-days carry `hrrr_status = "not_requested"` and null forecast
-  fields until they land. Per-month extraction state (completeness,
-  files, bytes, wall time) lives in `noaa-monthly/manifest.json`.
+- **Forecasts (NOAA): the full WY2025 season is extracted**
+  (2024-10 → 2025-05). Every CONUS station-day in those months has
+  `hrrr_status = "ok"` (115,668 station-days = 476 CONUS stations ×
+  243 days, 100% coverage). The remaining planned months
+  (2025-10 → 2026-05, 2026-10, 2023-10 → 2024-05) are being extracted
+  in plan order; their station-days carry
+  `hrrr_status = "not_requested"` and null forecast fields until they
+  land. Per-month extraction state (completeness, files, bytes, wall
+  time) lives in `noaa-monthly/manifest.json`.
 - **Oct 2026 caveat:** a month extraction needs GRIB cycles through the
   day after the month ends, so 2026-10 can only complete on/after
   2026-11-01. Cycles that already exist are fetched and cached in the
@@ -80,8 +81,14 @@ but no longer feeds the committed dataset.
   `dataTimeZone` UTC offset, nearest resort name/region, distance (km).
 - `daily/water_year=YYYY/data.parquet` — the joined daily rows,
   partitioned by water year (water year = Oct 1 → Sep 30, named by the
-  spring year). 550,052 rows in this build: WY2024 179,457 · WY2025
-  181,251 · WY2026 181,402 · WY2027 7,942 (Oct 1–18, 2026 only).
+  spring year). 550,517 rows in this build: WY2024 179,457 · WY2025
+  181,716 · WY2026 181,402 · WY2027 7,942 (Oct 1–18, 2026 only). The
+  row set is the union of observed station-days and forecast-covered
+  station-days: a station-day inside an extracted forecast month with
+  no AWDB observation row (dead or gapped stations) still appears,
+  with null observation fields — 465 such forecast-skeleton rows in
+  WY2025 — so the total grows as more forecast months land.
+  Observation values and the QC-passed count (21,994) do not change.
 - `validation_report.json` — request counts, chunk outcomes, coverage
   and null-rate statistics for the producing build, including
   `forecast_source`, `hrrr.months_fed` and `hrrr.months_missing`.
@@ -168,7 +175,7 @@ included in the build); `hrrr_status` is per-day: `ok`, `no_coverage`,
 ## Validation (this build)
 
 - Parquet round-trips with pyarrow; per-partition row counts sum to the
-  report total (550,052).
+  report total (550,517).
 - Spot-check 784:CA:SNTL (Palisades Tahoe), 2025-01-10 → 16, against the
   raw cached AWDB rows: **0 mismatches** (SWE 464.82 mm; snow depth
   1117.6 → 1092.2 mm; precip accumulation 538.48 mm).
