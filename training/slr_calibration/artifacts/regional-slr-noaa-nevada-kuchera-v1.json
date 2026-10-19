@@ -1,0 +1,197 @@
+{
+  "artifactId": "regional-slr-noaa-nevada-kuchera-v1",
+  "artifactVersion": "noaa-nevada-a-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "822987fffffffff": "intermountain",
+      "82298ffffffffff": "intermountain",
+      "82299ffffffffff": "intermountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "coverage": {
+    "geographicNote": "Nevada Ranges: SNOTEL stations in the region footprint only; H3/site fallback inside the artifact. Not validated outside the region.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2025-05-18T00:00:00Z",
+  "methods": {
+    "kuchera": {
+      "climate": {
+        "intermountain": {
+          "effectiveSampleSize": 253.0,
+          "logBias": -0.08867971,
+          "rawLogBias": -0.09919509,
+          "rawSampleCount": 253,
+          "residualStdLog": 0.44827266,
+          "shrinkageWeight": 0.89399293
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 253.0,
+        "logBias": -0.83654526,
+        "rawLogBias": -0.93574035,
+        "rawSampleCount": 253,
+        "residualStdLog": 0.44827266,
+        "shrinkageWeight": 0.89399293
+      },
+      "local": {
+        "1110:NV:SNTL": {
+          "effectiveSampleSize": 10.0,
+          "logBias": -0.00891659,
+          "rawLogBias": -0.03566636,
+          "rawSampleCount": 10,
+          "residualStdLog": 0.29248563,
+          "shrinkageWeight": 0.25
+        },
+        "1111:NV:SNTL": {
+          "effectiveSampleSize": 16.0,
+          "logBias": 0.06383762,
+          "rawLogBias": 0.18353317,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.34500476,
+          "shrinkageWeight": 0.34782609
+        },
+        "1112:NV:SNTL": {
+          "effectiveSampleSize": 12.0,
+          "logBias": -0.05560679,
+          "rawLogBias": -0.19462377,
+          "rawSampleCount": 12,
+          "residualStdLog": 0.57952174,
+          "shrinkageWeight": 0.28571429
+        },
+        "1242:NV:SNTL": {
+          "effectiveSampleSize": 10.0,
+          "logBias": -0.04585033,
+          "rawLogBias": -0.18340131,
+          "rawSampleCount": 10,
+          "residualStdLog": 0.53787085,
+          "shrinkageWeight": 0.25
+        },
+        "1310:NV:SNTL": {
+          "effectiveSampleSize": 77.0,
+          "logBias": -0.02901094,
+          "rawLogBias": -0.0403139,
+          "rawSampleCount": 77,
+          "residualStdLog": 0.47207243,
+          "shrinkageWeight": 0.71962617
+        },
+        "340:NV:SNTL": {
+          "effectiveSampleSize": 28.0,
+          "logBias": 0.02883538,
+          "rawLogBias": 0.05973042,
+          "rawSampleCount": 28,
+          "residualStdLog": 0.42818808,
+          "shrinkageWeight": 0.48275862
+        },
+        "570:NV:SNTL": {
+          "effectiveSampleSize": 38.0,
+          "logBias": 0.03994079,
+          "rawLogBias": 0.07147299,
+          "rawSampleCount": 38,
+          "residualStdLog": 0.47586475,
+          "shrinkageWeight": 0.55882353
+        },
+        "615:NV:SNTL": {
+          "effectiveSampleSize": 32.0,
+          "logBias": 0.0021392,
+          "rawLogBias": 0.0041447,
+          "rawSampleCount": 32,
+          "residualStdLog": 0.40388729,
+          "shrinkageWeight": 0.51612903
+        },
+        "652:NV:SNTL": {
+          "effectiveSampleSize": 30.0,
+          "logBias": -0.00620875,
+          "rawLogBias": -0.01241751,
+          "rawSampleCount": 30,
+          "residualStdLog": 0.32571505,
+          "shrinkageWeight": 0.5
+        }
+      },
+      "region": {
+        "842980dffffffff": {
+          "effectiveSampleSize": 28.0,
+          "logBias": 0.02003486,
+          "rawLogBias": 0.04150077,
+          "rawSampleCount": 28,
+          "residualStdLog": 0.49696176,
+          "shrinkageWeight": 0.48275862
+        },
+        "842986bffffffff": {
+          "effectiveSampleSize": 10.0,
+          "logBias": -0.01188878,
+          "rawLogBias": -0.04755514,
+          "rawSampleCount": 10,
+          "residualStdLog": 0.29248563,
+          "shrinkageWeight": 0.25
+        },
+        "8429891ffffffff": {
+          "effectiveSampleSize": 68.0,
+          "logBias": -0.01780288,
+          "rawLogBias": -0.02565709,
+          "rawSampleCount": 68,
+          "residualStdLog": 0.41384332,
+          "shrinkageWeight": 0.69387755
+        },
+        "8429899ffffffff": {
+          "effectiveSampleSize": 32.0,
+          "logBias": 0.00442101,
+          "rawLogBias": 0.00856571,
+          "rawSampleCount": 32,
+          "residualStdLog": 0.40388729,
+          "shrinkageWeight": 0.51612903
+        },
+        "84299bbffffffff": {
+          "effectiveSampleSize": 115.0,
+          "logBias": -0.01293987,
+          "rawLogBias": -0.01631549,
+          "rawSampleCount": 115,
+          "residualStdLog": 0.47624052,
+          "shrinkageWeight": 0.79310345
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "regionSlice": {
+    "definition": "station membership from training/slr_calibration/regions/station_regimes.csv (state footprint, design section 4.3)",
+    "label": "Nevada Ranges",
+    "regionId": "nevada"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2025-05-18",
+  "training": {
+    "acceptedEventCount": 253,
+    "candidate": "A",
+    "forecastSource": "noaa-hrrr-00z",
+    "labelTier": "weak-only",
+    "leakageGroup": "storm_group_id",
+    "minEffectiveSampleSize": 5.0,
+    "priorEffectiveSampleSize": 30.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "7ee8ed2ce211301252a0c4c6d9313bfa3b0190f350014b208ee786f96c6074f4",
+    "sourceLabel": "SNOTEL differenced (weak) labels, qc_weight 0.25, paired to NOAA HRRR 00Z-cycle Kuchera baselines at fixed leads 1-24 h; research-only",
+    "stationCount": 9,
+    "target": "log(observed_slr / physical_baseline_slr)",
+    "waterYears": [
+      2024,
+      2025
+    ]
+  }
+}

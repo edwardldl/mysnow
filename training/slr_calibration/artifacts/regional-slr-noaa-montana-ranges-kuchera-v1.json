@@ -1,0 +1,766 @@
+{
+  "artifactId": "regional-slr-noaa-montana-ranges-kuchera-v1",
+  "artifactVersion": "noaa-montana-ranges-b-v1",
+  "bounds": {
+    "maxCorrectionFactor": 2.0,
+    "maxSlr": 30.0,
+    "minCorrectionFactor": 0.5,
+    "minSlr": 3.0
+  },
+  "climateIndex": {
+    "assignments": {
+      "8212cffffffffff": "continental_mountain",
+      "8212dffffffffff": "continental_mountain",
+      "822797fffffffff": "continental_mountain",
+      "82279ffffffffff": "continental_mountain",
+      "822897fffffffff": "continental_mountain",
+      "82289ffffffffff": "continental_mountain"
+    },
+    "resolution": 2,
+    "system": "h3"
+  },
+  "covariateModel": {
+    "coefficients": {
+      "baseline_slr": -0.10175675,
+      "day_of_year_cos": -0.01505017,
+      "day_of_year_sin": -0.02360166,
+      "elevation_m": -0.12605059,
+      "fcst_t2m_max_c": 0.03357549,
+      "fcst_t2m_mean_c": -0.17500883,
+      "fcst_t2m_min_c": 0.09037277,
+      "latitude": -0.07955749,
+      "lead_max_h": 0.0,
+      "log_fcst_precip_mm": 0.0279939
+    },
+    "droppedFeatures": [
+      "lead_max_h"
+    ],
+    "envelopePolicy": "clamp features to the training envelope and flag the application out-of-envelope",
+    "featureEnvelope": {
+      "baseline_slr": [
+        3.579787,
+        30.0
+      ],
+      "day_of_year_cos": [
+        -0.78726,
+        0.999991
+      ],
+      "day_of_year_sin": [
+        -0.981947,
+        0.999986
+      ],
+      "elevation_m": [
+        1322.8,
+        2688.3
+      ],
+      "fcst_t2m_max_c": [
+        -26.2818,
+        6.1814
+      ],
+      "fcst_t2m_mean_c": [
+        -27.8948,
+        0.8337
+      ],
+      "fcst_t2m_min_c": [
+        -35.8987,
+        -0.9219
+      ],
+      "latitude": [
+        44.50832,
+        48.68005
+      ],
+      "lead_max_h": [
+        24.0,
+        24.0
+      ],
+      "log_fcst_precip_mm": [
+        -2.302585,
+        4.355554
+      ]
+    },
+    "featureNames": [
+      "baseline_slr",
+      "log_fcst_precip_mm",
+      "fcst_t2m_mean_c",
+      "fcst_t2m_min_c",
+      "fcst_t2m_max_c",
+      "elevation_m",
+      "latitude",
+      "day_of_year_sin",
+      "day_of_year_cos",
+      "lead_max_h"
+    ],
+    "intercept": -0.83924211,
+    "kind": "ridge-log-residual",
+    "lambda": 1.0,
+    "lambdaCvWeightedMse": {
+      "0.03": 0.24256438,
+      "0.1": 0.24255725,
+      "0.3": 0.24254003,
+      "1": 0.24250627,
+      "10": 0.24266752,
+      "100": 0.24505263,
+      "1000": 0.25315403,
+      "3": 0.24250838,
+      "30": 0.2431689,
+      "300": 0.24843676
+    },
+    "lambdaSelection": "storm-grouped 5-fold CV within training rows, weighted MSE of the log-residual",
+    "standardization": {
+      "baseline_slr": {
+        "mean": 18.20654894,
+        "std": 4.03762108
+      },
+      "day_of_year_cos": {
+        "mean": 0.63590507,
+        "std": 0.37433457
+      },
+      "day_of_year_sin": {
+        "mean": 0.28917574,
+        "std": 0.60981617
+      },
+      "elevation_m": {
+        "mean": 2149.84341737,
+        "std": 313.71139292
+      },
+      "fcst_t2m_max_c": {
+        "mean": -4.13407262,
+        "std": 3.63022857
+      },
+      "fcst_t2m_mean_c": {
+        "mean": -7.01039174,
+        "std": 3.84196067
+      },
+      "fcst_t2m_min_c": {
+        "mean": -10.15528088,
+        "std": 4.58621503
+      },
+      "latitude": {
+        "mean": 46.45595526,
+        "std": 1.28670556
+      },
+      "lead_max_h": {
+        "mean": 24.0,
+        "std": 0.0
+      },
+      "log_fcst_precip_mm": {
+        "mean": 1.81190839,
+        "std": 0.91629766
+      }
+    },
+    "version": 1
+  },
+  "coverage": {
+    "geographicNote": "Montana Ranges: SNOTEL stations in the region footprint only; H3/site fallback inside the artifact. Not validated outside the region.",
+    "qualityTier": "unvalidated",
+    "supportedMethods": [
+      "kuchera"
+    ]
+  },
+  "generatedAt": "2025-05-05T00:00:00Z",
+  "methods": {
+    "kuchera": {
+      "climate": {
+        "continental_mountain": {
+          "effectiveSampleSize": 1428.0,
+          "logBias": -5.21e-06,
+          "rawLogBias": -5.32e-06,
+          "rawSampleCount": 1428,
+          "residualStdLog": 0.48831363,
+          "shrinkageWeight": 0.97942387
+        }
+      },
+      "global": {
+        "effectiveSampleSize": 1428.0,
+        "logBias": -0.00025316,
+        "rawLogBias": -0.00025848,
+        "rawSampleCount": 1428,
+        "residualStdLog": 0.48831363,
+        "shrinkageWeight": 0.97942387
+      },
+      "local": {
+        "1008:MT:SNTL": {
+          "effectiveSampleSize": 42.0,
+          "logBias": 0.02475243,
+          "rawLogBias": 0.04243273,
+          "rawSampleCount": 42,
+          "residualStdLog": 0.43684367,
+          "shrinkageWeight": 0.58333333
+        },
+        "1009:MT:SNTL": {
+          "effectiveSampleSize": 33.0,
+          "logBias": -0.03964436,
+          "rawLogBias": -0.0756847,
+          "rawSampleCount": 33,
+          "residualStdLog": 0.47433151,
+          "shrinkageWeight": 0.52380952
+        },
+        "1144:MT:SNTL": {
+          "effectiveSampleSize": 31.0,
+          "logBias": 0.0152826,
+          "rawLogBias": 0.03007221,
+          "rawSampleCount": 31,
+          "residualStdLog": 0.40831374,
+          "shrinkageWeight": 0.50819672
+        },
+        "1311:MT:SNTL": {
+          "effectiveSampleSize": 80.0,
+          "logBias": -0.00714547,
+          "rawLogBias": -0.00982502,
+          "rawSampleCount": 80,
+          "residualStdLog": 0.50732348,
+          "shrinkageWeight": 0.72727273
+        },
+        "311:MT:SNTL": {
+          "effectiveSampleSize": 38.0,
+          "logBias": 0.04561978,
+          "rawLogBias": 0.08163539,
+          "rawSampleCount": 38,
+          "residualStdLog": 0.3440806,
+          "shrinkageWeight": 0.55882353
+        },
+        "313:MT:SNTL": {
+          "effectiveSampleSize": 33.0,
+          "logBias": 0.10929325,
+          "rawLogBias": 0.20865075,
+          "rawSampleCount": 33,
+          "residualStdLog": 0.52618657,
+          "shrinkageWeight": 0.52380952
+        },
+        "315:MT:SNTL": {
+          "effectiveSampleSize": 14.0,
+          "logBias": 0.04986368,
+          "rawLogBias": 0.15671442,
+          "rawSampleCount": 14,
+          "residualStdLog": 0.41691394,
+          "shrinkageWeight": 0.31818182
+        },
+        "347:MT:SNTL": {
+          "effectiveSampleSize": 62.0,
+          "logBias": -0.04500441,
+          "rawLogBias": -0.06678074,
+          "rawSampleCount": 62,
+          "residualStdLog": 0.54909275,
+          "shrinkageWeight": 0.67391304
+        },
+        "349:MT:SNTL": {
+          "effectiveSampleSize": 30.0,
+          "logBias": -0.02462477,
+          "rawLogBias": -0.04924954,
+          "rawSampleCount": 30,
+          "residualStdLog": 0.47001264,
+          "shrinkageWeight": 0.5
+        },
+        "365:MT:SNTL": {
+          "effectiveSampleSize": 23.0,
+          "logBias": -0.04419094,
+          "rawLogBias": -0.10183129,
+          "rawSampleCount": 23,
+          "residualStdLog": 0.4809852,
+          "shrinkageWeight": 0.43396226
+        },
+        "381:MT:SNTL": {
+          "effectiveSampleSize": 13.0,
+          "logBias": -4.611e-05,
+          "rawLogBias": -0.00015253,
+          "rawSampleCount": 13,
+          "residualStdLog": 0.43634072,
+          "shrinkageWeight": 0.30232558
+        },
+        "407:MT:SNTL": {
+          "effectiveSampleSize": 20.0,
+          "logBias": 0.0311477,
+          "rawLogBias": 0.07786925,
+          "rawSampleCount": 20,
+          "residualStdLog": 0.58261063,
+          "shrinkageWeight": 0.4
+        },
+        "410:MT:SNTL": {
+          "effectiveSampleSize": 11.0,
+          "logBias": 0.00466414,
+          "rawLogBias": 0.01738454,
+          "rawSampleCount": 11,
+          "residualStdLog": 0.57274349,
+          "shrinkageWeight": 0.26829268
+        },
+        "437:MT:SNTL": {
+          "effectiveSampleSize": 23.0,
+          "logBias": 0.0755233,
+          "rawLogBias": 0.17403195,
+          "rawSampleCount": 23,
+          "residualStdLog": 0.2407895,
+          "shrinkageWeight": 0.43396226
+        },
+        "458:MT:SNTL": {
+          "effectiveSampleSize": 16.0,
+          "logBias": -0.01414031,
+          "rawLogBias": -0.0406534,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.56649692,
+          "shrinkageWeight": 0.34782609
+        },
+        "469:MT:SNTL": {
+          "effectiveSampleSize": 30.0,
+          "logBias": -0.01429195,
+          "rawLogBias": -0.0285839,
+          "rawSampleCount": 30,
+          "residualStdLog": 0.44321415,
+          "shrinkageWeight": 0.5
+        },
+        "568:MT:SNTL": {
+          "effectiveSampleSize": 6.0,
+          "logBias": -0.0278825,
+          "rawLogBias": -0.16729499,
+          "rawSampleCount": 6,
+          "residualStdLog": 0.39003621,
+          "shrinkageWeight": 0.16666667
+        },
+        "578:MT:SNTL": {
+          "effectiveSampleSize": 19.0,
+          "logBias": 0.08815904,
+          "rawLogBias": 0.22735752,
+          "rawSampleCount": 19,
+          "residualStdLog": 0.44436714,
+          "shrinkageWeight": 0.3877551
+        },
+        "590:MT:SNTL": {
+          "effectiveSampleSize": 68.0,
+          "logBias": -0.02028932,
+          "rawLogBias": -0.0292405,
+          "rawSampleCount": 68,
+          "residualStdLog": 0.45984058,
+          "shrinkageWeight": 0.69387755
+        },
+        "604:MT:SNTL": {
+          "effectiveSampleSize": 14.0,
+          "logBias": -0.00102985,
+          "rawLogBias": -0.00323666,
+          "rawSampleCount": 14,
+          "residualStdLog": 0.5017753,
+          "shrinkageWeight": 0.31818182
+        },
+        "609:MT:SNTL": {
+          "effectiveSampleSize": 63.0,
+          "logBias": -0.02378018,
+          "rawLogBias": -0.03510408,
+          "rawSampleCount": 63,
+          "residualStdLog": 0.50617088,
+          "shrinkageWeight": 0.67741935
+        },
+        "649:MT:SNTL": {
+          "effectiveSampleSize": 26.0,
+          "logBias": 0.01604197,
+          "rawLogBias": 0.03455195,
+          "rawSampleCount": 26,
+          "residualStdLog": 0.53582337,
+          "shrinkageWeight": 0.46428571
+        },
+        "656:MT:SNTL": {
+          "effectiveSampleSize": 37.0,
+          "logBias": -0.00566982,
+          "rawLogBias": -0.01026697,
+          "rawSampleCount": 37,
+          "residualStdLog": 0.46617931,
+          "shrinkageWeight": 0.55223881
+        },
+        "657:MT:SNTL": {
+          "effectiveSampleSize": 22.0,
+          "logBias": 0.02859802,
+          "rawLogBias": 0.06759531,
+          "rawSampleCount": 22,
+          "residualStdLog": 0.44026251,
+          "shrinkageWeight": 0.42307692
+        },
+        "664:MT:SNTL": {
+          "effectiveSampleSize": 76.0,
+          "logBias": -0.04237162,
+          "rawLogBias": -0.05909726,
+          "rawSampleCount": 76,
+          "residualStdLog": 0.46473903,
+          "shrinkageWeight": 0.71698113
+        },
+        "667:MT:SNTL": {
+          "effectiveSampleSize": 60.0,
+          "logBias": -0.01951405,
+          "rawLogBias": -0.02927107,
+          "rawSampleCount": 60,
+          "residualStdLog": 0.50785649,
+          "shrinkageWeight": 0.66666667
+        },
+        "727:MT:SNTL": {
+          "effectiveSampleSize": 57.0,
+          "logBias": 0.00319939,
+          "rawLogBias": 0.00488328,
+          "rawSampleCount": 57,
+          "residualStdLog": 0.50121431,
+          "shrinkageWeight": 0.65517241
+        },
+        "754:MT:SNTL": {
+          "effectiveSampleSize": 67.0,
+          "logBias": 0.00052199,
+          "rawLogBias": 0.00075572,
+          "rawSampleCount": 67,
+          "residualStdLog": 0.42886525,
+          "shrinkageWeight": 0.69072165
+        },
+        "781:MT:SNTL": {
+          "effectiveSampleSize": 53.0,
+          "logBias": 0.01326115,
+          "rawLogBias": 0.02076747,
+          "rawSampleCount": 53,
+          "residualStdLog": 0.51523039,
+          "shrinkageWeight": 0.63855422
+        },
+        "813:MT:SNTL": {
+          "effectiveSampleSize": 40.0,
+          "logBias": 0.02606873,
+          "rawLogBias": 0.04562027,
+          "rawSampleCount": 40,
+          "residualStdLog": 0.44061673,
+          "shrinkageWeight": 0.57142857
+        },
+        "847:MT:SNTL": {
+          "effectiveSampleSize": 18.0,
+          "logBias": 0.02988447,
+          "rawLogBias": 0.07969193,
+          "rawSampleCount": 18,
+          "residualStdLog": 0.52963375,
+          "shrinkageWeight": 0.375
+        },
+        "850:MT:SNTL": {
+          "effectiveSampleSize": 42.0,
+          "logBias": -0.0971641,
+          "rawLogBias": -0.16656703,
+          "rawSampleCount": 42,
+          "residualStdLog": 0.46478007,
+          "shrinkageWeight": 0.58333333
+        },
+        "858:MT:SNTL": {
+          "effectiveSampleSize": 31.0,
+          "logBias": -0.00175511,
+          "rawLogBias": -0.0034536,
+          "rawSampleCount": 31,
+          "residualStdLog": 0.37965889,
+          "shrinkageWeight": 0.50819672
+        },
+        "901:MT:SNTL": {
+          "effectiveSampleSize": 83.0,
+          "logBias": -0.03259924,
+          "rawLogBias": -0.0443821,
+          "rawSampleCount": 83,
+          "residualStdLog": 0.36776041,
+          "shrinkageWeight": 0.73451327
+        },
+        "903:MT:SNTL": {
+          "effectiveSampleSize": 44.0,
+          "logBias": 0.00611653,
+          "rawLogBias": 0.0102869,
+          "rawSampleCount": 44,
+          "residualStdLog": 0.50182396,
+          "shrinkageWeight": 0.59459459
+        },
+        "917:MT:SNTL": {
+          "effectiveSampleSize": 10.0,
+          "logBias": 0.0256398,
+          "rawLogBias": 0.1025592,
+          "rawSampleCount": 10,
+          "residualStdLog": 0.47504414,
+          "shrinkageWeight": 0.25
+        },
+        "924:MT:SNTL": {
+          "effectiveSampleSize": 26.0,
+          "logBias": 0.01498717,
+          "rawLogBias": 0.03228005,
+          "rawSampleCount": 26,
+          "residualStdLog": 0.41923833,
+          "shrinkageWeight": 0.46428571
+        },
+        "929:MT:SNTL": {
+          "effectiveSampleSize": 31.0,
+          "logBias": 0.0371042,
+          "rawLogBias": 0.0730115,
+          "rawSampleCount": 31,
+          "residualStdLog": 0.55082425,
+          "shrinkageWeight": 0.50819672
+        },
+        "930:MT:SNTL": {
+          "effectiveSampleSize": 25.0,
+          "logBias": 0.04050128,
+          "rawLogBias": 0.08910282,
+          "rawSampleCount": 25,
+          "residualStdLog": 0.38239996,
+          "shrinkageWeight": 0.45454545
+        },
+        "981:MT:SNTL": {
+          "effectiveSampleSize": 11.0,
+          "logBias": 0.00715843,
+          "rawLogBias": 0.02668144,
+          "rawSampleCount": 11,
+          "residualStdLog": 0.65288742,
+          "shrinkageWeight": 0.26829268
+        }
+      },
+      "region": {
+        "8412ca7ffffffff": {
+          "effectiveSampleSize": 80.0,
+          "logBias": -0.02620004,
+          "rawLogBias": -0.03602506,
+          "rawSampleCount": 80,
+          "residualStdLog": 0.50732348,
+          "shrinkageWeight": 0.72727273
+        },
+        "8412cb3ffffffff": {
+          "effectiveSampleSize": 16.0,
+          "logBias": -0.02168181,
+          "rawLogBias": -0.06233521,
+          "rawSampleCount": 16,
+          "residualStdLog": 0.56649692,
+          "shrinkageWeight": 0.34782609
+        },
+        "8412cb5ffffffff": {
+          "effectiveSampleSize": 30.0,
+          "logBias": -0.0285839,
+          "rawLogBias": -0.0571678,
+          "rawSampleCount": 30,
+          "residualStdLog": 0.44321415,
+          "shrinkageWeight": 0.5
+        },
+        "8412d9bffffffff": {
+          "effectiveSampleSize": 38.0,
+          "logBias": 0.10340484,
+          "rawLogBias": 0.18504023,
+          "rawSampleCount": 38,
+          "residualStdLog": 0.3440806,
+          "shrinkageWeight": 0.55882353
+        },
+        "8427925ffffffff": {
+          "effectiveSampleSize": 44.0,
+          "logBias": 0.01508746,
+          "rawLogBias": 0.02537436,
+          "rawSampleCount": 44,
+          "residualStdLog": 0.50182396,
+          "shrinkageWeight": 0.59459459
+        },
+        "8427939ffffffff": {
+          "effectiveSampleSize": 53.0,
+          "logBias": 0.03668918,
+          "rawLogBias": 0.05745665,
+          "rawSampleCount": 53,
+          "residualStdLog": 0.51523039,
+          "shrinkageWeight": 0.63855422
+        },
+        "842793dffffffff": {
+          "effectiveSampleSize": 98.0,
+          "logBias": 0.10957716,
+          "rawLogBias": 0.14312119,
+          "rawSampleCount": 98,
+          "residualStdLog": 0.42407354,
+          "shrinkageWeight": 0.765625
+        },
+        "842795dffffffff": {
+          "effectiveSampleSize": 10.0,
+          "logBias": 0.0341864,
+          "rawLogBias": 0.1367456,
+          "rawSampleCount": 10,
+          "residualStdLog": 0.47504414,
+          "shrinkageWeight": 0.25
+        },
+        "84279a9ffffffff": {
+          "effectiveSampleSize": 20.0,
+          "logBias": 0.05191284,
+          "rawLogBias": 0.12978209,
+          "rawSampleCount": 20,
+          "residualStdLog": 0.58261063,
+          "shrinkageWeight": 0.4
+        },
+        "84279adffffffff": {
+          "effectiveSampleSize": 11.0,
+          "logBias": 0.0097832,
+          "rawLogBias": 0.03646464,
+          "rawSampleCount": 11,
+          "residualStdLog": 0.65288742,
+          "shrinkageWeight": 0.26829268
+        },
+        "842890dffffffff": {
+          "effectiveSampleSize": 46.0,
+          "logBias": 0.02736803,
+          "rawLogBias": 0.04521675,
+          "rawSampleCount": 46,
+          "residualStdLog": 0.44023247,
+          "shrinkageWeight": 0.60526316
+        },
+        "8428913ffffffff": {
+          "effectiveSampleSize": 57.0,
+          "logBias": 0.00927823,
+          "rawLogBias": 0.01416151,
+          "rawSampleCount": 57,
+          "residualStdLog": 0.50121431,
+          "shrinkageWeight": 0.65517241
+        },
+        "8428915ffffffff": {
+          "effectiveSampleSize": 37.0,
+          "logBias": -0.01266261,
+          "rawLogBias": -0.02292958,
+          "rawSampleCount": 37,
+          "residualStdLog": 0.46617931,
+          "shrinkageWeight": 0.55223881
+        },
+        "8428917ffffffff": {
+          "effectiveSampleSize": 13.0,
+          "logBias": -6.61e-05,
+          "rawLogBias": -0.00021863,
+          "rawSampleCount": 13,
+          "residualStdLog": 0.43634072,
+          "shrinkageWeight": 0.30232558
+        },
+        "8428923ffffffff": {
+          "effectiveSampleSize": 54.0,
+          "logBias": -0.00262543,
+          "rawLogBias": -0.00408401,
+          "rawSampleCount": 54,
+          "residualStdLog": 0.52932943,
+          "shrinkageWeight": 0.64285714
+        },
+        "842892bffffffff": {
+          "effectiveSampleSize": 154.0,
+          "logBias": 0.07940239,
+          "rawLogBias": 0.09487039,
+          "rawSampleCount": 154,
+          "residualStdLog": 0.45195881,
+          "shrinkageWeight": 0.83695652
+        },
+        "842893bffffffff": {
+          "effectiveSampleSize": 14.0,
+          "logBias": 0.0731334,
+          "rawLogBias": 0.22984782,
+          "rawSampleCount": 14,
+          "residualStdLog": 0.41691394,
+          "shrinkageWeight": 0.31818182
+        },
+        "8428963ffffffff": {
+          "effectiveSampleSize": 120.0,
+          "logBias": -0.04931124,
+          "rawLogBias": -0.06163905,
+          "rawSampleCount": 120,
+          "residualStdLog": 0.45885883,
+          "shrinkageWeight": 0.8
+        },
+        "842896bffffffff": {
+          "effectiveSampleSize": 62.0,
+          "logBias": -0.13801352,
+          "rawLogBias": -0.20479426,
+          "rawSampleCount": 62,
+          "residualStdLog": 0.54909275,
+          "shrinkageWeight": 0.67391304
+        },
+        "8428985ffffffff": {
+          "effectiveSampleSize": 83.0,
+          "logBias": -0.12279047,
+          "rawLogBias": -0.16717257,
+          "rawSampleCount": 83,
+          "residualStdLog": 0.36776041,
+          "shrinkageWeight": 0.73451327
+        },
+        "84289a7ffffffff": {
+          "effectiveSampleSize": 44.0,
+          "logBias": 0.07776018,
+          "rawLogBias": 0.13077848,
+          "rawSampleCount": 44,
+          "residualStdLog": 0.53376154,
+          "shrinkageWeight": 0.59459459
+        },
+        "84289abffffffff": {
+          "effectiveSampleSize": 60.0,
+          "logBias": -0.05854213,
+          "rawLogBias": -0.0878132,
+          "rawSampleCount": 60,
+          "residualStdLog": 0.50785649,
+          "shrinkageWeight": 0.66666667
+        },
+        "84289b1ffffffff": {
+          "effectiveSampleSize": 31.0,
+          "logBias": 0.03107462,
+          "rawLogBias": 0.06114683,
+          "rawSampleCount": 31,
+          "residualStdLog": 0.40831374,
+          "shrinkageWeight": 0.50819672
+        },
+        "84289b5ffffffff": {
+          "effectiveSampleSize": 76.0,
+          "logBias": -0.14971307,
+          "rawLogBias": -0.20881033,
+          "rawSampleCount": 76,
+          "residualStdLog": 0.46473903,
+          "shrinkageWeight": 0.71698113
+        },
+        "84289e1ffffffff": {
+          "effectiveSampleSize": 41.0,
+          "logBias": -0.0428752,
+          "rawLogBias": -0.0742473,
+          "rawSampleCount": 41,
+          "residualStdLog": 0.50052363,
+          "shrinkageWeight": 0.57746479
+        },
+        "84289e7ffffffff": {
+          "effectiveSampleSize": 36.0,
+          "logBias": 0.04805945,
+          "rawLogBias": 0.088109,
+          "rawSampleCount": 36,
+          "residualStdLog": 0.46643169,
+          "shrinkageWeight": 0.54545455
+        },
+        "84289e9ffffffff": {
+          "effectiveSampleSize": 25.0,
+          "logBias": 0.07425235,
+          "rawLogBias": 0.16335517,
+          "rawSampleCount": 25,
+          "residualStdLog": 0.38239996,
+          "shrinkageWeight": 0.45454545
+        },
+        "84289edffffffff": {
+          "effectiveSampleSize": 75.0,
+          "logBias": -0.00367802,
+          "rawLogBias": -0.00514923,
+          "rawSampleCount": 75,
+          "residualStdLog": 0.52676898,
+          "shrinkageWeight": 0.71428571
+        }
+      }
+    }
+  },
+  "modelKind": "hierarchical-log-residual-eb",
+  "regionIndex": {
+    "resolution": 4,
+    "system": "h3"
+  },
+  "regionSlice": {
+    "definition": "station membership from training/slr_calibration/regions/station_regimes.csv (state footprint, design section 4.3)",
+    "label": "Montana Ranges",
+    "regionId": "montana-ranges"
+  },
+  "schemaVersion": 1,
+  "status": "unvalidated",
+  "trainedThrough": "2025-05-05",
+  "training": {
+    "acceptedEventCount": 1428,
+    "adjustedBaselineClampedCount": 2,
+    "candidate": "B",
+    "covariateAdjustedEventCount": 1428,
+    "featureIncompleteEventCount": 0,
+    "forecastSource": "noaa-hrrr-00z",
+    "labelTier": "weak-only",
+    "leakageGroup": "storm_group_id",
+    "minEffectiveSampleSize": 5.0,
+    "priorEffectiveSampleSize": 30.0,
+    "rejectedEventCount": 0,
+    "rejectionCounts": {},
+    "sourceDigestSha256": "3ca7f3b1e4532bccf2a7cdc4707319167dad26ff434c354c31dc376e1e5fd6ad",
+    "sourceLabel": "SNOTEL differenced (weak) labels, qc_weight 0.25, paired to NOAA HRRR 00Z-cycle Kuchera baselines at fixed leads 1-24 h; research-only",
+    "stationCount": 40,
+    "target": "log(observed_slr / physical_baseline_slr)",
+    "waterYears": [
+      2024,
+      2025
+    ]
+  }
+}
