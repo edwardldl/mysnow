@@ -1,0 +1,500 @@
+station_triplet,station_name,state,latitude,longitude,range_name,climate_regime,region_id,assignment_basis
+1000:OR:SNTL,Annie Springs,OR,42.87007,-122.16518,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+1003:AK:SNTL,Mcneil Canyon,AK,59.74521,-151.25839,Alaska ranges,unclassified,,state default: Alaska ranges
+1008:MT:SNTL,Onion Park,MT,46.91348,-110.8536,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+1009:MT:SNTL,Stringer Creek,MT,46.9269,-110.90198,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+1011:WA:SNTL,MF Nooksack,WA,48.82441,-121.92947,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1012:WA:SNTL,Swift Creek,WA,46.1638,-122.18402,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1013:UT:SNTL,Temple Fork,UT,41.793,-111.54605,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1014:CO:SNTL,Middle Fork Camp,CO,39.79565,-106.02802,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1016:ID:SNTL,Long Valley,ID,44.78835,-116.08878,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+1030:CO:SNTL,Arapaho Ridge,CO,40.35098,-106.38141,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1031:CO:SNTL,Never Summer,CO,40.40392,-105.95567,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1032:CO:SNTL,Rawah,CO,40.70794,-106.00727,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1034:NM:SNTL,Sierra Blanca,NM,33.40682,-105.79467,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1035:AK:SNTL,Moraine,AK,61.37727,-148.99917,Alaska ranges,unclassified,,state default: Alaska ranges
+1039:UT:SNTL,Cascade Mountain,UT,40.283,-111.60992,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1040:CO:SNTL,Mccoy Park,CO,39.60231,-106.544,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1041:CO:SNTL,Beaver Ck Village,CO,39.59871,-106.51113,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1042:CO:SNTL,Wild Basin,CO,40.201,-105.6025,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1043:WA:SNTL,Sentinel Butte,WA,48.86133,-118.39843,Kettle-Selkirk-Okanogan,intermountain,washington-cascades,coordinate rule: WA east of the Cascade crest (lon > -119.0)
+1044:OR:SNTL,Toketee Airstrip,OR,43.22718,-122.42537,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+1045:WY:SNTL,Crow Creek,WY,41.22824,-105.38571,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1046:WY:SNTL,Cinnabar Park,WY,41.23843,-106.23101,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1047:WY:SNTL,Little Snake River,WY,41.07051,-106.94284,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1049:CA:SNTL,Forestdale Creek,CA,38.68245,-119.9597,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+1050:CA:SNTL,Horse Meadow,CA,38.83652,-119.88732,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+1051:CA:SNTL,Burnside Lake,CA,38.71943,-119.8942,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+1054:UT:SNTL,Farmington Lower,UT,40.992,-111.81702,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1056:UT:SNTL,Lightning Ridge,UT,41.35891,-111.48749,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1057:CO:SNTL,Glen Cove,CO,38.87602,-105.07605,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1058:CO:SNTL,Grayback,CO,37.47051,-106.5379,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1060:CO:SNTL,Sharkstooth,CO,37.50356,-108.11405,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1061:CO:SNTL,Bear River,CO,40.06152,-107.00948,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1062:AK:SNTL,Anchor River Divide,AK,59.8608,-151.31494,Alaska ranges,unclassified,,state default: Alaska ranges
+1067:CA:SNTL,Carson Pass,CA,38.6927,-120.0022,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+1068:WA:SNTL,Sawmill Ridge,WA,47.15992,-121.42172,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1070:AK:SNTL,Anchorage Hillside,AK,61.11315,-149.68345,Alaska ranges,unclassified,,state default: Alaska ranges
+1073:AK:SNTL,Mt. Eyak,AK,60.55648,-145.72201,Alaska ranges,unclassified,,state default: Alaska ranges
+1078:OR:SNTL,Sun Pass,OR,42.78637,-121.97715,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+1079:OR:SNTL,Milk Shakes,OR,45.9821,-117.94883,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+1081:ID:SNTL,Ragged Mountain,ID,47.85583,-117.03667,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+1082:WY:SNTL,Grand Targhee,WY,43.77933,-110.92783,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1083:NM:SNTL,Tres Ritos,NM,36.1279,-105.52706,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1085:WA:SNTL,Cayuse Pass,WA,46.86956,-121.53434,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1091:AK:SNTL,Independence Mine,AK,61.79001,-149.2839,Alaska ranges,unclassified,,state default: Alaska ranges
+1092:AK:SNTL,Exit Glacier,AK,60.18957,-149.6228,Alaska ranges,unclassified,,state default: Alaska ranges
+1095:AK:SNTL,Sugarloaf Mtn,AK,61.08042,-146.30202,Alaska ranges,unclassified,,state default: Alaska ranges
+1098:UT:SNTL,Usu Doc Daniel,UT,41.86425,-111.50603,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1100:CO:SNTL,Saint Elmo,CO,38.69985,-106.36805,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1101:CO:SNTL,Chapman Tunnel,CO,39.2621,-106.62944,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1103:AK:SNTL,Mt. Alyeska,AK,60.95842,-149.08858,Alaska ranges,unclassified,,state default: Alaska ranges
+1104:WA:SNTL,Pepper Creek,WA,46.10242,-121.95555,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1110:NV:SNTL,Rainbow Canyon,NV,36.2493,-115.62972,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+1111:NV:SNTL,Bristlecone Trail,NV,36.31575,-115.69543,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+1112:NV:SNTL,Lee Canyon,NV,36.30537,-115.67508,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+1113:UT:SNTL,Tony Grove RS,UT,41.88573,-111.56918,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1114:UT:SNTL,Garden City Summit,UT,41.9215,-111.4693,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1115:UT:SNTL,Klondike Narrows,UT,41.96769,-111.59713,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1119:WY:SNTL,Blackhall Mtn,WY,41.05623,-106.714,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1121:AZ:SNTL,Fort Valley,AZ,35.26773,-111.74479,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+1122:CO:SNTL,Hourglass Lake,CO,40.57717,-105.62584,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1123:CO:SNTL,Long Draw Resv,CO,40.51154,-105.7654,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1132:WY:SNTL,Soldier Park,WY,44.34847,-107.0136,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1135:UT:SNTL,Burts Miller Ranch,UT,40.98492,-110.85075,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1139:AZ:SNTL,Chalender,AZ,35.26238,-112.06221,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+1141:CO:SNTL,Upper Taylor,CO,38.99071,-106.74504,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1142:ID:SNTL,Pierce R.S.,ID,46.49597,-115.7957,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+1144:MT:SNTL,Blacktail Mtn,MT,47.98317,-114.35443,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+1148:UT:SNTL,Panguitch Lake RS,UT,37.70463,-112.65037,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1153:UT:SNTL,Buckboard Flat,UT,37.86943,-109.44717,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1154:UT:SNTL,Brian Head,UT,37.67994,-112.85674,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1158:OR:SNTL,Howard Prairie,OR,42.215,-122.3713,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+1159:WA:SNTL,Gold Axe Camp,WA,48.9516,-118.9864,Kettle-Selkirk-Okanogan,intermountain,washington-cascades,coordinate rule: WA east of the Cascade crest (lon > -119.0)
+1160:CO:SNTL,Weminuche Creek,CO,37.51968,-107.32139,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1161:CO:SNTL,Black Mountain,CO,40.8879,-105.66404,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1162:UT:SNTL,Blacks Fork Jct,UT,40.95814,-110.5828,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1163:UT:SNTL,EF Blacks Fork GS,UT,40.88472,-110.54056,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1164:UT:SNTL,Wolf Creek Peak,UT,40.47733,-111.04469,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1166:OR:SNTL,Bear Grass,OR,44.3253,-122.0938,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+1167:OR:SNTL,Smith Ridge,OR,44.30325,-122.04053,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+1168:NM:SNTL,Taos Powderhorn,NM,36.58195,-105.45617,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1169:NM:SNTL,Shuree,NM,36.78765,-105.2392,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1170:NM:SNTL,Palo,NM,36.40869,-105.33038,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1173:NM:SNTL,Garita Peak,NM,36.00469,-106.54805,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1176:AK:SNTL,Moore Creek Bridge,AK,59.58668,-135.19455,Alaska ranges,unclassified,,state default: Alaska ranges
+1186:CO:SNTL,Fool Creek,CO,39.86866,-105.86765,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1187:CO:SNTL,High Lonesome,CO,40.0359,-105.75472,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1188:CO:SNTL,Wager Gulch,CO,37.88248,-107.36428,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1192:UT:SNTL,Buck Pasture,UT,40.84456,-110.66068,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1196:WY:SNTL,Med Bow,WY,41.37833,-106.34697,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+1197:UT:SNTL,Yankee Reservoir,UT,37.74797,-112.77495,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1215:UT:SNTL,Lasal Mountain-Lower,UT,38.48167,-109.29164,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1216:UT:SNTL,Huntington Horse,UT,39.61774,-111.30576,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1225:UT:SNTL,Redden Mine Lwr,UT,40.67505,-111.21765,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1227:UT:SNTL,Upper Joes Valley,UT,39.4155,-111.2491,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1242:NV:SNTL,Little Valley,NV,39.25259,-119.8771,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+1248:UT:SNTL,Suu Ranch,UT,37.59711,-112.92949,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1251:CO:SNTL,Sawtooth,CO,40.13632,-105.58486,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1252:CO:SNTL,Elkhead Divide,CO,40.79637,-107.10113,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1254:NM:SNTL,Rio Santa Barbara,NM,36.07196,-105.62949,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1257:WA:SNTL,Skate Creek,WA,46.64336,-121.83044,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1259:WA:SNTL,Muckamuck,WA,48.58526,-119.86624,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1260:AK:SNTL,Chena Lakes,AK,64.75793,-147.21823,Alaska ranges,unclassified,,state default: Alaska ranges
+1263:WA:SNTL,Pinto Rock,WA,46.32318,-121.94219,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1271:AZ:SNTL,Hawley Lake,AZ,33.97121,-109.76531,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+1285:AK:SNTL,Flower Mountain,AK,59.39617,-136.28123,Alaska ranges,unclassified,,state default: Alaska ranges
+1299:ID:SNTL,Pebble Creek,ID,42.7674,-112.10648,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+1300:UT:SNTL,Powder Mountain,UT,41.37428,-111.76673,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1302:AK:SNTL,Creamers Field,AK,64.86534,-147.73617,Alaska ranges,unclassified,,state default: Alaska ranges
+1304:UT:SNTL,Gold Basin,UT,38.46516,-109.26332,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1305:ID:SNTL,Fish Ck,ID,43.55545,-113.71931,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+1306:ID:SNTL,Couch Summit,ID,43.51762,-114.80214,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+1307:NM:SNTL,Taos Pueblo,NM,36.54099,-105.35944,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+1308:UT:SNTL,Atwater,UT,40.59124,-111.63775,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1310:NV:SNTL,Lamoille Upper,NV,40.59965,-115.37902,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+1311:MT:SNTL,Stryker Basin,MT,48.68005,-114.66365,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+1314:OR:SNTL,Fifteenmile,OR,45.35265,-121.53,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+1321:UT:SNTL,Mill Creek Canyon,UT,40.69656,-111.67712,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+1324:CO:SNTL,Rat Creek,CO,37.93571,-106.98192,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1325:CO:SNTL,Elwood Pass,CO,37.40563,-106.64136,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1326:CO:SNTL,Castle Peak,CO,39.00074,-106.83912,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1331:CA:SNTL,Lost Lakes,CA,38.64745,-119.95141,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+1332:AK:SNTL,Elmendorf Field,AK,61.24777,-149.82331,Alaska ranges,unclassified,,state default: Alaska ranges
+1338:WA:SNTL,Icicle Creek,WA,47.59404,-120.88255,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+1344:CO:SNTL,Alta Lakes,CO,37.88929,-107.84484,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+1350:NV:SNTL,Lee Canyon Upper,NV,36.29604,-115.6843,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+2044:AK:SNTL,Spring Creek,AK,61.65653,-149.12926,Alaska ranges,unclassified,,state default: Alaska ranges
+302:OR:SNTL,Aneroid Lake #2,OR,45.21332,-117.19255,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+303:CO:SNTL,Apishapa,CO,37.33067,-105.06766,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+310:AZ:SNTL,Baldy,AZ,33.97845,-109.50357,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+311:MT:SNTL,Banfield Mountain,MT,48.5712,-115.44573,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+312:ID:SNTL,Banner Summit,ID,44.30342,-115.23447,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+313:MT:SNTL,Barker Lakes,MT,46.09713,-113.13038,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+314:WY:SNTL,Base Camp,WY,43.94019,-110.44544,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+315:MT:SNTL,Basin Creek,MT,45.79737,-112.52047,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+317:WY:SNTL,Battle Mountain,WY,41.05402,-107.26674,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+319:ID:SNTL,Bear Basin,ID,44.95222,-116.14293,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+322:CO:SNTL,Bear Lake,CO,40.31176,-105.6467,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+324:ID:SNTL,Bear Saddle,ID,44.60533,-116.98097,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+326:WY:SNTL,Beartooth Lake,WY,44.94307,-109.56743,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+327:CO:SNTL,Beartown,CO,37.71433,-107.5124,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+330:UT:SNTL,Beaver Divide,UT,40.61233,-111.09782,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+331:OR:SNTL,Beaver Reservoir,OR,45.14532,-118.219,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+332:UT:SNTL,Ben Lomond Peak,UT,41.37603,-111.94405,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+333:UT:SNTL,Ben Lomond Trail,UT,41.38291,-111.92103,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+335:CO:SNTL,Berthoud Summit,CO,39.80364,-105.77786,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+338:ID:SNTL,Big Creek Summit,ID,44.62621,-115.79561,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+339:UT:SNTL,Big Flat,UT,38.30183,-112.35672,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+340:NV:SNTL,Big Meadow,NV,39.455,-119.9422,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+341:OR:SNTL,Big Red Mountain,OR,42.05257,-122.85487,Siskiyou Mountains,maritime_mountain,oregon-cascades,coordinate rule: southwest OR (Siskiyou)
+344:OR:SNTL,Billie Creek Divide,OR,42.40717,-122.26617,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+345:CO:SNTL,Bison Lake,CO,39.76458,-107.35628,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+347:MT:SNTL,Black Bear,MT,44.50832,-111.12803,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+349:MT:SNTL,Black Pine,MT,46.414,-113.43095,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+350:WY:SNTL,Blackwater,WY,44.37667,-109.79333,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+351:OR:SNTL,Blazed Alder,OR,45.4287,-121.85605,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+352:WA:SNTL,Blewett Pass,WA,47.35037,-120.6796,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+353:WY:SNTL,Blind Bull Sum,WY,42.96413,-110.60992,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+354:SD:SNTL,Blind Park,SD,44.10772,-103.97688,Black Hills,continental_mountain,,state default: Black Hills
+356:CA:SNTL,Blue Lakes,CA,38.60801,-119.92455,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+358:WY:SNTL,Bone Springs Div,WY,44.67881,-107.5811,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+359:ID:SNTL,Bostetter R.S.,ID,42.16442,-114.19272,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+361:OR:SNTL,Bourne,OR,44.83052,-118.18787,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+362:OR:SNTL,Bowman Springs,OR,45.36428,-118.46715,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+365:MT:SNTL,Brackett Creek,MT,45.89107,-110.93851,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+366:UT:SNTL,Brighton,UT,40.59936,-111.58167,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+367:WY:SNTL,Brooklyn Lake,WY,41.36038,-106.23038,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+369:CO:SNTL,Brumley,CO,39.08758,-106.54231,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+370:ID:SNTL,Brundage Reservoir,ID,45.04315,-116.13253,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+375:WA:SNTL,Bumping Ridge,WA,46.81003,-121.33058,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+376:WA:SNTL,Bunchgrass Mdw,WA,48.68688,-117.17633,Blue Mountains (WA),intermountain,washington-cascades,coordinate rule: far southeast WA (Blue Mountains)
+377:WY:SNTL,Burgess Junction,WY,44.78765,-107.52917,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+379:WY:SNTL,Burroughs Creek,WY,43.69733,-109.67021,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+380:CO:SNTL,Butte,CO,38.89435,-106.95327,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+381:MT:SNTL,Calvert Creek,MT,45.8838,-113.32553,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+383:UT:SNTL,Camp Jackson,UT,37.81333,-109.48723,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+387:CO:SNTL,Cascade #2,CO,37.65751,-107.80287,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+388:OR:SNTL,Cascade Summit,OR,43.59042,-122.0601,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+389:WY:SNTL,Casper Mtn.,WY,42.73362,-106.31789,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+390:UT:SNTL,Castle Valley,UT,37.66098,-112.74093,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+391:CA:SNTL,Cedar Pass,CA,41.58216,-120.30253,Warner Mountains,intermountain,sierra-nevada,coordinate rule: far northeast CA (Warner Mountains); region stays sierra-nevada per design 4.3
+392:UT:SNTL,Chalk Creek #1,UT,40.85464,-111.04765,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+393:UT:SNTL,Chalk Creek #2,UT,40.88529,-111.06954,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+394:NM:SNTL,Chamita,NM,36.95606,-106.65723,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+398:OR:SNTL,Clackamas Lake,OR,45.09658,-121.75443,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+399:UT:SNTL,Clear Creek #1,UT,39.86671,-111.28363,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+401:OR:SNTL,Clear Lake,OR,45.18832,-121.6916,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+406:OR:SNTL,Cold Springs Camp,OR,42.53305,-122.17683,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+407:MT:SNTL,Cole Creek,MT,45.19405,-109.34548,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+408:CO:SNTL,Columbine,CO,40.39591,-106.60437,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+410:MT:SNTL,Combination,MT,46.46523,-113.39358,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+412:CO:SNTL,Copeland Lake,CO,40.20733,-105.5695,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+415:CO:SNTL,Copper Mountain,CO,39.48917,-106.17154,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+418:WA:SNTL,Corral Pass,WA,47.01872,-121.46464,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+419:WY:SNTL,Cottonwood Creek,WY,42.6459,-110.81482,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+420:WA:SNTL,Cougar Mountain,WA,47.27666,-121.67138,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+424:ID:SNTL,Crab Creek,ID,44.437,-111.99384,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+426:CO:SNTL,Crosho,CO,40.16749,-107.05769,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+428:CA:SNTL,Css Lab,CA,39.32565,-120.36807,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+430:CO:SNTL,Culebra #2,CO,37.20939,-105.19988,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+431:CO:SNTL,Cumbres Trestle,CO,37.01877,-106.45275,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+434:OR:SNTL,Daly Lake,OR,44.52147,-122.08718,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+437:MT:SNTL,Deadman Creek,MT,46.79279,-110.67545,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+438:CO:SNTL,Deadman Hill,CO,40.80572,-105.77018,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+442:OR:SNTL,Diamond Lake,OR,43.18787,-122.14003,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+450:ID:SNTL,Dollarhide Summit,ID,43.6025,-114.67417,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+451:WY:SNTL,Dome Lake,WY,44.57462,-107.29537,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+455:UT:SNTL,Dry Bread Pond,UT,41.41289,-111.5377,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+457:CO:SNTL,Dry Lake,CO,40.5337,-106.7814,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+458:MT:SNTL,Dupuyer Creek,MT,48.06341,-112.7573,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+462:CA:SNTL,Ebbetts Pass,CA,38.5497,-119.80468,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+463:CA:SNTL,Echo Peak,CA,38.849,-120.0795,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+464:OR:SNTL,Eilertson Meadows,OR,44.86887,-118.11387,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+465:CO:SNTL,El Diente Peak,CO,37.78607,-108.02235,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+466:ID:SNTL,Elk Butte,ID,46.83998,-116.12233,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+467:CO:SNTL,Elk River,CO,40.84758,-106.96861,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+468:WY:SNTL,Elkhart Park G.S.,WY,43.00657,-109.75893,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+469:MT:SNTL,Emery Creek,MT,48.43412,-113.93725,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+470:OR:SNTL,Emigrant Springs,OR,45.55808,-118.45385,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+472:WY:SNTL,Evening Star,WY,44.65258,-109.78422,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+473:CA:SNTL,Fallen Leaf,CA,38.93403,-120.0545,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+474:UT:SNTL,Farmington,UT,40.97462,-111.80975,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+478:WA:SNTL,Fish Lake,WA,47.53565,-121.08553,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+479:OR:SNTL,Fish Lk.,OR,42.3801,-122.34943,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+483:OR:SNTL,Fourmile Lake,OR,42.43933,-122.2288,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+484:ID:SNTL,Franklin Basin,ID,42.0505,-111.6012,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+485:CO:SNTL,Fremont Pass,CO,39.38014,-106.19784,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+489:ID:SNTL,Galena,ID,43.87722,-114.6725,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+490:ID:SNTL,Galena Summit,ID,43.87497,-114.71363,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+491:NM:SNTL,Gallegos Peak,NM,36.19418,-105.55742,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+494:OR:SNTL,Gold Center,OR,44.7638,-118.3117,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+497:WY:SNTL,Granite Creek,WY,43.34298,-110.43495,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+502:WA:SNTL,Green Lake,WA,46.54741,-121.17093,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+504:OR:SNTL,Greenpoint,OR,45.62237,-121.70415,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+505:CO:SNTL,Grizzly Peak,CO,39.64646,-105.8694,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+506:WY:SNTL,Gros Ventre Summit,WY,43.38939,-110.12943,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+507:WA:SNTL,Grouse Camp,WA,47.28107,-120.48771,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+508:CA:SNTL,Hagans Meadow,CA,38.8519,-119.9374,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+509:WY:SNTL,Hams Fork,WY,42.146,-110.67833,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+512:WY:SNTL,Hanson Sawmill,WY,44.25602,-106.97983,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+513:UT:SNTL,Lakefork Basin,UT,40.73785,-110.62121,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+514:UT:SNTL,Harris Flat,UT,37.48997,-112.57602,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+515:WA:SNTL,Harts Pass,WA,48.72047,-120.6586,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+517:UT:SNTL,Hayden Fork,UT,40.79669,-110.88472,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+518:CA:SNTL,Heavenly Valley,CA,38.92431,-119.91641,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+520:ID:SNTL,Hemlock Butte,ID,46.48111,-115.63361,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+523:OR:SNTL,High Ridge,OR,45.69682,-118.10657,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+526:OR:SNTL,Hogg Pass,OR,44.42042,-121.85655,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+531:CO:SNTL,Hoosier Pass,CO,39.36092,-106.05999,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+534:ID:SNTL,Howell Canyon,ID,42.32029,-113.61587,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+535:ID:SNTL,Humboldt Gulch,ID,47.53178,-115.77643,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+537:ID:SNTL,Hyndman,ID,43.71077,-114.15894,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+538:CO:SNTL,Idarado,CO,37.93389,-107.6762,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+539:CA:SNTL,Independence Camp,CA,39.45269,-120.29367,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+540:CA:SNTL,Independence Creek,CA,39.49001,-120.28226,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+541:CA:SNTL,Independence Lake,CA,39.42752,-120.31342,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+542:CO:SNTL,Independence Pass,CO,39.07543,-106.61154,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+545:OR:SNTL,Irish Taylor,OR,43.80368,-121.94793,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+546:ID:SNTL,Island Park,ID,44.4203,-111.38512,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+547:CO:SNTL,Ivanhoe,CO,39.29228,-106.54907,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+550:ID:SNTL,Jackson Peak,ID,44.05092,-115.44322,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+551:CO:SNTL,Joe Wright,CO,40.53285,-105.88747,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+552:OR:SNTL,Jump Off Joe,OR,44.38605,-122.16683,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+553:WA:SNTL,June Lake,WA,46.14778,-122.15413,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+554:WY:SNTL,Kelley R.S.,WY,42.26554,-110.80181,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+555:WY:SNTL,Kendall R.S.,WY,43.24922,-110.01671,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+556:CO:SNTL,Kiln,CO,39.3172,-106.61501,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+557:UT:SNTL,Kimberly Mine,UT,38.48383,-112.39273,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+559:UT:SNTL,Kings Cabin,UT,40.71632,-109.54401,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+560:WY:SNTL,Kirwin,WY,43.86067,-109.32163,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+561:UT:SNTL,Kolob,UT,37.52664,-113.05386,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+564:CO:SNTL,Lake Eldora,CO,39.93659,-105.59031,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+565:CO:SNTL,Lake Irene,CO,40.41446,-105.81941,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+568:MT:SNTL,Lakeview Ridge,MT,44.58907,-111.82498,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+570:NV:SNTL,Lamoille #3,NV,40.6448,-115.3812,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+572:UT:SNTL,Lasal Mountain,UT,38.48226,-109.27198,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+578:MT:SNTL,Lick Creek,MT,45.5041,-110.96625,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+579:UT:SNTL,Lily Lake,UT,40.86493,-110.79813,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+580:CO:SNTL,Lily Pond,CO,37.38028,-106.54823,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+582:UT:SNTL,Little Bear,UT,41.40562,-111.82607,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+586:CO:SNTL,Lizard Head Pass,CO,37.79895,-107.92475,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+588:ID:SNTL,Lolo Pass,ID,46.63448,-114.58072,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+589:CO:SNTL,Lone Cone,CO,37.89169,-108.19636,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+590:MT:SNTL,Lone Mountain,MT,45.27412,-111.42692,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+591:WA:SNTL,Lone Pine,WA,46.27143,-121.96288,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+594:ID:SNTL,Lookout,ID,47.45749,-115.70457,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+596:UT:SNTL,Lookout Peak,UT,40.83731,-111.70965,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+597:WY:SNTL,Loomis Park,WY,43.17387,-110.14007,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+601:ID:SNTL,Lost-Wood Divide,ID,43.82441,-114.26404,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+602:CO:SNTL,Loveland Basin,CO,39.67428,-105.90264,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+604:MT:SNTL,Lubrecht Flume,MT,46.88293,-113.32228,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+607:CO:SNTL,Lynx Pass,CO,40.07832,-106.67095,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+609:MT:SNTL,Madison Plateau,MT,44.58623,-111.11627,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+610:ID:SNTL,Magic Mountain,ID,42.18071,-114.28665,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+612:UT:SNTL,Mammoth-Cottonwood,UT,39.68338,-111.31818,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+614:OR:SNTL,Marion Forks,OR,44.59397,-121.97365,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+615:NV:SNTL,Marlette Lake,NV,39.16395,-119.89672,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+617:AZ:SNTL,Maverick Fork,AZ,33.92123,-109.45872,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+618:CO:SNTL,Mc Clure Pass,CO,39.12899,-107.28834,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+619:OR:SNTL,Mckenzie,OR,44.2103,-121.87292,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+621:UT:SNTL,Merchant Valley,UT,38.30285,-112.43637,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+622:CO:SNTL,Mesa Lakes,CO,39.05738,-108.05756,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+626:UT:SNTL,Midway Valley,UT,37.56933,-112.83849,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+627:ID:SNTL,Mill Creek Summit,ID,44.47212,-114.48992,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+628:UT:SNTL,Mill-D North,UT,40.65883,-111.63683,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+629:CO:SNTL,Mineral Creek,CO,37.84737,-107.72657,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+632:CO:SNTL,Molas Lake,CO,37.74929,-107.68933,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+634:UT:SNTL,Monte Cristo,UT,41.46547,-111.49688,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+637:ID:SNTL,Mores Creek Summit,ID,43.932,-115.66588,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+638:ID:SNTL,Moose Creek,ID,45.67008,-113.95315,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+641:AK:SNTL,Frostbite Bottom,AK,61.74699,-149.26769,Alaska ranges,unclassified,,state default: Alaska ranges
+642:WA:SNTL,Morse Lake,WA,46.90585,-121.4827,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+649:MT:SNTL,Mount Lockhart,MT,47.91727,-112.8238,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+651:OR:SNTL,Mt Hood Test Site,OR,45.32097,-121.7158,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+652:NV:SNTL,Mt Rose Ski Area,NV,39.31573,-119.89473,Great Basin ranges,intermountain,nevada,state default: Great Basin ranges
+653:OR:SNTL,Mt. Howard,OR,45.26514,-117.17377,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+655:OR:SNTL,Mud Ridge,OR,45.25362,-121.73673,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+656:MT:SNTL,Mule Creek,MT,45.40957,-112.95927,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+657:MT:SNTL,N Fk Elk Creek,MT,46.8716,-113.27725,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+658:CO:SNTL,Nast Lake,CO,39.29695,-106.60786,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+660:OR:SNTL,New Crescent Lake,OR,43.51185,-121.97982,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+661:WY:SNTL,New Fork Lake,WY,43.11265,-109.94947,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+663:CO:SNTL,Niwot,CO,40.03581,-105.5452,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+664:MT:SNTL,Noisy Basin,MT,48.15668,-113.9463,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+665:NM:SNTL,North Costilla,NM,36.99396,-105.25988,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+667:MT:SNTL,North Fork Jocko,MT,47.27258,-113.75631,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+668:WY:SNTL,North French Creek,WY,41.33087,-106.37558,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+669:CO:SNTL,North Lost Trail,CO,39.07818,-107.14388,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+672:WA:SNTL,Olallie Meadows,WA,47.37406,-121.44213,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+673:WY:SNTL,Old Battle,WY,41.15426,-106.96926,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+679:WA:SNTL,Paradise,WA,46.78266,-121.74767,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+680:CO:SNTL,Park Cone,CO,38.81982,-106.58962,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+681:WA:SNTL,Park Creek Ridge,WA,48.44488,-120.91551,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+682:CO:SNTL,Park Reservoir,CO,39.04433,-107.87951,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+684:UT:SNTL,Parleys Summit,UT,40.76184,-111.62917,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+688:CO:SNTL,Phantom Valley,CO,40.39803,-105.84606,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+689:WY:SNTL,Phillips Bench,WY,43.51687,-110.91258,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+692:WA:SNTL,Pigtail Peak,WA,46.62153,-121.38643,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+695:ID:SNTL,Pine Creek Pass,ID,43.56998,-111.21157,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+699:WA:SNTL,Pope Ridge,WA,47.9909,-120.56622,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+701:CO:SNTL,Porphyry Creek,CO,38.48864,-106.33967,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+702:WA:SNTL,Potato Hill,WA,46.3497,-121.51415,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+703:WY:SNTL,Powder River Pass,WY,44.16188,-107.12622,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+707:WA:SNTL,Quartz Peak,WA,47.87927,-117.08938,Blue Mountains (WA),intermountain,washington-cascades,coordinate rule: far southeast WA (Blue Mountains)
+708:NM:SNTL,Quemazon,NM,35.92195,-106.39179,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+709:CO:SNTL,Rabbit Ears,CO,40.36735,-106.74118,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+710:OR:SNTL,Railroad Overpass,OR,43.65887,-122.21272,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+711:WA:SNTL,Rainy Pass,WA,48.51865,-120.7358,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+712:OR:SNTL,Red Hill,OR,45.4643,-121.70428,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+713:CO:SNTL,Red Mountain Pass,CO,37.89168,-107.71389,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+714:UT:SNTL,Red Pine Ridge,UT,39.45197,-111.27221,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+715:NM:SNTL,Red River Pass #2,NM,36.69935,-105.34145,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+716:WY:SNTL,Reno Hill,WY,42.57089,-106.08969,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+718:CO:SNTL,Roach,CO,40.87498,-106.04675,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+724:CA:SNTL,Rubicon #2,CA,38.99927,-120.13139,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+727:MT:SNTL,Saddle Mtn.,MT,45.69259,-113.96828,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+729:OR:SNTL,Salt Creek Falls,OR,43.61193,-122.11758,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+730:WY:SNTL,Salt River Summit,WY,42.5075,-110.9099,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+731:WY:SNTL,Sand Lake,WY,41.4625,-106.281,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+732:WY:SNTL,Sandstone RS,WY,41.11179,-107.17043,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+733:OR:SNTL,Santiam Jct.,OR,44.43503,-121.94502,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+734:WA:SNTL,Sasse Ridge,WA,47.38485,-121.06323,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+735:ID:SNTL,Savage Pass,ID,46.46633,-114.63333,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+736:OR:SNTL,Schneider Meadows,OR,45.00107,-117.16522,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+737:CO:SNTL,Schofield Pass,CO,39.01467,-107.04933,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+738:ID:SNTL,Schweitzer Basin,ID,48.37428,-116.63917,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+739:CO:SNTL,Scotch Creek,CO,37.64562,-108.00833,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+740:ID:SNTL,Secesh Summit,ID,45.18848,-115.97152,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+745:OR:SNTL,Sevenmile Marsh,OR,42.69825,-122.14165,Southern Oregon Cascades,maritime_mountain,oregon-cascades,coordinate rule: southern OR Cascades
+747:ID:SNTL,Shanghi Summit,ID,46.56603,-115.74216,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+748:WA:SNTL,Sheep Canyon,WA,46.19325,-122.25393,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+749:ID:SNTL,Sheep Mtn.,ID,43.2103,-111.68792,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+751:WY:SNTL,Shell Creek,WY,44.50012,-107.42947,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+752:ID:SNTL,Sherwin,ID,46.95028,-116.33972,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+754:MT:SNTL,Shower Falls,MT,45.40125,-110.95758,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+762:CO:SNTL,Slumgullion,CO,37.99076,-107.20392,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+763:UT:SNTL,Smith  Morehouse,UT,40.78931,-111.09192,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+766:UT:SNTL,Snowbird,UT,40.56914,-111.65852,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+768:AK:SNTL,Look Eyrie,AK,63.32192,-145.59655,Alaska ranges,unclassified,,state default: Alaska ranges
+769:ID:SNTL,Soldier R.S.,ID,43.48407,-114.82692,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+772:WY:SNTL,South Brush Creek,WY,41.3295,-106.5025,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+773:CO:SNTL,South Colony,CO,37.96647,-105.53671,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+775:WY:SNTL,South Pass,WY,42.57314,-108.84324,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+776:WA:SNTL,Spencer Meadow,WA,46.1795,-121.92661,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+777:WA:SNTL,Spirit Lake,WA,46.26113,-122.1772,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+778:CA:SNTL,Spratt Creek,CA,38.66627,-119.81741,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+780:CO:SNTL,Spud Mountain,CO,37.69883,-107.77841,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+781:MT:SNTL,Spur Park,MT,46.77962,-110.62165,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+782:ID:SNTL,Puhi Flat,ID,44.77091,-116.24805,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+784:CA:SNTL,Palisades Tahoe,CA,39.18986,-120.26576,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+788:WA:SNTL,Stampede Pass,WA,47.27427,-121.34162,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+791:WA:SNTL,Stevens Pass,WA,47.74607,-121.09288,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+792:ID:SNTL,Stickney Mill,ID,43.86117,-114.20902,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+793:CO:SNTL,Stillwater Creek,CO,40.22532,-105.9198,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+797:CO:SNTL,Stump Lakes,CO,37.47647,-107.63348,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+798:WY:SNTL,Sucker Creek,WY,44.72279,-107.40035,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+801:OR:SNTL,Summit Lake,OR,43.44907,-122.13808,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+802:CO:SNTL,Summit Ranch,CO,39.71803,-106.1577,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+803:ID:SNTL,Sunset,ID,47.55545,-115.82422,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+804:WA:SNTL,Surprise Lakes,WA,46.09497,-121.76345,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+806:WY:SNTL,Sylvan Lake,WY,44.47764,-110.15651,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+807:WY:SNTL,Sylvan Road,WY,44.47825,-110.03808,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+809:CA:SNTL,Tahoe City Cross,CA,39.17162,-120.15362,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+813:MT:SNTL,Tepee Creek,MT,44.78562,-111.71,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+814:UT:SNTL,Thaynes Canyon,UT,40.6235,-111.53322,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+815:OR:SNTL,Three Creeks Meadow,OR,44.14425,-121.64095,Cascade Range (OR),maritime_mountain,oregon-cascades,state default: Cascade Range (OR)
+817:WA:SNTL,Thunder Basin,WA,48.52753,-120.9895,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+818:WY:SNTL,Tie Creek,WY,44.81243,-107.41017,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+819:WY:SNTL,Timber Creek,WY,44.0274,-109.17879,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+820:UT:SNTL,Timpanogos Divide,UT,40.42817,-111.61633,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+821:OR:SNTL,Tipton,OR,44.65567,-118.42617,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+822:WY:SNTL,Togwotee Pass,WY,43.74902,-110.0578,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+823:UT:SNTL,Tony Grove Lake,UT,41.89833,-111.62957,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+824:WA:SNTL,Touchet,WA,46.11868,-117.8505,Blue Mountains (WA),intermountain,washington-cascades,coordinate rule: far southeast WA (Blue Mountains)
+825:CO:SNTL,Tower,CO,40.5374,-106.67655,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+826:WY:SNTL,Townsend Creek,WY,42.69525,-108.89572,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+828:UT:SNTL,Trial Lake,UT,40.678,-110.94873,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+829:CO:SNTL,Trinchera,CO,37.35296,-105.23259,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+831:WY:SNTL,Triple Peak,WY,42.76393,-110.5914,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+832:WA:SNTL,Trough,WA,47.23328,-120.29412,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+833:UT:SNTL,Trout Creek,UT,40.739,-109.6728,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+834:CA:SNTL,Truckee #2,CA,39.30087,-120.18407,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+838:CO:SNTL,University Camp,CO,40.03307,-105.57562,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+840:CO:SNTL,Upper San Juan,CO,37.48563,-106.83528,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+841:WA:SNTL,Upper Wheeler,WA,47.28734,-120.37015,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+842:CO:SNTL,Vail Mountain,CO,39.61765,-106.38019,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+843:CO:SNTL,Vallecito,CO,37.48524,-107.50748,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+845:ID:SNTL,Vienna Mine,ID,43.79942,-114.85273,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+847:MT:SNTL,Waldron,MT,47.91998,-112.79087,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+848:CA:SNTL,Ward Creek #3,CA,39.13545,-120.21865,Sierra Nevada,maritime_mountain,sierra-nevada,state default: Sierra Nevada
+850:MT:SNTL,Warm Springs,MT,46.27368,-113.164,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+852:WY:SNTL,Webber Springs,WY,41.1591,-106.92809,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+853:UT:SNTL,Webster Flat,UT,37.575,-112.90155,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+854:NM:SNTL,Wesner Springs,NM,35.77584,-105.54337,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+856:UT:SNTL,Parleys Upper,UT,40.70194,-111.60619,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+857:CO:SNTL,Whiskey Ck,CO,37.21423,-105.12262,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+858:MT:SNTL,Whiskey Creek,MT,44.61088,-111.14998,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+859:WY:SNTL,Whiskey Park,WY,41.00368,-106.90795,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+860:ID:SNTL,White Elephant,ID,44.53267,-111.41085,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+861:AZ:SNTL,White Horse Lake,AZ,35.14189,-112.14966,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+863:WA:SNTL,White Pass E.S.,WA,46.64142,-121.38153,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+866:AZ:SNTL,Wildcat,AZ,33.74347,-109.48078,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+867:ID:SNTL,Wildhorse Divide,ID,42.75743,-112.47783,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+868:WY:SNTL,Willow Creek,WY,42.81513,-110.83515,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+869:CO:SNTL,Willow Creek Pass,CO,40.34734,-106.0952,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+870:CO:SNTL,Willow Park,CO,40.43397,-105.73588,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+873:OR:SNTL,Wolf Creek,OR,45.06704,-118.15185,Wallowa-Blue Mountains,intermountain,oregon-cascades,coordinate rule: OR east (lon >= -118.6)
+874:CO:SNTL,Wolf Creek Summit,CO,37.47903,-106.80234,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+895:ID:SNTL,Chocolate Gulch,ID,43.7685,-114.41812,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+896:UT:SNTL,Hardscrabble,UT,40.86833,-111.71865,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+897:WA:SNTL,Meadows Pass,WA,47.28312,-121.47197,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+898:WA:SNTL,Mount Gardner,WA,47.35768,-121.56812,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+899:WA:SNTL,Tinkham Creek,WA,47.33198,-121.46975,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+901:MT:SNTL,Stuart Mountain,MT,46.99521,-113.92667,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+903:MT:SNTL,Nevada Ridge,MT,46.84234,-112.50787,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+904:CO:SNTL,Columbus Basin,CO,37.44146,-108.02468,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+905:CO:SNTL,Mancos,CO,37.43109,-108.17005,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+907:UT:SNTL,Agua Canyon,UT,37.52217,-112.27118,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+909:WA:SNTL,Wells Creek,WA,48.8661,-121.78976,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+910:WA:SNTL,Elbow Lake,WA,48.69092,-121.90893,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+911:WA:SNTL,Rex River,WA,47.30218,-121.60475,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+913:CO:SNTL,Buffalo Park,CO,40.22838,-106.5962,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+917:MT:SNTL,Rocky Boy,MT,48.17478,-109.64728,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+920:SD:SNTL,North Rapid Creek,SD,44.20617,-103.78758,Black Hills,continental_mountain,,state default: Black Hills
+921:NM:SNTL,Elk Cabin,NM,35.7073,-105.80584,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+922:NM:SNTL,Santa Fe,NM,35.77154,-105.78487,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+923:WY:SNTL,Deer Park,WY,42.59076,-108.90273,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+924:MT:SNTL,West Yellowstone,MT,44.65866,-111.09199,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+927:AZ:SNTL,Snowslide Canyon,AZ,35.34179,-111.65084,Arizona sky islands,intermountain,southwest,state default: Arizona sky islands
+928:WA:SNTL,Huckleberry Creek,WA,47.06565,-121.58778,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+929:MT:SNTL,Sacajawea,MT,45.87395,-110.92783,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+930:MT:SNTL,Peterson Meadows,MT,46.12588,-113.30792,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+934:NM:SNTL,Tolby,NM,36.47498,-105.19534,New Mexico ranges,continental_mountain,southwest,state default: New Mexico ranges
+935:CO:SNTL,Jackwhacker Gulch,CO,39.57096,-105.80355,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+936:CO:SNTL,Echo Lake,CO,39.65539,-105.59358,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+937:CO:SNTL,Michigan Creek,CO,39.43579,-105.91072,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+938:CO:SNTL,Buckskin Joe,CO,39.30378,-106.11316,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+940:CO:SNTL,Lost Dog,CO,40.81557,-106.74833,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+941:WA:SNTL,Mowich,WA,46.92833,-121.95232,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+944:WY:SNTL,Gunsight Pass,WY,43.38332,-109.87815,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+946:AK:SNTL,Indian Pass,AK,61.06577,-149.48543,Alaska ranges,unclassified,,state default: Alaska ranges
+954:AK:SNTL,Turnagain Pass,AK,60.78043,-149.18325,Alaska ranges,unclassified,,state default: Alaska ranges
+955:AK:SNTL,Summit Creek,AK,60.61713,-149.53128,Alaska ranges,unclassified,,state default: Alaska ranges
+956:AK:SNTL,Grandview,AK,60.60832,-149.06313,Alaska ranges,unclassified,,state default: Alaska ranges
+964:AK:SNTL,Grouse Creek Divide,AK,60.25965,-149.34228,Alaska ranges,unclassified,,state default: Alaska ranges
+967:AK:SNTL,Susitna Valley High,AK,62.13245,-150.04391,Alaska ranges,unclassified,,state default: Alaska ranges
+970:CO:SNTL,Jones Pass,CO,39.7645,-105.90655,Colorado Rockies,continental_mountain,colorado-ranges,state default: Colorado Rockies
+971:UT:SNTL,Parrish Creek,UT,40.93417,-111.81372,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+972:UT:SNTL,Louis Meadow,UT,40.83033,-111.76457,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+974:WA:SNTL,Waterhole,WA,47.94485,-123.42594,Olympic Mountains,maritime_mountain,washington-cascades,coordinate rule: Olympic Peninsula west of -123.0
+975:WA:SNTL,Swamp Creek,WA,48.57142,-120.78267,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+978:ID:SNTL,Bogus Basin,ID,43.76377,-116.09685,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+981:MT:SNTL,Burnt Mtn,MT,45.2401,-109.45961,Montana Rockies,continental_mountain,montana-ranges,state default: Montana Rockies
+982:WY:SNTL,Cole Canyon,WY,44.48632,-104.41057,Wyoming Rockies,continental_mountain,wyoming-ranges,state default: Wyoming Rockies
+985:WA:SNTL,Sourdough Gulch,WA,46.23713,-117.39435,Blue Mountains (WA),intermountain,washington-cascades,coordinate rule: far southeast WA (Blue Mountains)
+989:ID:SNTL,Moscow Mountain,ID,46.805,-116.8535,Idaho Batholith and ranges,intermountain,idaho-ranges,state default: Idaho Batholith and ranges
+991:WA:SNTL,Hozomeen Camp,WA,48.98075,-121.07976,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+992:UT:SNTL,Bear River RS,UT,40.8852,-110.8277,Wasatch-Uinta and Utah plateaus,intermountain,utah-wasatch-uinta,state default: Wasatch-Uinta and Utah plateaus
+998:WA:SNTL,Easy Pass,WA,48.85933,-121.43895,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)
+999:WA:SNTL,Marten Ridge,WA,48.76292,-121.69823,Cascade Range (WA),maritime_mountain,washington-cascades,state default: Cascade Range (WA)

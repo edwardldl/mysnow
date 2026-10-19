@@ -8,16 +8,19 @@ from pathlib import Path
 from statistics import mean, median
 
 from .cssl import CsslImportConfig, write_cssl_outputs
+from .ecmwf_transfer import run_transfer_test
 from .evaluation import evaluate_rockies_station_temporal_holdout, evaluate_temporal_holdout
 from .forecast_snapshot import SNAPSHOT_MODELS, run_snapshots
 from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
 from .ghcn_track import ingest_ghcn
+from .hrrr_events import adapt_hrrr_events
 from .hrrr_dataset import OBS_START_DEFAULT as HRRR_OBS_START_DEFAULT
 from .hrrr_dataset import build_dataset as build_hrrr_dataset
 from .hrrr_dataset import hrrr_month_plan
 from .io import read_rows
 from .noaa_hrrr import extract_noaa_hrrr, extract_noaa_months
 from .profiles import backfill_openmeteo_multistation_profiles, backfill_openmeteo_profiles
+from .regional_evaluation import run_regional_evaluation
 from .sierra import SierraImportConfig, import_sierra_ghcn_directory, write_sierra_import
 from .sierra_evaluation import evaluate_sierra_station_water_year_holdout
 from .snotel_track import ingest_snotel
@@ -566,6 +569,49 @@ def _extract_noaa_hrrr(args: argparse.Namespace) -> int:
     return 0
 
 
+def _adapt_hrrr_events(args: argparse.Namespace) -> int:
+    report = adapt_hrrr_events(
+        dataset_dir=args.dataset_dir,
+        regimes_path=args.regimes,
+        output_parquet=args.output_parquet,
+        output_csv=args.output_csv,
+        report_path=args.output_report,
+    )
+    print(json.dumps({"output": str(args.output_parquet), "emitted": report["emittedEvents"], "eligible": report["trainerEligibleEvents"]}, sort_keys=True))
+    return 0
+
+
+def _evaluate_regional_models(args: argparse.Namespace) -> int:
+    direct_sets = {
+        "rockies-ghcn": (args.direct_rockies, None),
+        "sierra-ghcn": (args.direct_sierra, "sierra-nevada"),
+        "cssl": (args.direct_cssl, "sierra-nevada"),
+    }
+    report = run_regional_evaluation(
+        events_path=args.events,
+        artifacts_dir=args.artifacts_dir,
+        report_json_path=args.report_json,
+        report_md_path=args.report_md,
+        direct_sets=direct_sets,
+    )
+    verdicts = {region_id: result["verdict"] for region_id, result in report["regions"].items()}
+    print(json.dumps({"eligible": report["eligibleEvents"], "verdicts": verdicts, "artifacts": report["artifactsWritten"]}, sort_keys=True))
+    return 0
+
+
+def _transfer_ecmwf(args: argparse.Namespace) -> int:
+    report = run_transfer_test(
+        events_path=args.events,
+        evaluation_report_path=args.evaluation_report,
+        cache_dir=args.cache_dir,
+        output_path=args.output,
+        max_stations_per_region=args.max_stations_per_region,
+        sleep_seconds=args.sleep_seconds,
+    )
+    print(json.dumps({"status": report["status"], "stationsCompleted": report["stationsCompleted"], "eventsBackfilled": report["eventsBackfilled"]}, sort_keys=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -814,6 +860,33 @@ def build_parser() -> argparse.ArgumentParser:
     noaa_hrrr.add_argument("--max-workers", type=int, default=4)
     noaa_hrrr.add_argument("--max-files", type=int, help="debug cap on GRIB files processed")
     noaa_hrrr.set_defaults(func=_extract_noaa_hrrr)
+
+    adapt = subparsers.add_parser("adapt-hrrr-events", help="adapt the NOAA HRRR/SNOTEL dataset into normalized trainer events with the station regime map")
+    adapt.add_argument("--dataset-dir", type=Path, default=Path("data/hrrr-dataset"))
+    adapt.add_argument("--regimes", type=Path, default=Path("training/slr_calibration/regions/station_regimes.csv"))
+    adapt.add_argument("--output-parquet", type=Path, default=Path("data/hrrr-dataset/model-evaluation/events.parquet"))
+    adapt.add_argument("--output-csv", type=Path)
+    adapt.add_argument("--output-report", type=Path, default=Path("data/hrrr-dataset/model-evaluation/adapter_report.json"))
+    adapt.set_defaults(func=_adapt_hrrr_events)
+
+    regional = subparsers.add_parser("evaluate-regional-models", help="fit and gate Candidates A and B per region on the adapted HRRR events")
+    regional.add_argument("--events", type=Path, default=Path("data/hrrr-dataset/model-evaluation/events.parquet"))
+    regional.add_argument("--artifacts-dir", type=Path, default=Path("training/slr_calibration/artifacts"))
+    regional.add_argument("--report-json", type=Path, default=Path("data/hrrr-dataset/model-evaluation/evaluation_report.json"))
+    regional.add_argument("--report-md", type=Path, default=Path("data/hrrr-dataset/model-evaluation/summary.md"))
+    regional.add_argument("--direct-rockies", type=Path, default=Path("data/slr-training-data/normalized/baseline/ghcn_rockies_kuchera.csv"))
+    regional.add_argument("--direct-sierra", type=Path, default=Path("data/sierra-slr-research/normalized/sierra_kuchera.csv"))
+    regional.add_argument("--direct-cssl", type=Path, default=Path("data/cssl/v13/research/cssl-aligned-baselines.csv"))
+    regional.set_defaults(func=_evaluate_regional_models)
+
+    transfer = subparsers.add_parser("transfer-ecmwf", help="ECMWF IFS transfer test for retained regional artifacts (design section 8)")
+    transfer.add_argument("--events", type=Path, default=Path("data/hrrr-dataset/model-evaluation/events.parquet"))
+    transfer.add_argument("--evaluation-report", type=Path, default=Path("data/hrrr-dataset/model-evaluation/evaluation_report.json"))
+    transfer.add_argument("--cache-dir", type=Path, default=Path("data/hrrr-dataset/model-evaluation/ecmwf-cache"))
+    transfer.add_argument("--output", type=Path, default=Path("data/hrrr-dataset/model-evaluation/transfer_report.json"))
+    transfer.add_argument("--max-stations-per-region", type=int, default=4)
+    transfer.add_argument("--sleep-seconds", type=float, default=1.2)
+    transfer.set_defaults(func=_transfer_ecmwf)
 
     return parser
 

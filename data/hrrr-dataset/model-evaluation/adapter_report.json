@@ -1,0 +1,53 @@
+{
+  "eligibleByRegion": {
+    "(none)": 32,
+    "colorado-ranges": 4712,
+    "idaho-ranges": 2478,
+    "montana-ranges": 2045,
+    "nevada": 321,
+    "oregon-cascades": 1384,
+    "sierra-nevada": 789,
+    "southwest": 583,
+    "utah-wasatch-uinta": 3231,
+    "washington-cascades": 2548,
+    "wyoming-ranges": 2799
+  },
+  "eligibleByState": {
+    "AZ": 98,
+    "CA": 789,
+    "CO": 4712,
+    "ID": 2478,
+    "MT": 2045,
+    "NM": 485,
+    "NV": 321,
+    "OR": 1384,
+    "SD": 32,
+    "UT": 3231,
+    "WA": 2548,
+    "WY": 2799
+  },
+  "eligibleByWaterYear": {
+    "2024": 8142,
+    "2025": 7765,
+    "2026": 5015
+  },
+  "emittedEvents": 21967,
+  "labelTier": "weak (SNOTEL pack differencing, qc_weight 0.25)",
+  "note": "Baseline is the Python-replicated Kuchera over NOAA HRRR profiles at fixed 00Z leads 1-24 h; not interchangeable with the previous Open-Meteo/TS-Kuchera slices.",
+  "partitionRowCounts": {
+    "water_year=2024": 181454,
+    "water_year=2025": 181716,
+    "water_year=2026": 181909
+  },
+  "qcPassedRows": 21967,
+  "regimeMap": "training/slr_calibration/regions/station_regimes.csv",
+  "source": "data/hrrr-dataset",
+  "sourceLabel": "snotel-differenced-noaa-hrrr",
+  "stationCount": 473,
+  "stormGroupCount": 15813,
+  "trainerEligibleEvents": 20922,
+  "trainerRejectionCounts": {
+    "MISSING_FIELD": 1030,
+    "OBSERVED_SLR_RANGE": 15
+  }
+}
