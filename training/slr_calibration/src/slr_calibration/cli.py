@@ -15,6 +15,8 @@ from .evaluation import evaluate_rockies_station_temporal_holdout, evaluate_temp
 from .forecast_snapshot import SNAPSHOT_MODELS, run_snapshots
 from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
 from .ghcn_track import ingest_ghcn
+from .gold_model import run_evaluate_gold_models
+from .gold_profiles import run_build_features, run_fetch_profiles
 from .hrrr_events import adapt_hrrr_events
 from .hrrr_dataset import OBS_START_DEFAULT as HRRR_OBS_START_DEFAULT
 from .hrrr_dataset import build_dataset as build_hrrr_dataset
@@ -631,6 +633,34 @@ def _build_screened_labels(args: argparse.Namespace) -> int:
     }, sort_keys=True))
     return 0
 
+
+def _fetch_gold_profiles(args: argparse.Namespace) -> int:
+    summary = run_fetch_profiles(
+        pool_dir=args.pool_dir,
+        output_dir=args.output_dir,
+        max_workers=args.max_workers,
+        min_interval_s=args.min_interval_s,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    return 0
+
+
+def _build_gold_features(args: argparse.Namespace) -> int:
+    coverage = run_build_features(pool_dir=args.pool_dir, output_dir=args.output_dir)
+    print(json.dumps(coverage, sort_keys=True))
+    return 0
+
+
+def _evaluate_gold_models(args: argparse.Namespace) -> int:
+    results = run_evaluate_gold_models(
+        features_path=args.features,
+        output_dir=args.output_dir,
+        random_repeats=args.random_repeats,
+    )
+    print(json.dumps({"accounting": results["accounting"]}, sort_keys=True))
+    return 0
+
+
 def _investigate_weak_labels(args: argparse.Namespace) -> int:
     results = run_weak_label_investigation(
         events_path=args.events,
@@ -958,6 +988,24 @@ def build_parser() -> argparse.ArgumentParser:
     screened.add_argument("--max-workers", type=int, default=4)
     screened.add_argument("--pletcher-pickle", type=Path, action="append", default=[], help="Pletcher et al. dataset pickle(s) with lat/lon/elev columns, for the survey-confirmed reference match")
     screened.set_defaults(func=_build_screened_labels)
+
+    gold_fetch = subparsers.add_parser("fetch-gold-profiles", help="step 2: fetch best-match archive profiles for screened-v2 gold events (resumable; NOT ERA5 -- see gold_profiles docstring)")
+    gold_fetch.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_fetch.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_fetch.add_argument("--max-workers", type=int, default=6)
+    gold_fetch.add_argument("--min-interval-s", type=float, default=0.15)
+    gold_fetch.set_defaults(func=_fetch_gold_profiles)
+
+    gold_features = subparsers.add_parser("build-gold-features", help="step 2: build 27 Pletcher-spec AGL features + Kuchera baselines for screened-v2 gold events from cached profiles")
+    gold_features.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_features.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_features.set_defaults(func=_build_gold_features)
+
+    gold_eval = subparsers.add_parser("evaluate-gold-models", help="step 2: benchmark RF/GBM/intercept/EB-gold/Kuchera/climatology/RF+EB on screened-v2 gold labels (research only)")
+    gold_eval.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/features.parquet"))
+    gold_eval.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_eval.add_argument("--random-repeats", type=int, default=20)
+    gold_eval.set_defaults(func=_evaluate_gold_models)
 
     return parser
 
