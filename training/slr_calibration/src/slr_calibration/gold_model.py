@@ -62,6 +62,19 @@ def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
+def _frame_profile_source(frame: pd.DataFrame) -> str:
+    """Provenance of a features frame: its own uniform profile_source.
+
+    Falls back to the module default (best-match) for frames that lack
+    the column, so pre-ERA5 feature files keep their original labels.
+    """
+    if "profile_source" in frame.columns:
+        values = {str(value) for value in frame["profile_source"].dropna().unique()}
+        if len(values) == 1:
+            return values.pop()
+    return PROFILE_SOURCE
+
+
 # ---------------------------------------------------------------------------
 # Frame loading
 # ---------------------------------------------------------------------------
@@ -360,8 +373,9 @@ def _run_split(
 
 def run_benchmark(features_path: Path, output_dir: Path, random_repeats: int = 20) -> dict[str, Any]:
     frame, accounting = load_modeling_frame(features_path)
+    profile_source = _frame_profile_source(frame)
     results: dict[str, Any] = {
-        "profileSource": PROFILE_SOURCE,
+        "profileSource": profile_source,
         "accounting": accounting,
         "splits": {},
     }
@@ -428,7 +442,7 @@ def run_benchmark(features_path: Path, output_dir: Path, random_repeats: int = 2
     joblib.dump(final_rf, output_dir / "rf_full.joblib")
     joblib.dump(final_gbm, output_dir / "gbm_full.joblib")
     (output_dir / "model_sidecar.json").write_text(json.dumps({
-        "profileSource": PROFILE_SOURCE,
+        "profileSource": profile_source,
         "features": list(FEATURE_COLUMNS),
         "trainingRows": int(len(frame)),
         "models": {

@@ -16,7 +16,7 @@ from .forecast_snapshot import SNAPSHOT_MODELS, run_snapshots
 from .ghcn import GhcnRockiesConfig, import_ghcn_rockies, write_ghcn_import
 from .ghcn_track import ingest_ghcn
 from .gold_model import run_evaluate_gold_models
-from .gold_profiles import run_build_features, run_fetch_profiles
+from .gold_profiles import BEST_MATCH_SPEC, ERA5_SPEC, run_build_features, run_fetch_profiles
 from .hrrr_events import adapt_hrrr_events
 from .hrrr_dataset import OBS_START_DEFAULT as HRRR_OBS_START_DEFAULT
 from .hrrr_dataset import build_dataset as build_hrrr_dataset
@@ -645,8 +645,29 @@ def _fetch_gold_profiles(args: argparse.Namespace) -> int:
     return 0
 
 
+def _fetch_gold_profiles_era5(args: argparse.Namespace) -> int:
+    from .gold_profiles_era5 import run_fetch_profiles_era5
+
+    event_ids: set[str] | None = None
+    if args.event_id_file is not None:
+        event_ids = {
+            line.strip()
+            for line in args.event_id_file.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+    summary = run_fetch_profiles_era5(
+        pool_dir=args.pool_dir,
+        output_dir=args.output_dir,
+        max_workers=args.max_workers,
+        event_ids=event_ids,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    return 0
+
+
 def _build_gold_features(args: argparse.Namespace) -> int:
-    coverage = run_build_features(pool_dir=args.pool_dir, output_dir=args.output_dir)
+    spec = ERA5_SPEC if args.profile_source == "era5" else BEST_MATCH_SPEC
+    coverage = run_build_features(pool_dir=args.pool_dir, output_dir=args.output_dir, spec=spec)
     print(json.dumps(coverage, sort_keys=True))
     return 0
 
@@ -996,9 +1017,17 @@ def build_parser() -> argparse.ArgumentParser:
     gold_fetch.add_argument("--min-interval-s", type=float, default=0.15)
     gold_fetch.set_defaults(func=_fetch_gold_profiles)
 
+    gold_fetch_era5 = subparsers.add_parser("fetch-gold-profiles-era5", help="step 2: fetch ERA5 profiles (NSF NCAR AWS mirror, source era5-nsf-ncar-aws) for screened-v2 gold events (resumable; lifts the 2021-06 coverage floor)")
+    gold_fetch_era5.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_fetch_era5.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_fetch_era5.add_argument("--max-workers", type=int, default=6)
+    gold_fetch_era5.add_argument("--event-id-file", type=Path, default=None, help="restrict the run to the event ids listed in this file (one per line); used for pilots")
+    gold_fetch_era5.set_defaults(func=_fetch_gold_profiles_era5)
+
     gold_features = subparsers.add_parser("build-gold-features", help="step 2: build 27 Pletcher-spec AGL features + Kuchera baselines for screened-v2 gold events from cached profiles")
     gold_features.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
     gold_features.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_features.add_argument("--profile-source", choices=("best-match", "era5"), default="best-match", help="which cached profile source to build from (default: best-match)")
     gold_features.set_defaults(func=_build_gold_features)
 
     gold_eval = subparsers.add_parser("evaluate-gold-models", help="step 2: benchmark RF/GBM/intercept/EB-gold/Kuchera/climatology/RF+EB on screened-v2 gold labels (research only)")

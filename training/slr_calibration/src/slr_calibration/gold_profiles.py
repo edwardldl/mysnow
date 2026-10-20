@@ -39,6 +39,21 @@ elevation: 27 features.  The Kuchera baseline for the same window is
 computed with the project's established Python path
 (``tracking_align.compute_baseline_slr``) over hour records built from
 the same responses, so baseline and features share provenance.
+
+UPDATE (2026-10-20): a true-ERA5 route was verified and adopted.  The
+Open-Meteo best-match campaign was stopped at 1,812 of 13,660 chunks
+(per-IP daily cap; the cache is kept as a comparison set).  ERA5 itself
+is now fetched from the NSF NCAR mirror of ERA5 on AWS Open Data
+(bucket ``nsf-ncar-era5``, anonymous read; see
+``gold_profiles_era5``).  The original Intertrust bucket ``era5-pds``
+was probed the same day and is NOT anonymously readable (ListBucket
+and GetObject both return HTTP 403), so the NCAR mirror -- the same
+ECMWF ERA5 reanalysis, curated by NSF NCAR -- is the source of record;
+its source id is ``era5-nsf-ncar-aws``.  ERA5 coverage (verified by
+listing: pressure-level months 1940-01 through 2026-07) removes the
+2021-06-01 eligibility floor.  Source selection is explicit via
+``SourceSpec``; the best-match path above is unchanged and remains the
+default for the original commands.
 """
 
 from __future__ import annotations
@@ -54,6 +69,7 @@ import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -65,6 +81,34 @@ PROFILE_SOURCE = "open-meteo-historical-forecast-best-match"
 PRESSURE_LEVELS_HPA = (1000, 975, 950, 925, 900, 850, 800, 750, 700, 650, 600, 550, 500)
 AGL_TARGETS_M = (300, 600, 900, 1200, 1500, 1800, 2100, 2400)
 ARCHIVE_START = date(2021, 6, 1)  # probed coverage start (see docstring)
+ERA5_PROFILE_SOURCE = "era5-nsf-ncar-aws"
+ERA5_COVERAGE_START = date(1940, 1, 1)
+ERA5_COVERAGE_END = date(2026, 7, 31)  # latest verified month: 202607
+
+
+@dataclass(frozen=True)
+class SourceSpec:
+    """One profile source: provenance id, cache subdir, coverage window.
+
+    An event is fetch-eligible when its observation_date lies inside
+    [coverage_start, coverage_end] (end None = unbounded).  Events
+    outside the window are reported as ``outside_archive_coverage`` by
+    build_features, never silently dropped.
+    """
+
+    source_id: str
+    cache_dir_name: str
+    coverage_start: date
+    coverage_end: date | None = None
+
+    def covers(self, day: date) -> bool:
+        if day < self.coverage_start:
+            return False
+        return self.coverage_end is None or day <= self.coverage_end
+
+
+BEST_MATCH_SPEC = SourceSpec(PROFILE_SOURCE, "raw_cache", ARCHIVE_START)
+ERA5_SPEC = SourceSpec(ERA5_PROFILE_SOURCE, "raw_cache_era5", ERA5_COVERAGE_START, ERA5_COVERAGE_END)
 MIN_VALID_HOURS = 18  # of the 24 window hours, for a complete feature set
 USER_AGENT = "MySnow-SLR-research/0.1"
 
@@ -169,18 +213,24 @@ def event_window(event: dict[str, Any]) -> tuple[datetime, datetime]:
 # Fetch planning and downloading
 # ---------------------------------------------------------------------------
 
-def plan_chunks(events: list[dict[str, Any]], gap_days: int = 4) -> list[dict[str, Any]]:
+def plan_chunks(
+    events: list[dict[str, Any]],
+    gap_days: int = 4,
+    spec: SourceSpec = BEST_MATCH_SPEC,
+) -> list[dict[str, Any]]:
     """Group each station's fetch-eligible event windows into date chunks.
 
     A chunk covers a run of observation dates separated by at most
     ``gap_days``; the request range is padded one UTC day on both sides
-    so every window endpoint is inside the response.
+    so every window endpoint is inside the response.  Eligibility is
+    governed by ``spec`` (elevation present and observation_date inside
+    the source's verified coverage window).
     """
     by_station: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for event in events:
         if event["elevation_m"] is None:
             continue  # no AGL reference; build_features marks these missing_station_metadata
-        if date.fromisoformat(event["observation_date"]) >= ARCHIVE_START:
+        if spec.covers(date.fromisoformat(event["observation_date"])):
             by_station[event["station_id"]].append(event)
     chunks: list[dict[str, Any]] = []
     for station_id, station_events in sorted(by_station.items()):
@@ -487,6 +537,7 @@ def _kuchera_hour_dicts(
 def build_event_features(
     event: dict[str, Any],
     hours: dict[datetime, dict[str, Any]],
+    source_id: str = PROFILE_SOURCE,
 ) -> dict[str, Any]:
     """Compute the 24-h AGL feature means and Kuchera baseline for one event."""
     start, end = event_window(event)
@@ -542,7 +593,7 @@ def build_event_features(
         "baseline_slr": baseline,
         "profile_status": status,
         "valid_hours": valid_hours,
-        "profile_source": PROFILE_SOURCE,
+        "profile_source": source_id,
     }
     for column in FEATURE_COLUMNS:
         if column == "latitude":
@@ -556,7 +607,7 @@ def build_event_features(
     return row
 
 
-def _blank_row(event: dict[str, Any], status: str) -> dict[str, Any]:
+def _blank_row(event: dict[str, Any], status: str, source_id: str = PROFILE_SOURCE) -> dict[str, Any]:
     row: dict[str, Any] = {
         "event_id": event["event_id"], "region": event["region"],
         "station_id": event["station_id"], "site_id": event["site_id"],
@@ -570,7 +621,7 @@ def _blank_row(event: dict[str, Any], status: str) -> dict[str, Any]:
         "climate_regime": event["climate_regime"],
         "source_tier": event["source_tier"],
         "baseline_slr": None, "profile_status": status,
-        "valid_hours": 0, "profile_source": PROFILE_SOURCE,
+        "valid_hours": 0, "profile_source": source_id,
     }
     for column in FEATURE_COLUMNS:
         if column == "latitude":
@@ -588,6 +639,7 @@ def build_features(
     events: list[dict[str, Any]],
     cache_dir: Path,
     chunks: list[dict[str, Any]],
+    spec: SourceSpec = BEST_MATCH_SPEC,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build per-event features for every event, with status accounting."""
     chunk_by_station: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -616,8 +668,8 @@ def build_features(
                 hours.update(_payload_hours(json.load(handle)))
         for event in station_events:
             if event["elevation_m"] is None:
-                record(_blank_row(event, "missing_station_metadata"))
-            elif date.fromisoformat(event["observation_date"]) < ARCHIVE_START:
+                record(_blank_row(event, "missing_station_metadata", spec.source_id))
+            elif not spec.covers(date.fromisoformat(event["observation_date"])):
                 row = {
                     "event_id": event["event_id"], "region": event["region"],
                     "station_id": event["station_id"], "site_id": event["site_id"],
@@ -631,7 +683,7 @@ def build_features(
                     "climate_regime": event["climate_regime"],
                     "source_tier": event["source_tier"],
                     "baseline_slr": None, "profile_status": "outside_archive_coverage",
-                    "valid_hours": 0, "profile_source": PROFILE_SOURCE,
+                    "valid_hours": 0, "profile_source": spec.source_id,
                 }
                 for column in FEATURE_COLUMNS:
                     row[column] = event["latitude"] if column == "latitude" else (
@@ -639,13 +691,13 @@ def build_features(
                             event["elevation_m"] if column == "elevation_m" else None))
                 record(row)
             elif not hours:
-                row = build_event_features(event, {})
+                row = build_event_features(event, {}, spec.source_id)
                 row["profile_status"] = "fetch_missing"
                 record(row)
             else:
-                record(build_event_features(event, hours))
+                record(build_event_features(event, hours, spec.source_id))
     coverage = {
-        "profileSource": PROFILE_SOURCE,
+        "profileSource": spec.source_id,
         "eventsTotal": len(events),
         "statusCounts": dict(status_counts),
         "byRegion": {region: dict(counts) for region, counts in sorted(region_status.items())},
@@ -674,11 +726,15 @@ def run_fetch_profiles(pool_dir: Path, output_dir: Path, max_workers: int, min_i
     return summary
 
 
-def run_build_features(pool_dir: Path, output_dir: Path) -> dict[str, Any]:
+def run_build_features(
+    pool_dir: Path,
+    output_dir: Path,
+    spec: SourceSpec = BEST_MATCH_SPEC,
+) -> dict[str, Any]:
     events = load_screened_events(pool_dir)
-    cache_dir = output_dir / "raw_cache"
-    chunks = plan_chunks(events)
-    rows, coverage = build_features(events, cache_dir, chunks)
+    cache_dir = output_dir / spec.cache_dir_name
+    chunks = plan_chunks(events, spec=spec)
+    rows, coverage = build_features(events, cache_dir, chunks, spec=spec)
     write_features_parquet(rows, output_dir / "features.parquet")
     (output_dir / "feature_coverage.json").write_text(json.dumps(coverage, indent=2), encoding="utf-8")
     return coverage

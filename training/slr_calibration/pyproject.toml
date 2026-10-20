@@ -29,6 +29,13 @@ ml = [
   "scipy==1.18.1",
 ]
 
+# Step-2 ERA5 profile fetch (slr_calibration.gold_profiles_era5):
+# anonymous S3 range reads of the NSF NCAR ERA5 mirror via h5py + s3fs.
+era5 = [
+  "h5py==3.16.0",
+  "s3fs==2026.9.0",
+]
+
 [project.scripts]
 mysnow-slr-calibration = "slr_calibration.cli:main"
 
