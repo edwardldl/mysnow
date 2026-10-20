@@ -8,6 +8,8 @@ from pathlib import Path
 from statistics import mean, median
 
 from .cssl import CsslImportConfig, write_cssl_outputs
+from .direct_labels import build_screened_labels as run_build_screened_labels
+from .direct_labels import load_pletcher_sites
 from .ecmwf_transfer import run_transfer_test
 from .evaluation import evaluate_rockies_station_temporal_holdout, evaluate_temporal_holdout
 from .forecast_snapshot import SNAPSHOT_MODELS, run_snapshots
@@ -613,6 +615,22 @@ def _transfer_ecmwf(args: argparse.Namespace) -> int:
     return 0
 
 
+def _build_screened_labels(args: argparse.Namespace) -> int:
+    sites = load_pletcher_sites(args.pletcher_pickle) if args.pletcher_pickle else None
+    report = run_build_screened_labels(
+        repo_root=args.repo_root,
+        output_dir=args.output_dir,
+        fetch_missing=args.fetch_missing,
+        max_workers=args.max_workers,
+        pletcher_sites=sites,
+    )
+    print(json.dumps({
+        "totals": report["totals"],
+        "pletcherPassRate": report["validation"]["pletcher"]["passRateAmongSufficient"],
+        "downloads": report["downloads"],
+    }, sort_keys=True))
+    return 0
+
 def _investigate_weak_labels(args: argparse.Namespace) -> int:
     results = run_weak_label_investigation(
         events_path=args.events,
@@ -932,6 +950,14 @@ def build_parser() -> argparse.ArgumentParser:
     investigate.add_argument("--report-json", type=Path, default=Path("data/hrrr-dataset/model-evaluation/weak_label_investigation.json"))
     investigate.add_argument("--report-md", type=Path, default=Path("data/hrrr-dataset/model-evaluation/weak-label-investigation.md"))
     investigate.set_defaults(func=_investigate_weak_labels)
+
+    screened = subparsers.add_parser("build-screened-labels", help="step 1: Pletcher hygiene + CoCoRaHS core-sampler screen; build the screened-v2 direct-label pool (labels only, no training)")
+    screened.add_argument("--repo-root", type=Path, default=Path("."))
+    screened.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    screened.add_argument("--fetch-missing", action="store_true", help="download missing by-station files from the NCEI access endpoint into the output raw cache")
+    screened.add_argument("--max-workers", type=int, default=4)
+    screened.add_argument("--pletcher-pickle", type=Path, action="append", default=[], help="Pletcher et al. dataset pickle(s) with lat/lon/elev columns, for the survey-confirmed reference match")
+    screened.set_defaults(func=_build_screened_labels)
 
     return parser
 
