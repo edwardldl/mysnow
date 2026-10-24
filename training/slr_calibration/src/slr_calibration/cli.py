@@ -682,6 +682,42 @@ def _evaluate_gold_models(args: argparse.Namespace) -> int:
     return 0
 
 
+def _fetch_gold_profiles_hrrr(args: argparse.Namespace) -> int:
+    from .hrrr_transfer import run_fetch_hrrr_transfer
+
+    event_ids: set[str] | None = None
+    if args.event_id_file is not None:
+        event_ids = {
+            line.strip()
+            for line in args.event_id_file.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+    summary = run_fetch_hrrr_transfer(
+        pool_dir=args.pool_dir,
+        output_dir=args.output_dir,
+        max_workers=args.max_workers,
+        event_ids=event_ids,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    return 0
+
+
+def _build_gold_features_hrrr(args: argparse.Namespace) -> int:
+    from .hrrr_transfer import run_build_hrrr_features
+
+    coverage = run_build_hrrr_features(pool_dir=args.pool_dir, output_dir=args.output_dir)
+    print(json.dumps(coverage, sort_keys=True))
+    return 0
+
+
+def _evaluate_gold_transfer_hrrr(args: argparse.Namespace) -> int:
+    from .hrrr_transfer import run_evaluate_hrrr_transfer
+
+    results = run_evaluate_hrrr_transfer(output_dir=args.output_dir)
+    print(json.dumps({"accounting": results["accounting"]}, sort_keys=True))
+    return 0
+
+
 def _investigate_weak_labels(args: argparse.Namespace) -> int:
     results = run_weak_label_investigation(
         events_path=args.events,
@@ -1071,6 +1107,22 @@ def build_parser() -> argparse.ArgumentParser:
     gold_eval.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
     gold_eval.add_argument("--random-repeats", type=int, default=20)
     gold_eval.set_defaults(func=_evaluate_gold_models)
+
+    gold_fetch_hrrr = subparsers.add_parser("fetch-gold-profiles-hrrr", help="step 5: fetch NOAA HRRR wrfprs profiles for step-2 gold events (resumable; transfer test -- see hrrr_transfer docstring)")
+    gold_fetch_hrrr.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_fetch_hrrr.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_fetch_hrrr.add_argument("--max-workers", type=int, default=10)
+    gold_fetch_hrrr.add_argument("--event-id-file", type=Path, default=None, help="restrict the run to the event ids listed in this file (one per line); used for pilots")
+    gold_fetch_hrrr.set_defaults(func=_fetch_gold_profiles_hrrr)
+
+    gold_features_hrrr = subparsers.add_parser("build-gold-features-hrrr", help="step 5: build the 27 AGL features + Kuchera baselines for gold events from cached HRRR profiles")
+    gold_features_hrrr.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_features_hrrr.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_features_hrrr.set_defaults(func=_build_gold_features_hrrr)
+
+    gold_transfer = subparsers.add_parser("evaluate-gold-transfer-hrrr", help="step 5: score the frozen step-2 models (RF/GBM/RF+EB/Kuchera) on HRRR features vs best-match features, same covered subset")
+    gold_transfer.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_transfer.set_defaults(func=_evaluate_gold_transfer_hrrr)
 
     return parser
 
