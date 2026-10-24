@@ -710,6 +710,30 @@ def _investigate_weak_labels(args: argparse.Namespace) -> int:
     return 0
 
 
+def _investigate_observation_operator(args: argparse.Namespace) -> int:
+    from .observation_operator import run_observation_operator_study
+
+    results = run_observation_operator_study(
+        cache_dir=args.cache_dir,
+        cssl_raw_dir=args.cssl_raw_dir,
+        screened_dir=args.screened_dir,
+        dataset_dir=args.dataset_dir,
+        report_json_path=args.report_json,
+        report_md_path=args.report_md,
+        fetch=args.fetch,
+        sleep_seconds=args.sleep_seconds,
+        bootstrap_reps=args.bootstrap_reps,
+        progress=lambda message: print(message, flush=True),
+    )
+    pooled = results.get("csslPooledHeldOut", {})
+    print(json.dumps({
+        "csslPooledHeldOut": pooled,
+        "finalParams": results.get("finalFit", {}).get("params"),
+        "transferPooled": results.get("transferPooled"),
+    }, sort_keys=True))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MySnow offline regional SLR calibration")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1001,6 +1025,18 @@ def build_parser() -> argparse.ArgumentParser:
     investigate.add_argument("--report-json", type=Path, default=Path("data/hrrr-dataset/model-evaluation/weak_label_investigation.json"))
     investigate.add_argument("--report-md", type=Path, default=Path("data/hrrr-dataset/model-evaluation/weak-label-investigation.md"))
     investigate.set_defaults(func=_investigate_weak_labels)
+
+    operator = subparsers.add_parser("investigate-observation-operator", help="step 4 (research): fit an Anderson-style observation operator on hourly SNOTEL data and test board-SLR recovery at CSSL + transfer pairs (research-only, no artifacts)")
+    operator.add_argument("--cache-dir", type=Path, default=Path("data/hrrr-dataset/model-evaluation/operator-cache"))
+    operator.add_argument("--cssl-raw-dir", type=Path, default=Path("data/cssl/v13/raw"))
+    operator.add_argument("--screened-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    operator.add_argument("--dataset-dir", type=Path, default=Path("data/hrrr-dataset"))
+    operator.add_argument("--report-json", type=Path, default=Path("data/hrrr-dataset/model-evaluation/observation_operator.json"))
+    operator.add_argument("--report-md", type=Path, default=Path("data/hrrr-dataset/model-evaluation/observation-operator-report.md"))
+    operator.add_argument("--fetch", action="store_true", help="fetch missing AWDB hourly months into the cache first (rate-limited)")
+    operator.add_argument("--sleep-seconds", type=float, default=1.5)
+    operator.add_argument("--bootstrap-reps", type=int, default=30)
+    operator.set_defaults(func=_investigate_observation_operator)
 
     screened = subparsers.add_parser("build-screened-labels", help="step 1: Pletcher hygiene + CoCoRaHS core-sampler screen; build the screened-v2 direct-label pool (labels only, no training)")
     screened.add_argument("--repo-root", type=Path, default=Path("."))

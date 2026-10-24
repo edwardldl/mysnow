@@ -1,0 +1,2225 @@
+{
+  "alignmentVerification": {
+    "+0d 00:00": {
+      "meanAbsDiffMm": 0.0,
+      "n": 86
+    },
+    "+0d 08:00": {
+      "meanAbsDiffMm": 9.024,
+      "n": 85
+    },
+    "-1d 00:00": {
+      "meanAbsDiffMm": 19.404,
+      "n": 86
+    },
+    "-1d 08:00": {
+      "meanAbsDiffMm": 16.854,
+      "n": 85
+    }
+  },
+  "csslBoardDays": {
+    "events": 86,
+    "total": 432
+  },
+  "csslFolds": {
+    "fitWY2024_validateWY2025": {
+      "alignment": {
+        "chosen": [
+          0,
+          0
+        ],
+        "chosenCorr": 0.8378,
+        "table": [
+          {
+            "candidate": "-1d 00:00",
+            "corr": 0.5778,
+            "n": 23
+          },
+          {
+            "candidate": "-1d 08:00",
+            "corr": 0.6083,
+            "n": 31
+          },
+          {
+            "candidate": "+0d 00:00",
+            "corr": 0.8378,
+            "n": 42
+          },
+          {
+            "candidate": "+0d 08:00",
+            "corr": 0.739,
+            "n": 42
+          }
+        ]
+      },
+      "evaluation": {
+        "ablationGammaOne": {
+          "bias": -0.49,
+          "mae": 3.783,
+          "medianAbsErr": 3.463,
+          "n": 38
+        },
+        "ablationNoNewSettle": {
+          "bias": 3.128,
+          "mae": 4.924,
+          "medianAbsErr": 4.756,
+          "n": 38
+        },
+        "meanLogBoardOverNaive": 0.2312,
+        "nBoardDays": 38,
+        "nNaiveUndefined": 6,
+        "naive": {
+          "bias": -2.005,
+          "mae": 5.38,
+          "medianAbsErr": 4.381,
+          "n": 32
+        },
+        "recovered": {
+          "bias": -0.49,
+          "mae": 3.783,
+          "medianAbsErr": 3.463,
+          "n": 38
+        },
+        "recoveredOnNaiveSubset": {
+          "bias": -1.175,
+          "mae": 3.899,
+          "medianAbsErr": 3.565,
+          "n": 32
+        },
+        "recoveredWhereNaiveUndefined": {
+          "bias": 3.163,
+          "mae": 3.163,
+          "medianAbsErr": 2.693,
+          "n": 6
+        },
+        "trivial": {
+          "bias": 2.245,
+          "mae": 6.532,
+          "medianAbsErr": 4.56,
+          "n": 32
+        }
+      },
+      "fitDepthRmseMm": 172.46958157874775,
+      "fitWindows": 7,
+      "params": {
+        "gamma": 1.0852,
+        "logEtaNew": 27.9977,
+        "logEtaOld": 15.5703,
+        "rho0Intercept": 87.718,
+        "rho0TempSlope": 8.1043
+      },
+      "refitNoOldSettle": {
+        "fitDepthRmseMm": 212.03193842292382,
+        "params": {
+          "gamma": 1.4277,
+          "logEtaNew": 27.9907,
+          "logEtaOld": 15.5703,
+          "rho0Intercept": 139.622,
+          "rho0TempSlope": 23.6624
+        },
+        "recovered": {
+          "bias": -2.185,
+          "mae": 4.089,
+          "medianAbsErr": 3.288,
+          "n": 38
+        },
+        "recoveredOnNaiveSubset": {
+          "bias": -2.722,
+          "mae": 4.477,
+          "medianAbsErr": 3.488,
+          "n": 32
+        }
+      },
+      "rows": [
+        {
+          "ablationGammaOne": 9.047,
+          "ablationNoNewSettle": 12.283,
+          "boardSlr": 19.0,
+          "date": "2024-11-02",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 5.0,
+          "recoveredSlr": 9.047
+        },
+        {
+          "ablationGammaOne": 9.961,
+          "ablationNoNewSettle": 12.596,
+          "boardSlr": 5.0,
+          "date": "2024-11-14",
+          "deltaDepthMm": 0.0,
+          "naiveSlr": null,
+          "recoveredSlr": 9.961
+        },
+        {
+          "ablationGammaOne": 8.454,
+          "ablationNoNewSettle": 16.504,
+          "boardSlr": 6.875,
+          "date": "2024-11-16",
+          "deltaDepthMm": 127.0,
+          "naiveSlr": 25.0,
+          "recoveredSlr": 8.454
+        },
+        {
+          "ablationGammaOne": 9.03,
+          "ablationNoNewSettle": 12.889,
+          "boardSlr": 5.556,
+          "date": "2024-11-18",
+          "deltaDepthMm": -25.4,
+          "naiveSlr": null,
+          "recoveredSlr": 9.03
+        },
+        {
+          "ablationGammaOne": 10.115,
+          "ablationNoNewSettle": 12.431,
+          "boardSlr": 17.563,
+          "date": "2024-11-21",
+          "deltaDepthMm": 304.8,
+          "naiveSlr": 10.0,
+          "recoveredSlr": 10.115
+        },
+        {
+          "ablationGammaOne": 9.032,
+          "ablationNoNewSettle": 10.992,
+          "boardSlr": 8.472,
+          "date": "2024-11-23",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 3.333,
+          "recoveredSlr": 9.032
+        },
+        {
+          "ablationGammaOne": 8.151,
+          "ablationNoNewSettle": 12.502,
+          "boardSlr": 3.226,
+          "date": "2024-11-24",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 2.727,
+          "recoveredSlr": 8.151
+        },
+        {
+          "ablationGammaOne": 8.904,
+          "ablationNoNewSettle": 11.082,
+          "boardSlr": 7.407,
+          "date": "2024-11-26",
+          "deltaDepthMm": 0.0,
+          "naiveSlr": null,
+          "recoveredSlr": 8.904
+        },
+        {
+          "ablationGammaOne": 7.678,
+          "ablationNoNewSettle": 12.182,
+          "boardSlr": 4.0,
+          "date": "2024-11-27",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 5.0,
+          "recoveredSlr": 7.678
+        },
+        {
+          "ablationGammaOne": 12.318,
+          "ablationNoNewSettle": 15.57,
+          "boardSlr": 10.435,
+          "date": "2024-12-13",
+          "deltaDepthMm": 279.4,
+          "naiveSlr": 12.222,
+          "recoveredSlr": 12.318
+        },
+        {
+          "ablationGammaOne": 11.776,
+          "ablationNoNewSettle": 14.996,
+          "boardSlr": 18.0,
+          "date": "2024-12-14",
+          "deltaDepthMm": 127.0,
+          "naiveSlr": 5.0,
+          "recoveredSlr": 11.776
+        },
+        {
+          "ablationGammaOne": 8.984,
+          "ablationNoNewSettle": 14.471,
+          "boardSlr": 4.828,
+          "date": "2024-12-15",
+          "deltaDepthMm": 482.6,
+          "naiveSlr": 9.048,
+          "recoveredSlr": 8.984
+        },
+        {
+          "ablationGammaOne": 8.751,
+          "ablationNoNewSettle": 13.592,
+          "boardSlr": 7.021,
+          "date": "2024-12-17",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 3.333,
+          "recoveredSlr": 8.751
+        },
+        {
+          "ablationGammaOne": 8.355,
+          "ablationNoNewSettle": 11.993,
+          "boardSlr": 14.412,
+          "date": "2024-12-25",
+          "deltaDepthMm": 177.8,
+          "naiveSlr": 10.0,
+          "recoveredSlr": 8.355
+        },
+        {
+          "ablationGammaOne": 9.453,
+          "ablationNoNewSettle": 12.007,
+          "boardSlr": 10.227,
+          "date": "2024-12-27",
+          "deltaDepthMm": 203.2,
+          "naiveSlr": 6.154,
+          "recoveredSlr": 9.453
+        },
+        {
+          "ablationGammaOne": 8.171,
+          "ablationNoNewSettle": 10.975,
+          "boardSlr": 2.846,
+          "date": "2024-12-30",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 4.0,
+          "recoveredSlr": 8.171
+        },
+        {
+          "ablationGammaOne": 9.941,
+          "ablationNoNewSettle": 13.775,
+          "boardSlr": 8.553,
+          "date": "2025-01-04",
+          "deltaDepthMm": 279.4,
+          "naiveSlr": 12.222,
+          "recoveredSlr": 9.941
+        },
+        {
+          "ablationGammaOne": 8.607,
+          "ablationNoNewSettle": 10.844,
+          "boardSlr": 14.783,
+          "date": "2025-02-01",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 6.667,
+          "recoveredSlr": 8.607
+        },
+        {
+          "ablationGammaOne": 7.887,
+          "ablationNoNewSettle": 10.207,
+          "boardSlr": 15.493,
+          "date": "2025-02-05",
+          "deltaDepthMm": 406.4,
+          "naiveSlr": 6.154,
+          "recoveredSlr": 7.887
+        },
+        {
+          "ablationGammaOne": 7.934,
+          "ablationNoNewSettle": 9.796,
+          "boardSlr": 9.429,
+          "date": "2025-02-07",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 2.727,
+          "recoveredSlr": 7.934
+        },
+        {
+          "ablationGammaOne": 8.699,
+          "ablationNoNewSettle": 13.136,
+          "boardSlr": 4.375,
+          "date": "2025-02-08",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 10.0,
+          "recoveredSlr": 8.699
+        },
+        {
+          "ablationGammaOne": 8.539,
+          "ablationNoNewSettle": 11.973,
+          "boardSlr": 7.593,
+          "date": "2025-02-14",
+          "deltaDepthMm": 685.8,
+          "naiveSlr": 7.941,
+          "recoveredSlr": 8.539
+        },
+        {
+          "ablationGammaOne": 8.068,
+          "ablationNoNewSettle": 11.124,
+          "boardSlr": 4.615,
+          "date": "2025-02-20",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 4.0,
+          "recoveredSlr": 8.068
+        },
+        {
+          "ablationGammaOne": 9.328,
+          "ablationNoNewSettle": 12.777,
+          "boardSlr": 4.0,
+          "date": "2025-03-03",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 10.0,
+          "recoveredSlr": 9.328
+        },
+        {
+          "ablationGammaOne": 9.174,
+          "ablationNoNewSettle": 12.328,
+          "boardSlr": 10.101,
+          "date": "2025-03-06",
+          "deltaDepthMm": 152.4,
+          "naiveSlr": 15.0,
+          "recoveredSlr": 9.174
+        },
+        {
+          "ablationGammaOne": 9.125,
+          "ablationNoNewSettle": 13.613,
+          "boardSlr": 12.857,
+          "date": "2025-03-07",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 20.0,
+          "recoveredSlr": 9.125
+        },
+        {
+          "ablationGammaOne": 10.559,
+          "ablationNoNewSettle": 13.584,
+          "boardSlr": 15.93,
+          "date": "2025-03-13",
+          "deltaDepthMm": 558.8,
+          "naiveSlr": 11.579,
+          "recoveredSlr": 10.559
+        },
+        {
+          "ablationGammaOne": 9.377,
+          "ablationNoNewSettle": 18.231,
+          "boardSlr": 17.5,
+          "date": "2025-03-14",
+          "deltaDepthMm": 127.0,
+          "naiveSlr": 7.143,
+          "recoveredSlr": 9.377
+        },
+        {
+          "ablationGammaOne": 10.339,
+          "ablationNoNewSettle": 16.69,
+          "boardSlr": 20.769,
+          "date": "2025-03-15",
+          "deltaDepthMm": 152.4,
+          "naiveSlr": 5.455,
+          "recoveredSlr": 10.339
+        },
+        {
+          "ablationGammaOne": 9.15,
+          "ablationNoNewSettle": 10.535,
+          "boardSlr": 7.237,
+          "date": "2025-03-17",
+          "deltaDepthMm": -50.8,
+          "naiveSlr": null,
+          "recoveredSlr": 9.15
+        },
+        {
+          "ablationGammaOne": 9.415,
+          "ablationNoNewSettle": 15.057,
+          "boardSlr": 6.0,
+          "date": "2025-03-18",
+          "deltaDepthMm": 254.0,
+          "naiveSlr": 5.556,
+          "recoveredSlr": 9.415
+        },
+        {
+          "ablationGammaOne": 8.542,
+          "ablationNoNewSettle": 10.773,
+          "boardSlr": 2.391,
+          "date": "2025-03-20",
+          "deltaDepthMm": null,
+          "naiveSlr": null,
+          "recoveredSlr": 8.542
+        },
+        {
+          "ablationGammaOne": 8.221,
+          "ablationNoNewSettle": 9.923,
+          "boardSlr": 7.237,
+          "date": "2025-03-28",
+          "deltaDepthMm": null,
+          "naiveSlr": null,
+          "recoveredSlr": 8.221
+        },
+        {
+          "ablationGammaOne": 8.158,
+          "ablationNoNewSettle": 10.099,
+          "boardSlr": 9.179,
+          "date": "2025-03-31",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 4.286,
+          "recoveredSlr": 8.158
+        },
+        {
+          "ablationGammaOne": 8.997,
+          "ablationNoNewSettle": 13.082,
+          "boardSlr": 9.479,
+          "date": "2025-04-01",
+          "deltaDepthMm": 431.8,
+          "naiveSlr": 8.095,
+          "recoveredSlr": 8.997
+        },
+        {
+          "ablationGammaOne": 10.2,
+          "ablationNoNewSettle": 17.161,
+          "boardSlr": 9.306,
+          "date": "2025-04-02",
+          "deltaDepthMm": 355.6,
+          "naiveSlr": 9.333,
+          "recoveredSlr": 10.2
+        },
+        {
+          "ablationGammaOne": 7.599,
+          "ablationNoNewSettle": 10.028,
+          "boardSlr": 11.0,
+          "date": "2025-04-27",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 10.0,
+          "recoveredSlr": 7.599
+        },
+        {
+          "ablationGammaOne": 8.44,
+          "ablationNoNewSettle": 10.185,
+          "boardSlr": 10.417,
+          "date": "2025-05-13",
+          "deltaDepthMm": 127.0,
+          "naiveSlr": 7.143,
+          "recoveredSlr": 8.44
+        }
+      ]
+    },
+    "fitWY2025_validateWY2024": {
+      "alignment": {
+        "chosen": [
+          0,
+          0
+        ],
+        "chosenCorr": 0.7929,
+        "table": [
+          {
+            "candidate": "-1d 00:00",
+            "corr": -0.1389,
+            "n": 17
+          },
+          {
+            "candidate": "-1d 08:00",
+            "corr": 0.3372,
+            "n": 23
+          },
+          {
+            "candidate": "+0d 00:00",
+            "corr": 0.7929,
+            "n": 36
+          },
+          {
+            "candidate": "+0d 08:00",
+            "corr": 0.7127,
+            "n": 35
+          }
+        ]
+      },
+      "evaluation": {
+        "ablationGammaOne": {
+          "bias": -0.394,
+          "mae": 5.514,
+          "medianAbsErr": 4.615,
+          "n": 46
+        },
+        "ablationNoNewSettle": {
+          "bias": 7.839,
+          "mae": 10.891,
+          "medianAbsErr": 11.566,
+          "n": 45
+        },
+        "meanLogBoardOverNaive": 0.5541,
+        "nBoardDays": 46,
+        "nNaiveUndefined": 10,
+        "naive": {
+          "bias": -4.997,
+          "mae": 6.784,
+          "medianAbsErr": 3.442,
+          "n": 36
+        },
+        "recovered": {
+          "bias": -0.512,
+          "mae": 5.527,
+          "medianAbsErr": 4.602,
+          "n": 45
+        },
+        "recoveredOnNaiveSubset": {
+          "bias": -1.046,
+          "mae": 5.817,
+          "medianAbsErr": 4.575,
+          "n": 36
+        },
+        "recoveredWhereNaiveUndefined": {
+          "bias": 1.621,
+          "mae": 4.368,
+          "medianAbsErr": 5.048,
+          "n": 9
+        },
+        "trivial": {
+          "bias": -0.983,
+          "mae": 7.146,
+          "medianAbsErr": 4.126,
+          "n": 36
+        }
+      },
+      "fitDepthRmseMm": 80.56830786738286,
+      "fitWindows": 14,
+      "params": {
+        "gamma": 1.6157,
+        "logEtaNew": 27.8319,
+        "logEtaOld": 17.2231,
+        "rho0Intercept": 62.222,
+        "rho0TempSlope": 25.0
+      },
+      "refitNoOldSettle": {
+        "fitDepthRmseMm": 151.65732001634112,
+        "params": {
+          "gamma": 1.8,
+          "logEtaNew": 26.0097,
+          "logEtaOld": 17.2231,
+          "rho0Intercept": 79.056,
+          "rho0TempSlope": 25.0
+        },
+        "recovered": {
+          "bias": -1.174,
+          "mae": 5.586,
+          "medianAbsErr": 4.296,
+          "n": 45
+        },
+        "recoveredOnNaiveSubset": {
+          "bias": -1.712,
+          "mae": 5.932,
+          "medianAbsErr": 4.031,
+          "n": 36
+        }
+      },
+      "rows": [
+        {
+          "ablationGammaOne": 8.926,
+          "ablationNoNewSettle": 12.305,
+          "boardSlr": 10.101,
+          "date": "2023-10-26",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 7.5,
+          "recoveredSlr": 8.926
+        },
+        {
+          "ablationGammaOne": 7.314,
+          "ablationNoNewSettle": 9.013,
+          "boardSlr": 3.478,
+          "date": "2023-11-07",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 3.333,
+          "recoveredSlr": 7.314
+        },
+        {
+          "ablationGammaOne": 10.948,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 6.5,
+          "date": "2023-12-01",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 6.667,
+          "recoveredSlr": 10.948
+        },
+        {
+          "ablationGammaOne": 10.006,
+          "ablationNoNewSettle": 19.565,
+          "boardSlr": 8.418,
+          "date": "2023-12-02",
+          "deltaDepthMm": 0.0,
+          "naiveSlr": null,
+          "recoveredSlr": 10.006
+        },
+        {
+          "ablationGammaOne": 10.158,
+          "ablationNoNewSettle": 17.122,
+          "boardSlr": 5.556,
+          "date": "2023-12-03",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 2.5,
+          "recoveredSlr": 10.158
+        },
+        {
+          "ablationGammaOne": 10.755,
+          "ablationNoNewSettle": 14.26,
+          "boardSlr": 10.769,
+          "date": "2023-12-07",
+          "deltaDepthMm": 177.8,
+          "naiveSlr": 7.0,
+          "recoveredSlr": 10.755
+        },
+        {
+          "ablationGammaOne": 11.023,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 5.714,
+          "date": "2023-12-08",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 30.0,
+          "recoveredSlr": 11.023
+        },
+        {
+          "ablationGammaOne": 10.566,
+          "ablationNoNewSettle": 14.201,
+          "boardSlr": 7.895,
+          "date": "2023-12-20",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 1.25,
+          "recoveredSlr": 10.566
+        },
+        {
+          "ablationGammaOne": 12.169,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 11.957,
+          "date": "2024-01-03",
+          "deltaDepthMm": 203.2,
+          "naiveSlr": 11.429,
+          "recoveredSlr": 12.169
+        },
+        {
+          "ablationGammaOne": 11.084,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 3.0,
+          "date": "2024-01-04",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 2.5,
+          "recoveredSlr": 11.084
+        },
+        {
+          "ablationGammaOne": 12.553,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 15.0,
+          "date": "2024-01-07",
+          "deltaDepthMm": 304.8,
+          "naiveSlr": 13.333,
+          "recoveredSlr": 12.553
+        },
+        {
+          "ablationGammaOne": 12.548,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 7.5,
+          "date": "2024-01-10",
+          "deltaDepthMm": 0.0,
+          "naiveSlr": null,
+          "recoveredSlr": 12.548
+        },
+        {
+          "ablationGammaOne": 13.261,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 8.065,
+          "date": "2024-01-11",
+          "deltaDepthMm": 254.0,
+          "naiveSlr": 6.25,
+          "recoveredSlr": 13.261
+        },
+        {
+          "ablationGammaOne": 11.528,
+          "ablationNoNewSettle": 19.368,
+          "boardSlr": 5.755,
+          "date": "2024-01-14",
+          "deltaDepthMm": 203.2,
+          "naiveSlr": 5.714,
+          "recoveredSlr": 11.528
+        },
+        {
+          "ablationGammaOne": 9.616,
+          "ablationNoNewSettle": 11.188,
+          "boardSlr": 13.333,
+          "date": "2024-01-17",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 2.857,
+          "recoveredSlr": 9.616
+        },
+        {
+          "ablationGammaOne": 12.172,
+          "ablationNoNewSettle": 17.94,
+          "boardSlr": 12.311,
+          "date": "2024-01-21",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 4.444,
+          "recoveredSlr": 12.172
+        },
+        {
+          "ablationGammaOne": 10.831,
+          "ablationNoNewSettle": 17.585,
+          "boardSlr": 10.0,
+          "date": "2024-01-22",
+          "deltaDepthMm": 76.2,
+          "naiveSlr": 4.286,
+          "recoveredSlr": 10.831
+        },
+        {
+          "ablationGammaOne": 9.905,
+          "ablationNoNewSettle": 14.568,
+          "boardSlr": 3.846,
+          "date": "2024-01-25",
+          "deltaDepthMm": 0.0,
+          "naiveSlr": null,
+          "recoveredSlr": 9.905
+        },
+        {
+          "ablationGammaOne": 9.754,
+          "ablationNoNewSettle": 11.026,
+          "boardSlr": 27.0,
+          "date": "2024-02-01",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 8.0,
+          "recoveredSlr": 9.754
+        },
+        {
+          "ablationGammaOne": 14.153,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 13.0,
+          "date": "2024-02-03",
+          "deltaDepthMm": 279.4,
+          "naiveSlr": 10.0,
+          "recoveredSlr": 14.153
+        },
+        {
+          "ablationGammaOne": 10.459,
+          "ablationNoNewSettle": 20.752,
+          "boardSlr": 8.418,
+          "date": "2024-02-05",
+          "deltaDepthMm": 228.6,
+          "naiveSlr": 4.737,
+          "recoveredSlr": 10.459
+        },
+        {
+          "ablationGammaOne": 10.557,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 15.625,
+          "date": "2024-02-06",
+          "deltaDepthMm": 228.6,
+          "naiveSlr": 5.625,
+          "recoveredSlr": 10.557
+        },
+        {
+          "ablationGammaOne": 11.432,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 16.429,
+          "date": "2024-02-08",
+          "deltaDepthMm": 101.6,
+          "naiveSlr": 13.333,
+          "recoveredSlr": 11.432
+        },
+        {
+          "ablationGammaOne": 14.765,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 11.0,
+          "date": "2024-02-15",
+          "deltaDepthMm": 228.6,
+          "naiveSlr": 7.5,
+          "recoveredSlr": 14.765
+        },
+        {
+          "ablationGammaOne": 14.575,
+          "ablationNoNewSettle": 19.048,
+          "boardSlr": 38.0,
+          "date": "2024-02-18",
+          "deltaDepthMm": 127.0,
+          "naiveSlr": 7.143,
+          "recoveredSlr": 14.575
+        },
+        {
+          "ablationGammaOne": 10.072,
+          "ablationNoNewSettle": 18.75,
+          "boardSlr": 16.508,
+          "date": "2024-02-19",
+          "deltaDepthMm": -25.4,
+          "naiveSlr": null,
+          "recoveredSlr": 10.072
+        },
+        {
+          "ablationGammaOne": 9.663,
+          "ablationNoNewSettle": 18.438,
+          "boardSlr": 5.116,
+          "date": "2024-02-20",
+          "deltaDepthMm": 228.6,
+          "naiveSlr": 4.5,
+          "recoveredSlr": 9.663
+        },
+        {
+          "ablationGammaOne": 13.139,
+          "ablationNoNewSettle": 22.378,
+          "boardSlr": 12.222,
+          "date": "2024-02-21",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 1.25,
+          "recoveredSlr": 13.139
+        },
+        {
+          "ablationGammaOne": 14.165,
+          "ablationNoNewSettle": 18.947,
+          "boardSlr": 5.051,
+          "date": "2024-02-27",
+          "deltaDepthMm": 0.0,
+          "naiveSlr": null,
+          "recoveredSlr": 14.165
+        },
+        {
+          "ablationGammaOne": 12.611,
+          "ablationNoNewSettle": 21.681,
+          "boardSlr": 18.654,
+          "date": "2024-03-01",
+          "deltaDepthMm": 304.8,
+          "naiveSlr": 6.0,
+          "recoveredSlr": 12.611
+        },
+        {
+          "ablationGammaOne": 12.299,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 9.052,
+          "date": "2024-03-02",
+          "deltaDepthMm": 431.8,
+          "naiveSlr": 5.667,
+          "recoveredSlr": 12.299
+        },
+        {
+          "ablationGammaOne": 11.718,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 11.415,
+          "date": "2024-03-03",
+          "deltaDepthMm": 508.0,
+          "naiveSlr": 7.692,
+          "recoveredSlr": 11.718
+        },
+        {
+          "ablationGammaOne": 11.712,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 3.734,
+          "date": "2024-03-04",
+          "deltaDepthMm": 304.8,
+          "naiveSlr": 5.455,
+          "recoveredSlr": 11.712
+        },
+        {
+          "ablationGammaOne": 11.296,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 7.0,
+          "date": "2024-03-05",
+          "deltaDepthMm": -152.4,
+          "naiveSlr": null,
+          "recoveredSlr": 11.296
+        },
+        {
+          "ablationGammaOne": 14.147,
+          "ablationNoNewSettle": 20.253,
+          "boardSlr": 40.0,
+          "date": "2024-03-12",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 5.0,
+          "recoveredSlr": 14.147
+        },
+        {
+          "ablationGammaOne": 9.693,
+          "ablationNoNewSettle": 10.768,
+          "boardSlr": 16.184,
+          "date": "2024-03-23",
+          "deltaDepthMm": 203.2,
+          "naiveSlr": 13.333,
+          "recoveredSlr": 9.693
+        },
+        {
+          "ablationGammaOne": 17.36,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 6.429,
+          "date": "2024-03-24",
+          "deltaDepthMm": 127.0,
+          "naiveSlr": 5.556,
+          "recoveredSlr": 17.36
+        },
+        {
+          "ablationGammaOne": 15.016,
+          "ablationNoNewSettle": 20.035,
+          "boardSlr": 9.019,
+          "date": "2024-03-28",
+          "deltaDepthMm": 177.8,
+          "naiveSlr": 8.75,
+          "recoveredSlr": 15.016
+        },
+        {
+          "ablationGammaOne": 12.755,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 24.0,
+          "date": "2024-03-30",
+          "deltaDepthMm": 228.6,
+          "naiveSlr": 30.0,
+          "recoveredSlr": 12.755
+        },
+        {
+          "ablationGammaOne": 10.968,
+          "ablationNoNewSettle": 21.461,
+          "boardSlr": 22.0,
+          "date": "2024-03-31",
+          "deltaDepthMm": 50.8,
+          "naiveSlr": 6.667,
+          "recoveredSlr": 10.968
+        },
+        {
+          "ablationGammaOne": 6.607,
+          "ablationNoNewSettle": 6.854,
+          "boardSlr": 6.667,
+          "date": "2024-04-04",
+          "deltaDepthMm": null,
+          "naiveSlr": null,
+          "recoveredSlr": 6.607
+        },
+        {
+          "ablationGammaOne": 13.97,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 13.125,
+          "date": "2024-04-05",
+          "deltaDepthMm": null,
+          "naiveSlr": null,
+          "recoveredSlr": 13.97
+        },
+        {
+          "ablationGammaOne": 13.04,
+          "ablationNoNewSettle": 25.0,
+          "boardSlr": 9.0,
+          "date": "2024-04-06",
+          "deltaDepthMm": 25.4,
+          "naiveSlr": 2.5,
+          "recoveredSlr": 13.04
+        },
+        {
+          "ablationGammaOne": 13.912,
+          "ablationNoNewSettle": null,
+          "boardSlr": 9.0,
+          "date": "2024-04-15",
+          "deltaDepthMm": null,
+          "naiveSlr": null,
+          "recoveredSlr": null
+        },
+        {
+          "ablationGammaOne": 6.636,
+          "ablationNoNewSettle": 7.214,
+          "boardSlr": 12.5,
+          "date": "2024-04-26",
+          "deltaDepthMm": null,
+          "naiveSlr": null,
+          "recoveredSlr": 6.636
+        },
+        {
+          "ablationGammaOne": 10.065,
+          "ablationNoNewSettle": 14.068,
+          "boardSlr": 14.693,
+          "date": "2024-05-05",
+          "deltaDepthMm": 584.2,
+          "naiveSlr": 12.778,
+          "recoveredSlr": 10.065
+        }
+      ]
+    }
+  },
+  "csslPooledHeldOut": {
+    "naive": {
+      "bias": -3.589,
+      "mae": 6.123,
+      "medianAbsErr": 3.746,
+      "n": 68
+    },
+    "recovered": {
+      "bias": -0.502,
+      "mae": 4.729,
+      "medianAbsErr": 4.156,
+      "n": 83
+    },
+    "trivial": {
+      "bias": 0.536,
+      "mae": 6.857,
+      "medianAbsErr": 4.337,
+      "n": 68
+    }
+  },
+  "csslSeries": {
+    "hours": 24817,
+    "span": [
+      "2023-09-01T00:00:00",
+      "2026-07-01T00:00:00"
+    ],
+    "sweCoverage": 0.6583,
+    "sweCoverageNovApr": 0.9626
+  },
+  "finalFit": {
+    "bootstrap": {
+      "gamma": {
+        "p05": 1.0927,
+        "p50": 1.2549,
+        "p95": 1.6872
+      },
+      "logEtaNew": {
+        "p05": 23.2687,
+        "p50": 28.0,
+        "p95": 28.0
+      },
+      "logEtaOld": {
+        "p05": 16.176,
+        "p50": 16.8859,
+        "p95": 17.1367
+      },
+      "reps": 30,
+      "rho0Intercept": {
+        "p05": 46.9454,
+        "p50": 94.5606,
+        "p95": 195.9019
+      },
+      "rho0TempSlope": {
+        "p05": 20.1263,
+        "p50": 25.0,
+        "p95": 25.0
+      }
+    },
+    "fitDepthRmseMm": 138.81997076068424,
+    "kEtaSensitivity": {
+      "0.01": {
+        "fitDepthRmseMm": 143.18714777709147,
+        "params": {
+          "gamma": 1.2052,
+          "logEtaNew": 28.0,
+          "logEtaOld": 19.6623,
+          "rho0Intercept": 133.216,
+          "rho0TempSlope": 25.0
+        }
+      },
+      "0.03": {
+        "fitDepthRmseMm": 138.32562372225655,
+        "params": {
+          "gamma": 1.3505,
+          "logEtaNew": 28.0,
+          "logEtaOld": 13.4221,
+          "rho0Intercept": 92.48,
+          "rho0TempSlope": 25.0
+        }
+      }
+    },
+    "medianWindowRmseMm": 74.5,
+    "params": {
+      "gamma": 1.2874,
+      "logEtaNew": 28.0,
+      "logEtaOld": 16.8014,
+      "rho0Intercept": 105.277,
+      "rho0TempSlope": 25.0
+    },
+    "windows": 21,
+    "worstWindows": [
+      {
+        "depthRmseMm": 273.2,
+        "gainMm": 274.3,
+        "hours": 224,
+        "start": "2024-02-25T22:00:00"
+      },
+      {
+        "depthRmseMm": 267.7,
+        "gainMm": 116.8,
+        "hours": 223,
+        "start": "2024-02-16T23:00:00"
+      },
+      {
+        "depthRmseMm": 205.6,
+        "gainMm": 48.3,
+        "hours": 84,
+        "start": "2024-05-03T16:00:00"
+      },
+      {
+        "depthRmseMm": 167.9,
+        "gainMm": 38.1,
+        "hours": 91,
+        "start": "2025-01-30T17:00:00"
+      },
+      {
+        "depthRmseMm": 162.5,
+        "gainMm": 114.3,
+        "hours": 105,
+        "start": "2025-02-10T23:00:00"
+      }
+    ]
+  },
+  "researchOnly": true,
+  "stormWindows": {
+    "2024": 7,
+    "2025": 14,
+    "2026": 9
+  },
+  "transferPooled": {
+    "naive": {
+      "bias": -2.412,
+      "mae": 5.032,
+      "medianAbsErr": 3.066,
+      "n": 120
+    },
+    "recovered": {
+      "bias": -2.296,
+      "mae": 3.718,
+      "medianAbsErr": 2.99,
+      "n": 151
+    },
+    "trivial": {
+      "bias": 2.616,
+      "mae": 6.217,
+      "medianAbsErr": 4.469,
+      "n": 120
+    }
+  },
+  "transferProbe": {
+    "724:CA:SNTL vs USC00048760": {
+      "deltaElevationM": 379.5,
+      "distanceKm": 6.76,
+      "goldEventsInPool": 48,
+      "goldStation": "USC00048760",
+      "nEventsPaired": 48,
+      "naive": {
+        "bias": -1.991,
+        "mae": 4.875,
+        "medianAbsErr": 3.235,
+        "n": 46
+      },
+      "recovered": {
+        "bias": -0.761,
+        "mae": 3.226,
+        "medianAbsErr": 3.336,
+        "n": 47
+      },
+      "recoveredOnNaiveSubset": {
+        "bias": -0.684,
+        "mae": 3.202,
+        "medianAbsErr": 3.286,
+        "n": 46
+      },
+      "region": "sierra-nevada",
+      "rows": [
+        {
+          "date": "2023-12-07",
+          "naiveSlr": 8.75,
+          "observedSlr": 5.369,
+          "recoveredSlr": 9.544
+        },
+        {
+          "date": "2024-01-03",
+          "naiveSlr": 30.0,
+          "observedSlr": 11.786,
+          "recoveredSlr": 9.77
+        },
+        {
+          "date": "2024-01-07",
+          "naiveSlr": 22.0,
+          "observedSlr": 15.257,
+          "recoveredSlr": 11.528
+        },
+        {
+          "date": "2024-01-11",
+          "naiveSlr": 7.5,
+          "observedSlr": 5.884,
+          "recoveredSlr": 10.009
+        },
+        {
+          "date": "2024-01-14",
+          "naiveSlr": 6.667,
+          "observedSlr": 7.033,
+          "recoveredSlr": 8.337
+        },
+        {
+          "date": "2024-01-21",
+          "naiveSlr": 10.0,
+          "observedSlr": 9.18,
+          "recoveredSlr": 8.305
+        },
+        {
+          "date": "2024-02-02",
+          "naiveSlr": 26.667,
+          "observedSlr": 13.103,
+          "recoveredSlr": 10.259
+        },
+        {
+          "date": "2024-02-03",
+          "naiveSlr": 11.667,
+          "observedSlr": 15.532,
+          "recoveredSlr": 10.954
+        },
+        {
+          "date": "2024-02-04",
+          "naiveSlr": 1.667,
+          "observedSlr": 15.956,
+          "recoveredSlr": 15.695
+        },
+        {
+          "date": "2024-02-05",
+          "naiveSlr": 6.471,
+          "observedSlr": 8.843,
+          "recoveredSlr": 9.053
+        },
+        {
+          "date": "2024-02-15",
+          "naiveSlr": 8.0,
+          "observedSlr": 8.99,
+          "recoveredSlr": 12.225
+        },
+        {
+          "date": "2024-02-19",
+          "naiveSlr": 5.385,
+          "observedSlr": 3.609,
+          "recoveredSlr": 9.412
+        },
+        {
+          "date": "2024-03-01",
+          "naiveSlr": 6.4,
+          "observedSlr": 8.039,
+          "recoveredSlr": 12.019
+        },
+        {
+          "date": "2024-03-02",
+          "naiveSlr": 5.278,
+          "observedSlr": 12.885,
+          "recoveredSlr": 11.992
+        },
+        {
+          "date": "2024-03-03",
+          "naiveSlr": 6.667,
+          "observedSlr": 16.063,
+          "recoveredSlr": 11.523
+        },
+        {
+          "date": "2024-03-04",
+          "naiveSlr": 1.0,
+          "observedSlr": 7.495,
+          "recoveredSlr": 10.692
+        },
+        {
+          "date": "2024-03-23",
+          "naiveSlr": 13.75,
+          "observedSlr": 9.351,
+          "recoveredSlr": 8.512
+        },
+        {
+          "date": "2024-03-24",
+          "naiveSlr": 6.25,
+          "observedSlr": 16.387,
+          "recoveredSlr": 11.266
+        },
+        {
+          "date": "2024-03-30",
+          "naiveSlr": 11.111,
+          "observedSlr": 16.667,
+          "recoveredSlr": 10.347
+        },
+        {
+          "date": "2024-05-05",
+          "naiveSlr": 10.0,
+          "observedSlr": 10.855,
+          "recoveredSlr": 10.312
+        },
+        {
+          "date": "2024-12-13",
+          "naiveSlr": 13.333,
+          "observedSlr": 15.797,
+          "recoveredSlr": 10.889
+        },
+        {
+          "date": "2024-12-14",
+          "naiveSlr": 7.5,
+          "observedSlr": 11.711,
+          "recoveredSlr": 13.028
+        },
+        {
+          "date": "2024-12-27",
+          "naiveSlr": 4.444,
+          "observedSlr": 10.625,
+          "recoveredSlr": 8.049
+        },
+        {
+          "date": "2025-01-04",
+          "naiveSlr": 11.667,
+          "observedSlr": 10.382,
+          "recoveredSlr": 10.626
+        },
+        {
+          "date": "2025-02-07",
+          "naiveSlr": 3.846,
+          "observedSlr": 4.18,
+          "recoveredSlr": 8.446
+        },
+        {
+          "date": "2025-02-14",
+          "naiveSlr": 5.135,
+          "observedSlr": 7.262,
+          "recoveredSlr": 10.858
+        },
+        {
+          "date": "2025-03-06",
+          "naiveSlr": 16.667,
+          "observedSlr": 11.515,
+          "recoveredSlr": 11.214
+        },
+        {
+          "date": "2025-03-13",
+          "naiveSlr": 13.846,
+          "observedSlr": 16.091,
+          "recoveredSlr": 12.401
+        },
+        {
+          "date": "2025-03-14",
+          "naiveSlr": 7.5,
+          "observedSlr": 15.448,
+          "recoveredSlr": 10.78
+        },
+        {
+          "date": "2025-03-15",
+          "naiveSlr": 4.0,
+          "observedSlr": 15.462,
+          "recoveredSlr": 9.53
+        },
+        {
+          "date": "2025-03-17",
+          "naiveSlr": 3.333,
+          "observedSlr": 5.0,
+          "recoveredSlr": 9.837
+        },
+        {
+          "date": "2025-03-18",
+          "naiveSlr": 10.0,
+          "observedSlr": 16.667,
+          "recoveredSlr": 10.098
+        },
+        {
+          "date": "2025-03-31",
+          "naiveSlr": 6.923,
+          "observedSlr": 4.81,
+          "recoveredSlr": 9.899
+        },
+        {
+          "date": "2025-04-01",
+          "naiveSlr": 6.875,
+          "observedSlr": 9.679,
+          "recoveredSlr": 10.916
+        },
+        {
+          "date": "2025-04-02",
+          "naiveSlr": 8.182,
+          "observedSlr": 13.758,
+          "recoveredSlr": 11.675
+        },
+        {
+          "date": "2025-04-26",
+          "naiveSlr": null,
+          "observedSlr": 16.098,
+          "recoveredSlr": null
+        },
+        {
+          "date": "2025-12-25",
+          "naiveSlr": 7.391,
+          "observedSlr": 5.105,
+          "recoveredSlr": 8.036
+        },
+        {
+          "date": "2025-12-26",
+          "naiveSlr": 5.789,
+          "observedSlr": 7.387,
+          "recoveredSlr": 11.398
+        },
+        {
+          "date": "2026-01-04",
+          "naiveSlr": 6.429,
+          "observedSlr": 6.653,
+          "recoveredSlr": 9.989
+        },
+        {
+          "date": "2026-01-05",
+          "naiveSlr": 9.0,
+          "observedSlr": 17.135,
+          "recoveredSlr": 9.831
+        },
+        {
+          "date": "2026-02-11",
+          "naiveSlr": 12.5,
+          "observedSlr": 7.901,
+          "recoveredSlr": 8.156
+        },
+        {
+          "date": "2026-02-17",
+          "naiveSlr": 9.286,
+          "observedSlr": 12.374,
+          "recoveredSlr": 11.871
+        },
+        {
+          "date": "2026-02-18",
+          "naiveSlr": 10.0,
+          "observedSlr": 18.032,
+          "recoveredSlr": 10.3
+        },
+        {
+          "date": "2026-02-19",
+          "naiveSlr": 1.667,
+          "observedSlr": 18.976,
+          "recoveredSlr": 11.716
+        },
+        {
+          "date": "2026-02-20",
+          "naiveSlr": null,
+          "observedSlr": 14.076,
+          "recoveredSlr": 9.77
+        },
+        {
+          "date": "2026-04-12",
+          "naiveSlr": 11.429,
+          "observedSlr": 11.456,
+          "recoveredSlr": 12.221
+        },
+        {
+          "date": "2026-04-13",
+          "naiveSlr": 11.0,
+          "observedSlr": 13.253,
+          "recoveredSlr": 10.717
+        },
+        {
+          "date": "2026-04-22",
+          "naiveSlr": 10.0,
+          "observedSlr": 9.623,
+          "recoveredSlr": 8.863
+        }
+      ],
+      "snotel": "724:CA:SNTL",
+      "trivial": {
+        "bias": 2.744,
+        "mae": 6.249,
+        "medianAbsErr": 4.476,
+        "n": 46
+      }
+    },
+    "802:CO:SNTL vs US1COSU0008": {
+      "deltaElevationM": 115.8,
+      "distanceKm": 1.82,
+      "goldEventsInPool": 27,
+      "goldStation": "US1COSU0008",
+      "nEventsPaired": 27,
+      "naive": {
+        "bias": -4.03,
+        "mae": 5.777,
+        "medianAbsErr": 5.11,
+        "n": 20
+      },
+      "recovered": {
+        "bias": -5.142,
+        "mae": 5.63,
+        "medianAbsErr": 4.964,
+        "n": 27
+      },
+      "recoveredOnNaiveSubset": {
+        "bias": -5.389,
+        "mae": 5.812,
+        "medianAbsErr": 4.165,
+        "n": 20
+      },
+      "region": "rockies",
+      "rows": [
+        {
+          "date": "2023-10-28",
+          "naiveSlr": 10.0,
+          "observedSlr": 9.192,
+          "recoveredSlr": 6.453
+        },
+        {
+          "date": "2023-10-29",
+          "naiveSlr": 12.5,
+          "observedSlr": 18.143,
+          "recoveredSlr": 9.073
+        },
+        {
+          "date": "2023-12-01",
+          "naiveSlr": 10.0,
+          "observedSlr": 11.515,
+          "recoveredSlr": 11.689
+        },
+        {
+          "date": "2023-12-02",
+          "naiveSlr": 10.0,
+          "observedSlr": 13.913,
+          "recoveredSlr": 11.874
+        },
+        {
+          "date": "2023-12-08",
+          "naiveSlr": null,
+          "observedSlr": 17.368,
+          "recoveredSlr": 16.179
+        },
+        {
+          "date": "2023-12-09",
+          "naiveSlr": 15.0,
+          "observedSlr": 13.788,
+          "recoveredSlr": 10.793
+        },
+        {
+          "date": "2023-12-24",
+          "naiveSlr": 20.0,
+          "observedSlr": 25.333,
+          "recoveredSlr": 10.118
+        },
+        {
+          "date": "2024-01-06",
+          "naiveSlr": 10.0,
+          "observedSlr": 20.0,
+          "recoveredSlr": 12.395
+        },
+        {
+          "date": "2024-01-11",
+          "naiveSlr": 10.0,
+          "observedSlr": 10.704,
+          "recoveredSlr": 12.048
+        },
+        {
+          "date": "2024-01-15",
+          "naiveSlr": 8.0,
+          "observedSlr": 15.679,
+          "recoveredSlr": 10.751
+        },
+        {
+          "date": "2024-01-16",
+          "naiveSlr": null,
+          "observedSlr": 18.214,
+          "recoveredSlr": 11.607
+        },
+        {
+          "date": "2024-01-18",
+          "naiveSlr": 11.667,
+          "observedSlr": 20.0,
+          "recoveredSlr": 11.026
+        },
+        {
+          "date": "2024-02-03",
+          "naiveSlr": 14.0,
+          "observedSlr": 18.947,
+          "recoveredSlr": 9.833
+        },
+        {
+          "date": "2024-02-04",
+          "naiveSlr": null,
+          "observedSlr": 8.718,
+          "recoveredSlr": 11.073
+        },
+        {
+          "date": "2024-02-08",
+          "naiveSlr": 13.333,
+          "observedSlr": 15.0,
+          "recoveredSlr": 11.598
+        },
+        {
+          "date": "2024-02-17",
+          "naiveSlr": 25.0,
+          "observedSlr": 16.711,
+          "recoveredSlr": 11.083
+        },
+        {
+          "date": "2024-02-27",
+          "naiveSlr": null,
+          "observedSlr": 13.023,
+          "recoveredSlr": 7.062
+        },
+        {
+          "date": "2024-02-28",
+          "naiveSlr": 6.667,
+          "observedSlr": 9.438,
+          "recoveredSlr": 9.29
+        },
+        {
+          "date": "2024-03-03",
+          "naiveSlr": 7.5,
+          "observedSlr": 12.773,
+          "recoveredSlr": 7.809
+        },
+        {
+          "date": "2024-03-04",
+          "naiveSlr": 10.0,
+          "observedSlr": 11.875,
+          "recoveredSlr": 12.714
+        },
+        {
+          "date": "2024-03-05",
+          "naiveSlr": 5.0,
+          "observedSlr": 20.0,
+          "recoveredSlr": 10.461
+        },
+        {
+          "date": "2024-03-14",
+          "naiveSlr": 15.0,
+          "observedSlr": 9.048,
+          "recoveredSlr": 10.925
+        },
+        {
+          "date": "2024-03-25",
+          "naiveSlr": null,
+          "observedSlr": 18.539,
+          "recoveredSlr": 11.151
+        },
+        {
+          "date": "2024-03-29",
+          "naiveSlr": null,
+          "observedSlr": 15.156,
+          "recoveredSlr": 9.813
+        },
+        {
+          "date": "2024-04-06",
+          "naiveSlr": null,
+          "observedSlr": 13.421,
+          "recoveredSlr": 6.482
+        },
+        {
+          "date": "2024-04-20",
+          "naiveSlr": 10.0,
+          "observedSlr": 8.793,
+          "recoveredSlr": 6.561
+        },
+        {
+          "date": "2024-05-08",
+          "naiveSlr": 10.0,
+          "observedSlr": 33.421,
+          "recoveredSlr": 10.008
+        }
+      ],
+      "snotel": "802:CO:SNTL",
+      "trivial": {
+        "bias": 1.987,
+        "mae": 6.271,
+        "medianAbsErr": 4.648,
+        "n": 20
+      }
+    },
+    "834:CA:SNTL vs US1CANV0051": {
+      "deltaElevationM": 4.0,
+      "distanceKm": 5.6,
+      "goldEventsInPool": 54,
+      "goldStation": "US1CANV0051",
+      "nEventsPaired": 51,
+      "naive": {
+        "bias": -1.571,
+        "mae": 5.159,
+        "medianAbsErr": 2.993,
+        "n": 40
+      },
+      "recovered": {
+        "bias": -2.159,
+        "mae": 3.053,
+        "medianAbsErr": 1.996,
+        "n": 51
+      },
+      "recoveredOnNaiveSubset": {
+        "bias": -2.437,
+        "mae": 3.352,
+        "medianAbsErr": 2.13,
+        "n": 40
+      },
+      "region": "sierra-nevada",
+      "rows": [
+        {
+          "date": "2023-12-07",
+          "naiveSlr": 11.429,
+          "observedSlr": 10.273,
+          "recoveredSlr": 8.479
+        },
+        {
+          "date": "2024-01-03",
+          "naiveSlr": 2.857,
+          "observedSlr": 10.242,
+          "recoveredSlr": 6.18
+        },
+        {
+          "date": "2024-01-07",
+          "naiveSlr": 11.111,
+          "observedSlr": 11.193,
+          "recoveredSlr": 10.806
+        },
+        {
+          "date": "2024-01-11",
+          "naiveSlr": 7.5,
+          "observedSlr": 6.603,
+          "recoveredSlr": 10.456
+        },
+        {
+          "date": "2024-01-14",
+          "naiveSlr": null,
+          "observedSlr": 5.086,
+          "recoveredSlr": 6.631
+        },
+        {
+          "date": "2024-01-21",
+          "naiveSlr": 10.0,
+          "observedSlr": 7.059,
+          "recoveredSlr": 6.557
+        },
+        {
+          "date": "2024-01-22",
+          "naiveSlr": null,
+          "observedSlr": 8.421,
+          "recoveredSlr": 7.797
+        },
+        {
+          "date": "2024-02-01",
+          "naiveSlr": null,
+          "observedSlr": 9.048,
+          "recoveredSlr": 4.733
+        },
+        {
+          "date": "2024-02-03",
+          "naiveSlr": 22.5,
+          "observedSlr": 15.394,
+          "recoveredSlr": 12.542
+        },
+        {
+          "date": "2024-02-15",
+          "naiveSlr": 7.778,
+          "observedSlr": 9.432,
+          "recoveredSlr": 8.694
+        },
+        {
+          "date": "2024-02-18",
+          "naiveSlr": 5.0,
+          "observedSlr": 6.861,
+          "recoveredSlr": 6.771
+        },
+        {
+          "date": "2024-02-19",
+          "naiveSlr": 3.636,
+          "observedSlr": 6.32,
+          "recoveredSlr": 6.933
+        },
+        {
+          "date": "2024-02-20",
+          "naiveSlr": 4.0,
+          "observedSlr": 7.835,
+          "recoveredSlr": 7.435
+        },
+        {
+          "date": "2024-02-21",
+          "naiveSlr": null,
+          "observedSlr": 12.66,
+          "recoveredSlr": 9.318
+        },
+        {
+          "date": "2024-03-01",
+          "naiveSlr": 5.882,
+          "observedSlr": 6.577,
+          "recoveredSlr": 8.593
+        },
+        {
+          "date": "2024-03-02",
+          "naiveSlr": 8.214,
+          "observedSlr": 7.953,
+          "recoveredSlr": 11.751
+        },
+        {
+          "date": "2024-03-03",
+          "naiveSlr": 8.333,
+          "observedSlr": 13.292,
+          "recoveredSlr": 11.447
+        },
+        {
+          "date": "2024-03-04",
+          "naiveSlr": null,
+          "observedSlr": 9.438,
+          "recoveredSlr": 10.314
+        },
+        {
+          "date": "2024-03-23",
+          "naiveSlr": 7.143,
+          "observedSlr": 11.587,
+          "recoveredSlr": 6.539
+        },
+        {
+          "date": "2024-03-24",
+          "naiveSlr": null,
+          "observedSlr": 14.079,
+          "recoveredSlr": 14.472
+        },
+        {
+          "date": "2024-03-28",
+          "naiveSlr": 8.0,
+          "observedSlr": 8.4,
+          "recoveredSlr": 7.363
+        },
+        {
+          "date": "2024-03-30",
+          "naiveSlr": 12.222,
+          "observedSlr": 15.266,
+          "recoveredSlr": 8.627
+        },
+        {
+          "date": "2024-03-31",
+          "naiveSlr": 3.333,
+          "observedSlr": 15.421,
+          "recoveredSlr": 11.255
+        },
+        {
+          "date": "2024-05-05",
+          "naiveSlr": 10.909,
+          "observedSlr": 12.012,
+          "recoveredSlr": 8.251
+        },
+        {
+          "date": "2024-11-02",
+          "naiveSlr": 6.667,
+          "observedSlr": 7.835,
+          "recoveredSlr": 6.497
+        },
+        {
+          "date": "2024-11-23",
+          "naiveSlr": null,
+          "observedSlr": 5.933,
+          "recoveredSlr": 7.178
+        },
+        {
+          "date": "2024-12-13",
+          "naiveSlr": 13.333,
+          "observedSlr": 17.342,
+          "recoveredSlr": 12.874
+        },
+        {
+          "date": "2024-12-15",
+          "naiveSlr": 6.667,
+          "observedSlr": 8.675,
+          "recoveredSlr": 8.944
+        },
+        {
+          "date": "2025-02-04",
+          "naiveSlr": null,
+          "observedSlr": 11.091,
+          "recoveredSlr": 8.56
+        },
+        {
+          "date": "2025-02-07",
+          "naiveSlr": 2.857,
+          "observedSlr": 6.357,
+          "recoveredSlr": 6.976
+        },
+        {
+          "date": "2025-02-13",
+          "naiveSlr": null,
+          "observedSlr": 8.162,
+          "recoveredSlr": 8.612
+        },
+        {
+          "date": "2025-02-14",
+          "naiveSlr": 53.333,
+          "observedSlr": 7.216,
+          "recoveredSlr": 9.087
+        },
+        {
+          "date": "2025-02-16",
+          "naiveSlr": null,
+          "observedSlr": 13.947,
+          "recoveredSlr": 8.122
+        },
+        {
+          "date": "2025-03-13",
+          "naiveSlr": 15.556,
+          "observedSlr": 12.092,
+          "recoveredSlr": 11.63
+        },
+        {
+          "date": "2025-03-15",
+          "naiveSlr": null,
+          "observedSlr": 13.023,
+          "recoveredSlr": 12.551
+        },
+        {
+          "date": "2025-03-17",
+          "naiveSlr": 1.667,
+          "observedSlr": 7.09,
+          "recoveredSlr": 5.496
+        },
+        {
+          "date": "2025-03-18",
+          "naiveSlr": 20.0,
+          "observedSlr": 17.368,
+          "recoveredSlr": 6.888
+        },
+        {
+          "date": "2025-03-31",
+          "naiveSlr": 8.333,
+          "observedSlr": 5.616,
+          "recoveredSlr": 6.814
+        },
+        {
+          "date": "2025-04-01",
+          "naiveSlr": 10.0,
+          "observedSlr": 9.217,
+          "recoveredSlr": 10.54
+        },
+        {
+          "date": "2025-04-02",
+          "naiveSlr": 6.667,
+          "observedSlr": 13.445,
+          "recoveredSlr": 10.455
+        },
+        {
+          "date": "2025-04-26",
+          "naiveSlr": 10.0,
+          "observedSlr": 23.571,
+          "recoveredSlr": 5.501
+        },
+        {
+          "date": "2025-10-15",
+          "naiveSlr": 10.0,
+          "observedSlr": 12.459,
+          "recoveredSlr": 7.652
+        },
+        {
+          "date": "2025-11-21",
+          "naiveSlr": 10.0,
+          "observedSlr": 16.863,
+          "recoveredSlr": 7.36
+        },
+        {
+          "date": "2025-12-23",
+          "naiveSlr": 2.5,
+          "observedSlr": 4.352,
+          "recoveredSlr": 5.086
+        },
+        {
+          "date": "2026-01-04",
+          "naiveSlr": 3.75,
+          "observedSlr": 6.603,
+          "recoveredSlr": 8.599
+        },
+        {
+          "date": "2026-01-05",
+          "naiveSlr": 15.0,
+          "observedSlr": 11.727,
+          "recoveredSlr": 8.819
+        },
+        {
+          "date": "2026-01-08",
+          "naiveSlr": 6.667,
+          "observedSlr": 16.207,
+          "recoveredSlr": 12.408
+        },
+        {
+          "date": "2026-02-11",
+          "naiveSlr": 10.0,
+          "observedSlr": 9.595,
+          "recoveredSlr": 7.351
+        },
+        {
+          "date": "2026-02-16",
+          "naiveSlr": 3.333,
+          "observedSlr": 15.345,
+          "recoveredSlr": 7.967
+        },
+        {
+          "date": "2026-02-18",
+          "naiveSlr": 9.091,
+          "observedSlr": 16.846,
+          "recoveredSlr": 10.163
+        },
+        {
+          "date": "2026-02-19",
+          "naiveSlr": 6.667,
+          "observedSlr": 17.248,
+          "recoveredSlr": 11.51
+        }
+      ],
+      "snotel": "834:CA:SNTL",
+      "trivial": {
+        "bias": 3.346,
+        "mae": 6.77,
+        "medianAbsErr": 4.503,
+        "n": 40
+      }
+    },
+    "938:CO:SNTL vs US1COPK0015": {
+      "deltaElevationM": 233.5,
+      "distanceKm": 9.55,
+      "goldEventsInPool": 45,
+      "goldStation": "US1COPK0015",
+      "nEventsPaired": 29,
+      "naive": {
+        "bias": -3.887,
+        "mae": 4.121,
+        "medianAbsErr": 2.1,
+        "n": 14
+      },
+      "recovered": {
+        "bias": -2.382,
+        "mae": 3.924,
+        "medianAbsErr": 3.324,
+        "n": 26
+      },
+      "recoveredOnNaiveSubset": {
+        "bias": -2.171,
+        "mae": 3.71,
+        "medianAbsErr": 2.593,
+        "n": 14
+      },
+      "region": "rockies",
+      "rows": [
+        {
+          "date": "2023-11-24",
+          "naiveSlr": null,
+          "observedSlr": 32.195,
+          "recoveredSlr": null
+        },
+        {
+          "date": "2023-12-04",
+          "naiveSlr": null,
+          "observedSlr": 16.087,
+          "recoveredSlr": 9.708
+        },
+        {
+          "date": "2023-12-14",
+          "naiveSlr": 6.667,
+          "observedSlr": 12.703,
+          "recoveredSlr": 10.341
+        },
+        {
+          "date": "2024-01-08",
+          "naiveSlr": 10.0,
+          "observedSlr": 23.571,
+          "recoveredSlr": 10.808
+        },
+        {
+          "date": "2024-01-14",
+          "naiveSlr": null,
+          "observedSlr": 15.283,
+          "recoveredSlr": 12.737
+        },
+        {
+          "date": "2024-02-03",
+          "naiveSlr": 9.0,
+          "observedSlr": 10.867,
+          "recoveredSlr": 11.503
+        },
+        {
+          "date": "2024-03-03",
+          "naiveSlr": null,
+          "observedSlr": 14.648,
+          "recoveredSlr": 15.056
+        },
+        {
+          "date": "2024-03-09",
+          "naiveSlr": 12.5,
+          "observedSlr": 13.75,
+          "recoveredSlr": 9.199
+        },
+        {
+          "date": "2024-03-14",
+          "naiveSlr": 8.889,
+          "observedSlr": 9.505,
+          "recoveredSlr": 11.769
+        },
+        {
+          "date": "2024-03-15",
+          "naiveSlr": 11.667,
+          "observedSlr": 14.0,
+          "recoveredSlr": 12.293
+        },
+        {
+          "date": "2024-03-25",
+          "naiveSlr": 10.0,
+          "observedSlr": 16.053,
+          "recoveredSlr": 10.966
+        },
+        {
+          "date": "2024-04-16",
+          "naiveSlr": 8.571,
+          "observedSlr": 19.535,
+          "recoveredSlr": 12.871
+        },
+        {
+          "date": "2024-04-20",
+          "naiveSlr": null,
+          "observedSlr": 15.455,
+          "recoveredSlr": 8.774
+        },
+        {
+          "date": "2024-05-08",
+          "naiveSlr": 10.0,
+          "observedSlr": 12.976,
+          "recoveredSlr": 10.373
+        },
+        {
+          "date": "2024-05-10",
+          "naiveSlr": 10.0,
+          "observedSlr": 9.333,
+          "recoveredSlr": 11.915
+        },
+        {
+          "date": "2024-05-12",
+          "naiveSlr": 10.0,
+          "observedSlr": 10.867,
+          "recoveredSlr": 12.156
+        },
+        {
+          "date": "2024-09-22",
+          "naiveSlr": 4.0,
+          "observedSlr": 3.027,
+          "recoveredSlr": 7.031
+        },
+        {
+          "date": "2024-11-04",
+          "naiveSlr": null,
+          "observedSlr": 13.942,
+          "recoveredSlr": 11.243
+        },
+        {
+          "date": "2024-11-07",
+          "naiveSlr": null,
+          "observedSlr": 16.061,
+          "recoveredSlr": 14.794
+        },
+        {
+          "date": "2024-11-09",
+          "naiveSlr": 5.0,
+          "observedSlr": 13.261,
+          "recoveredSlr": 9.254
+        },
+        {
+          "date": "2024-12-26",
+          "naiveSlr": null,
+          "observedSlr": 13.261,
+          "recoveredSlr": null
+        },
+        {
+          "date": "2024-12-30",
+          "naiveSlr": 16.667,
+          "observedSlr": 17.931,
+          "recoveredSlr": 16.512
+        },
+        {
+          "date": "2025-04-01",
+          "naiveSlr": null,
+          "observedSlr": 13.659,
+          "recoveredSlr": 20.581
+        },
+        {
+          "date": "2025-04-05",
+          "naiveSlr": null,
+          "observedSlr": 16.757,
+          "recoveredSlr": null
+        },
+        {
+          "date": "2025-05-06",
+          "naiveSlr": null,
+          "observedSlr": 6.667,
+          "recoveredSlr": 8.617
+        },
+        {
+          "date": "2026-03-07",
+          "naiveSlr": null,
+          "observedSlr": 13.519,
+          "recoveredSlr": 9.426
+        },
+        {
+          "date": "2026-04-15",
+          "naiveSlr": null,
+          "observedSlr": 12.075,
+          "recoveredSlr": 8.126
+        },
+        {
+          "date": "2026-05-01",
+          "naiveSlr": null,
+          "observedSlr": 16.05,
+          "recoveredSlr": 10.004
+        },
+        {
+          "date": "2026-05-06",
+          "naiveSlr": null,
+          "observedSlr": 15.435,
+          "recoveredSlr": 8.282
+        }
+      ],
+      "snotel": "938:CO:SNTL",
+      "trivial": {
+        "bias": 1.004,
+        "mae": 4.456,
+        "medianAbsErr": 4.122,
+        "n": 14
+      }
+    }
+  }
+}
