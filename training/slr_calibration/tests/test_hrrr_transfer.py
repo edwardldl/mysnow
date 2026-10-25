@@ -179,6 +179,30 @@ class AssemblyTests(unittest.TestCase):
         for column in ("t_300", "ws_2400", "rh_1500"):
             self.assertIsNotNone(rows[0][column])
 
+    def test_build_with_tiny_memo_and_unsorted_input(self) -> None:
+        early = _event(valid=datetime(2024, 1, 15, 13, 0, tzinfo=UTC))
+        late = _event(valid=datetime(2024, 3, 15, 13, 0, tzinfo=UTC))
+        late["event_id"] = "test:2"
+        row = _points_row()
+        with TemporaryDirectory() as tmp:
+            cache_dir = Path(tmp)
+            for event in (early, late):
+                start = event["valid_time"] - timedelta(hours=24)
+                for step in range(25):
+                    instant = start + timedelta(hours=step)
+                    cycle, fxx = cycle_for_instant(instant, "conus")
+                    path = _points_cache_path(cache_dir, "conus", cycle, fxx, False)
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    payload = {"kind": "hrrr_transfer_points", "points": {event["station_id"]: row}}
+                    with gzip.open(path, "wt", encoding="utf-8") as handle:
+                        json.dump(payload, handle)
+            rows, _coverage = build_transfer_features([late, early], cache_dir, memo_maxsize=2)
+        # Input order is preserved even though processing is time-sorted,
+        # and a memo far smaller than the working set still builds ok rows
+        # (evicted files are simply re-read from disk).
+        self.assertEqual([r["event_id"] for r in rows], ["test:2", "test:1"])
+        self.assertTrue(all(r["profile_status"] == "ok" for r in rows))
+
     def test_missing_cache_marks_fetch_missing(self) -> None:
         with TemporaryDirectory() as tmp:
             rows, _coverage = build_transfer_features([_event()], Path(tmp))

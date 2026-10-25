@@ -55,7 +55,7 @@ import json
 import math
 import os
 import threading
-from collections import Counter, defaultdict
+from collections import Counter, OrderedDict, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -628,29 +628,54 @@ def assemble_event_hours(
 def build_transfer_features(
     events: list[dict[str, Any]],
     cache_dir: Path,
+    memo_maxsize: int = 300,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Per-event HRRR features for every event, with status accounting."""
-    cache_memo: dict[tuple[str, datetime, int, bool], dict[str, Any] | None] = {}
+    """Per-event HRRR features for every event, with status accounting.
+
+    Events are processed in (domain, valid_time) order so the points-cache
+    memo has temporal locality, and the memo is a bounded LRU: an earlier
+    version memoized every parsed file it touched (up to 26,185 payloads
+    of ~800 stations x 68 values each) and was OOM-killed mid-build with
+    no output.  Rows are returned in the input event order regardless of
+    processing order.
+    """
+    cache_memo: OrderedDict[
+        tuple[str, datetime, int, bool], dict[str, Any] | None
+    ] = OrderedDict()
 
     def load_points(domain: str, cycle: datetime, fxx: int, reduced: bool):
         key = (domain, cycle, fxx, reduced)
-        if key not in cache_memo:
-            cache_memo[key] = _read_points_cache(_points_cache_path(cache_dir, domain, cycle, fxx, reduced))
-        return cache_memo[key]
+        if key in cache_memo:
+            cache_memo.move_to_end(key)
+            return cache_memo[key]
+        points = _read_points_cache(
+            _points_cache_path(cache_dir, domain, cycle, fxx, reduced)
+        )
+        cache_memo[key] = points
+        while len(cache_memo) > memo_maxsize:
+            cache_memo.popitem(last=False)
+        return points
 
-    rows: list[dict[str, Any]] = []
+    rows_by_id: dict[str, dict[str, Any]] = {}
     status_counts: Counter[str] = Counter()
     region_status: dict[str, Counter[str]] = defaultdict(Counter)
     wy_status: dict[str, Counter[str]] = defaultdict(Counter)
-    for event in events:
+    ordered = sorted(
+        events,
+        key=lambda e: (station_domain(e), e["valid_time"], str(e["event_id"])),
+    )
+    for index, event in enumerate(ordered, start=1):
         hours = assemble_event_hours(event, load_points)
         row = build_event_features(event, hours, TRANSFER_SOURCE_ID)
         if not hours:
             row["profile_status"] = "fetch_missing"
-        rows.append(row)
+        rows_by_id[str(event["event_id"])] = row
         status_counts[row["profile_status"]] += 1
         region_status[event["region"]][row["profile_status"]] += 1
         wy_status[str(event["water_year"])][row["profile_status"]] += 1
+        if index % 2000 == 0 or index == len(ordered):
+            print(f"[hrrr-transfer] built {index}/{len(ordered)} events", flush=True)
+    rows = [rows_by_id[str(event["event_id"])] for event in events]
     coverage = {
         "profileSource": TRANSFER_SOURCE_ID,
         "eventsTotal": len(events),
