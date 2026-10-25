@@ -475,9 +475,18 @@ def _round(value: float | None) -> float | None:
     return round(value, 4) if value is not None else None
 
 
+ERA5_ALIGNMENT = (
+    "ERA5 (NSF NCAR AWS mirror, era5-nsf-ncar-aws): nearest 0.25 deg grid point; "
+    "24-h observation window ending at the stored valid_time"
+)
+
+
 def build_chunk_payload(
     chunk: dict[str, Any],
     hours: dict[datetime, dict[str, Any]],
+    profile_source: str = ERA5_PROFILE_SOURCE,
+    profile_model: str = "ERA5",
+    profile_alignment: str = ERA5_ALIGNMENT,
 ) -> dict[str, Any] | None:
     """Open-Meteo-shaped payload for one chunk, or None if any hour is absent."""
     fields: dict[str, list[Any]] = {name: [] for name in HOURLY_FIELDS}
@@ -503,12 +512,9 @@ def build_chunk_payload(
         day += timedelta(days=1)
     return {
         "hourly": {"time": times, **fields},
-        "profile_source": ERA5_PROFILE_SOURCE,
-        "profile_model": "ERA5",
-        "profile_alignment": (
-            "ERA5 (NSF NCAR AWS mirror, era5-nsf-ncar-aws): nearest 0.25 deg grid point; "
-            "24-h observation window ending at the stored valid_time"
-        ),
+        "profile_source": profile_source,
+        "profile_model": profile_model,
+        "profile_alignment": profile_alignment,
     }
 
 

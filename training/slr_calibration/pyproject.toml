@@ -36,6 +36,17 @@ era5 = [
   "s3fs==2026.9.0",
 ]
 
+# Year-expansion ERA5 profile fetch (slr_calibration.gold_profiles_cds):
+# Copernicus CDS queued API via the official cdsapi client (credentials
+# only from the user's own ~/.cdsapirc); NetCDF results parsed with
+# xarray over the h5netcdf backend.
+cds = [
+  "cdsapi==0.7.7",
+  "h5netcdf==1.8.1",
+  "h5py==3.16.0",
+  "xarray==2026.9.0",
+]
+
 [project.scripts]
 mysnow-slr-calibration = "slr_calibration.cli:main"
 

@@ -109,6 +109,14 @@ class SourceSpec:
 
 BEST_MATCH_SPEC = SourceSpec(PROFILE_SOURCE, "raw_cache", ARCHIVE_START)
 ERA5_SPEC = SourceSpec(ERA5_PROFILE_SOURCE, "raw_cache_era5", ERA5_COVERAGE_START, ERA5_COVERAGE_END)
+
+# Year expansion (2026-10-24): the same ECMWF ERA5 reanalysis fetched
+# through the Copernicus Climate Data Store (cds.climate.copernicus.eu)
+# with the user's own CDS API key (~/.cdsapirc, written by the user;
+# see gold_profiles_cds).  Provenance stays distinct from the NCAR
+# mirror because the retrieval route and accumulation cycles differ.
+CDS_PROFILE_SOURCE = "era5-cds"
+CDS_SPEC = SourceSpec(CDS_PROFILE_SOURCE, "raw_cache_cds", ERA5_COVERAGE_START, ERA5_COVERAGE_END)
 MIN_VALID_HOURS = 18  # of the 24 window hours, for a complete feature set
 USER_AGENT = "MySnow-SLR-research/0.1"
 
