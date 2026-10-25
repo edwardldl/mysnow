@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import threading
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -14,6 +15,7 @@ from slr_calibration.hrrr_transfer import (
     PooledRangeFetcher,
     _points_cache_path,
     _read_points_cache,
+    _write_points_cache,
     assemble_event_hours,
     build_transfer_features,
     cycle_for_instant,
@@ -216,6 +218,35 @@ class PooledFetcherTests(unittest.TestCase):
         self.assertEqual(fetcher.get("https://example.invalid/f"), b"x" * 1001)
         self.assertEqual(fetcher.head_size("https://example.invalid/f"), 1001)
 
+
+
+class PointsCacheWriteTests(unittest.TestCase):
+    def test_concurrent_writes_to_same_path_do_not_clobber_tmp(self) -> None:
+        cycle = datetime(2022, 3, 13, 6, 0, tzinfo=UTC)
+        points = {"TEST0001": _points_row()}
+        with TemporaryDirectory() as tmp:
+            cache_dir = Path(tmp)
+            path = _points_cache_path(cache_dir, "conus", cycle, 1, False)
+            errors: list[BaseException] = []
+
+            def write() -> None:
+                try:
+                    _write_points_cache(
+                        path, "conus", cycle, 1, False,
+                        "https://example.invalid/f", points,
+                    )
+                except BaseException as exc:  # noqa: BLE001 - collected below
+                    errors.append(exc)
+
+            threads = [threading.Thread(target=write) for _ in range(8)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+            self.assertEqual(errors, [])
+            self.assertEqual(_read_points_cache(path), points)
+            leftovers = [p for p in cache_dir.rglob("*") if ".tmp" in p.name]
+            self.assertEqual(leftovers, [])
 
 if __name__ == "__main__":
     unittest.main()

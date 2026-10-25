@@ -388,10 +388,20 @@ def _write_points_cache(
         "url": url,
         "points": points,
     }
-    tmp = path.with_suffix(path.suffix + ".tmp")
+    # Unique tmp name per writer: two writers of the same cache path
+    # (e.g. a resumed campaign overlapping a still-running earlier one)
+    # must not rename each other's tmp file away mid-write.
+    tmp = path.with_name(f"{path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
     with gzip.open(tmp, "wt", encoding="utf-8") as handle:
         json.dump(payload, handle, separators=(",", ":"))
-    os.replace(tmp, path)
+    try:
+        os.replace(tmp, path)
+    except FileNotFoundError:
+        # Another writer placed the file first; its content derives from
+        # the same source file and station grid, so it is interchangeable.
+        if not path.exists():
+            raise
+        tmp.unlink(missing_ok=True)
 
 
 def extract_cycle_points(
