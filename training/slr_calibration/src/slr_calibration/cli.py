@@ -660,6 +660,7 @@ def _fetch_gold_profiles_era5(args: argparse.Namespace) -> int:
         output_dir=args.output_dir,
         max_workers=args.max_workers,
         event_ids=event_ids,
+        executor=args.executor,
     )
     print(json.dumps(summary, sort_keys=True))
     return 0
@@ -1114,6 +1115,7 @@ def build_parser() -> argparse.ArgumentParser:
     gold_fetch_era5.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
     gold_fetch_era5.add_argument("--max-workers", type=int, default=6)
     gold_fetch_era5.add_argument("--event-id-file", type=Path, default=None, help="restrict the run to the event ids listed in this file (one per line); used for pilots")
+    gold_fetch_era5.add_argument("--executor", choices=("thread", "process"), default="thread", help="day-read executor: thread (default; historical behaviour) or process (worker processes -- day reads are GIL-bound in one interpreter, so process mode uses every core)")
     gold_fetch_era5.set_defaults(func=_fetch_gold_profiles_era5)
 
     gold_fetch_cds = subparsers.add_parser("fetch-gold-profiles-cds", help="year expansion: fetch ERA5 profiles via the Copernicus CDS API (source era5-cds; needs the user's ~/.cdsapirc) for screened-v2 gold events (resumable; pre-2021 days first)")

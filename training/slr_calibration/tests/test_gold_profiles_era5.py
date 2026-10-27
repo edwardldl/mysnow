@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import gzip
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from unittest import mock
 
 import h5py
 import numpy as np
@@ -23,12 +26,14 @@ from slr_calibration.gold_profiles import (
     build_event_features,
     plan_chunks,
 )
+from slr_calibration.cli import build_parser
 from slr_calibration.gold_profiles_era5 import (
     GRAVITY_M_S2,
     accumu_key,
     accumu_span_start,
     accumulation_init,
     build_chunk_payload,
+    fetch_profiles_era5,
     hourly_accumulation,
     pl_key,
     read_points,
@@ -232,6 +237,18 @@ class _StubReader:
         }
 
 
+class _ExplodingReader(_StubReader):
+    """Stub reader whose pressure-level reads always fail for one day."""
+
+    def __init__(self, bad_day: date) -> None:
+        self.bad_day = bad_day
+
+    def read_pl_day(self, day: date, variable: str, stations: list) -> dict:
+        if day == self.bad_day:
+            raise RuntimeError("boom")
+        return super().read_pl_day(day, variable, stations)
+
+
 class ReadStationDayTest(unittest.TestCase):
     def test_conversions(self) -> None:
         stations = [("TEST0001", 39.5, -105.5)]
@@ -279,6 +296,81 @@ class FrameProfileSourceTest(unittest.TestCase):
     def test_missing_column_falls_back(self) -> None:
         frame = pd.DataFrame({"other": [1, 2]})
         self.assertEqual(_frame_profile_source(frame), PROFILE_SOURCE)
+
+
+class ProcessExecutorParityTest(unittest.TestCase):
+    """Process mode must be indistinguishable from thread mode: same
+    chunk payloads, same summary.  The injected stub reader is
+    stateless and picklable, so the process path is genuinely
+    exercised (workers receive it as their day-read reader)."""
+
+    def _run(self, executor: str, reader) -> tuple[dict, dict]:
+        with tempfile.TemporaryDirectory() as tmp:
+            cache_dir = Path(tmp) / "cache"
+            summary = fetch_profiles_era5(
+                [_synthetic_event()],
+                cache_dir,
+                max_workers=2,
+                reader=reader,
+                executor=executor,
+            )
+            payloads = {}
+            for path in sorted(cache_dir.rglob("*.json.gz")):
+                with gzip.open(path, "rt", encoding="utf-8") as handle:
+                    payloads[str(path.relative_to(cache_dir))] = json.load(handle)
+            return summary, payloads
+
+    def test_process_matches_thread_outputs_and_summary(self) -> None:
+        thread_summary, thread_payloads = self._run("thread", _StubReader())
+        process_summary, process_payloads = self._run("process", _StubReader())
+        self.assertEqual(thread_summary["chunksDownloadedThisRun"], 1)
+        self.assertEqual(thread_summary, process_summary)
+        # Compare decompressed payloads, not raw .json.gz bytes: the
+        # gzip container embeds a write-time mtime in its header, so
+        # the bytes differ between ANY two runs (thread vs thread too).
+        self.assertEqual(thread_payloads, process_payloads)
+        self.assertEqual(len(process_payloads), 1)
+
+    def test_failed_day_accounting_matches(self) -> None:
+        bad_day = date(2023, 1, 15)
+        stderr = io.StringIO()
+        # Neutralise the retry backoff so the failing day costs no wall
+        # time; with the fork start method the workers inherit the
+        # patch.  Both executors must still attempt, fail and report
+        # the day identically (the message is printed by the parent).
+        with mock.patch("time.sleep", lambda *_args: None), redirect_stderr(stderr):
+            thread_summary, _ = self._run("thread", _ExplodingReader(bad_day))
+            process_summary, _ = self._run("process", _ExplodingReader(bad_day))
+        self.assertEqual(thread_summary, process_summary)
+        self.assertEqual(process_summary["daysFailed"], 1)
+        self.assertEqual(process_summary["failedDays"], ["2023-01-15"])
+        self.assertEqual(process_summary["chunksDownloadedThisRun"], 0)
+        self.assertEqual(process_summary["chunksFailedThisRun"], 1)
+        self.assertIn(
+            "day 2023-01-15 failed after retries: RuntimeError: boom",
+            stderr.getvalue(),
+        )
+
+    def test_unknown_executor_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError):
+                fetch_profiles_era5(
+                    [_synthetic_event()],
+                    Path(tmp) / "cache",
+                    reader=_StubReader(),
+                    executor="bogus",
+                )
+
+
+class Era5ExecutorCliTest(unittest.TestCase):
+    def test_executor_flag_parses_and_defaults_to_thread(self) -> None:
+        parser = build_parser()
+        args = parser.parse_args(["fetch-gold-profiles-era5"])
+        self.assertEqual(args.executor, "thread")
+        args = parser.parse_args(["fetch-gold-profiles-era5", "--executor", "process"])
+        self.assertEqual(args.executor, "process")
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parser.parse_args(["fetch-gold-profiles-era5", "--executor", "bogus"])
 
 
 if __name__ == "__main__":

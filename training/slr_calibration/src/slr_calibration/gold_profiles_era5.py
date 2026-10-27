@@ -59,11 +59,13 @@ from __future__ import annotations
 import gzip
 import json
 import math
+import multiprocessing
+import pickle
 import sys
 import threading
 import time
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -522,12 +524,63 @@ def build_chunk_payload(
 # Fetch orchestration: batch by calendar day, assemble planned chunks
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Process-pool day reads
+# ---------------------------------------------------------------------------
+
+_WORKER_READER: Era5Reader | None = None
+
+
+def _read_day_in_worker(
+    day_iso: str,
+    stations: list[tuple[str, float, float]],
+    reader: Era5Reader | None,
+) -> tuple[str, dict[str, dict[datetime, dict[str, Any]]] | None, str | None]:
+    """Read one calendar day in a worker process (process executor only).
+
+    Returns ``(day_iso, day_data, None)`` on success, or ``(day_iso,
+    None, "TypeName: message")`` after the same 3-attempt retry schedule
+    with the same backoff the threaded path uses (5 s, 20 s, 45 s).
+    Only the day read -- the GIL-bound s3fs/HDF5 work -- leaves the
+    parent process; planning, the shared store, chunk assembly/writing,
+    progress prints and the summary all stay in the parent, so process
+    mode produces exactly the threaded mode's outputs.
+
+    Reader construction: with ``reader=None`` the worker builds its own
+    Era5Reader -- one per worker process, kept in the module global
+    ``_WORKER_READER`` -- because the real reader's s3fs filesystem is
+    built lazily per thread and must never be pickled across a process
+    boundary.  An INJECTED reader (the test seam used by
+    ``fetch_profiles_era5``) is passed through as the task payload
+    instead: it must be picklable, which the parent checks up front and
+    falls back to threaded reads if not.  The stateless fakes in the
+    test suite are picklable, so the process/thread equality test runs
+    the real process path.
+    """
+    global _WORKER_READER
+    active = reader
+    if active is None:
+        if _WORKER_READER is None:
+            _WORKER_READER = Era5Reader()
+        active = _WORKER_READER
+    day = date.fromisoformat(day_iso)
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            return day_iso, read_station_day(active, day, stations), None
+        except Exception as exc:  # retried: S3 throttling / transient I/O
+            last_error = exc
+            time.sleep(5.0 * (attempt + 1) ** 2)
+    return day_iso, None, f"{type(last_error).__name__}: {last_error}"
+
+
 def fetch_profiles_era5(
     events: list[dict[str, Any]],
     cache_dir: Path,
     max_workers: int = 6,
     event_ids: set[str] | None = None,
     reader: Era5Reader | None = None,
+    executor: str = "thread",
 ) -> dict[str, Any]:
     """Download ERA5 profiles for all eligible event windows into the chunk cache.
 
@@ -539,7 +592,17 @@ def fetch_profiles_era5(
     ``event_ids`` restricts downloads to chunks containing at least one
     of the given events (chunk boundaries still come from the full
     pool, so pilot caches are identical to campaign caches).
+
+    ``executor`` selects how day reads are parallelised: ``"thread"``
+    (default; the historical behaviour -- worker threads in this
+    process sharing ``reader``) or ``"process"`` (a ProcessPoolExecutor
+    whose workers run ``_read_day_in_worker``; the parent still plans,
+    merges, assembles and writes every chunk).  The threaded reader's
+    throughput is bounded by the GIL at roughly one core; process mode
+    exists to put the decompression/extraction work on every core.
     """
+    if executor not in ("thread", "process"):
+        raise ValueError(f"executor must be 'thread' or 'process', got {executor!r}")
     chunks = plan_chunks(events, spec=ERA5_SPEC)
     if event_ids is not None:
         chunks = [c for c in chunks if event_ids.intersection(c["event_ids"])]
@@ -547,6 +610,7 @@ def fetch_profiles_era5(
     cache_dir.mkdir(parents=True, exist_ok=True)
     pending = [c for c in chunks if not _cache_valid(_chunk_path(cache_dir, c))]
     already = len(chunks) - len(pending)
+    injected_reader = reader
     reader = reader or Era5Reader()
 
     station_coords: dict[str, tuple[float, float]] = {}
@@ -565,29 +629,32 @@ def fetch_profiles_era5(
             day += timedelta(days=1)
         chunk_days[chunk["key"]] = days
 
+    day_stations: dict[date, list[tuple[str, float, float]]] = {}
+    for needed_day in day_chunks:
+        station_ids = sorted({c["station_id"] for c in pending if needed_day in chunk_days[c["key"]]})
+        day_stations[needed_day] = [(sid, *station_coords[sid]) for sid in station_ids]
+    by_key = {c["key"]: c for c in pending}
+
     store: dict[tuple[str, datetime], dict[str, Any]] = {}
     lock = threading.Lock()
     state = {"written": 0, "days_done": 0}
     failed_days: list[date] = []
 
-    def work(day: date) -> None:
-        station_ids = sorted({c["station_id"] for c in pending if day in chunk_days[c["key"]]})
-        stations = [(sid, *station_coords[sid]) for sid in station_ids]
-        day_data: dict[str, dict[datetime, dict[str, Any]]] | None = None
-        last_error: Exception | None = None
-        for attempt in range(3):
-            try:
-                day_data = read_station_day(reader, day, stations)
-                break
-            except Exception as exc:  # retried: S3 throttling / transient I/O
-                last_error = exc
-                time.sleep(5.0 * (attempt + 1) ** 2)
+    def absorb(
+        day: date,
+        day_data: dict[str, dict[datetime, dict[str, Any]]] | None,
+        error_text: str | None,
+    ) -> None:
+        """Merge one finished day read (from either executor) and write
+        any chunks it completes.  Runs in the parent under the lock, so
+        store mutation and chunk writes stay single-threaded and the
+        outputs are identical whichever executor produced the read."""
         with lock:
             if day_data is None:
                 failed_days.append(day)
                 print(
                     f"[era5] day {day.isoformat()} failed after retries: "
-                    f"{type(last_error).__name__}: {last_error}",
+                    f"{error_text}",
                     file=sys.stderr,
                 )
                 return
@@ -600,7 +667,6 @@ def fetch_profiles_era5(
                 chunk_days[chunk_key].discard(day)
                 if not chunk_days[chunk_key]:
                     completed.append(chunk_key)
-            by_key = {c["key"]: c for c in pending}
             for chunk_key in completed:
                 chunk = by_key[chunk_key]
                 station_hours = {
@@ -628,12 +694,64 @@ def fetch_profiles_era5(
                     file=sys.stderr,
                 )
 
+    def work(day: date) -> None:
+        day_data: dict[str, dict[datetime, dict[str, Any]]] | None = None
+        last_error: Exception | None = None
+        for attempt in range(3):
+            try:
+                day_data = read_station_day(reader, day, day_stations[day])
+                break
+            except Exception as exc:  # retried: S3 throttling / transient I/O
+                last_error = exc
+                time.sleep(5.0 * (attempt + 1) ** 2)
+        absorb(
+            day,
+            day_data,
+            None if day_data is not None else f"{type(last_error).__name__}: {last_error}",
+        )
+
+    # Process mode dispatches day reads to worker processes.  An
+    # injected reader may only cross the process boundary if it is
+    # picklable (the parent checks; the real Era5Reader is never
+    # injected by production callers, and workers build their own when
+    # the payload carries None).  An unpicklable injected reader falls
+    # back to threaded reads with a logged note rather than crashing.
+    use_process = executor == "process"
+    worker_reader: Era5Reader | None = None
+    if use_process and injected_reader is not None:
+        try:
+            pickle.dumps(injected_reader)
+            worker_reader = injected_reader
+        except Exception:
+            print(
+                "[era5] injected reader is not picklable; "
+                "process executor falls back to threaded day reads",
+                file=sys.stderr,
+            )
+            use_process = False
+
     days = sorted(day_chunks)
     if days:
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = [pool.submit(work, day) for day in days]
-            for future in as_completed(futures):
-                future.result()
+        if use_process:
+            context = multiprocessing.get_context("fork")
+            with ProcessPoolExecutor(max_workers=max_workers, mp_context=context) as pool:
+                futures = {
+                    pool.submit(
+                        _read_day_in_worker,
+                        day.isoformat(),
+                        day_stations[day],
+                        worker_reader,
+                    ): day
+                    for day in days
+                }
+                for future in as_completed(futures):
+                    _day_iso, day_data, error_text = future.result()
+                    absorb(futures[future], day_data, error_text)
+        else:
+            with ThreadPoolExecutor(max_workers=max_workers) as pool:
+                futures = [pool.submit(work, day) for day in days]
+                for future in as_completed(futures):
+                    future.result()
     cached_total = sum(1 for c in chunks if _cache_valid(_chunk_path(cache_dir, c)))
     return {
         "profileSource": ERA5_PROFILE_SOURCE,
@@ -655,7 +773,14 @@ def run_fetch_profiles_era5(
     output_dir: Path,
     max_workers: int = 6,
     event_ids: set[str] | None = None,
+    executor: str = "thread",
 ) -> dict[str, Any]:
     events = load_screened_events(pool_dir)
     cache_dir = output_dir / ERA5_SPEC.cache_dir_name
-    return fetch_profiles_era5(events, cache_dir, max_workers=max_workers, event_ids=event_ids)
+    return fetch_profiles_era5(
+        events,
+        cache_dir,
+        max_workers=max_workers,
+        event_ids=event_ids,
+        executor=executor,
+    )
