@@ -3,6 +3,7 @@ from __future__ import annotations
 import gzip
 import io
 import json
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stderr
@@ -26,6 +27,7 @@ from slr_calibration.gold_profiles import (
     build_event_features,
     plan_chunks,
 )
+from slr_calibration import gold_profiles_era5 as era5_module
 from slr_calibration.cli import build_parser
 from slr_calibration.gold_profiles_era5 import (
     GRAVITY_M_S2,
@@ -159,6 +161,14 @@ def _synthetic_event() -> dict:
     }
 
 
+def _second_synthetic_event() -> dict:
+    event = _synthetic_event()
+    event["event_id"] = "test:era5:2"
+    event["valid_time"] = datetime(2023, 1, 20, 7, 0, tzinfo=timezone(timedelta(hours=-6)))
+    event["observation_date"] = "2023-01-20"
+    return event
+
+
 class ChunkPayloadTest(unittest.TestCase):
     def _chunk_and_hours(self) -> tuple[dict, dict]:
         chunk = {
@@ -246,6 +256,37 @@ class _ExplodingReader(_StubReader):
     def read_pl_day(self, day: date, variable: str, stations: list) -> dict:
         if day == self.bad_day:
             raise RuntimeError("boom")
+        return super().read_pl_day(day, variable, stations)
+
+
+class _WorkerKillingReader(_StubReader):
+    """Stub reader that kills its own process outright on one day.
+
+    os._exit bypasses exceptions and cleanup entirely, so from the
+    parent's side the worker simply vanishes -- the failure mode that
+    aborted the round-1 production runs with BrokenProcessPool.
+    """
+
+    def __init__(self, kill_day: date) -> None:
+        self.kill_day = kill_day
+
+    def read_pl_day(self, day: date, variable: str, stations: list) -> dict:
+        if day == self.kill_day:
+            os._exit(42)
+        return super().read_pl_day(day, variable, stations)
+
+
+class _WorkerOnlyKillingReader(_StubReader):
+    """Kills whichever process reads in it UNLESS that process is the
+    one that constructed it: every pooled worker dies, while the
+    parent process (the threaded fallback) reads normally."""
+
+    def __init__(self) -> None:
+        self.home_pid = os.getpid()
+
+    def read_pl_day(self, day: date, variable: str, stations: list) -> dict:
+        if os.getpid() != self.home_pid:
+            os._exit(42)
         return super().read_pl_day(day, variable, stations)
 
 
@@ -360,6 +401,80 @@ class ProcessExecutorParityTest(unittest.TestCase):
                     reader=_StubReader(),
                     executor="bogus",
                 )
+
+
+class ProcessPoolResilienceTest(unittest.TestCase):
+    """A dead worker must degrade the run, not abort it: the affected
+    day is accounted failed, the pool is recreated, remaining days
+    still complete, and the summary is always produced."""
+
+    def _run(self, executor: str, reader, events: list, max_workers: int = 2) -> tuple[dict, dict]:
+        with tempfile.TemporaryDirectory() as tmp:
+            cache_dir = Path(tmp) / "cache"
+            summary = fetch_profiles_era5(
+                events,
+                cache_dir,
+                max_workers=max_workers,
+                reader=reader,
+                executor=executor,
+            )
+            payloads = {}
+            for path in sorted(cache_dir.rglob("*.json.gz")):
+                with gzip.open(path, "rt", encoding="utf-8") as handle:
+                    payloads[str(path.relative_to(cache_dir))] = json.load(handle)
+            return summary, payloads
+
+    def test_worker_death_fails_one_day_and_run_completes(self) -> None:
+        kill_day = date(2023, 1, 15)
+        # max_workers=1 serialises dispatch, so exactly the killed day
+        # is in flight when the pool breaks: deterministic accounting.
+        # The thread run over an always-raising reader defines the
+        # expected summary for "that one day failed"; the patch only
+        # neutralises the retry backoff (inherited by fork workers).
+        with mock.patch("time.sleep", lambda *_args: None):
+            process_summary, process_payloads = self._run(
+                "process", _WorkerKillingReader(kill_day), [_synthetic_event()], max_workers=1
+            )
+            thread_summary, _ = self._run(
+                "thread", _ExplodingReader(kill_day), [_synthetic_event()], max_workers=1
+            )
+        self.assertEqual(process_summary, thread_summary)
+        self.assertEqual(process_summary["daysFailed"], 1)
+        self.assertEqual(process_summary["failedDays"], ["2023-01-15"])
+        self.assertEqual(process_summary["chunksDownloadedThisRun"], 0)
+        self.assertEqual(process_summary["chunksFailedThisRun"], 1)
+        self.assertEqual(process_payloads, {})
+
+    def test_repeated_pool_breaks_fall_back_to_threaded(self) -> None:
+        events = [_synthetic_event(), _second_synthetic_event()]
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            summary, payloads = self._run(
+                "process", _WorkerOnlyKillingReader(), events, max_workers=1
+            )
+        # The first three days each kill their worker (three
+        # consecutive breaks), then the fallback reads the remaining
+        # days in-process and completes the second chunk.
+        self.assertEqual(summary["daysFailed"], 3)
+        self.assertEqual(
+            summary["failedDays"], ["2023-01-13", "2023-01-14", "2023-01-15"]
+        )
+        self.assertEqual(summary["chunksDownloadedThisRun"], 1)
+        self.assertEqual(summary["chunksFailedThisRun"], 1)
+        self.assertEqual(len(payloads), 1)
+        self.assertIn("falling back to threaded day reads", stderr.getvalue())
+
+    def test_pool_recycling_is_output_neutral(self) -> None:
+        with mock.patch.object(era5_module, "POOL_RECYCLE_DAYS", 2):
+            process_summary, process_payloads = self._run(
+                "process", _StubReader(), [_synthetic_event()]
+            )
+        thread_summary, thread_payloads = self._run(
+            "thread", _StubReader(), [_synthetic_event()]
+        )
+        self.assertEqual(thread_summary, process_summary)
+        self.assertEqual(thread_payloads, process_payloads)
+        self.assertEqual(len(process_payloads), 1)
 
 
 class Era5ExecutorCliTest(unittest.TestCase):

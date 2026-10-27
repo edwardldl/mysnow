@@ -663,7 +663,15 @@ def _fetch_gold_profiles_era5(args: argparse.Namespace) -> int:
         executor=args.executor,
     )
     print(json.dumps(summary, sort_keys=True))
-    return 0
+    # The summary always prints; the exit code carries completeness so
+    # orchestrators can gate on it (the workspace campaign loop parses
+    # the JSON and ignores the code; the AWS user-data endgame uploads
+    # its _DONE marker only on 0).  Any failed day or unwritten chunk
+    # means this run did not fetch everything it planned.
+    incomplete = summary.get("daysFailed", 0) > 0 or summary.get(
+        "chunksFailedThisRun", 0
+    ) > 0
+    return 2 if incomplete else 0
 
 
 def _fetch_gold_profiles_cds(args: argparse.Namespace) -> int:

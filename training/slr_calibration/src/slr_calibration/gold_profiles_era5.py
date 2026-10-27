@@ -65,7 +65,16 @@ import sys
 import threading
 import time
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from concurrent.futures import (
+    FIRST_COMPLETED,
+    CancelledError,
+    Future,
+    ProcessPoolExecutor,
+    ThreadPoolExecutor,
+    as_completed,
+    wait,
+)
+from concurrent.futures.process import BrokenProcessPool
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -530,6 +539,14 @@ def build_chunk_payload(
 
 _WORKER_READER: Era5Reader | None = None
 
+# Process workers accumulate RSS across day reads (s3fs/HDF5 buffers),
+# so the pool is recycled after this many absorbed day reads per
+# generation; recycling is output-neutral and only bounds memory.
+POOL_RECYCLE_DAYS = 120
+# Consecutive pool breaks with no successful day read in between after
+# which process mode abandons pools and finishes with threaded reads.
+POOL_MAX_CONSECUTIVE_BREAKS = 3
+
 
 def _read_day_in_worker(
     day_iso: str,
@@ -600,6 +617,13 @@ def fetch_profiles_era5(
     merges, assembles and writes every chunk).  The threaded reader's
     throughput is bounded by the GIL at roughly one core; process mode
     exists to put the decompression/extraction work on every core.
+    Process mode is self-healing: a worker that dies outright
+    (BrokenProcessPool) fails only the day reads in flight, the pool is
+    recreated for the remaining days, and after
+    POOL_MAX_CONSECUTIVE_BREAKS breaks in a row the rest of the run
+    falls back to threaded reads -- the summary is always produced.
+    Pools are also recycled every POOL_RECYCLE_DAYS absorbed day reads
+    to bound worker memory.
     """
     if executor not in ("thread", "process"):
         raise ValueError(f"executor must be 'thread' or 'process', got {executor!r}")
@@ -730,23 +754,150 @@ def fetch_profiles_era5(
             )
             use_process = False
 
+    def run_process_days(all_days: list[date]) -> None:
+        """Process-executor day loop: bounded in-flight window, pool
+        recycling, and pool-break self-healing.
+
+        Round-1 production runs died outright when a worker process
+        was killed (most plausibly OOM): ``future.result()`` raised
+        BrokenProcessPool and aborted the whole fetch.  Here a broken
+        pool fails only the day reads in flight at the break (counted
+        exactly like days that exhaust their retries); the pool is
+        recreated and the remaining days continue.  After
+        POOL_MAX_CONSECUTIVE_BREAKS breaks in a row with no successful
+        day in between, the rest of the run falls back to threaded day
+        reads.  Either way the caller reaches its summary.
+
+        Worker RSS grows across reads (s3fs/HDF5 buffering), so the
+        pool is also recycled after POOL_RECYCLE_DAYS absorbed day
+        reads per generation; recycling changes nothing observable --
+        same reads, same accounting, same chunk outputs.
+        """
+        context = multiprocessing.get_context("fork")
+        next_idx = 0
+        consecutive_breaks = 0
+        gen_days = 0
+        in_flight: dict[Future, date] = {}
+        pool: ProcessPoolExecutor | None = ProcessPoolExecutor(
+            max_workers=max_workers, mp_context=context
+        )
+
+        def stop_pool(drain: bool) -> None:
+            nonlocal pool
+            if pool is not None:
+                try:
+                    pool.shutdown(wait=drain, cancel_futures=not drain)
+                except Exception:
+                    pass
+                pool = None
+
+        def threaded_fallback(remaining: list[date]) -> None:
+            print(
+                f"[era5] process pool broke {POOL_MAX_CONSECUTIVE_BREAKS} "
+                "times in a row; falling back to threaded day reads for "
+                f"the remaining {len(remaining)} days",
+                file=sys.stderr,
+            )
+            with ThreadPoolExecutor(max_workers=max_workers) as tpool:
+                tfutures = [tpool.submit(work, d) for d in remaining]
+                for tfuture in as_completed(tfutures):
+                    tfuture.result()
+
+        try:
+            while next_idx < len(all_days) or in_flight:
+                broke = False
+                # Top up the in-flight window: at most max_workers day
+                # reads outstanding, and never past this generation's
+                # recycle budget.
+                while (
+                    pool is not None
+                    and len(in_flight) < max_workers
+                    and next_idx < len(all_days)
+                    and gen_days + len(in_flight) < POOL_RECYCLE_DAYS
+                ):
+                    day = all_days[next_idx]
+                    try:
+                        future = pool.submit(
+                            _read_day_in_worker,
+                            day.isoformat(),
+                            day_stations[day],
+                            worker_reader,
+                        )
+                    except (BrokenProcessPool, CancelledError):
+                        broke = True
+                        break
+                    in_flight[future] = day
+                    next_idx += 1
+                if in_flight and not broke:
+                    done, _not_done = wait(
+                        list(in_flight), return_when=FIRST_COMPLETED
+                    )
+                    for future in done:
+                        day = in_flight.pop(future)
+                        if broke:
+                            absorb(
+                                day,
+                                None,
+                                "BrokenProcessPool: process pool broke",
+                            )
+                            gen_days += 1
+                            continue
+                        try:
+                            _day_iso, day_data, error_text = future.result()
+                        except (BrokenProcessPool, CancelledError) as exc:
+                            broke = True
+                            absorb(
+                                day,
+                                None,
+                                f"{type(exc).__name__}: process pool broke",
+                            )
+                            gen_days += 1
+                            continue
+                        absorb(day, day_data, error_text)
+                        gen_days += 1
+                        if error_text is None:
+                            consecutive_breaks = 0
+                if broke:
+                    consecutive_breaks += 1
+                    for _future, day in list(in_flight.items()):
+                        absorb(
+                            day, None, "BrokenProcessPool: process pool broke"
+                        )
+                        gen_days += 1
+                    in_flight.clear()
+                    stop_pool(drain=False)
+                    if consecutive_breaks >= POOL_MAX_CONSECUTIVE_BREAKS:
+                        threaded_fallback(all_days[next_idx:])
+                        return
+                    pool = ProcessPoolExecutor(
+                        max_workers=max_workers, mp_context=context
+                    )
+                    gen_days = 0
+                    continue
+                if (
+                    not in_flight
+                    and next_idx < len(all_days)
+                    and gen_days >= POOL_RECYCLE_DAYS
+                ):
+                    # Generation budget spent: recycle into fresh
+                    # workers so per-worker RSS stays bounded.
+                    print(
+                        f"[era5] process pool recycled after {gen_days} "
+                        "days (worker memory bound)",
+                        file=sys.stderr,
+                    )
+                    stop_pool(drain=True)
+                    pool = ProcessPoolExecutor(
+                        max_workers=max_workers, mp_context=context
+                    )
+                    gen_days = 0
+        finally:
+            stop_pool(drain=False)
+
     days = sorted(day_chunks)
     if days:
         if use_process:
-            context = multiprocessing.get_context("fork")
-            with ProcessPoolExecutor(max_workers=max_workers, mp_context=context) as pool:
-                futures = {
-                    pool.submit(
-                        _read_day_in_worker,
-                        day.isoformat(),
-                        day_stations[day],
-                        worker_reader,
-                    ): day
-                    for day in days
-                }
-                for future in as_completed(futures):
-                    _day_iso, day_data, error_text = future.result()
-                    absorb(futures[future], day_data, error_text)
+            run_process_days(days)
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as pool:
                 futures = [pool.submit(work, day) for day in days]
