@@ -276,6 +276,23 @@ class _WorkerKillingReader(_StubReader):
         return super().read_pl_day(day, variable, stations)
 
 
+class _OneShotKillingReader(_StubReader):
+    """Kills its own process the first time one day is read (in any
+    process), then reads normally -- a sporadic worker death such as
+    an OOM kill, not a poison day.  The marker file is the
+    cross-process memory of the first kill."""
+
+    def __init__(self, kill_day: date, marker: Path) -> None:
+        self.kill_day = kill_day
+        self.marker = marker
+
+    def read_pl_day(self, day: date, variable: str, stations: list) -> dict:
+        if day == self.kill_day and not self.marker.exists():
+            self.marker.write_text("killed")
+            os._exit(42)
+        return super().read_pl_day(day, variable, stations)
+
+
 class _WorkerOnlyKillingReader(_StubReader):
     """Kills whichever process reads in it UNLESS that process is the
     one that constructed it: every pooled worker dies, while the
@@ -445,6 +462,28 @@ class ProcessPoolResilienceTest(unittest.TestCase):
         self.assertEqual(process_summary["chunksFailedThisRun"], 1)
         self.assertEqual(process_payloads, {})
 
+    def test_break_lost_day_is_requeued_and_completes(self) -> None:
+        kill_day = date(2023, 1, 15)
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = Path(tmp) / "killed.marker"
+            with mock.patch("time.sleep", lambda *_args: None):
+                process_summary, process_payloads = self._run(
+                    "process",
+                    _OneShotKillingReader(kill_day, marker),
+                    [_synthetic_event()],
+                    max_workers=1,
+                )
+                thread_summary, thread_payloads = self._run(
+                    "thread", _StubReader(), [_synthetic_event()], max_workers=1
+                )
+        # The day whose first read killed a worker is retried in a
+        # fresh pool and completes: nothing is counted failed and the
+        # outputs are exactly the clean run's.
+        self.assertEqual(process_summary, thread_summary)
+        self.assertEqual(process_summary["daysFailed"], 0)
+        self.assertEqual(process_summary["chunksDownloadedThisRun"], 1)
+        self.assertEqual(process_payloads, thread_payloads)
+
     def test_repeated_pool_breaks_fall_back_to_threaded(self) -> None:
         events = [_synthetic_event(), _second_synthetic_event()]
         stderr = io.StringIO()
@@ -453,15 +492,15 @@ class ProcessPoolResilienceTest(unittest.TestCase):
                 "process", _WorkerOnlyKillingReader(), events, max_workers=1
             )
         # The first three days each kill their worker (three
-        # consecutive breaks), then the fallback reads the remaining
-        # days in-process and completes the second chunk.
-        self.assertEqual(summary["daysFailed"], 3)
-        self.assertEqual(
-            summary["failedDays"], ["2023-01-13", "2023-01-14", "2023-01-15"]
-        )
-        self.assertEqual(summary["chunksDownloadedThisRun"], 1)
-        self.assertEqual(summary["chunksFailedThisRun"], 1)
-        self.assertEqual(len(payloads), 1)
+        # consecutive breaks).  Break-lost days are requeued rather
+        # than counted failed, so when the fallback engages they are
+        # read in-process along with the remaining days -- and this
+        # reader only kills pooled workers, so every day completes.
+        self.assertEqual(summary["daysFailed"], 0)
+        self.assertEqual(summary["failedDays"], [])
+        self.assertEqual(summary["chunksDownloadedThisRun"], 2)
+        self.assertEqual(summary["chunksFailedThisRun"], 0)
+        self.assertEqual(len(payloads), 2)
         self.assertIn("falling back to threaded day reads", stderr.getvalue())
 
     def test_pool_recycling_is_output_neutral(self) -> None:

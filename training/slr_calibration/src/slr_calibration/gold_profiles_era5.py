@@ -64,7 +64,7 @@ import pickle
 import sys
 import threading
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from concurrent.futures import (
     FIRST_COMPLETED,
     CancelledError,
@@ -546,6 +546,13 @@ POOL_RECYCLE_DAYS = 120
 # Consecutive pool breaks with no successful day read in between after
 # which process mode abandons pools and finishes with threaded reads.
 POOL_MAX_CONSECUTIVE_BREAKS = 3
+# A day caught in a pool break is requeued, not failed: the break
+# says something about the worker (killed, most plausibly OOM after
+# its RSS grew across reads), not about the day.  Only a day that has
+# been break-lost this many times is counted failed -- and named in
+# the summary's failedDays -- so completion accounting stays honest:
+# a clean exit still means every planned chunk is cached.
+POOL_MAX_DAY_BREAK_LOSSES = 3
 
 
 def _read_day_in_worker(
@@ -708,8 +715,32 @@ def fetch_profiles_era5(
                     json.dump(payload, handle)
                 tmp.replace(path)
                 state["written"] += 1
-                for instant in list(station_hours):
-                    store.pop((chunk["station_id"], instant), None)
+                # Drop only this chunk's own window instants.  Days
+                # are absorbed in completion order (and, in process
+                # mode, break-lost days are requeued), so the store
+                # can already hold hours of a later chunk for this
+                # station -- and still miss hours of an earlier one.
+                # Popping the whole station store here would destroy
+                # those hours and silently strand the other chunk.
+                first_day = date.fromisoformat(chunk["start"])
+                last_day = date.fromisoformat(chunk["end"])
+                window_day = first_day
+                while window_day <= last_day:
+                    for hour in range(24):
+                        store.pop(
+                            (
+                                chunk["station_id"],
+                                datetime(
+                                    window_day.year,
+                                    window_day.month,
+                                    window_day.day,
+                                    hour,
+                                    tzinfo=timezone.utc,
+                                ),
+                            ),
+                            None,
+                        )
+                    window_day += timedelta(days=1)
             done_days = state["days_done"]
             if done_days % 25 == 0:
                 print(
@@ -761,9 +792,11 @@ def fetch_profiles_era5(
         Round-1 production runs died outright when a worker process
         was killed (most plausibly OOM): ``future.result()`` raised
         BrokenProcessPool and aborted the whole fetch.  Here a broken
-        pool fails only the day reads in flight at the break (counted
-        exactly like days that exhaust their retries); the pool is
-        recreated and the remaining days continue.  After
+        pool costs only time: the day reads in flight at the break are
+        requeued for the recreated pool (a day break-lost
+        POOL_MAX_DAY_BREAK_LOSSES times is counted failed, exactly
+        like a day that exhausts its read retries, and named in
+        failedDays).  After
         POOL_MAX_CONSECUTIVE_BREAKS breaks in a row with no successful
         day in between, the rest of the run falls back to threaded day
         reads.  Either way the caller reaches its summary.
@@ -774,9 +807,10 @@ def fetch_profiles_era5(
         same reads, same accounting, same chunk outputs.
         """
         context = multiprocessing.get_context("fork")
-        next_idx = 0
+        queue: deque[date] = deque(all_days)
         consecutive_breaks = 0
         gen_days = 0
+        break_losses: dict[date, int] = {}
         in_flight: dict[Future, date] = {}
         pool: ProcessPoolExecutor | None = ProcessPoolExecutor(
             max_workers=max_workers, mp_context=context
@@ -803,8 +837,20 @@ def fetch_profiles_era5(
                 for tfuture in as_completed(tfutures):
                     tfuture.result()
 
+        def lose_day(day: date) -> None:
+            """Account one pool-break loss for an in-flight day: requeue
+            it for a fresh pool, or -- once it has been break-lost
+            POOL_MAX_DAY_BREAK_LOSSES times -- count it failed via the
+            usual absorb path so the summary names it in failedDays."""
+            losses = break_losses.get(day, 0) + 1
+            break_losses[day] = losses
+            if losses >= POOL_MAX_DAY_BREAK_LOSSES:
+                absorb(day, None, "BrokenProcessPool: process pool broke")
+            else:
+                queue.append(day)
+
         try:
-            while next_idx < len(all_days) or in_flight:
+            while queue or in_flight:
                 broke = False
                 # Top up the in-flight window: at most max_workers day
                 # reads outstanding, and never past this generation's
@@ -812,10 +858,10 @@ def fetch_profiles_era5(
                 while (
                     pool is not None
                     and len(in_flight) < max_workers
-                    and next_idx < len(all_days)
+                    and queue
                     and gen_days + len(in_flight) < POOL_RECYCLE_DAYS
                 ):
-                    day = all_days[next_idx]
+                    day = queue[0]
                     try:
                         future = pool.submit(
                             _read_day_in_worker,
@@ -826,8 +872,8 @@ def fetch_profiles_era5(
                     except (BrokenProcessPool, CancelledError):
                         broke = True
                         break
+                    queue.popleft()
                     in_flight[future] = day
-                    next_idx += 1
                 if in_flight and not broke:
                     done, _not_done = wait(
                         list(in_flight), return_when=FIRST_COMPLETED
@@ -835,23 +881,13 @@ def fetch_profiles_era5(
                     for future in done:
                         day = in_flight.pop(future)
                         if broke:
-                            absorb(
-                                day,
-                                None,
-                                "BrokenProcessPool: process pool broke",
-                            )
-                            gen_days += 1
+                            lose_day(day)
                             continue
                         try:
                             _day_iso, day_data, error_text = future.result()
-                        except (BrokenProcessPool, CancelledError) as exc:
+                        except (BrokenProcessPool, CancelledError):
                             broke = True
-                            absorb(
-                                day,
-                                None,
-                                f"{type(exc).__name__}: process pool broke",
-                            )
-                            gen_days += 1
+                            lose_day(day)
                             continue
                         absorb(day, day_data, error_text)
                         gen_days += 1
@@ -860,14 +896,11 @@ def fetch_profiles_era5(
                 if broke:
                     consecutive_breaks += 1
                     for _future, day in list(in_flight.items()):
-                        absorb(
-                            day, None, "BrokenProcessPool: process pool broke"
-                        )
-                        gen_days += 1
+                        lose_day(day)
                     in_flight.clear()
                     stop_pool(drain=False)
                     if consecutive_breaks >= POOL_MAX_CONSECUTIVE_BREAKS:
-                        threaded_fallback(all_days[next_idx:])
+                        threaded_fallback(list(queue))
                         return
                     pool = ProcessPoolExecutor(
                         max_workers=max_workers, mp_context=context
@@ -876,7 +909,7 @@ def fetch_profiles_era5(
                     continue
                 if (
                     not in_flight
-                    and next_idx < len(all_days)
+                    and queue
                     and gen_days >= POOL_RECYCLE_DAYS
                 ):
                     # Generation budget spent: recycle into fresh
