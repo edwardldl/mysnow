@@ -775,6 +775,29 @@ def _investigate_weak_labels(args: argparse.Namespace) -> int:
     return 0
 
 
+
+
+def _investigate_w0_transfer(args: argparse.Namespace) -> int:
+    from .w0_transfer import run_w0_study
+
+    results = run_w0_study(
+        screened_dir=args.screened_dir,
+        sntl_stations_json=args.sntl_stations_json,
+        cache_dir=args.cache_dir,
+        results_json_path=args.results_json,
+        report_md_path=args.report_md,
+        stage=args.stage,
+        sleep_seconds=args.sleep_seconds,
+        progress=lambda message: print(message, flush=True),
+    )
+    print(json.dumps({
+        "stage": args.stage,
+        "censusSummary": results.get("stage1Census", {}).get("summary"),
+        "verdict": results.get("stage5Verdict"),
+    }, sort_keys=True, default=str))
+    return 0
+
+
 def _investigate_observation_operator(args: argparse.Namespace) -> int:
     from .observation_operator import run_observation_operator_study
 
@@ -1102,6 +1125,16 @@ def build_parser() -> argparse.ArgumentParser:
     operator.add_argument("--sleep-seconds", type=float, default=1.5)
     operator.add_argument("--bootstrap-reps", type=int, default=30)
     operator.set_defaults(func=_investigate_observation_operator)
+
+    w0 = subparsers.add_parser("investigate-w0-transfer", help="weak-label track W0 (research): step-4 operator transfer study across the SNOTEL network via proximity-paired gold stations (research-only, no artifacts)")
+    w0.add_argument("--screened-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    w0.add_argument("--sntl-stations-json", type=Path, default=Path("data/slr-training-data/raw/snotel/stations.json"))
+    w0.add_argument("--cache-dir", type=Path, default=Path("data/hrrr-dataset/model-evaluation/operator-cache"))
+    w0.add_argument("--results-json", type=Path, default=Path("data/hrrr-dataset/model-evaluation/w0_transfer.json"))
+    w0.add_argument("--report-md", type=Path, default=Path("data/hrrr-dataset/model-evaluation/w0-transfer-report.md"))
+    w0.add_argument("--stage", choices=("census", "fetch", "score", "refit", "all"), default="all")
+    w0.add_argument("--sleep-seconds", type=float, default=1.5)
+    w0.set_defaults(func=_investigate_w0_transfer)
 
     screened = subparsers.add_parser("build-screened-labels", help="step 1: Pletcher hygiene + CoCoRaHS core-sampler screen; build the screened-v2 direct-label pool (labels only, no training)")
     screened.add_argument("--repo-root", type=Path, default=Path("."))
