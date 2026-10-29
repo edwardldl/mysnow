@@ -790,6 +790,39 @@ def _evaluate_gold_transfer_hrrr(args: argparse.Namespace) -> int:
     return 0
 
 
+def _fetch_gold_profiles_hrrr_champion(args: argparse.Namespace) -> int:
+    from .hrrr_transfer import run_fetch_champion_transfer
+
+    summary = run_fetch_champion_transfer(
+        pool_dir=args.pool_dir,
+        output_dir=args.output_dir,
+        source_output_dir=args.source_output_dir,
+        max_workers=args.max_workers,
+    )
+    print(json.dumps(summary["fetch"], sort_keys=True))
+    return 0
+
+
+def _build_gold_features_hrrr_champion(args: argparse.Namespace) -> int:
+    from .hrrr_transfer import run_build_champion_features
+
+    coverage = run_build_champion_features(
+        pool_dir=args.pool_dir,
+        output_dir=args.output_dir,
+        source_output_dir=args.source_output_dir,
+    )
+    print(json.dumps({"coveredRows": coverage["coveredRows"], "inWindowRows": coverage["inWindowRows"]}, sort_keys=True))
+    return 0
+
+
+def _evaluate_gold_transfer_hrrr_champion(args: argparse.Namespace) -> int:
+    from .hrrr_transfer import run_evaluate_champion_transfer
+
+    results = run_evaluate_champion_transfer(output_dir=args.output_dir)
+    print(json.dumps({"accounting": results["accounting"], "verdict": results["verdict"]}, sort_keys=True))
+    return 0
+
+
 def _investigate_weak_labels(args: argparse.Namespace) -> int:
     results = run_weak_label_investigation(
         events_path=args.events,
@@ -1256,6 +1289,23 @@ def build_parser() -> argparse.ArgumentParser:
     gold_transfer = subparsers.add_parser("evaluate-gold-transfer-hrrr", help="step 5: score the frozen step-2 models (RF/GBM/RF+EB/Kuchera) on HRRR features vs best-match features, same covered subset")
     gold_transfer.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
     gold_transfer.set_defaults(func=_evaluate_gold_transfer_hrrr)
+
+    champion_fetch_hrrr = subparsers.add_parser("fetch-gold-profiles-hrrr-champion", help="champion transfer: seed the HRRR points cache from step 5 and fetch profiles for era5-expanded-v2 events step 5 did not cover (resumable)")
+    champion_fetch_hrrr.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    champion_fetch_hrrr.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    champion_fetch_hrrr.add_argument("--source-output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    champion_fetch_hrrr.add_argument("--max-workers", type=int, default=10)
+    champion_fetch_hrrr.set_defaults(func=_fetch_gold_profiles_hrrr_champion)
+
+    champion_features_hrrr = subparsers.add_parser("build-gold-features-hrrr-champion", help="champion transfer: build the 27 AGL features + Kuchera baselines for the v2 build set from cached HRRR profiles and merge with reused step-5 rows")
+    champion_features_hrrr.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    champion_features_hrrr.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    champion_features_hrrr.add_argument("--source-output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    champion_features_hrrr.set_defaults(func=_build_gold_features_hrrr_champion)
+
+    champion_transfer = subparsers.add_parser("evaluate-gold-transfer-hrrr-champion", help="champion transfer: score ENS-EB (mean of RF+EB and GBM+EB, fitted on the full v2 ERA5 frame) on HRRR vs ERA5 features, same covered subset, against Kuchera on HRRR")
+    champion_transfer.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    champion_transfer.set_defaults(func=_evaluate_gold_transfer_hrrr_champion)
 
     return parser
 

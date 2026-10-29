@@ -968,3 +968,693 @@ def write_transfer_report(results: dict[str, Any], path: Path) -> None:
                  "Research only — production calibration gates untouched.")
     lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Champion transfer re-run (era5-expanded-v2): ENS-EB on HRRR profiles
+#
+# Step 5 asked whether the frozen step-2 models (trained on Open-Meteo
+# best-match profiles) survive HRRR features.  This section re-runs the
+# same feature-source transfer test for the designated champion of the
+# era5-expanded-v2 pool: ENS-EB, the mean of RF+EB and GBM+EB, each
+# fitted on the full v2 modeling frame (ERA5 profiles, source
+# ``era5-nsf-ncar-aws``) exactly as judged in the cheap-wins bundle
+# (``gold_model.RFEBModel`` / ``GBMEBModel`` with seed 0; the run
+# verifies the reconstructed inner RF / GBM reproduce the v2
+# ``rf_full.joblib`` / ``gbm_full.joblib`` artifacts).  No HRRR data
+# enters any fit; both profile sources are scored on the identical
+# covered event subset, so differences are profile-source effects, not
+# sample effects.  This is a feature-source transfer test on the same
+# events, NOT a holdout.
+#
+# HRRR features are reused from the step-5 build wherever they exist:
+# the event-id space is shared (ghcn:<station>:<date>) and an event's
+# HRRR features depend only on the event and the HRRR archive, not on
+# the training profile source.  The reuse window is the step-5 pool
+# window: v2 modeling events with valid_time at or after the earliest
+# step-2 modeling event.  Step-5 rows with a deterministic non-ok
+# status (no_baseline: the Kuchera baseline failure follows from the
+# profiles themselves) are carried verbatim; fetch_missing /
+# incomplete_profile rows are rebuilt, as are in-window v2 events
+# step 5 never attempted (the v2 pool's minute-offset recoveries and
+# other additions).  New builds run against a points cache seeded
+# from the step-5 cache (hardlinks); files needed by events at
+# stations step 5 never sampled are purged from the seed so they are
+# re-extracted with the enlarged station grid, because seeded payloads
+# only contain step-5 stations.
+# ---------------------------------------------------------------------------
+
+CHAMPION_MODELS = ("ens_eb", "rf_eb", "gbm_eb", "kuchera")
+CHAMPION_RETRY_STATUSES = ("fetch_missing", "incomplete_profile")
+
+
+def plan_champion_transfer(
+    v2_frame: Any,
+    step2_frame: Any,
+    step5_rows: Any,
+    step5_station_ids: set[str],
+) -> dict[str, Any]:
+    """Partition the v2 pool for the champion HRRR build (pure).
+
+    Frames are DataFrames with event_id / valid_time / station_id
+    columns (step5_rows also profile_status).  Returns the window
+    floor plus disjoint sorted id lists: step-5 ok rows to reuse,
+    deterministic non-ok rows to carry verbatim, rows to rebuild
+    (split into retry vs never-attempted), the union build list, and
+    the build stations step 5 never sampled (with their event ids).
+    """
+    import pandas as pd
+
+    floor = pd.to_datetime(step2_frame["valid_time"], utc=True).min()
+    v2 = v2_frame.copy()
+    v2["valid_time"] = pd.to_datetime(v2["valid_time"], utc=True)
+    in_window = v2[v2["valid_time"] >= floor]
+    status = {
+        str(event_id): str(value)
+        for event_id, value in zip(step5_rows["event_id"], step5_rows["profile_status"])
+    }
+    reused: list[str] = []
+    carried: list[str] = []
+    retry: list[str] = []
+    fresh: list[str] = []
+    for event_id in (str(value) for value in in_window["event_id"]):
+        value = status.get(event_id)
+        if value == "ok":
+            reused.append(event_id)
+        elif value in CHAMPION_RETRY_STATUSES:
+            retry.append(event_id)
+        elif value is not None:
+            carried.append(event_id)
+        else:
+            fresh.append(event_id)
+    build_ids = sorted(retry + fresh)
+    station_of = {
+        str(event_id): str(station_id)
+        for event_id, station_id in zip(in_window["event_id"], in_window["station_id"])
+    }
+    new_stations = sorted({station_of[event_id] for event_id in build_ids} - set(step5_station_ids))
+    new_station_set = set(new_stations)
+    return {
+        "windowFloor": floor.isoformat(),
+        "v2ModelingRows": int(len(v2_frame)),
+        "inWindowRows": int(len(in_window)),
+        "reusedOk": sorted(reused),
+        "carriedNonOk": sorted(carried),
+        "retry": sorted(retry),
+        "fresh": sorted(fresh),
+        "build": build_ids,
+        "newStationIds": new_stations,
+        "newStationEventIds": sorted(
+            event_id for event_id in build_ids if station_of[event_id] in new_station_set
+        ),
+        "step5StationCount": int(len(step5_station_ids)),
+    }
+
+
+def _plan_counts(plan: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: (len(value) if isinstance(value, list) else value)
+        for key, value in plan.items()
+    }
+
+
+def seed_champion_cache(source_cache_dir: Path, cache_dir: Path) -> dict[str, int]:
+    """Seed the champion points cache from the step-5 cache.
+
+    Hardlinks where possible (copies otherwise).  Grid-index files
+    are not carried over: they are keyed to the step-5 station set
+    and are rebuilt for the champion station set on first fetch.
+    """
+    import shutil
+
+    stats = {"linked": 0, "copied": 0, "skippedExisting": 0}
+    if not source_cache_dir.exists():
+        return stats
+    for src in sorted(source_cache_dir.rglob("*")):
+        if not src.is_file() or src.name.startswith("grid_indices_"):
+            continue
+        dest = cache_dir / src.relative_to(source_cache_dir)
+        if dest.exists():
+            stats["skippedExisting"] += 1
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.link(src, dest)
+            stats["linked"] += 1
+        except OSError:
+            shutil.copy2(src, dest)
+            stats["copied"] += 1
+    return stats
+
+
+def purge_new_station_files(cache_dir: Path, events: list[dict[str, Any]]) -> int:
+    """Delete seeded cache files the given events need.
+
+    Seeded payloads only contain step-5 stations, so any file a
+    new-station event depends on must be re-extracted with the
+    enlarged station grid; deleting it here makes the fetch driver
+    download it again instead of trusting the seeded copy.
+    """
+    full, acc_prev = plan_transfer_files(events)
+    keys: list[tuple[str, datetime, int, bool]] = [
+        (domain, cycle, fxx, False) for (domain, cycle, fxx) in full
+    ]
+    keys += [
+        (domain, cycle, fxx, True)
+        for (domain, cycle, fxx) in acc_prev
+        if (domain, cycle, fxx) not in full
+    ]
+    removed = 0
+    for domain, cycle, fxx, reduced in keys:
+        path = _points_cache_path(cache_dir, domain, cycle, fxx, reduced)
+        if path.exists():
+            path.unlink()
+            removed += 1
+    return removed
+
+
+def merge_champion_rows(
+    ordered_ids: list[str],
+    reused_records: list[dict[str, Any]],
+    new_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Merge reused step-5 rows and newly built rows in a fixed order."""
+    by_id: dict[str, dict[str, Any]] = {}
+    for row in list(reused_records) + list(new_rows):
+        event_id = str(row["event_id"])
+        if event_id in by_id:
+            raise ValueError(f"duplicate transfer row for {event_id}")
+        by_id[event_id] = row
+    missing = [event_id for event_id in ordered_ids if event_id not in by_id]
+    if missing:
+        raise ValueError(
+            f"{len(missing)} in-window events have no transfer row (first: {missing[0]})"
+        )
+    return [by_id[event_id] for event_id in ordered_ids]
+
+
+def feature_parity(era5_frame: Any, hrrr_frame: Any) -> list[dict[str, Any]]:
+    """Paired per-feature means on the covered subset (same events)."""
+    import numpy as np
+
+    from .gold_profiles import FEATURE_COLUMNS
+
+    rows: list[dict[str, Any]] = []
+    for column in list(FEATURE_COLUMNS) + ["baseline_slr"]:
+        era5_values = era5_frame[column].to_numpy(dtype=float)
+        hrrr_values = hrrr_frame[column].to_numpy(dtype=float)
+        rows.append({
+            "feature": column,
+            "era5Mean": round(float(np.mean(era5_values)), 4),
+            "hrrrMean": round(float(np.mean(hrrr_values)), 4),
+            "meanDiffHrrrMinusEra5": round(float(np.mean(hrrr_values - era5_values)), 4),
+        })
+    return rows
+
+
+def champion_verdict(metrics: dict[str, Any]) -> dict[str, Any]:
+    """Pre-declared verdict for the champion transfer check (pure).
+
+    The champion transfers iff ENS-EB on HRRR beats Kuchera on HRRR
+    overall AND in at least 5 of 6 regions.  The transfer cost
+    (ENS-EB HRRR minus ENS-EB ERA5, same events) is reported plainly
+    whatever it is, as are the step-5 watch items.
+    """
+    ens_hrrr = metrics["hrrr"]["ens_eb"]
+    ens_era5 = metrics["era5"]["ens_eb"]
+    rf_hrrr = metrics["hrrr"]["rf_eb"]
+    kuchera_hrrr = metrics["hrrr"]["kuchera"]
+    regions = sorted(ens_hrrr["perRegion"])
+    region_wins = {
+        region: ens_hrrr["perRegion"][region]["mae"] < kuchera_hrrr["perRegion"][region]["mae"]
+        for region in regions
+    }
+    wins = int(sum(region_wins.values()))
+    beats_overall = ens_hrrr["overall"]["mae"] < kuchera_hrrr["overall"]["mae"]
+    return {
+        "ensEbBeatsKucheraOverall": bool(beats_overall),
+        "regionsWonVsKuchera": wins,
+        "regionsTotal": len(regions),
+        "regionWinsVsKuchera": region_wins,
+        "transfers": bool(beats_overall and wins >= 5),
+        "transferCostMae": round(ens_hrrr["overall"]["mae"] - ens_era5["overall"]["mae"], 4),
+        "transferCostByRegion": {
+            region: round(
+                ens_hrrr["perRegion"][region]["mae"] - ens_era5["perRegion"][region]["mae"], 4
+            )
+            for region in regions
+        },
+        "ensEbBeatsRfEbOnHrrr": bool(ens_hrrr["overall"]["mae"] < rf_hrrr["overall"]["mae"]),
+        "ensEbVsRfEbOnHrrrByRegion": {
+            region: bool(ens_hrrr["perRegion"][region]["mae"] < rf_hrrr["perRegion"][region]["mae"])
+            for region in regions
+        },
+        "watchItems": {
+            "alaskaBiasEnsEbHrrr": ens_hrrr["perRegion"]["alaska"]["bias"],
+            "alaskaBiasRfEbHrrr": rf_hrrr["perRegion"]["alaska"]["bias"],
+            "alaskaBiasEnsEbEra5": ens_era5["perRegion"]["alaska"]["bias"],
+            "tailLowMaeEnsEbHrrr": ens_hrrr["tailLow_slr_lt_5"]["mae"],
+            "tailLowMaeRfEbHrrr": rf_hrrr["tailLow_slr_lt_5"]["mae"],
+            "tailLowMaeKucheraHrrr": kuchera_hrrr["tailLow_slr_lt_5"]["mae"],
+            "tailLowEnsEbBeatsKuchera": bool(
+                ens_hrrr["tailLow_slr_lt_5"]["mae"] < kuchera_hrrr["tailLow_slr_lt_5"]["mae"]
+            ),
+        },
+    }
+
+
+def _champion_context(
+    pool_dir: Path, output_dir: Path, source_output_dir: Path
+) -> dict[str, Any]:
+    import pandas as pd
+
+    v2_frame, _v2_acc = load_modeling_frame(output_dir / "features.parquet")
+    step2_frame, _s2_acc = load_modeling_frame(source_output_dir / "features.parquet")
+    step5_rows = pd.read_parquet(transfer_dir(source_output_dir) / "features_hrrr.parquet")
+    screened = load_screened_events(pool_dir)
+    v2_ids = {str(value) for value in v2_frame["event_id"]}
+    step2_ids = {str(value) for value in step2_frame["event_id"]}
+    events_by_id = {e["event_id"]: e for e in screened if e["event_id"] in v2_ids}
+    step5_station_ids = {e["station_id"] for e in screened if e["event_id"] in step2_ids}
+    plan = plan_champion_transfer(v2_frame, step2_frame, step5_rows, step5_station_ids)
+    floor = datetime.fromisoformat(plan["windowFloor"])
+    ordered_ids: list[str] = []
+    for event in screened:
+        if event["event_id"] not in v2_ids:
+            continue
+        valid_time = event["valid_time"]
+        if valid_time.tzinfo is None:
+            valid_time = valid_time.replace(tzinfo=timezone.utc)
+        if valid_time >= floor:
+            ordered_ids.append(event["event_id"])
+    return {
+        "plan": plan,
+        "floor": floor,
+        "v2_frame": v2_frame,
+        "step5_rows": step5_rows,
+        "events_by_id": events_by_id,
+        "ordered_ids": ordered_ids,
+    }
+
+
+def run_fetch_champion_transfer(
+    pool_dir: Path,
+    output_dir: Path,
+    source_output_dir: Path,
+    max_workers: int = 10,
+) -> dict[str, Any]:
+    """Seed the champion cache from step 5 and fetch what is missing."""
+    ctx = _champion_context(pool_dir, output_dir, source_output_dir)
+    plan = ctx["plan"]
+    out = transfer_dir(output_dir)
+    cache_dir = out / "raw_cache_hrrr"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    seed = seed_champion_cache(
+        transfer_dir(source_output_dir) / "raw_cache_hrrr", cache_dir
+    )
+    new_station_events = [ctx["events_by_id"][event_id] for event_id in plan["newStationEventIds"]]
+    purged = purge_new_station_files(cache_dir, new_station_events) if new_station_events else 0
+    build_events = [ctx["events_by_id"][event_id] for event_id in plan["build"]]
+    fetcher = PooledRangeFetcher()
+    summary = fetch_transfer_files(build_events, cache_dir, fetcher, max_workers=max_workers)
+    result = {
+        "plan": _plan_counts(plan),
+        "seed": seed,
+        "purgedForNewStations": purged,
+        "fetch": summary,
+    }
+    (out / "fetch_summary_champion.json").write_text(
+        json.dumps(result, indent=2), encoding="utf-8"
+    )
+    return result
+
+
+def _has_baseline(row: dict[str, Any]) -> bool:
+    value = row.get("baseline_slr")
+    return value is not None and not (isinstance(value, float) and math.isnan(value))
+
+
+def champion_coverage(
+    rows: list[dict[str, Any]], v2_frame: Any, floor: datetime
+) -> dict[str, Any]:
+    """Coverage accounting for the merged champion HRRR table."""
+    import pandas as pd
+
+    v2 = v2_frame.copy()
+    v2["valid_time"] = pd.to_datetime(v2["valid_time"], utc=True)
+    floor_ts = pd.Timestamp(floor)
+    if floor_ts.tzinfo is None:
+        floor_ts = floor_ts.tz_localize("UTC")
+    in_window = v2[v2["valid_time"] >= floor_ts]
+    covered_ids = {
+        str(row["event_id"]) for row in rows if row["profile_status"] == "ok" and _has_baseline(row)
+    }
+    by_region: dict[str, Any] = {}
+    for region in sorted(str(value) for value in v2["region"].unique()):
+        region_rows = [row for row in rows if row["region"] == region]
+        by_region[region] = {
+            "v2ModelingRows": int((v2["region"] == region).sum()),
+            "inWindowRows": int((in_window["region"] == region).sum()),
+            "coveredRows": int(sum(1 for row in region_rows if str(row["event_id"]) in covered_ids)),
+            "statusCounts": dict(Counter(row["profile_status"] for row in region_rows)),
+        }
+    return {
+        "profileSource": TRANSFER_SOURCE_ID,
+        "v2ModelingRows": int(len(v2)),
+        "inWindowRows": int(len(in_window)),
+        "coveredRows": len(covered_ids),
+        "statusCounts": dict(Counter(row["profile_status"] for row in rows)),
+        "byRegion": by_region,
+    }
+
+
+def run_build_champion_features(
+    pool_dir: Path,
+    output_dir: Path,
+    source_output_dir: Path,
+) -> dict[str, Any]:
+    """Build HRRR features for the champion build set and merge with step 5."""
+    from .gold_profiles import write_features_parquet
+
+    ctx = _champion_context(pool_dir, output_dir, source_output_dir)
+    plan = ctx["plan"]
+    out = transfer_dir(output_dir)
+    cache_dir = out / "raw_cache_hrrr"
+    build_events = [ctx["events_by_id"][event_id] for event_id in plan["build"]]
+    new_rows, _new_coverage = build_transfer_features(build_events, cache_dir)
+    keep = set(plan["reusedOk"]) | set(plan["carriedNonOk"])
+    step5 = ctx["step5_rows"]
+    reused_records = step5[step5["event_id"].astype(str).isin(keep)].to_dict("records")
+    rows = merge_champion_rows(ctx["ordered_ids"], reused_records, new_rows)
+    write_features_parquet(rows, out / "features_hrrr.parquet")
+    coverage = champion_coverage(rows, ctx["v2_frame"], ctx["floor"])
+    coverage["reuse"] = _plan_counts(plan)
+    (out / "feature_coverage_hrrr.json").write_text(
+        json.dumps(coverage, indent=2), encoding="utf-8"
+    )
+    return coverage
+
+
+# ---------------------------------------------------------------------------
+# Champion transfer evaluation
+# ---------------------------------------------------------------------------
+
+def _champion_predictions(frame: Any, fitted: dict[str, Any]) -> dict[str, Any]:
+    import numpy as np
+
+    rf_pred = fitted["rf_eb"].predict(frame)
+    gbm_pred = fitted["gbm_eb"].predict(frame)
+    return {
+        "ens_eb": (rf_pred + gbm_pred) / 2.0,
+        "rf_eb": rf_pred,
+        "gbm_eb": gbm_pred,
+        "kuchera": frame["baseline_slr"].to_numpy(),
+    }
+
+
+def run_evaluate_champion_transfer(output_dir: Path) -> dict[str, Any]:
+    import joblib
+    import numpy as np
+    import pandas as pd
+
+    from .gold_model import GBMEBModel
+    from .gold_profiles import FEATURE_COLUMNS
+
+    out = transfer_dir(output_dir)
+    era5_frame, accounting = load_modeling_frame(output_dir / "features.parquet")
+    hrrr_all = pd.read_parquet(out / "features_hrrr.parquet")
+    hrrr_frame = hrrr_all[
+        (hrrr_all["profile_status"] == "ok") & hrrr_all["baseline_slr"].notna()
+    ].copy().reset_index(drop=True)
+    covered_ids = {str(value) for value in hrrr_frame["event_id"]}
+    era5_subset = era5_frame[era5_frame["event_id"].astype(str).isin(covered_ids)].copy()
+    era5_subset = era5_subset.reset_index(drop=True)
+    hrrr_subset = hrrr_frame.set_index("event_id").loc[era5_subset["event_id"]].reset_index(drop=True)
+
+    # The champion, fitted on the full v2 ERA5 modeling frame exactly
+    # as judged (seed 0).  Verify the reconstructed inner models
+    # reproduce the v2 full-pool artifacts before trusting them.
+    rf_eb = RFEBModel(seed=0).fit(era5_frame)
+    gbm_eb = GBMEBModel(seed=0).fit(era5_frame)
+    features = era5_frame[list(FEATURE_COLUMNS)].to_numpy()
+    rf_diff = float(np.max(np.abs(
+        rf_eb.rf.predict(features)
+        - joblib.load(output_dir / "rf_full.joblib").predict(features)
+    )))
+    gbm_diff = float(np.max(np.abs(
+        gbm_eb.gbm.predict(features)
+        - joblib.load(output_dir / "gbm_full.joblib").predict(features)
+    )))
+    fitted = {"rf_eb": rf_eb, "gbm_eb": gbm_eb}
+
+    metrics: dict[str, Any] = {}
+    for source, frame in (("era5", era5_subset), ("hrrr", hrrr_subset)):
+        predictions = _champion_predictions(frame, fitted)
+        metrics[source] = {}
+        for model_name in CHAMPION_MODELS:
+            entry = evaluate_predictions(frame, predictions[model_name])
+            entry["byWaterYear"] = _season_metrics(frame, predictions[model_name])
+            metrics[source][model_name] = entry
+
+    coverage_path = out / "feature_coverage_hrrr.json"
+    build_coverage = (
+        json.loads(coverage_path.read_text(encoding="utf-8")) if coverage_path.exists() else None
+    )
+    results: dict[str, Any] = {
+        "provenance": {
+            "trainingProfileSource": "era5-nsf-ncar-aws",
+            "trainingProfiles": "ERA5 via the NSF NCAR AWS mirror (ds633.0), "
+                                "era5-expanded-v2 feature build",
+            "transferProfileSource": TRANSFER_SOURCE_ID,
+            "transferProduct": "NOAA HRRR wrfprs GRIB2, bucket noaa-hrrr-bdp-pds",
+            "cycleConvention": (
+                "per window instant t: latest cycle initialized at or before t-1h, "
+                "forecast hour valid at t (CONUS hourly cycles -> f01 uniform; "
+                "Alaska 3-hourly cycles -> f01-f03)"
+            ),
+            "champion": "ENS-EB = mean of RF+EB and GBM+EB predictions; each component "
+                        "is gold_model.RFEBModel / GBMEBModel (seed 0) fitted on the full "
+                        "v2 ERA5 modeling frame; no HRRR data in any fit",
+            "framing": "feature-source transfer test on the same events (not a holdout): "
+                       "identical covered subset scored with ERA5 vs HRRR features",
+            "rfEbInnerRfMaxAbsDiffVsRfFull": rf_diff,
+            "gbmEbInnerGbmMaxAbsDiffVsGbmFull": gbm_diff,
+        },
+        "accounting": {
+            "era5ModelingRows": int(len(era5_frame)),
+            "coveredRows": int(len(hrrr_subset)),
+            "coveredByRegion": {
+                str(k): int(v) for k, v in hrrr_subset["region"].value_counts().items()
+            },
+            "era5ByRegion": accounting["modelingByRegion"],
+            "buildCoverage": build_coverage,
+        },
+        "metrics": metrics,
+        "featureParity": feature_parity(era5_subset, hrrr_subset),
+        "verdict": champion_verdict(metrics),
+    }
+    (out / "transfer_results.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    write_champion_transfer_report(results, out / "TRANSFER_REPORT.md")
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Champion transfer report
+# ---------------------------------------------------------------------------
+
+def write_champion_transfer_report(results: dict[str, Any], path: Path) -> None:
+    prov = results["provenance"]
+    acc = results["accounting"]
+    metrics = results["metrics"]
+    verdict = results["verdict"]
+    watch = verdict["watchItems"]
+    build = acc.get("buildCoverage") or {}
+    reuse = build.get("reuse") or {}
+    lines: list[str] = []
+    lines.append("# HRRR transfer check — champion ENS-EB (era5-expanded-v2)")
+    lines.append("")
+    lines.append("## Provenance — read first")
+    lines.append("")
+    lines.append(
+        "**Training profiles: ERA5 (`era5-nsf-ncar-aws`)** — ECMWF ERA5 via the NSF NCAR "
+        "AWS mirror (RDA ds633.0), the era5-expanded-v2 feature build. **Transfer profiles: "
+        "NOAA HRRR `wrfprs` GRIB2** from the AWS bucket `noaa-hrrr-bdp-pds` (HRRR v4 era "
+        "throughout the covered window). Cycle convention: for each hourly instant *t* of "
+        "an event's 24-h observation window, the latest cycle initialized at or before "
+        "*t* − 1 h at the forecast hour valid at *t* — CONUS hourly cycles give a uniform "
+        "f01 (1-h lead); Alaska's 3-hourly cycles give f01–f03. The 27 AGL features and "
+        "the Kuchera baseline are built by the identical code "
+        "(`gold_profiles.build_event_features`) for both sources; the snowfall field "
+        "(HRRR ASNOW) feeds only the Kuchera baseline's interval weighting and never the "
+        "27 model features, exactly as in step 5."
+    )
+    lines.append("")
+    lines.append(
+        "**Champion: ENS-EB** — the simple average of RF+EB and GBM+EB, each fitted on "
+        "the full v2 ERA5 modeling frame with the judged construction "
+        "(`RFEBModel` / `GBMEBModel`, seed 0; reconstructed inner RF vs `rf_full.joblib` "
+        f"max abs prediction difference {prov['rfEbInnerRfMaxAbsDiffVsRfFull']:.4g}; inner "
+        f"GBM vs `gbm_full.joblib` {prov['gbmEbInnerGbmMaxAbsDiffVsGbmFull']:.4g}). No HRRR "
+        "data enters any fit. **Framing: this is a feature-source transfer test on the "
+        "same events, not a holdout** — the identical covered subset is scored with ERA5 "
+        "vs HRRR features, so differences are profile-source effects, not sample effects."
+    )
+    lines.append("")
+    lines.append("## Coverage")
+    lines.append("")
+    lines.append(
+        f"HRRR features complete (status ok, Kuchera baseline computable) for "
+        f"**{acc['coveredRows']}** of {build.get('inWindowRows', '?')} v2 modeling events "
+        f"in the step-5 window (valid_time at or after {reuse.get('windowFloor', '?')}) "
+        f"and of {acc['era5ModelingRows']} v2 modeling events overall (the rest predate "
+        "the window). Reuse accounting: "
+        f"{reuse.get('reusedOk', '?')} step-5 ok rows reused verbatim, "
+        f"{reuse.get('carriedNonOk', '?')} deterministic no-baseline rows carried, "
+        f"{reuse.get('build', '?')} events rebuilt "
+        f"({reuse.get('fresh', '?')} never attempted by step 5, "
+        f"{reuse.get('retry', '?')} retried after a step-5 fetch/incomplete failure). "
+        "HRRR build status counts (merged table): "
+        + ", ".join(f"{k}={v}" for k, v in sorted((build.get("statusCounts") or {}).items()))
+        + "."
+    )
+    lines.append("")
+    lines.append("| Region | covered | in-window v2 rows | all v2 rows |")
+    lines.append("|---|---:|---:|---:|")
+    for region, entry in sorted((build.get("byRegion") or {}).items()):
+        lines.append(
+            f"| {region} | {entry['coveredRows']} | {entry['inWindowRows']} | "
+            f"{entry['v2ModelingRows']} |"
+        )
+    lines.append("")
+    lines.append("## Headline — same covered subset, ERA5 vs HRRR profiles (MAE)")
+    lines.append("")
+    lines.append("| Model | ERA5 MAE | HRRR MAE | Δ (HRRR − ERA5) | ERA5 bias | HRRR bias | HRRR RMSE | HRRR tail>20 MAE (n) | HRRR tail<5 MAE (n) |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+    for model in CHAMPION_MODELS:
+        era5 = metrics["era5"][model]["overall"]
+        hrrr = metrics["hrrr"][model]["overall"]
+        tail_h = metrics["hrrr"][model]["tailHigh_slr_gt_20"]
+        tail_l = metrics["hrrr"][model]["tailLow_slr_lt_5"]
+        lines.append(
+            f"| {model} | {era5['mae']:.3f} | {hrrr['mae']:.3f} | {hrrr['mae'] - era5['mae']:+.3f} | "
+            f"{_fmt(era5['bias'])} | {_fmt(hrrr['bias'])} | {_fmt(hrrr['rmse'])} | "
+            f"{_fmt(tail_h['mae'])} ({tail_h['n']}) | {_fmt(tail_l['mae'])} ({tail_l['n']}) |"
+        )
+    lines.append("")
+    lines.append("## Per-region — ENS-EB on HRRR vs Kuchera on HRRR")
+    lines.append("")
+    lines.append("| Region | n | ENS-EB ERA5 | ENS-EB HRRR | Δ | Kuchera HRRR | ENS-EB margin | ENS-EB bias (HRRR) | RF+EB HRRR | verdict |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+    for region in sorted(metrics["hrrr"]["ens_eb"]["perRegion"]):
+        ens_e = metrics["era5"]["ens_eb"]["perRegion"][region]
+        ens_h = metrics["hrrr"]["ens_eb"]["perRegion"][region]
+        kuch = metrics["hrrr"]["kuchera"]["perRegion"][region]
+        rf_h = metrics["hrrr"]["rf_eb"]["perRegion"][region]
+        won = verdict["regionWinsVsKuchera"][region]
+        lines.append(
+            f"| {region} | {ens_h['n']} | {ens_e['mae']:.3f} | {ens_h['mae']:.3f} | "
+            f"{ens_h['mae'] - ens_e['mae']:+.3f} | {kuch['mae']:.3f} | "
+            f"{kuch['mae'] - ens_h['mae']:+.3f} | {_fmt(ens_h['bias'])} | {rf_h['mae']:.3f} | "
+            f"{'ENS-EB beats Kuchera' if won else 'ENS-EB LOSES to Kuchera'} |"
+        )
+    lines.append("")
+    lines.append(
+        f"ENS-EB on HRRR features beats Kuchera on HRRR features in "
+        f"**{verdict['regionsWonVsKuchera']} of {verdict['regionsTotal']} regions** and "
+        f"{'beats' if verdict['ensEbBeatsKucheraOverall'] else 'loses to'} Kuchera overall. "
+        f"Transfer cost (ENS-EB HRRR − ERA5, same events): "
+        f"**{verdict['transferCostMae']:+.3f} MAE**. ENS-EB vs RF+EB on HRRR: ENS-EB "
+        f"{'wins' if verdict['ensEbBeatsRfEbOnHrrr'] else 'loses'} overall "
+        f"({metrics['hrrr']['ens_eb']['overall']['mae']:.3f} vs "
+        f"{metrics['hrrr']['rf_eb']['overall']['mae']:.3f})."
+    )
+    lines.append("")
+    lines.append("## Step-5 watch items")
+    lines.append("")
+    lines.append(
+        f"- **Alaska bias (HRRR):** ENS-EB {_fmt(watch['alaskaBiasEnsEbHrrr'])}, RF+EB "
+        f"{_fmt(watch['alaskaBiasRfEbHrrr'])} (step 5 recorded −1.32 for RF+EB on the old "
+        f"pool/features; ENS-EB on ERA5 features for the same covered Alaska events: "
+        f"{_fmt(watch['alaskaBiasEnsEbEra5'])})."
+    )
+    lines.append(
+        f"- **SLR < 5 slice (HRRR):** ENS-EB {_fmt(watch['tailLowMaeEnsEbHrrr'])}, RF+EB "
+        f"{_fmt(watch['tailLowMaeRfEbHrrr'])}, Kuchera {_fmt(watch['tailLowMaeKucheraHrrr'])} "
+        f"— ENS-EB {'beats' if watch['tailLowEnsEbBeatsKuchera'] else 'does not beat'} "
+        "Kuchera on this slice (step 5: Kuchera 3.54 edged RF+EB 3.63)."
+    )
+    lines.append("")
+    lines.append("## Tails (same covered subset)")
+    lines.append("")
+    lines.append("| Model | source | tail>20 MAE (n) | tail<5 MAE (n) |")
+    lines.append("|---|---|---:|---:|")
+    for model in CHAMPION_MODELS:
+        for source in ("era5", "hrrr"):
+            entry = metrics[source][model]
+            lines.append(
+                f"| {model} | {source} | {_fmt(entry['tailHigh_slr_gt_20']['mae'])} "
+                f"({entry['tailHigh_slr_gt_20']['n']}) | {_fmt(entry['tailLow_slr_lt_5']['mae'])} "
+                f"({entry['tailLow_slr_lt_5']['n']}) |"
+            )
+    lines.append("")
+    lines.append("## Feature parity — paired means on the covered subset")
+    lines.append("")
+    lines.append(
+        "Identical 27-feature AGL spec from the identical builder for both sources; "
+        "ASNOW is not a model feature on either side. Paired means below are the "
+        "empirical check that the two builds describe the same events."
+    )
+    lines.append("")
+    lines.append("| Feature | ERA5 mean | HRRR mean | mean Δ (HRRR − ERA5) |")
+    lines.append("|---|---:|---:|---:|")
+    for row in results["featureParity"]:
+        lines.append(
+            f"| {row['feature']} | {row['era5Mean']:.3f} | {row['hrrrMean']:.3f} | "
+            f"{row['meanDiffHrrrMinusEra5']:+.3f} |"
+        )
+    lines.append("")
+    lines.append("## Verdict")
+    lines.append("")
+    if verdict["transfers"]:
+        lines.append(
+            "**The champion transfers.** ENS-EB on HRRR features beats Kuchera on HRRR "
+            f"features overall and in {verdict['regionsWonVsKuchera']} of "
+            f"{verdict['regionsTotal']} regions, at a transfer cost of "
+            f"{verdict['transferCostMae']:+.3f} MAE against its own ERA5-feature scores "
+            "on the same events."
+        )
+    else:
+        lines.append(
+            "**The champion does not clear the step-5 transfer bar.** ENS-EB on HRRR "
+            f"features {'beats' if verdict['ensEbBeatsKucheraOverall'] else 'loses to'} "
+            f"Kuchera on HRRR overall and wins {verdict['regionsWonVsKuchera']} of "
+            f"{verdict['regionsTotal']} regions (bar: overall win and at least 5 of 6). "
+            f"Transfer cost: {verdict['transferCostMae']:+.3f} MAE."
+        )
+    lines.append("")
+    lines.append("## Caveats")
+    lines.append("")
+    lines.append("- HRRR is a 3-km convection-allowing forecast model, not a reanalysis: its "
+                 "profiles carry genuine short-lead forecast error, complex-terrain smoothing "
+                 "(the nearest gridpoint's terrain can sit well below a mountain station), and "
+                 "its own precipitation phase partitioning (APCP/ASNOW drive the Kuchera "
+                 "baseline's interval weighting here, exactly as the ERA5 build used its "
+                 "accumulation fields).")
+    lines.append("- Alaska cycles in the archive are 3-hourly, so Alaska instants use leads of "
+                 "1–3 h while CONUS uses a uniform 1-h lead; read Alaska's degradation with "
+                 "that asymmetry in mind.")
+    lines.append("- Events whose HRRR windows are incomplete (missing files or < 18 valid "
+                 "profile hours) or whose Kuchera baseline is not computable on HRRR profiles "
+                 "are excluded from the covered subset and counted in the coverage block "
+                 "above; both profile sources are scored on the identical subset. The "
+                 "no-baseline exclusion is deterministic given the HRRR profiles and is the "
+                 "largest single coverage loss, exactly as in step 5.")
+    lines.append("- Minute-offset events (recovered into the v2 pool) are sampled on HRRR at "
+                 "the forecast valid at each window instant (a whole forecast hour), where "
+                 "the ERA5 v2 build time-interpolated between whole-hour profiles; the "
+                 "feature construction is otherwise identical.")
+    lines.append("- Labels are the screened-v2 gold labels, with their caveats "
+                 "(behaviour-screened CoCoRaHS tier; low-elevation Northeast/Great Lakes). "
+                 "Research only — production calibration gates untouched.")
+    lines.append("")
+    path.write_text("\n".join(lines), encoding="utf-8")
