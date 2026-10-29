@@ -823,6 +823,34 @@ def _evaluate_gold_transfer_hrrr_champion(args: argparse.Namespace) -> int:
     return 0
 
 
+def _package_champion(args: argparse.Namespace) -> int:
+    from .champion import build_champion_package
+
+    sidecar = build_champion_package(
+        features_path=args.features,
+        source_dir=args.source_dir,
+        output_dir=args.output_dir,
+    )
+    print(json.dumps({
+        "model": sidecar["model"],
+        "trainingRows": sidecar["training"]["trainingRows"],
+        "buildVerification": sidecar["buildVerification"],
+    }, sort_keys=True))
+    return 0
+
+
+def _predict_champion(args: argparse.Namespace) -> int:
+    from .champion import predict_file
+
+    summary = predict_file(
+        champion_dir=args.champion_dir,
+        input_path=args.input,
+        output_path=args.output,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    return 0
+
+
 def _investigate_weak_labels(args: argparse.Namespace) -> int:
     results = run_weak_label_investigation(
         events_path=args.events,
@@ -1306,6 +1334,18 @@ def build_parser() -> argparse.ArgumentParser:
     champion_transfer = subparsers.add_parser("evaluate-gold-transfer-hrrr-champion", help="champion transfer: score ENS-EB (mean of RF+EB and GBM+EB, fitted on the full v2 ERA5 frame) on HRRR vs ERA5 features, same covered subset, against Kuchera on HRRR")
     champion_transfer.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
     champion_transfer.set_defaults(func=_evaluate_gold_transfer_hrrr_champion)
+
+    package_champion = subparsers.add_parser("package-champion", help="step 6 prep: package the designated ENS-EB champion (copied full-pool component joblibs + refit EB artifacts + sidecar) as a loadable shadow-scoring artifact (research only; gates stay off)")
+    package_champion.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/features.parquet"))
+    package_champion.add_argument("--source-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    package_champion.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/champion"))
+    package_champion.set_defaults(func=_package_champion)
+
+    predict_champion = subparsers.add_parser("predict-champion", help="step 6 prep: score events (CSV/JSON: 27 features + region, optional site_id/event_id/liquid) with the packaged ENS-EB champion")
+    predict_champion.add_argument("--champion-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/champion"))
+    predict_champion.add_argument("--input", type=Path, required=True)
+    predict_champion.add_argument("--output", type=Path, required=True)
+    predict_champion.set_defaults(func=_predict_champion)
 
     return parser
 
