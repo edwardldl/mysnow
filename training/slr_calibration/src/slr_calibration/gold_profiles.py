@@ -507,6 +507,24 @@ def _payload_hours(payload: dict[str, Any]) -> dict[datetime, dict[str, Any]]:
     return hours
 
 
+def _kuchera_dict(instant: datetime, record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "time": instant.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "temperature2mC": record["temperature2mC"],
+        "precipitationMm": record["precipitationMm"],
+        "snowfallCm": record["snowfallCm"],
+        "freezingLevelHeightM": None,
+        "levels": [
+            {
+                "pressureHpa": pressure,
+                "temperatureC": temperature,
+                "geopotentialHeightM": height,
+            }
+            for pressure, temperature, _rh, _ws, height in record["levels"]
+        ],
+    }
+
+
 def _kuchera_hour_dicts(
     hours: dict[datetime, dict[str, Any]],
     start: datetime,
@@ -518,42 +536,36 @@ def _kuchera_hour_dicts(
     established interval logic in compute_baseline_slr never spans a
     data gap.
     """
+    return _kuchera_hour_dicts_at(start, end, hours.get)
+
+
+def _kuchera_hour_dicts_at(
+    start: datetime,
+    end: datetime,
+    at: Any,
+) -> list[dict[str, Any]] | None:
+    """_kuchera_hour_dicts with records resolved through ``at(instant)``."""
     dicts: list[dict[str, Any]] = []
     for step in range(25):
         instant = start + timedelta(hours=step)
-        record = hours.get(instant)
+        record = at(instant)
         if record is None:
             return None
-        dicts.append({
-            "time": instant.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "temperature2mC": record["temperature2mC"],
-            "precipitationMm": record["precipitationMm"],
-            "snowfallCm": record["snowfallCm"],
-            "freezingLevelHeightM": None,
-            "levels": [
-                {
-                    "pressureHpa": pressure,
-                    "temperatureC": temperature,
-                    "geopotentialHeightM": height,
-                }
-                for pressure, temperature, _rh, _ws, height in record["levels"]
-            ],
-        })
+        dicts.append(_kuchera_dict(instant, record))
     return dicts
 
 
-def build_event_features(
+def _accumulate_agl(
     event: dict[str, Any],
-    hours: dict[datetime, dict[str, Any]],
-    source_id: str = PROFILE_SOURCE,
-) -> dict[str, Any]:
-    """Compute the 24-h AGL feature means and Kuchera baseline for one event."""
-    start, end = event_window(event)
+    start: datetime,
+    at: Any,
+) -> tuple[dict[str, list[float]], int]:
+    """Sum AGL values over the 24 window sample instants via ``at``."""
     elevation = event["elevation_m"]
     sums = {"t": [0.0] * len(AGL_TARGETS_M), "ws": [0.0] * len(AGL_TARGETS_M), "rh": [0.0] * len(AGL_TARGETS_M)}
     valid_hours = 0
     for step in range(1, 25):
-        record = hours.get(start + timedelta(hours=step))
+        record = at(start + timedelta(hours=step))
         if record is None:
             continue
         agl = hour_agl_values(record["levels"], elevation)
@@ -563,17 +575,28 @@ def build_event_features(
         for var, values in zip(("t", "ws", "rh"), agl):
             for i, value in enumerate(values):
                 sums[var][i] += value
+    return sums, valid_hours
+
+
+def _features_from_sums(
+    sums: dict[str, list[float]],
+    valid_hours: int,
+) -> dict[str, float | None]:
     features: dict[str, float | None] = {}
     if valid_hours >= MIN_VALID_HOURS:
-        for var, prefix in (("t", "t"), ("ws", "ws"), ("rh", "rh")):
+        for var in ("t", "ws", "rh"):
             for i, height in enumerate(AGL_TARGETS_M):
-                features[f"{prefix}_{height}"] = round(sums[var][i] / valid_hours, 4)
-    baseline = None
-    kuchera_dicts = _kuchera_hour_dicts(hours, start, end)
-    if kuchera_dicts is not None:
-        computed = compute_baseline_slr(kuchera_dicts, start, end, elevation)
-        if computed is not None:
-            baseline = computed[0]
+                features[f"{var}_{height}"] = round(sums[var][i] / valid_hours, 4)
+    return features
+
+
+def _event_row(
+    event: dict[str, Any],
+    features: dict[str, float | None],
+    baseline: float | None,
+    valid_hours: int,
+    source_id: str,
+) -> dict[str, Any]:
     if features and baseline is not None:
         status = "ok"
     elif baseline is not None:
@@ -613,6 +636,116 @@ def build_event_features(
         else:
             row[column] = features.get(column)
     return row
+
+
+def build_event_features(
+    event: dict[str, Any],
+    hours: dict[datetime, dict[str, Any]],
+    source_id: str = PROFILE_SOURCE,
+) -> dict[str, Any]:
+    """Compute the 24-h AGL feature means and Kuchera baseline for one event."""
+    start, end = event_window(event)
+    sums, valid_hours = _accumulate_agl(event, start, hours.get)
+    features = _features_from_sums(sums, valid_hours)
+    baseline = None
+    kuchera_dicts = _kuchera_hour_dicts(hours, start, end)
+    if kuchera_dicts is not None:
+        computed = compute_baseline_slr(kuchera_dicts, start, end, event["elevation_m"])
+        if computed is not None:
+            baseline = computed[0]
+    return _event_row(event, features, baseline, valid_hours, source_id)
+
+
+# ---------------------------------------------------------------------------
+# Minute-offset events (era5-expanded-v2 recovery)
+#
+# Some GHCN observers report at sub-hourly times (e.g. 07:45), so the
+# event's valid_time -- and therefore every instant of its 24-h window --
+# falls between the whole-hour profile records and the whole-hour builder
+# above finds zero valid hours.  The recovery below evaluates each window
+# instant from the linear time-interpolation of the two bracketing
+# whole-hour profiles (every profile variable, plus temperature_2m and
+# the accumulation fields the Kuchera path consumes).  For an on-the-hour
+# valid_time record_at returns the stored record untouched, so the
+# offset builder reduces exactly to build_event_features; it is only
+# ever applied to events the whole-hour builder marked
+# incomplete_profile, and only their rows are replaced (additive merge
+# in run_build_features_v2), which keeps every previously built row
+# bit-identical.
+# ---------------------------------------------------------------------------
+
+def _lerp_value(lo: float | None, hi: float | None, frac: float) -> float | None:
+    if lo is None or hi is None:
+        return None
+    return lo + (hi - lo) * frac
+
+
+def _lerp_record(
+    lo: dict[str, Any],
+    hi: dict[str, Any],
+    frac: float,
+) -> dict[str, Any]:
+    """Linear time-interpolation of one hour record; None propagates."""
+    levels = []
+    for (pressure, t_lo, rh_lo, ws_lo, z_lo), (_p, t_hi, rh_hi, ws_hi, z_hi) in zip(lo["levels"], hi["levels"]):
+        levels.append((
+            pressure,
+            _lerp_value(t_lo, t_hi, frac),
+            _lerp_value(rh_lo, rh_hi, frac),
+            _lerp_value(ws_lo, ws_hi, frac),
+            _lerp_value(z_lo, z_hi, frac),
+        ))
+    return {
+        "temperature2mC": _lerp_value(lo["temperature2mC"], hi["temperature2mC"], frac),
+        "precipitationMm": _lerp_value(lo["precipitationMm"], hi["precipitationMm"], frac),
+        "snowfallCm": _lerp_value(lo["snowfallCm"], hi["snowfallCm"], frac),
+        "levels": levels,
+    }
+
+
+def record_at(
+    hours: dict[datetime, dict[str, Any]],
+    instant: datetime,
+) -> dict[str, Any] | None:
+    """Hour record at an arbitrary instant.
+
+    The stored record itself when ``instant`` is on a whole hour;
+    otherwise the linear time-interpolation of the two bracketing
+    whole-hour records.  None when a needed record is missing.
+    """
+    floor = instant.replace(minute=0, second=0, microsecond=0)
+    if floor == instant:
+        return hours.get(instant)
+    lo = hours.get(floor)
+    hi = hours.get(floor + timedelta(hours=1))
+    if lo is None or hi is None:
+        return None
+    frac = (instant - floor).total_seconds() / 3600.0
+    return _lerp_record(lo, hi, frac)
+
+
+def build_event_features_offset(
+    event: dict[str, Any],
+    hours: dict[datetime, dict[str, Any]],
+    source_id: str = PROFILE_SOURCE,
+) -> dict[str, Any]:
+    """build_event_features for sub-hourly-offset valid_times.
+
+    Identical aggregation to build_event_features, except every window
+    instant's profile is resolved through record_at (linear time
+    interpolation between the bracketing whole-hour profiles).
+    """
+    start, end = event_window(event)
+    at = lambda instant: record_at(hours, instant)  # noqa: E731
+    sums, valid_hours = _accumulate_agl(event, start, at)
+    features = _features_from_sums(sums, valid_hours)
+    baseline = None
+    kuchera_dicts = _kuchera_hour_dicts_at(start, end, at)
+    if kuchera_dicts is not None:
+        computed = compute_baseline_slr(kuchera_dicts, start, end, event["elevation_m"])
+        if computed is not None:
+            baseline = computed[0]
+    return _event_row(event, features, baseline, valid_hours, source_id)
 
 
 def _blank_row(event: dict[str, Any], status: str, source_id: str = PROFILE_SOURCE) -> dict[str, Any]:
@@ -746,3 +879,137 @@ def run_build_features(
     write_features_parquet(rows, output_dir / "features.parquet")
     (output_dir / "feature_coverage.json").write_text(json.dumps(coverage, indent=2), encoding="utf-8")
     return coverage
+
+
+def _has_subhour_offset(valid_time_text: str) -> bool:
+    parsed = datetime.fromisoformat(str(valid_time_text))
+    return parsed.minute != 0 or parsed.second != 0 or parsed.microsecond != 0
+
+
+def _merge_recovered_rows(
+    source_rows: list[dict[str, Any]],
+    recovered: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Source rows in original order, with recovered rows swapped in."""
+    return [recovered.get(str(row["event_id"]), row) for row in source_rows]
+
+
+def run_build_features_v2(
+    pool_dir: Path,
+    source_dir: Path,
+    output_dir: Path,
+    spec: SourceSpec = ERA5_SPEC,
+    extended_id_file: Path | None = None,
+) -> dict[str, Any]:
+    """Additive v2 build: recover minute-offset events from a prior build.
+
+    Reads the source build's features.parquet, finds the events it
+    marked ``incomplete_profile`` whose valid_time is offset from the
+    whole hour, and rebuilds only those rows with
+    build_event_features_offset from the same profile cache.  A row is
+    replaced only when the offset build reaches status ``ok``; every
+    other row is carried over untouched, so the v2 parquet differs from
+    the source exactly in the recovered rows.  Writes features.parquet,
+    feature_coverage.json and recovery_report.json into output_dir
+    (created if needed).  The profile cache is resolved as
+    ``<output_dir>/<spec.cache_dir_name>``; when that path does not
+    exist it is symlinked to the source build's cache, mirroring the
+    era5-expanded layout.
+    """
+    import pyarrow.parquet as pq
+
+    events = load_screened_events(pool_dir)
+    events_by_id = {event["event_id"]: event for event in events}
+    source_rows = pq.read_table(source_dir / "features.parquet").to_pylist()
+    targets = [
+        row for row in source_rows
+        if row["profile_status"] == "incomplete_profile" and _has_subhour_offset(str(row["valid_time"]))
+    ]
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir = output_dir / spec.cache_dir_name
+    if not cache_dir.exists():
+        real_cache = (source_dir / spec.cache_dir_name).resolve()
+        if real_cache.is_dir():
+            cache_dir.symlink_to(real_cache)
+
+    chunks = plan_chunks(events, spec=spec)
+    chunk_by_station: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for chunk in chunks:
+        chunk_by_station[chunk["station_id"]].append(chunk)
+
+    station_hours: dict[str, dict[datetime, dict[str, Any]]] = {}
+
+    def hours_for(station_id: str) -> dict[datetime, dict[str, Any]]:
+        if station_id not in station_hours:
+            hours: dict[datetime, dict[str, Any]] = {}
+            for chunk in chunk_by_station.get(station_id, []):
+                path = _chunk_path(cache_dir, chunk)
+                if not _cache_valid(path):
+                    continue
+                with gzip.open(path, "rt", encoding="utf-8") as handle:
+                    hours.update(_payload_hours(json.load(handle)))
+            station_hours[station_id] = hours
+        return station_hours[station_id]
+
+    recovered: dict[str, dict[str, Any]] = {}
+    still_failing: dict[str, dict[str, Any]] = {}
+    for row in targets:
+        event = events_by_id[str(row["event_id"])]
+        new_row = build_event_features_offset(event, hours_for(event["station_id"]), spec.source_id)
+        if new_row["profile_status"] == "ok":
+            recovered[event["event_id"]] = new_row
+        else:
+            still_failing[event["event_id"]] = {
+                "region": event["region"],
+                "waterYear": event["water_year"],
+                "wouldBeStatus": new_row["profile_status"],
+                "validHours": new_row["valid_hours"],
+                "baselinePresent": new_row["baseline_slr"] is not None,
+            }
+
+    merged_rows = _merge_recovered_rows(source_rows, recovered)
+    status_counts: Counter[str] = Counter()
+    region_status: dict[str, Counter[str]] = defaultdict(Counter)
+    for row in merged_rows:
+        status_counts[row["profile_status"]] += 1
+        region_status[row["region"]][row["profile_status"]] += 1
+    coverage = {
+        "profileSource": spec.source_id,
+        "eventsTotal": len(merged_rows),
+        "statusCounts": dict(status_counts),
+        "byRegion": {region: dict(counts) for region, counts in sorted(region_status.items())},
+    }
+
+    recovered_rows = list(recovered.values())
+    recovery: dict[str, Any] = {
+        "profileSource": spec.source_id,
+        "sourceDir": str(source_dir),
+        "targetEvents": len(targets),
+        "recoveredEvents": len(recovered_rows),
+        "stillFailingEvents": len(still_failing),
+        "recoveredByRegion": dict(Counter(row["region"] for row in recovered_rows)),
+        "recoveredByWaterYear": {
+            str(year): count
+            for year, count in sorted(Counter(row["water_year"] for row in recovered_rows).items())
+        },
+        "stillFailing": dict(sorted(still_failing.items())),
+        "modelingRowsBefore": sum(1 for row in source_rows if row["profile_status"] == "ok"),
+        "modelingRowsAfter": int(status_counts.get("ok", 0)),
+    }
+    if extended_id_file is not None and extended_id_file.exists():
+        extended_ids = {
+            line.strip()
+            for line in extended_id_file.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+        recovery["targetsInExtendedPool"] = sum(
+            1 for row in targets if str(row["event_id"]) in extended_ids
+        )
+        recovery["recoveredInExtendedPool"] = sum(
+            1 for event_id in recovered if event_id in extended_ids
+        )
+    write_features_parquet(merged_rows, output_dir / "features.parquet")
+    (output_dir / "feature_coverage.json").write_text(json.dumps(coverage, indent=2), encoding="utf-8")
+    (output_dir / "recovery_report.json").write_text(json.dumps(recovery, indent=2), encoding="utf-8")
+    return recovery
