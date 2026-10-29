@@ -674,6 +674,38 @@ def _fetch_gold_profiles_era5(args: argparse.Namespace) -> int:
     return 2 if incomplete else 0
 
 
+def _fetch_gold_sp_era5(args: argparse.Namespace) -> int:
+    from .gold_profiles_sp import run_fetch_sp
+
+    summary = run_fetch_sp(
+        pool_dir=args.pool_dir,
+        output_dir=args.output_dir,
+        shard_index=args.shard_index,
+        shard_count=args.shard_count,
+        assemble_only=args.assemble_only,
+        no_assemble=args.no_assemble,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    fetch = summary.get("fetch", {})
+    coverage = summary.get("coverage", {})
+    incomplete = bool(fetch.get("monthsFailed")) or (
+        bool(coverage) and coverage.get("eventsCovered", 0) < coverage.get("eventsTotal", 0)
+    )
+    return 2 if incomplete else 0
+
+
+def _build_pressure_features(args: argparse.Namespace) -> int:
+    from .pressure_features import run_build_pressure_features
+
+    summary = run_build_pressure_features(
+        pool_dir=args.pool_dir,
+        model_dir=args.model_dir,
+        output_dir=args.output_dir,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    return 0 if summary["statusCounts"].get("ok", 0) == summary["eventsTotal"] else 2
+
+
 def _fetch_gold_profiles_cds(args: argparse.Namespace) -> int:
     from .gold_profiles_cds import run_fetch_profiles_cds
 
@@ -1288,6 +1320,21 @@ def build_parser() -> argparse.ArgumentParser:
     gold_features_v2.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
     gold_features_v2.add_argument("--extended-id-file", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5_ext2006_event_ids.txt"))
     gold_features_v2.set_defaults(func=_build_gold_features_v2)
+
+    gold_sp_fetch = subparsers.add_parser("fetch-gold-sp-era5", help="pressure-level model: fetch ERA5 surface pressure (NSF NCAR an.sfc 128_134_sp) for the v2 modelling pool into raw_cache_era5_sp (resumable, shardable by month)")
+    gold_sp_fetch.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_sp_fetch.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    gold_sp_fetch.add_argument("--shard-index", type=int, default=0)
+    gold_sp_fetch.add_argument("--shard-count", type=int, default=1)
+    gold_sp_fetch.add_argument("--assemble-only", action="store_true", help="skip fetching; assemble chunk files from existing parts and report coverage")
+    gold_sp_fetch.add_argument("--no-assemble", action="store_true", help="fetch parts only (multi-shard runs); assemble afterwards with --assemble-only")
+    gold_sp_fetch.set_defaults(func=_fetch_gold_sp_era5)
+
+    pressure_features = subparsers.add_parser("build-pressure-features", help="pressure-level model: build P-core (46) and P-mask (59) features for the v2 modelling pool from cached ERA5 profiles + fetched surface pressure")
+    pressure_features.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    pressure_features.add_argument("--model-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    pressure_features.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v2-pressure"))
+    pressure_features.set_defaults(func=_build_pressure_features)
 
     gold_variants = subparsers.add_parser("evaluate-gold-model-variants", help="cheap-wins bundle items 3-4: ensembles, median-objective GBM and tail-shrunk RF+EB on identical splits/seeds; appends bundle verdicts to MODEL_REPORT.md")
     gold_variants.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/features.parquet"))
