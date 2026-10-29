@@ -711,6 +711,36 @@ def _evaluate_gold_models(args: argparse.Namespace) -> int:
     return 0
 
 
+def _build_gold_features_v2(args: argparse.Namespace) -> int:
+    from .gold_profiles import run_build_features_v2
+
+    recovery = run_build_features_v2(
+        pool_dir=args.pool_dir,
+        source_dir=args.source_dir,
+        output_dir=args.output_dir,
+        spec=ERA5_SPEC,
+        extended_id_file=args.extended_id_file,
+    )
+    print(json.dumps(recovery, sort_keys=True))
+    return 0
+
+
+def _evaluate_gold_model_variants(args: argparse.Namespace) -> int:
+    from .gold_model import append_bundle_report, run_variant_benchmark
+
+    results = run_variant_benchmark(
+        features_path=args.features,
+        output_dir=args.output_dir,
+        random_repeats=args.random_repeats,
+    )
+    verdicts = append_bundle_report(
+        output_dir=args.output_dir,
+        baseline_results_path=args.baseline_results,
+    )
+    print(json.dumps({"accounting": results["accounting"], "verdicts": verdicts}, sort_keys=True))
+    return 0
+
+
 def _fetch_gold_profiles_hrrr(args: argparse.Namespace) -> int:
     from .hrrr_transfer import run_fetch_hrrr_transfer
 
@@ -1177,6 +1207,20 @@ def build_parser() -> argparse.ArgumentParser:
     gold_eval.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
     gold_eval.add_argument("--random-repeats", type=int, default=20)
     gold_eval.set_defaults(func=_evaluate_gold_models)
+
+    gold_features_v2 = subparsers.add_parser("build-gold-features-v2", help="cheap-wins bundle item 1: additive v2 build recovering minute-offset events from a prior build's cache (ERA5 only)")
+    gold_features_v2.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    gold_features_v2.add_argument("--source-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded"))
+    gold_features_v2.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    gold_features_v2.add_argument("--extended-id-file", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5_ext2006_event_ids.txt"))
+    gold_features_v2.set_defaults(func=_build_gold_features_v2)
+
+    gold_variants = subparsers.add_parser("evaluate-gold-model-variants", help="cheap-wins bundle items 3-4: ensembles, median-objective GBM and tail-shrunk RF+EB on identical splits/seeds; appends bundle verdicts to MODEL_REPORT.md")
+    gold_variants.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/features.parquet"))
+    gold_variants.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    gold_variants.add_argument("--baseline-results", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded/results.json"))
+    gold_variants.add_argument("--random-repeats", type=int, default=20)
+    gold_variants.set_defaults(func=_evaluate_gold_model_variants)
 
     gold_fetch_hrrr = subparsers.add_parser("fetch-gold-profiles-hrrr", help="step 5: fetch NOAA HRRR wrfprs profiles for step-2 gold events (resumable; transfer test -- see hrrr_transfer docstring)")
     gold_fetch_hrrr.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))

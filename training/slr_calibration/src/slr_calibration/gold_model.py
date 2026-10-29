@@ -50,7 +50,7 @@ import numpy as np
 import pandas as pd
 
 from .evaluation import apply_artifact
-from .gold_profiles import FEATURE_COLUMNS, PROFILE_SOURCE
+from .gold_profiles import ERA5_PROFILE_SOURCE, FEATURE_COLUMNS, PROFILE_SOURCE
 from .trainer import TrainingConfig, train_artifact
 
 MODELS = ("rf", "gbm", "intercept", "eb_gold", "kuchera", "climatology", "rf_eb")
@@ -207,6 +207,20 @@ class EBPerRegionModel:
         return out
 
 
+def _station_grouped_folds(train: pd.DataFrame, seed: int) -> np.ndarray:
+    """Station-grouped 5-fold assignment for out-of-fold predictions.
+
+    Stations are shuffled with the split seed and dealt round-robin, so
+    every station's rows share one fold and no station leaks between the
+    OOF fit and its own residual.
+    """
+    stations = np.array(sorted(train["station_id"].unique()))
+    rng = np.random.default_rng(seed)
+    rng.shuffle(stations)
+    fold_of = {station: i % 5 for i, station in enumerate(stations)}
+    return train["station_id"].map(fold_of).to_numpy()
+
+
 class RFEBModel:
     """RF plus an EB residual layer fitted on out-of-fold RF predictions."""
 
@@ -220,11 +234,7 @@ class RFEBModel:
         y = train["observed_slr"].to_numpy()
         # Station-grouped 5-fold out-of-fold predictions for honest
         # residual fitting (no in-sample RF residuals).
-        stations = np.array(sorted(train["station_id"].unique()))
-        rng = np.random.default_rng(self.seed)
-        rng.shuffle(stations)
-        fold_of = {station: i % 5 for i, station in enumerate(stations)}
-        folds = train["station_id"].map(fold_of).to_numpy()
+        folds = _station_grouped_folds(train, self.seed)
         oof = np.full(len(train), np.nan)
         for fold in range(5):
             mask = folds == fold
@@ -245,12 +255,158 @@ class RFEBModel:
         )
         return self
 
-    def predict(self, test: pd.DataFrame) -> np.ndarray:
+    def predict_parts(self, test: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        """(clipped RF prediction, EB-calibrated prediction) for a frame."""
         X = test[list(FEATURE_COLUMNS)].to_numpy()
         rf_pred = np.clip(self.rf.predict(X), MIN_SLR, MAX_SLR)
         frame = test.copy()
         frame["rf_pred"] = rf_pred
-        return _apply_eb(self.eb_artifact, frame, baseline_column="rf_pred")
+        return rf_pred, _apply_eb(self.eb_artifact, frame, baseline_column="rf_pred")
+
+    def predict(self, test: pd.DataFrame) -> np.ndarray:
+        return self.predict_parts(test)[1]
+
+
+class GBMEBModel:
+    """GBM plus the same EB residual layer treatment as RFEBModel."""
+
+    def __init__(self, seed: int) -> None:
+        self.seed = seed
+
+    def fit(self, train: pd.DataFrame) -> "GBMEBModel":
+        from sklearn.ensemble import HistGradientBoostingRegressor
+
+        X = train[list(FEATURE_COLUMNS)].to_numpy()
+        y = train["observed_slr"].to_numpy()
+        folds = _station_grouped_folds(train, self.seed)
+        oof = np.full(len(train), np.nan)
+        for fold in range(5):
+            mask = folds == fold
+            if mask.sum() == 0 or (~mask).sum() == 0:
+                continue
+            model = HistGradientBoostingRegressor(random_state=self.seed)
+            model.fit(X[~mask], y[~mask])
+            oof[mask] = model.predict(X[mask])
+        if np.isnan(oof).any():
+            oof[np.isnan(oof)] = train["baseline_slr"].to_numpy()[np.isnan(oof)]
+        self.gbm = HistGradientBoostingRegressor(random_state=self.seed)
+        self.gbm.fit(X, y)
+        residual_frame = train.copy()
+        residual_frame["gbm_oof"] = np.clip(oof, MIN_SLR, MAX_SLR)
+        self.eb_artifact = train_artifact(
+            _trainer_rows(residual_frame, baseline_column="gbm_oof"),
+            TrainingConfig(artifact_id="gold-gbm-eb-residual", source_label="screened-v2 gold events (step 2 benchmark)"),
+        )
+        return self
+
+    def predict_parts(self, test: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        """(clipped GBM prediction, EB-calibrated prediction) for a frame."""
+        X = test[list(FEATURE_COLUMNS)].to_numpy()
+        gbm_pred = np.clip(self.gbm.predict(X), MIN_SLR, MAX_SLR)
+        frame = test.copy()
+        frame["gbm_pred"] = gbm_pred
+        return gbm_pred, _apply_eb(self.eb_artifact, frame, baseline_column="gbm_pred")
+
+    def predict(self, test: pd.DataFrame) -> np.ndarray:
+        return self.predict_parts(test)[1]
+
+
+# ---------------------------------------------------------------------------
+# Median-objective GBM and its median-residual EB layer (bundle item 3)
+# ---------------------------------------------------------------------------
+
+MEDIAN_EB_PRIOR_ESS = 30.0  # the EB trainer's prior_effective_sample_size
+
+
+def _fit_gbm_quantile(train: pd.DataFrame, seed: int):
+    from sklearn.ensemble import HistGradientBoostingRegressor
+
+    model = HistGradientBoostingRegressor(loss="quantile", quantile=0.5, random_state=seed)
+    model.fit(train[list(FEATURE_COLUMNS)].to_numpy(), train["observed_slr"].to_numpy())
+    return model
+
+
+def _median_eb_corrections(
+    residuals: np.ndarray,
+    regions: np.ndarray,
+    prior_ess: float = MEDIAN_EB_PRIOR_ESS,
+) -> tuple[float, dict[str, float]]:
+    """Per-region median log-residual corrections, EB shrinkage form.
+
+    Mirrors the trainer's _fit_node shrinkage (effective sample size /
+    (ESS + prior ESS), prior 30) but with medians in place of weighted
+    means: the global correction is the shrunk overall median, and each
+    region's correction is the global value plus its shrunk median
+    deviation from it.  Returns (global_log_bias, {region: log_bias}).
+    """
+    residuals = np.asarray(residuals, dtype=float)
+    regions = np.asarray(regions)
+    n = len(residuals)
+    global_log = float(np.median(residuals)) * (n / (n + prior_ess)) if n else 0.0
+    by_region: dict[str, float] = {}
+    for region in sorted(set(regions.tolist())):
+        mask = regions == region
+        count = int(mask.sum())
+        deviation = float(np.median(residuals[mask] - global_log))
+        by_region[str(region)] = global_log + deviation * (count / (count + prior_ess))
+    return global_log, by_region
+
+
+class MedianEBGBMModel:
+    """Quantile (median) GBM plus a per-region median-residual EB layer.
+
+    The residual layer is fitted on station-grouped out-of-fold median
+    predictions, exactly as RFEBModel fits its mean-residual EB layer,
+    but the corrections are per-region medians of the log residuals
+    with the trainer's shrinkage form (see _median_eb_corrections).
+    The correction factor is clamped to [0.5, 2.0] and the calibrated
+    SLR to [3, 30], matching the EB artifact bounds.
+    """
+
+    def __init__(self, seed: int) -> None:
+        self.seed = seed
+
+    def fit(self, train: pd.DataFrame) -> "MedianEBGBMModel":
+        X = train[list(FEATURE_COLUMNS)].to_numpy()
+        y = train["observed_slr"].to_numpy()
+        folds = _station_grouped_folds(train, self.seed)
+        oof = np.full(len(train), np.nan)
+        for fold in range(5):
+            mask = folds == fold
+            if mask.sum() == 0 or (~mask).sum() == 0:
+                continue
+            model = _fit_gbm_quantile(train[~mask], self.seed)
+            oof[mask] = model.predict(X[mask])
+        if np.isnan(oof).any():
+            oof[np.isnan(oof)] = train["baseline_slr"].to_numpy()[np.isnan(oof)]
+        residuals = np.log(y / np.clip(oof, MIN_SLR, MAX_SLR))
+        self.global_log, self.by_region = _median_eb_corrections(
+            residuals, train["region"].to_numpy()
+        )
+        self.model = _fit_gbm_quantile(train, self.seed)
+        return self
+
+    def predict(self, test: pd.DataFrame) -> np.ndarray:
+        X = test[list(FEATURE_COLUMNS)].to_numpy()
+        base = np.clip(self.model.predict(X), MIN_SLR, MAX_SLR)
+        logs = test["region"].map(self.by_region).fillna(self.global_log).to_numpy()
+        factors = np.exp(np.clip(logs, math.log(MIN_FACTOR), math.log(MAX_FACTOR)))
+        return np.clip(base * factors, MIN_SLR, MAX_SLR)
+
+
+def tail_shrink_predictions(rf_pred: np.ndarray, eb_pred: np.ndarray) -> np.ndarray:
+    """RF+EB with the EB correction faded out at high predictions.
+
+    The effective multiplicative EB correction (eb / rf) is shrunk
+    toward 1 by weight clip(15 / prediction, 0, 1) when the RF
+    prediction exceeds 15 (full correction at or below 15), per the
+    pre-declared bundle item-4 form.
+    """
+    rf = np.asarray(rf_pred, dtype=float)
+    eb = np.asarray(eb_pred, dtype=float)
+    factor = eb / rf
+    weight = np.where(rf > 15.0, np.clip(15.0 / rf, 0.0, 1.0), 1.0)
+    return np.clip(rf * (1.0 + (factor - 1.0) * weight), MIN_SLR, MAX_SLR)
 
 
 # ---------------------------------------------------------------------------
@@ -457,6 +613,108 @@ def run_benchmark(features_path: Path, output_dir: Path, random_repeats: int = 2
 
 
 # ---------------------------------------------------------------------------
+# Cheap-wins bundle variants (items 3-4): ensembles, median objective,
+# tail-shrunk EB.  Evaluated on the identical splits and seeds as
+# run_benchmark, with component models fitted once per split and the
+# ensemble / tail predictions derived from the shared components.
+# ---------------------------------------------------------------------------
+
+VARIANT_MODELS = ("gbm_eb", "ens_rg", "ens_eb", "med_gbm", "med_gbm_eb", "tail_rf_eb")
+
+
+def _run_variant_split(
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    seed: int,
+) -> dict[str, Any]:
+    X_test = test[list(FEATURE_COLUMNS)].to_numpy()
+    rf_eb = RFEBModel(seed).fit(train)
+    rf_pred, rf_eb_pred = rf_eb.predict_parts(test)
+    gbm_pred = _fit_gbm(train, seed).predict(X_test)
+    gbm_eb_pred = GBMEBModel(seed).fit(train).predict(test)
+    med_pred = _fit_gbm_quantile(train, seed).predict(X_test)
+    med_eb_pred = MedianEBGBMModel(seed).fit(train).predict(test)
+    predictions = {
+        "gbm_eb": gbm_eb_pred,
+        "ens_rg": (rf_eb_pred + gbm_pred) / 2.0,
+        "ens_eb": (rf_eb_pred + gbm_eb_pred) / 2.0,
+        "med_gbm": med_pred,
+        "med_gbm_eb": med_eb_pred,
+        "tail_rf_eb": tail_shrink_predictions(rf_pred, rf_eb_pred),
+    }
+    out: dict[str, Any] = {"trainN": int(len(train)), "testN": int(len(test)), "models": {}}
+    for model_name in VARIANT_MODELS:
+        out["models"][model_name] = evaluate_predictions(test, predictions[model_name])
+    return out
+
+
+def run_variant_benchmark(
+    features_path: Path,
+    output_dir: Path,
+    random_repeats: int = 20,
+) -> dict[str, Any]:
+    """Bundle items 3-4 benchmark; same splits/seeds as run_benchmark."""
+    frame, accounting = load_modeling_frame(features_path)
+    profile_source = _frame_profile_source(frame)
+    results: dict[str, Any] = {
+        "profileSource": profile_source,
+        "accounting": accounting,
+        "variantModels": list(VARIANT_MODELS),
+        "splits": {},
+    }
+
+    repeats: list[dict[str, Any]] = []
+    for rep in range(random_repeats):
+        train, test = split_random(frame, seed=1000 + rep)
+        repeats.append(_run_variant_split(train, test, seed=1000 + rep))
+    aggregated: dict[str, Any] = {}
+    for model_name in VARIANT_MODELS:
+        maes = [r["models"][model_name]["overall"]["mae"] for r in repeats]
+        aggregated[model_name] = {
+            "maeMean": round(float(np.mean(maes)), 4),
+            "maeStd": round(float(np.std(maes)), 4),
+            "maeMin": round(float(np.min(maes)), 4),
+            "maeMax": round(float(np.max(maes)), 4),
+            "rep0": repeats[0]["models"][model_name],
+        }
+    results["splits"]["random60_40"] = {
+        "repeats": random_repeats,
+        "trainN": repeats[0]["trainN"],
+        "testN": repeats[0]["testN"],
+        "aggregated": aggregated,
+    }
+
+    loro: dict[str, Any] = {}
+    for region in sorted(frame["region"].unique()):
+        train, test = split_loro(frame, str(region))
+        loro[str(region)] = _run_variant_split(train, test, seed=2000)
+    results["splits"]["leaveOneRegionOut"] = loro
+
+    train, test = split_temporal(frame)
+    results["splits"]["temporalWY2026"] = _run_variant_split(train, test, seed=3000)
+
+    train, test = split_stations(frame, seed=4000)
+    results["splits"]["unseenStations"] = _run_variant_split(train, test, seed=4000)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "results_variants.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    (output_dir / "model_sidecar_variants.json").write_text(json.dumps({
+        "profileSource": profile_source,
+        "trainingRows": int(len(frame)),
+        "models": {
+            "gbm_eb": "HistGradientBoostingRegressor (sklearn defaults) + the RFEBModel EB residual layer (hierarchical trainer on log residuals of station-grouped OOF predictions)",
+            "ens_rg": "mean of rf_eb and raw gbm predictions",
+            "ens_eb": "mean of rf_eb and gbm_eb predictions",
+            "med_gbm": "HistGradientBoostingRegressor(loss='quantile', quantile=0.5) (median objective)",
+            "med_gbm_eb": "med_gbm + per-region median log-residual layer (trainer shrinkage form, prior ESS 30; factor clamp [0.5, 2.0]; SLR clamp [3, 30]; fitted on station-grouped OOF residuals)",
+            "tail_rf_eb": "rf_eb with the effective EB correction shrunk toward 1 by clip(15 / rf_prediction, 0, 1) when the RF prediction exceeds 15",
+        },
+        "note": "Research artifacts only. Not app artifacts; do not bundle into src/.",
+    }, indent=2), encoding="utf-8")
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 
@@ -489,26 +747,47 @@ def write_report(results: dict[str, Any], coverage: dict[str, Any] | None, path:
     lines.append("")
     lines.append("## Provenance — read first")
     lines.append("")
-    lines.append(
-        "**Profile source: `open-meteo-historical-forecast-best-match` — the Open-Meteo "
-        "historical-forecast best-match archive, NOT ERA5.** Pletcher et al. (2026) trained on "
-        "ERA5, but ERA5 pressure levels are unreachable from this workspace: the Open-Meteo "
-        "archive (ERA5) API returns every pressure-level field null with `hourly_units` "
-        "\"undefined\" (its published variable list contains no pressure-level variables at "
-        "all), and Copernicus CDS requires a personal API key this project does not hold. "
-        "The best-match archive is the fallback sanctioned for this case; it is also the "
-        "source of every previous baseline in this project, so features and Kuchera "
-        "baselines share provenance. The archive's coverage starts mid-2021, so the "
-        "modeling pool is the 2021-06+ subset of the screened pool. Treat all numbers "
-        "below as best-match-archive numbers, not ERA5 numbers."
-    )
-    lines.append("")
-    lines.append("Deviations from the Pletcher et al. spec: profile source (above); 13 API "
-                 "pressure levels instead of ERA5's 37 for the AGL interpolation; wind from "
-                 "the API wind_speed field; 24-h means over each event's observation window "
-                 "(24 h ending at the stored local-standard valid_time) rather than a "
-                 "calendar day; RF n_estimators=500 with sklearn defaults otherwise (paper "
-                 "does not fully specify hyperparameters); GBM at sklearn defaults.")
+    if results.get("profileSource") == ERA5_PROFILE_SOURCE:
+        lines.append(
+            "**Profile source: `era5-nsf-ncar-aws` — true ECMWF ERA5 reanalysis**, fetched "
+            "from the NSF NCAR mirror of ERA5 on AWS Open Data (bucket `nsf-ncar-era5`, "
+            "anonymous read), with native relative humidity at the 13 pressure levels "
+            "1000–500 hPa. This is the same reanalysis Pletcher et al. (2026) trained on. "
+            "Verified coverage: pressure-level months 1940-01 through 2026-07. Features and "
+            "Kuchera baselines are computed from the same ERA5 profiles, so they share "
+            "provenance. (The step-2 v1 benchmark used the Open-Meteo best-match forecast "
+            "archive instead; its report describes that source. Numbers here are ERA5 "
+            "numbers and are not pooled with best-match numbers anywhere.)"
+        )
+        lines.append("")
+        lines.append("Deviations from the Pletcher et al. spec: 13 of ERA5's 37 pressure "
+                     "levels for the AGL interpolation (the finest low-level set, shared "
+                     "with the step-2 spec); 24-h means over each event's observation "
+                     "window (24 h ending at the stored local-standard valid_time) rather "
+                     "than a calendar day; RF n_estimators=500 with sklearn defaults "
+                     "otherwise (paper does not fully specify hyperparameters); GBM at "
+                     "sklearn defaults.")
+    else:
+        lines.append(
+            "**Profile source: `open-meteo-historical-forecast-best-match` — the Open-Meteo "
+            "historical-forecast best-match archive, NOT ERA5.** Pletcher et al. (2026) trained on "
+            "ERA5, but ERA5 pressure levels are unreachable from this workspace: the Open-Meteo "
+            "archive (ERA5) API returns every pressure-level field null with `hourly_units` "
+            "\"undefined\" (its published variable list contains no pressure-level variables at "
+            "all), and Copernicus CDS requires a personal API key this project does not hold. "
+            "The best-match archive is the fallback sanctioned for this case; it is also the "
+            "source of every previous baseline in this project, so features and Kuchera "
+            "baselines share provenance. The archive's coverage starts mid-2021, so the "
+            "modeling pool is the 2021-06+ subset of the screened pool. Treat all numbers "
+            "below as best-match-archive numbers, not ERA5 numbers."
+        )
+        lines.append("")
+        lines.append("Deviations from the Pletcher et al. spec: profile source (above); 13 API "
+                     "pressure levels instead of ERA5's 37 for the AGL interpolation; wind from "
+                     "the API wind_speed field; 24-h means over each event's observation window "
+                     "(24 h ending at the stored local-standard valid_time) rather than a "
+                     "calendar day; RF n_estimators=500 with sklearn defaults otherwise (paper "
+                     "does not fully specify hyperparameters); GBM at sklearn defaults.")
     lines.append("")
     lines.append("## Feature coverage")
     lines.append("")
@@ -637,12 +916,24 @@ def write_report(results: dict[str, Any], coverage: dict[str, Any] | None, path:
                  "not provenance-proven (81% pass on survey-confirmed samplers; no confirmed-copier "
                  "reference exists). Northeast and Great Lakes stations are almost all below "
                  "900 m elevation; Alaska's screen validation was indirect only.")
-    lines.append("- Profiles are a best-match forecast-archive blend, not reanalysis: the "
-                 "contributing model varies by date, and forecast (not analysis) fields carry "
-                 "lead-time error that ERA5 would not. Numbers are therefore a lower bound "
-                 "on what the same spec would do on true ERA5 profiles.")
-    lines.append("- Events before 2021-06 are excluded by archive coverage; the temporal "
-                 "holdout is a single water year (WY2026).")
+    if results.get("profileSource") == ERA5_PROFILE_SOURCE:
+        lines.append("- Profiles are ERA5 reanalysis (NSF NCAR mirror), not a forecast "
+                     "blend: no lead-time error of the kind the best-match archive carries. "
+                     "ERA5's own resolution and assimilation limits still apply, and the "
+                     "13-level subset is coarser than the full 37-level ERA5 grid.")
+        lines.append("- The screened pool spans water years 1999–2026; modeling rows are "
+                     "concentrated in 2006–2026 (the year-expansion target pool) with a "
+                     "small number of earlier rows whose fetch chunks were shared with "
+                     "in-pool events. ERA5 coverage ends 2026-07, so late-WY2026 events "
+                     "without complete profiles are excluded by the completeness screen, "
+                     "and the temporal holdout is a single water year (WY2026).")
+    else:
+        lines.append("- Profiles are a best-match forecast-archive blend, not reanalysis: the "
+                     "contributing model varies by date, and forecast (not analysis) fields carry "
+                     "lead-time error that ERA5 would not. Numbers are therefore a lower bound "
+                     "on what the same spec would do on true ERA5 profiles.")
+        lines.append("- Events before 2021-06 are excluded by archive coverage; the temporal "
+                     "holdout is a single water year (WY2026).")
     lines.append("- Tail subsets are small in some splits; read tail MAEs with their n.")
     lines.append("- Model pickles beside this report are research artifacts only — not app "
                  "artifacts, never bundled into src/, and the production calibration gates "
@@ -659,3 +950,237 @@ def run_evaluate_gold_models(features_path: Path, output_dir: Path, random_repea
         coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
     write_report(results, coverage, output_dir / "MODEL_REPORT.md")
     return results
+
+
+# ---------------------------------------------------------------------------
+# Cheap-wins bundle verdicts and report sections (items 1-4)
+# ---------------------------------------------------------------------------
+
+_HEADLINE_SPLITS = ("randomised", "loroMean", "temporal", "stations")
+
+
+def headline_metrics(results: dict[str, Any], model: str) -> dict[str, Any]:
+    """The four headline split MAEs + rep0 tails for one model."""
+    agg = results["splits"]["random60_40"]["aggregated"][model]
+    loro = results["splits"]["leaveOneRegionOut"]
+    loro_maes = [split["models"][model]["overall"]["mae"] for split in loro.values()]
+    return {
+        "randomised": agg["maeMean"],
+        "randomisedStd": agg["maeStd"],
+        "loroMean": round(float(np.mean(loro_maes)), 4),
+        "temporal": results["splits"]["temporalWY2026"]["models"][model]["overall"]["mae"],
+        "stations": results["splits"]["unseenStations"]["models"][model]["overall"]["mae"],
+        "tailHigh": agg["rep0"]["tailHigh_slr_gt_20"]["mae"],
+        "tailHighN": agg["rep0"]["tailHigh_slr_gt_20"]["n"],
+        "tailLow": agg["rep0"]["tailLow_slr_lt_5"]["mae"],
+        "tailLowN": agg["rep0"]["tailLow_slr_lt_5"]["n"],
+    }
+
+
+def judge_candidate(candidate: dict[str, Any], reference: dict[str, Any]) -> dict[str, Any]:
+    """Pre-declared materiality rule for the bundle.
+
+    Material gain: >= 0.03 MAE improvement on at least one headline
+    split, with no regression > 0.05 on any other headline split and
+    no regression > 0.20 on the high tail (randomised rep 0).  A
+    candidate breaching a regression limit is harmful; anything else
+    is no material gain.  Deltas are reference - candidate (positive =
+    improvement).
+    """
+    deltas = {key: round(float(reference[key] - candidate[key]), 4) for key in _HEADLINE_SPLITS}
+    tail_high_delta = round(float(reference["tailHigh"] - candidate["tailHigh"]), 4)
+    tail_low_delta = round(float(reference["tailLow"] - candidate["tailLow"]), 4)
+    breach = any(deltas[key] < -0.05 for key in _HEADLINE_SPLITS) or tail_high_delta < -0.20
+    gain = max(deltas.values())
+    if gain >= 0.03 and not breach:
+        verdict = "adopt"
+    elif breach:
+        verdict = "harmful"
+    else:
+        verdict = "no material gain"
+    return {
+        "verdict": verdict,
+        "deltas": deltas,
+        "tailHighDelta": tail_high_delta,
+        "tailLowDelta": tail_low_delta,
+    }
+
+
+def _headline_table(results: dict[str, Any], variants: dict[str, Any]) -> list[str]:
+    lines = ["| Model | randomised | LORO mean | temporal | unseen-station | tail>20 (rep0) | tail<5 (rep0) |",
+             "|---|---:|---:|---:|---:|---:|---:|"]
+    for model in VARIANT_MODELS:
+        h = headline_metrics(variants, model)
+        lines.append(
+            f"| {model} | {h['randomised']:.3f} ±{h['randomisedStd']:.3f} | {h['loroMean']:.3f} | "
+            f"{h['temporal']:.3f} | {h['stations']:.3f} | {_fmt(h['tailHigh'])} (n={h['tailHighN']}) | "
+            f"{_fmt(h['tailLow'])} (n={h['tailLowN']}) |"
+        )
+    return lines
+
+
+def append_bundle_report(output_dir: Path, baseline_results_path: Path) -> dict[str, Any]:
+    """Append the bundle sections (items 1-4 + verdicts) to MODEL_REPORT.md."""
+    results = json.loads((output_dir / "results.json").read_text(encoding="utf-8"))
+    variants = json.loads((output_dir / "results_variants.json").read_text(encoding="utf-8"))
+    recovery = json.loads((output_dir / "recovery_report.json").read_text(encoding="utf-8"))
+    baseline = json.loads(baseline_results_path.read_text(encoding="utf-8"))
+
+    verdicts: dict[str, Any] = {}
+    ref_v2 = headline_metrics(results, "rf_eb")
+    base_v1 = headline_metrics(baseline, "rf_eb")
+    verdicts["item1_data_recovery"] = judge_candidate(ref_v2, base_v1)
+    for model in VARIANT_MODELS:
+        verdicts[model] = judge_candidate(headline_metrics(variants, model), ref_v2)
+    verdicts["gbm_eb_vs_gbm"] = judge_candidate(
+        headline_metrics(variants, "gbm_eb"), headline_metrics(results, "gbm"))
+    verdicts["med_gbm_vs_gbm"] = judge_candidate(
+        headline_metrics(variants, "med_gbm"), headline_metrics(results, "gbm"))
+    verdicts["med_gbm_eb_vs_gbm"] = judge_candidate(
+        headline_metrics(variants, "med_gbm_eb"), headline_metrics(results, "gbm"))
+
+    lines: list[str] = []
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append("## Cheap-wins bundle — era5-expanded-v2")
+    lines.append("")
+    lines.append("Four pre-declared items, each judged against the era5-expanded baseline "
+                 "(v1 pool, 54,880 rows) and against the item-2 ablation on this v2 pool. "
+                 "Materiality rule (pre-declared): a candidate is **adopt** when it gains "
+                 ">= 0.03 MAE on at least one headline split with no regression > 0.05 on "
+                 "any other headline split and no regression > 0.20 on the high tail "
+                 "(SLR > 20, randomised rep 0); a candidate breaching a regression limit "
+                 "is **harmful**; otherwise **no material gain**. Deltas below are "
+                 "reference - candidate, so positive is an improvement.")
+    lines.append("")
+    lines.append("### Item 1 — minute-offset event recovery (additive)")
+    lines.append("")
+    lines.append(
+        f"Target events (source build marked incomplete_profile with a sub-hourly "
+        f"valid_time): **{recovery['targetEvents']}**, of which "
+        f"{recovery.get('targetsInExtendedPool', '—')} are in the WY2006+ extended pool. "
+        f"Recovered to status ok (complete interpolated profiles + Kuchera baseline): "
+        f"**{recovery['recoveredEvents']}**; still failing: {recovery['stillFailingEvents']} "
+        f"(per-event reasons in recovery_report.json). Modeling rows: "
+        f"{recovery['modelingRowsBefore']} -> {recovery['modelingRowsAfter']}. "
+        "Recovered by region: "
+        + ", ".join(f"{k}={v}" for k, v in sorted(recovery["recoveredByRegion"].items()))
+        + ". Every non-recovered row is byte-carried from the source build (additive "
+        "merge), so all v1 features for previously ok events are bit-identical in v2."
+    )
+    lines.append("")
+    v1 = base_v1
+    lines.append(
+        f"Item 1 verdict (v2-pool RF+EB vs v1-pool RF+EB; pools differ by design — this "
+        f"is the data effect, isolated by item 2 below): randomised {v1['randomised']:.3f} "
+        f"-> {ref_v2['randomised']:.3f}, LORO mean {v1['loroMean']:.3f} -> "
+        f"{ref_v2['loroMean']:.3f}, temporal {v1['temporal']:.3f} -> {ref_v2['temporal']:.3f}, "
+        f"unseen-station {v1['stations']:.3f} -> {ref_v2['stations']:.3f}: "
+        f"**{verdicts['item1_data_recovery']['verdict']}**."
+    )
+    lines.append("")
+    lines.append("### Item 2 — ablation baseline (standard models on the v2 pool)")
+    lines.append("")
+    lines.append("The standard seven-model benchmark above (headline, LORO, temporal and "
+                 "unseen-station tables in the main report body) was re-run unchanged on "
+                 "the v2 pool; it is the reference for items 3–4, so model effects are "
+                 "never confounded with the item-1 data effect.")
+    lines.append("")
+    lines.append("### Items 3–4 — variant headline results (v2 pool)")
+    lines.append("")
+    lines.extend(_headline_table(results, variants))
+    lines.append("")
+    lines.append(f"Reference (v2 pool): rf_eb randomised {ref_v2['randomised']:.3f}, LORO mean "
+                 f"{ref_v2['loroMean']:.3f}, temporal {ref_v2['temporal']:.3f}, unseen-station "
+                 f"{ref_v2['stations']:.3f}, tail>20 {_fmt(ref_v2['tailHigh'])}, tail<5 "
+                 f"{_fmt(ref_v2['tailLow'])}; gbm randomised "
+                 f"{headline_metrics(results, 'gbm')['randomised']:.3f}.")
+    lines.append("")
+    lines.append("Variant definitions: **gbm_eb** = GBM + the same hierarchical EB residual "
+                 "layer as RF+EB (fitted on station-grouped OOF log residuals). "
+                 "**ens_rg** = mean(rf_eb, raw gbm). **ens_eb** = mean(rf_eb, gbm_eb). "
+                 "**med_gbm** = HistGradientBoosting with quantile loss (alpha 0.5). "
+                 "**med_gbm_eb** = med_gbm + a per-region **median** log-residual layer: "
+                 "corrections are medians (not the trainer's weighted means) of the "
+                 "station-grouped OOF log residuals per region, shrunk with the trainer's "
+                 "own form (ESS / (ESS + 30)) toward the shrunk global median, factor "
+                 "clamped to [0.5, 2.0], SLR clamped to [3, 30] — the documented median "
+                 "analogue of the EB layer. **tail_rf_eb** (item 4) = rf_eb with the "
+                 "effective EB correction shrunk toward 1 by clip(15 / rf_prediction, 0, 1) "
+                 "whenever the RF prediction exceeds 15 (full correction at <= 15).")
+    lines.append("")
+    lines.append("Per-region LORO MAE (variants; rf_eb on the v2 pool as reference):")
+    lines.append("")
+    regions = sorted(variants["splits"]["leaveOneRegionOut"].keys())
+    lines.append("| Held-out region | rf_eb (v2) | " + " | ".join(VARIANT_MODELS) + " |")
+    lines.append("|---|---:|" + "---:|" * (1 + len(VARIANT_MODELS)))
+    for region in regions:
+        row = [f"| {region} | {results['splits']['leaveOneRegionOut'][region]['models']['rf_eb']['overall']['mae']:.3f} |"]
+        for model in VARIANT_MODELS:
+            row.append(f"{variants['splits']['leaveOneRegionOut'][region]['models'][model]['overall']['mae']:.3f} |")
+        lines.append(" ".join(row))
+    lines.append("")
+    lines.append("Tails for every model (items 2–4), randomised rep 0:")
+    lines.append("")
+    lines.append("| Model | tail>20 MAE (n) | tail<5 MAE (n) |")
+    lines.append("|---|---:|---:|")
+    for model in MODELS:
+        h = headline_metrics(results, model)
+        lines.append(f"| {model} | {_fmt(h['tailHigh'])} ({h['tailHighN']}) | {_fmt(h['tailLow'])} ({h['tailLowN']}) |")
+    for model in VARIANT_MODELS:
+        h = headline_metrics(variants, model)
+        lines.append(f"| {model} | {_fmt(h['tailHigh'])} ({h['tailHighN']}) | {_fmt(h['tailLow'])} ({h['tailLowN']}) |")
+    lines.append("")
+    for split_key, title in (("temporalWY2026", "Temporal WY2026"), ("unseenStations", "Unseen-station")):
+        lines.append(f"Tails, {title} split:")
+        lines.append("")
+        lines.append("| Model | tail>20 MAE (n) | tail<5 MAE (n) |")
+        lines.append("|---|---:|---:|")
+        for model in MODELS:
+            r = results["splits"][split_key]["models"][model]
+            lines.append(f"| {model} | {_fmt(r['tailHigh_slr_gt_20']['mae'])} ({r['tailHigh_slr_gt_20']['n']}) | "
+                         f"{_fmt(r['tailLow_slr_lt_5']['mae'])} ({r['tailLow_slr_lt_5']['n']}) |")
+        for model in VARIANT_MODELS:
+            r = variants["splits"][split_key]["models"][model]
+            lines.append(f"| {model} | {_fmt(r['tailHigh_slr_gt_20']['mae'])} ({r['tailHigh_slr_gt_20']['n']}) | "
+                         f"{_fmt(r['tailLow_slr_lt_5']['mae'])} ({r['tailLow_slr_lt_5']['n']}) |")
+        lines.append("")
+    lines.append("### Verdicts")
+    lines.append("")
+    labels = {
+        "gbm_eb": "Item 3 — GBM+EB",
+        "ens_rg": "Item 3 — ENS-RG = mean(rf_eb, gbm)",
+        "ens_eb": "Item 3 — ENS-EB = mean(rf_eb, gbm_eb)",
+        "med_gbm": "Item 3 — MED (quantile GBM)",
+        "med_gbm_eb": "Item 3 — MED+EB (median residuals)",
+        "tail_rf_eb": "Item 4 — TAIL (magnitude-shrunk EB)",
+    }
+    for model in VARIANT_MODELS:
+        judge = verdicts[model]
+        d = judge["deltas"]
+        lines.append(
+            f"- **{labels[model]}: {judge['verdict']}** (vs rf_eb on the v2 pool: "
+            f"randomised {d['randomised']:+.3f}, LORO {d['loroMean']:+.3f}, temporal "
+            f"{d['temporal']:+.3f}, unseen-station {d['stations']:+.3f}, tail>20 "
+            f"{judge['tailHighDelta']:+.3f}, tail<5 {judge['tailLowDelta']:+.3f})."
+        )
+    for key, label in (("gbm_eb_vs_gbm", "GBM+EB vs raw GBM"), ("med_gbm_vs_gbm", "MED vs raw GBM"),
+                       ("med_gbm_eb_vs_gbm", "MED+EB vs raw GBM")):
+        judge = verdicts[key]
+        d = judge["deltas"]
+        lines.append(
+            f"- {label}: **{judge['verdict']}** (randomised {d['randomised']:+.3f}, LORO "
+            f"{d['loroMean']:+.3f}, temporal {d['temporal']:+.3f}, unseen-station "
+            f"{d['stations']:+.3f}, tail>20 {judge['tailHighDelta']:+.3f})."
+        )
+    lines.append("")
+    lines.append("Production calibration gates are untouched; all v2 artifacts are research "
+                 "files under the data tree, like v1.")
+    lines.append("")
+
+    report_path = output_dir / "MODEL_REPORT.md"
+    existing = report_path.read_text(encoding="utf-8") if report_path.exists() else ""
+    report_path.write_text(existing + "\n".join(lines), encoding="utf-8")
+    (output_dir / "bundle_verdicts.json").write_text(json.dumps(verdicts, indent=2), encoding="utf-8")
+    return verdicts
