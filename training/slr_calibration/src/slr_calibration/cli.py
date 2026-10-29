@@ -741,6 +741,19 @@ def _evaluate_gold_model_variants(args: argparse.Namespace) -> int:
     return 0
 
 
+def _evaluate_gold_west(args: argparse.Namespace) -> int:
+    from .west_experiment import run_west_experiment, write_west_report
+
+    results = run_west_experiment(
+        features_path=args.features,
+        output_dir=args.output_dir,
+        random_repeats=args.random_repeats,
+    )
+    write_west_report(results, args.output_dir / "west_experiment.md")
+    print(json.dumps({"accounting": results["accounting"], "verdicts": results["verdicts"]}, sort_keys=True))
+    return 0
+
+
 def _fetch_gold_profiles_hrrr(args: argparse.Namespace) -> int:
     from .hrrr_transfer import run_fetch_hrrr_transfer
 
@@ -1221,6 +1234,12 @@ def build_parser() -> argparse.ArgumentParser:
     gold_variants.add_argument("--baseline-results", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded/results.json"))
     gold_variants.add_argument("--random-repeats", type=int, default=20)
     gold_variants.set_defaults(func=_evaluate_gold_model_variants)
+
+    gold_west = subparsers.add_parser("evaluate-gold-west", help="west-only experiment: pooled vs west-only vs east-downweighted (0.25) training for RF+EB / ENS-EB, scored on identical western test folds (research only)")
+    gold_west.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/features.parquet"))
+    gold_west.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    gold_west.add_argument("--random-repeats", type=int, default=20)
+    gold_west.set_defaults(func=_evaluate_gold_west)
 
     gold_fetch_hrrr = subparsers.add_parser("fetch-gold-profiles-hrrr", help="step 5: fetch NOAA HRRR wrfprs profiles for step-2 gold events (resumable; transfer test -- see hrrr_transfer docstring)")
     gold_fetch_hrrr.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))

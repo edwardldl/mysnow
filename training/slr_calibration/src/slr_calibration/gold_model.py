@@ -227,13 +227,18 @@ class RFEBModel:
     def __init__(self, seed: int) -> None:
         self.seed = seed
 
-    def fit(self, train: pd.DataFrame) -> "RFEBModel":
+    def fit(
+        self, train: pd.DataFrame, sample_weight: np.ndarray | None = None
+    ) -> "RFEBModel":
         from sklearn.ensemble import RandomForestRegressor
 
         X = train[list(FEATURE_COLUMNS)].to_numpy()
         y = train["observed_slr"].to_numpy()
         # Station-grouped 5-fold out-of-fold predictions for honest
-        # residual fitting (no in-sample RF residuals).
+        # residual fitting (no in-sample RF residuals).  The optional
+        # sample weights apply to the RF fits only (OOF and full); the
+        # EB residual layer keeps the harness convention of unweighted
+        # rows (the trainer consumes qc_weight, fixed at 1.0 here).
         folds = _station_grouped_folds(train, self.seed)
         oof = np.full(len(train), np.nan)
         for fold in range(5):
@@ -241,12 +246,16 @@ class RFEBModel:
             if mask.sum() == 0 or (~mask).sum() == 0:
                 continue
             model = RandomForestRegressor(n_estimators=500, random_state=self.seed, n_jobs=-1)
-            model.fit(X[~mask], y[~mask])
+            model.fit(
+                X[~mask],
+                y[~mask],
+                sample_weight=None if sample_weight is None else sample_weight[~mask],
+            )
             oof[mask] = model.predict(X[mask])
         if np.isnan(oof).any():
             oof[np.isnan(oof)] = train["baseline_slr"].to_numpy()[np.isnan(oof)]
         self.rf = RandomForestRegressor(n_estimators=500, random_state=self.seed, n_jobs=-1)
-        self.rf.fit(X, y)
+        self.rf.fit(X, y, sample_weight=sample_weight)
         residual_frame = train.copy()
         residual_frame["rf_oof"] = np.clip(oof, MIN_SLR, MAX_SLR)
         self.eb_artifact = train_artifact(
@@ -273,7 +282,9 @@ class GBMEBModel:
     def __init__(self, seed: int) -> None:
         self.seed = seed
 
-    def fit(self, train: pd.DataFrame) -> "GBMEBModel":
+    def fit(
+        self, train: pd.DataFrame, sample_weight: np.ndarray | None = None
+    ) -> "GBMEBModel":
         from sklearn.ensemble import HistGradientBoostingRegressor
 
         X = train[list(FEATURE_COLUMNS)].to_numpy()
@@ -285,12 +296,16 @@ class GBMEBModel:
             if mask.sum() == 0 or (~mask).sum() == 0:
                 continue
             model = HistGradientBoostingRegressor(random_state=self.seed)
-            model.fit(X[~mask], y[~mask])
+            model.fit(
+                X[~mask],
+                y[~mask],
+                sample_weight=None if sample_weight is None else sample_weight[~mask],
+            )
             oof[mask] = model.predict(X[mask])
         if np.isnan(oof).any():
             oof[np.isnan(oof)] = train["baseline_slr"].to_numpy()[np.isnan(oof)]
         self.gbm = HistGradientBoostingRegressor(random_state=self.seed)
-        self.gbm.fit(X, y)
+        self.gbm.fit(X, y, sample_weight=sample_weight)
         residual_frame = train.copy()
         residual_frame["gbm_oof"] = np.clip(oof, MIN_SLR, MAX_SLR)
         self.eb_artifact = train_artifact(
