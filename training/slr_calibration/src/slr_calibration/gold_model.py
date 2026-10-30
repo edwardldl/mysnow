@@ -224,15 +224,16 @@ def _station_grouped_folds(train: pd.DataFrame, seed: int) -> np.ndarray:
 class RFEBModel:
     """RF plus an EB residual layer fitted on out-of-fold RF predictions."""
 
-    def __init__(self, seed: int) -> None:
+    def __init__(self, seed: int, columns: Any | None = None) -> None:
         self.seed = seed
+        self.columns = _feature_columns(columns)
 
     def fit(
         self, train: pd.DataFrame, sample_weight: np.ndarray | None = None
     ) -> "RFEBModel":
         from sklearn.ensemble import RandomForestRegressor
 
-        X = train[list(FEATURE_COLUMNS)].to_numpy()
+        X = train[self.columns].to_numpy()
         y = train["observed_slr"].to_numpy()
         # Station-grouped 5-fold out-of-fold predictions for honest
         # residual fitting (no in-sample RF residuals).  The optional
@@ -266,7 +267,7 @@ class RFEBModel:
 
     def predict_parts(self, test: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
         """(clipped RF prediction, EB-calibrated prediction) for a frame."""
-        X = test[list(FEATURE_COLUMNS)].to_numpy()
+        X = test[self.columns].to_numpy()
         rf_pred = np.clip(self.rf.predict(X), MIN_SLR, MAX_SLR)
         frame = test.copy()
         frame["rf_pred"] = rf_pred
@@ -279,15 +280,16 @@ class RFEBModel:
 class GBMEBModel:
     """GBM plus the same EB residual layer treatment as RFEBModel."""
 
-    def __init__(self, seed: int) -> None:
+    def __init__(self, seed: int, columns: Any | None = None) -> None:
         self.seed = seed
+        self.columns = _feature_columns(columns)
 
     def fit(
         self, train: pd.DataFrame, sample_weight: np.ndarray | None = None
     ) -> "GBMEBModel":
         from sklearn.ensemble import HistGradientBoostingRegressor
 
-        X = train[list(FEATURE_COLUMNS)].to_numpy()
+        X = train[self.columns].to_numpy()
         y = train["observed_slr"].to_numpy()
         folds = _station_grouped_folds(train, self.seed)
         oof = np.full(len(train), np.nan)
@@ -316,7 +318,7 @@ class GBMEBModel:
 
     def predict_parts(self, test: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
         """(clipped GBM prediction, EB-calibrated prediction) for a frame."""
-        X = test[list(FEATURE_COLUMNS)].to_numpy()
+        X = test[self.columns].to_numpy()
         gbm_pred = np.clip(self.gbm.predict(X), MIN_SLR, MAX_SLR)
         frame = test.copy()
         frame["gbm_pred"] = gbm_pred
@@ -428,27 +430,39 @@ def tail_shrink_predictions(rf_pred: np.ndarray, eb_pred: np.ndarray) -> np.ndar
 # Tree models
 # ---------------------------------------------------------------------------
 
-def _fit_rf(train: pd.DataFrame, seed: int):
+def _feature_columns(columns: Any | None) -> list[str]:
+    """Resolve an optional feature-column override (default: AGL spec)."""
+    return list(FEATURE_COLUMNS) if columns is None else list(columns)
+
+
+def _fit_rf(train: pd.DataFrame, seed: int, columns: Any | None = None):
     from sklearn.ensemble import RandomForestRegressor
 
     model = RandomForestRegressor(n_estimators=500, random_state=seed, n_jobs=-1)
-    model.fit(train[list(FEATURE_COLUMNS)].to_numpy(), train["observed_slr"].to_numpy())
+    model.fit(train[_feature_columns(columns)].to_numpy(), train["observed_slr"].to_numpy())
     return model
 
 
-def _fit_gbm(train: pd.DataFrame, seed: int):
+def _fit_gbm(train: pd.DataFrame, seed: int, columns: Any | None = None):
     from sklearn.ensemble import HistGradientBoostingRegressor
 
     model = HistGradientBoostingRegressor(random_state=seed)
-    model.fit(train[list(FEATURE_COLUMNS)].to_numpy(), train["observed_slr"].to_numpy())
+    model.fit(train[_feature_columns(columns)].to_numpy(), train["observed_slr"].to_numpy())
     return model
 
 
-def fit_predict(model_name: str, train: pd.DataFrame, test: pd.DataFrame, seed: int) -> np.ndarray:
+def fit_predict(
+    model_name: str,
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    seed: int,
+    columns: Any | None = None,
+) -> np.ndarray:
+    cols = _feature_columns(columns)
     if model_name == "rf":
-        return _fit_rf(train, seed).predict(test[list(FEATURE_COLUMNS)].to_numpy())
+        return _fit_rf(train, seed, cols).predict(test[cols].to_numpy())
     if model_name == "gbm":
-        return _fit_gbm(train, seed).predict(test[list(FEATURE_COLUMNS)].to_numpy())
+        return _fit_gbm(train, seed, cols).predict(test[cols].to_numpy())
     if model_name == "intercept":
         return InterceptModel().fit(train).predict(test)
     if model_name == "eb_gold":
@@ -458,7 +472,9 @@ def fit_predict(model_name: str, train: pd.DataFrame, test: pd.DataFrame, seed: 
     if model_name == "climatology":
         return ClimatologyModel().fit(train).predict(test)
     if model_name == "rf_eb":
-        return RFEBModel(seed).fit(train).predict(test)
+        return RFEBModel(seed, columns=cols).fit(train).predict(test)
+    if model_name == "gbm_eb":
+        return GBMEBModel(seed, columns=cols).fit(train).predict(test)
     raise ValueError(f"unknown model {model_name}")
 
 
@@ -534,10 +550,11 @@ def _run_split(
     test: pd.DataFrame,
     seed: int,
     models: tuple[str, ...] = MODELS,
+    columns: Any | None = None,
 ) -> dict[str, Any]:
     out: dict[str, Any] = {"trainN": int(len(train)), "testN": int(len(test)), "models": {}}
     for model_name in models:
-        predicted = fit_predict(model_name, train, test, seed)
+        predicted = fit_predict(model_name, train, test, seed, columns=columns)
         out["models"][model_name] = evaluate_predictions(test, predicted)
     return out
 
@@ -1199,3 +1216,518 @@ def append_bundle_report(output_dir: Path, baseline_results_path: Path) -> dict[
     report_path.write_text(existing + "\n".join(lines), encoding="utf-8")
     (output_dir / "bundle_verdicts.json").write_text(json.dumps(verdicts, indent=2), encoding="utf-8")
     return verdicts
+
+
+# ---------------------------------------------------------------------------
+# Pressure-level model judging (model-v2-pressure).  Same labels, splits,
+# seeds, model hyperparameters and EB machinery as run_benchmark /
+# run_variant_benchmark -- only the feature representation changes, from
+# AGL bands to native ERA5 pressure levels (pressure_features.py), so the
+# scores are directly comparable to the era5-expanded-v2 judging.  The
+# adoption rule applied to the results is the pre-registered one in
+# mysnow-pressure-level-model-plan.md section 7.
+# ---------------------------------------------------------------------------
+
+PRESSURE_MODELS = ("rf", "gbm", "rf_eb", "gbm_eb", "ens_eb", "kuchera")
+
+PRESSURE_REPRESENTATION = (
+    "ERA5 profiles in native pressure coordinates: window means of t / r / ws "
+    "at the 13 pressure levels 1000-500 hPa from the NSF NCAR ERA5 mirror; "
+    "surface pressure is the window mean of fetched ERA5 an.sfc sp "
+    "(128_134_sp), Pa converted to hPa"
+)
+
+
+def add_obs_hour_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Add obs_end_hour_sin / obs_end_hour_cos from the LOCAL valid_time.
+
+    ``valid_time`` is a local ISO string carrying its UTC offset, e.g.
+    "2007-11-12T07:00:00-09:00".  The wall-clock time in the string IS
+    the local observation-end time; it is parsed exactly as written and
+    never converted to UTC (a UTC conversion would shift the dominant
+    07:00-local peak to 12-13 UTC and silently corrupt the feature --
+    data-accuracy audit Check 7).
+    """
+    import re
+
+    pattern = re.compile(r"T(\d{2}):(\d{2})")
+
+    def _hour_angle(value: Any) -> float:
+        match = pattern.search(str(value))
+        if match is None:
+            raise ValueError(f"valid_time lacks a local time component: {value!r}")
+        hour = int(match.group(1)) + int(match.group(2)) / 60.0
+        return 2.0 * math.pi * hour / 24.0
+
+    out = frame.copy()
+    angles = out["valid_time"].map(_hour_angle).to_numpy()
+    out["obs_end_hour_sin"] = np.sin(angles)
+    out["obs_end_hour_cos"] = np.cos(angles)
+    return out
+
+
+def _run_pressure_split(
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    seed: int,
+    columns: Any,
+) -> dict[str, Any]:
+    """One split of the pressure ladder; components fitted once, shared.
+
+    rf / gbm are the raw base learners exactly as run_benchmark scores
+    them; rf_eb / gbm_eb come from the same EB-residual models the
+    variant benchmark used, and ens_eb is their mean -- identical
+    construction to results_variants.json's ens_eb.
+    """
+    cols = _feature_columns(columns)
+    X_test = test[cols].to_numpy()
+    rf_pred = _fit_rf(train, seed, cols).predict(X_test)
+    gbm_pred = _fit_gbm(train, seed, cols).predict(X_test)
+    _, rf_eb_pred = RFEBModel(seed, columns=cols).fit(train).predict_parts(test)
+    _, gbm_eb_pred = GBMEBModel(seed, columns=cols).fit(train).predict_parts(test)
+    predictions = {
+        "rf": rf_pred,
+        "gbm": gbm_pred,
+        "rf_eb": rf_eb_pred,
+        "gbm_eb": gbm_eb_pred,
+        "ens_eb": (rf_eb_pred + gbm_eb_pred) / 2.0,
+        "kuchera": test["baseline_slr"].to_numpy(),
+    }
+    out: dict[str, Any] = {"trainN": int(len(train)), "testN": int(len(test)), "models": {}}
+    for model_name in PRESSURE_MODELS:
+        out["models"][model_name] = evaluate_predictions(test, predictions[model_name])
+    return out
+
+
+def run_pressure_benchmark(
+    features_path: Path,
+    output_dir: Path,
+    *,
+    columns: Any,
+    variant: str,
+    random_repeats: int = 20,
+    splits: tuple[str, ...] = ("random", "loro", "temporal", "stations"),
+    add_obs_hour: bool = False,
+    permutation_importance_flag: bool = False,
+) -> dict[str, Any]:
+    """Judge one pressure-level variant on the champion's splits/seeds."""
+    frame, accounting = load_modeling_frame(features_path)
+    if add_obs_hour:
+        frame = add_obs_hour_features(frame)
+    cols = _feature_columns(columns)
+    missing = [c for c in cols if c not in frame.columns]
+    if missing:
+        raise ValueError(f"features frame is missing columns: {missing}")
+    results: dict[str, Any] = {
+        "profileSource": _frame_profile_source(frame),
+        "featureRepresentation": PRESSURE_REPRESENTATION,
+        "variant": variant,
+        "features": cols,
+        "accounting": accounting,
+        "splits": {},
+    }
+
+    if "random" in splits:
+        repeats: list[dict[str, Any]] = []
+        for rep in range(random_repeats):
+            train, test = split_random(frame, seed=1000 + rep)
+            repeats.append(_run_pressure_split(train, test, seed=1000 + rep, columns=cols))
+        aggregated: dict[str, Any] = {}
+        for model_name in PRESSURE_MODELS:
+            maes = [r["models"][model_name]["overall"]["mae"] for r in repeats]
+            aggregated[model_name] = {
+                "maeMean": round(float(np.mean(maes)), 4),
+                "maeStd": round(float(np.std(maes)), 4),
+                "maeMin": round(float(np.min(maes)), 4),
+                "maeMax": round(float(np.max(maes)), 4),
+                "rep0": repeats[0]["models"][model_name],
+            }
+        results["splits"]["random60_40"] = {
+            "repeats": random_repeats,
+            "trainN": repeats[0]["trainN"],
+            "testN": repeats[0]["testN"],
+            "aggregated": aggregated,
+        }
+
+    if permutation_importance_flag:
+        from sklearn.inspection import permutation_importance
+
+        train0, test0 = split_random(frame, seed=1000)
+        rf0 = _fit_rf(train0, 1000, cols)
+        importance = permutation_importance(
+            rf0, test0[cols].to_numpy(), test0["observed_slr"].to_numpy(),
+            n_repeats=5, random_state=0, n_jobs=-1,
+        )
+        order = np.argsort(importance.importances_mean)[::-1]
+        results["permutationImportance"] = [
+            {"feature": cols[i], "importanceMean": round(float(importance.importances_mean[i]), 4),
+             "importanceStd": round(float(importance.importances_std[i]), 4)}
+            for i in order
+        ]
+
+    if "loro" in splits:
+        loro: dict[str, Any] = {}
+        for region in sorted(frame["region"].unique()):
+            train, test = split_loro(frame, str(region))
+            loro[str(region)] = _run_pressure_split(train, test, seed=2000, columns=cols)
+        results["splits"]["leaveOneRegionOut"] = loro
+
+    if "temporal" in splits:
+        train, test = split_temporal(frame)
+        results["splits"]["temporalWY2026"] = _run_pressure_split(
+            train, test, seed=3000, columns=cols)
+
+    if "stations" in splits:
+        train, test = split_stations(frame, seed=4000)
+        results["splits"]["unseenStations"] = _run_pressure_split(
+            train, test, seed=4000, columns=cols)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / f"results_pressure_{variant}.json").write_text(
+        json.dumps(results, indent=2), encoding="utf-8")
+    return results
+
+
+def loro_region_metrics(results: dict[str, Any], model: str) -> dict[str, Any]:
+    """Per-region MAE/bias/n of one model under LORO (held-out region rows)."""
+    out: dict[str, Any] = {}
+    for region, split in results["splits"]["leaveOneRegionOut"].items():
+        overall = split["models"][model]["overall"]
+        out[str(region)] = {"mae": overall["mae"], "bias": overall["bias"], "n": overall["n"]}
+    return out
+
+
+def split_maes(results: dict[str, Any], model: str) -> dict[str, Any]:
+    """Headline MAEs for the splits a results dict actually contains."""
+    out: dict[str, Any] = {}
+    splits = results.get("splits", {})
+    if "random60_40" in splits:
+        out["randomised"] = splits["random60_40"]["aggregated"][model]["maeMean"]
+    if "leaveOneRegionOut" in splits:
+        maes = [s["models"][model]["overall"]["mae"] for s in splits["leaveOneRegionOut"].values()]
+        out["loroMean"] = round(float(np.mean(maes)), 4)
+    if "temporalWY2026" in splits:
+        out["temporal"] = splits["temporalWY2026"]["models"][model]["overall"]["mae"]
+    if "unseenStations" in splits:
+        out["stations"] = splits["unseenStations"]["models"][model]["overall"]["mae"]
+    return out
+
+
+def pressure_route_verdict(
+    candidate_results: dict[str, Any],
+    reference_variants: dict[str, Any],
+) -> dict[str, Any]:
+    """Plan section 7, applied mechanically to ENS-EB.
+
+    Route A (overall): LORO improves >= 0.03, no headline split regresses
+    > 0.05, high tail (randomised rep0, SLR > 20) regresses <= 0.20.
+    Route B (regional bias): Alaska or PNW LORO |bias| improves >= 0.5
+    with no MAE regression in that region.  Deltas are reference -
+    candidate (positive = improvement).
+    """
+    cand = headline_metrics(candidate_results, "ens_eb")
+    ref = headline_metrics(reference_variants, "ens_eb")
+    deltas = {key: round(float(ref[key] - cand[key]), 4) for key in _HEADLINE_SPLITS}
+    tail_high_delta = round(float(ref["tailHigh"] - cand["tailHigh"]), 4)
+    route_a = {
+        "loroGain": deltas["loroMean"],
+        "loroGainOk": deltas["loroMean"] >= 0.03,
+        "headlineDeltas": deltas,
+        "headlineOk": all(value >= -0.05 for value in deltas.values()),
+        "tailHighDelta": tail_high_delta,
+        "tailHighOk": tail_high_delta >= -0.20,
+    }
+    route_a["passed"] = bool(
+        route_a["loroGainOk"] and route_a["headlineOk"] and route_a["tailHighOk"])
+
+    cand_loro = loro_region_metrics(candidate_results, "ens_eb")
+    ref_loro = loro_region_metrics(reference_variants, "ens_eb")
+    route_b: dict[str, Any] = {"regions": {}}
+    route_b_passed = False
+    for region in ("alaska", "pacific-northwest"):
+        bias_gain = round(abs(ref_loro[region]["bias"]) - abs(cand_loro[region]["bias"]), 4)
+        mae_delta = round(float(ref_loro[region]["mae"] - cand_loro[region]["mae"]), 4)
+        passed = bool(bias_gain >= 0.5 and mae_delta >= 0.0)
+        route_b["regions"][region] = {
+            "referenceBias": ref_loro[region]["bias"],
+            "candidateBias": cand_loro[region]["bias"],
+            "absBiasGain": bias_gain,
+            "referenceMae": ref_loro[region]["mae"],
+            "candidateMae": cand_loro[region]["mae"],
+            "maeDelta": mae_delta,
+            "passed": passed,
+        }
+        route_b_passed = route_b_passed or passed
+    route_b["passed"] = bool(route_b_passed)
+
+    return {
+        "adopted": bool(route_a["passed"] or route_b["passed"]),
+        "routeA": route_a,
+        "routeB": route_b,
+        "candidateHeadline": cand,
+        "referenceHeadline": ref,
+        "candidateLoroRegions": cand_loro,
+        "referenceLoroRegions": ref_loro,
+    }
+
+
+def _ablation_summary(
+    base_results: dict[str, Any], ablated_results: dict[str, Any]
+) -> dict[str, Any]:
+    """ENS-EB MAE deltas of an ablation vs its base (positive = ablation worse)."""
+    base = split_maes(base_results, "ens_eb")
+    ablated = split_maes(ablated_results, "ens_eb")
+    return {
+        key: round(float(ablated[key] - base[key]), 4)
+        for key in ("randomised", "loroMean", "temporal", "stations")
+        if key in base and key in ablated
+    }
+
+
+def write_pressure_report_bundle(pressure_dir: Path, reference_dir: Path) -> dict[str, Any]:
+    """Aggregate the per-variant pressure results, apply plan section 7,
+    and write verdict_pressure.json + PRESSURE_MODEL_REPORT.md."""
+    ref_base = json.loads((reference_dir / "results.json").read_text(encoding="utf-8"))
+    ref_variants = json.loads((reference_dir / "results_variants.json").read_text(encoding="utf-8"))
+
+    variant_results: dict[str, Any] = {}
+    for path in sorted(pressure_dir.glob("results_pressure_*.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        variant_results[str(payload["variant"])] = payload
+    if not variant_results:
+        raise FileNotFoundError(f"no results_pressure_*.json under {pressure_dir}")
+
+    full_variants = [v for v, r in variant_results.items() if "unseenStations" in r["splits"]]
+    if not full_variants:
+        raise ValueError("no fully-judged pressure variant (unseenStations split missing)")
+
+    def _loro_mean(variant: str) -> float:
+        return float(split_maes(variant_results[variant], "ens_eb")["loroMean"])
+
+    better = sorted(full_variants, key=lambda v: (_loro_mean(v), v != "p_core", v))[0]
+    verdict = pressure_route_verdict(variant_results[better], ref_variants)
+    verdict["betterVariant"] = better
+    verdict["fullVariants"] = {v: split_maes(variant_results[v], "ens_eb") for v in full_variants}
+
+    ablations: dict[str, Any] = {}
+    if "p_core" in variant_results:
+        if "p_core_notime" in variant_results:
+            ablations["noTime"] = _ablation_summary(
+                variant_results["p_core"], variant_results["p_core_notime"])
+        if "p_core_obshour" in variant_results:
+            ablations["obsHour"] = _ablation_summary(
+                variant_results["p_core"], variant_results["p_core_obshour"])
+    verdict["ablations"] = ablations
+
+    ref_ens = headline_metrics(ref_variants, "ens_eb")
+    ref_kuchera = headline_metrics(ref_base, "kuchera")
+    cand_loro = loro_region_metrics(variant_results[better], "ens_eb")
+    ref_loro = loro_region_metrics(ref_variants, "ens_eb")
+
+    disp = {"rf": "RF", "gbm": "GBM", "rf_eb": "RF+EB", "gbm_eb": "GBM+EB",
+            "ens_eb": "ENS-EB", "kuchera": "Kuchera"}
+    lines: list[str] = []
+    lines.append("# Pressure-level model judging (model-v2-pressure)")
+    lines.append("")
+    lines.append("## Provenance — read first")
+    lines.append("")
+    lines.append(
+        "**Profile representation: native ERA5 pressure levels** — window means of "
+        "temperature, relative humidity and wind speed at the 13 pressure levels "
+        "1000–500 hPa, taken from the same NSF NCAR ERA5 profiles "
+        "(`era5-nsf-ncar-aws`) the AGL champion was judged on, *without* the "
+        "interpolation into 300–2400 m AGL bands. Surface pressure is the window "
+        "mean of the real ERA5 an.sfc surface-pressure field (128_134_sp), "
+        "fetched for this plan and validated in the data-accuracy audit. Labels, "
+        "the 57,376-event modelling pool, split constructions, seeds, model "
+        "hyperparameters and the hierarchical EB layer are identical to the "
+        "era5-expanded-v2 judging (gold_model harness), so every score below is "
+        "directly comparable to the AGL champion's. The AGL champion and its "
+        "tree are untouched; production calibration gates are untouched."
+    )
+    lines.append("")
+    lines.append("Variants judged: " + ", ".join(
+        f"{v} ({len(r['features'])} features)" for v, r in sorted(variant_results.items())) + ".")
+    lines.append("")
+    lines.append("The P-geometry ablation (per-level height-above-ground features) was "
+                 "**skipped**: the built pressure parquets persist only t/rh/ws level "
+                 "means, so per-level geopotential heights would require a new builder "
+                 "pass over the raw profile cache — new extraction plumbing, outside "
+                 "this judging run.")
+    lines.append("")
+    lines.append("## Headline comparison (ENS-EB, MAE)")
+    lines.append("")
+    lines.append("| Model | randomised | LORO mean | temporal | unseen-station | tail>20 (rep0) | tail<5 (rep0) |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|")
+    for variant in full_variants:
+        h = headline_metrics(variant_results[variant], "ens_eb")
+        marker = " ← better pressure variant" if variant == better else ""
+        lines.append(
+            f"| {variant} ENS-EB{marker} | {h['randomised']:.3f} ±{h['randomisedStd']:.3f} | "
+            f"{h['loroMean']:.3f} | {h['temporal']:.3f} | {h['stations']:.3f} | "
+            f"{_fmt(h['tailHigh'])} (n={h['tailHighN']}) | {_fmt(h['tailLow'])} (n={h['tailLowN']}) |"
+        )
+    lines.append(
+        f"| AGL champion ENS-EB | {ref_ens['randomised']:.3f} ±{ref_ens['randomisedStd']:.3f} | "
+        f"{ref_ens['loroMean']:.3f} | {ref_ens['temporal']:.3f} | {ref_ens['stations']:.3f} | "
+        f"{_fmt(ref_ens['tailHigh'])} (n={ref_ens['tailHighN']}) | "
+        f"{_fmt(ref_ens['tailLow'])} (n={ref_ens['tailLowN']}) |"
+    )
+    lines.append(
+        f"| Kuchera (same events) | {ref_kuchera['randomised']:.3f} | {ref_kuchera['loroMean']:.3f} | "
+        f"{ref_kuchera['temporal']:.3f} | {ref_kuchera['stations']:.3f} | "
+        f"{_fmt(ref_kuchera['tailHigh'])} (n={ref_kuchera['tailHighN']}) | "
+        f"{_fmt(ref_kuchera['tailLow'])} (n={ref_kuchera['tailLowN']}) |"
+    )
+    lines.append("")
+
+    for variant in full_variants:
+        results = variant_results[variant]
+        agg = results["splits"]["random60_40"]["aggregated"]
+        lines.append(f"## {variant} — full ladder")
+        lines.append("")
+        lines.append("Randomised 60/40 (20 repeats):")
+        lines.append("")
+        lines.append("| Model | MAE mean | MAE std | rep0 bias | rep0 tail>20 MAE (n) | rep0 tail<5 MAE (n) |")
+        lines.append("|---|---:|---:|---:|---:|---:|")
+        for model in PRESSURE_MODELS:
+            rep0 = agg[model]["rep0"]
+            lines.append(
+                f"| {disp[model]} | {agg[model]['maeMean']:.3f} | {agg[model]['maeStd']:.3f} | "
+                f"{_fmt(rep0['overall']['bias'])} | {_fmt(rep0['tailHigh_slr_gt_20']['mae'])} "
+                f"({rep0['tailHigh_slr_gt_20']['n']}) | {_fmt(rep0['tailLow_slr_lt_5']['mae'])} "
+                f"({rep0['tailLow_slr_lt_5']['n']}) |"
+            )
+        lines.append("")
+        lines.append("Leave-one-region-out (ENS-EB per held-out region; other models' MAE):")
+        lines.append("")
+        lines.append("| Held-out region | n | ENS-EB MAE | ENS-EB bias | RF | GBM | RF+EB | GBM+EB | Kuchera |")
+        lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+        for region, split in sorted(results["splits"]["leaveOneRegionOut"].items()):
+            m = split["models"]
+            ens = m["ens_eb"]["overall"]
+            lines.append(
+                f"| {region} | {split['testN']} | {ens['mae']:.3f} | {_fmt(ens['bias'])} | "
+                f"{m['rf']['overall']['mae']:.3f} | {m['gbm']['overall']['mae']:.3f} | "
+                f"{m['rf_eb']['overall']['mae']:.3f} | {m['gbm_eb']['overall']['mae']:.3f} | "
+                f"{m['kuchera']['overall']['mae']:.3f} |"
+            )
+        lines.append("")
+        for split_name, title in (("temporalWY2026", "Temporal holdout (train < WY2026, test WY2026)"),
+                                  ("unseenStations", "Unseen-station holdout (30% of stations)")):
+            split = results["splits"][split_name]
+            lines.append(f"{title} — train n={split['trainN']}, test n={split['testN']}:")
+            lines.append("")
+            lines.append("| Model | MAE | bias | tail>20 MAE (n) | tail<5 MAE (n) |")
+            lines.append("|---|---:|---:|---:|---:|")
+            for model in PRESSURE_MODELS:
+                r = split["models"][model]
+                lines.append(
+                    f"| {disp[model]} | {r['overall']['mae']:.3f} | {_fmt(r['overall']['bias'])} | "
+                    f"{_fmt(r['tailHigh_slr_gt_20']['mae'])} ({r['tailHigh_slr_gt_20']['n']}) | "
+                    f"{_fmt(r['tailLow_slr_lt_5']['mae'])} ({r['tailLow_slr_lt_5']['n']}) |"
+                )
+            lines.append("")
+
+    lines.append(f"## Better pressure variant ({better}) vs AGL champion — LORO per region (ENS-EB)")
+    lines.append("")
+    lines.append("| Region | n | champion MAE | pressure MAE | ΔMAE | champion bias | pressure bias | Δ|bias| |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|")
+    for region in sorted(cand_loro):
+        c, r = cand_loro[region], ref_loro[region]
+        lines.append(
+            f"| {region} | {c['n']} | {r['mae']:.3f} | {c['mae']:.3f} | "
+            f"{r['mae'] - c['mae']:+.3f} | {_fmt(r['bias'])} | {_fmt(c['bias'])} | "
+            f"{abs(r['bias']) - abs(c['bias']):+.3f} |"
+        )
+    lines.append("")
+
+    if ablations:
+        lines.append("## Ablations (ENS-EB MAE deltas: ablated variant minus P-core; positive = the ablated variant is worse)")
+        lines.append("")
+        if "noTime" in ablations:
+            d = ablations["noTime"]
+            lines.append(
+                "- **Time features (month, doy_sin, doy_cos), removed:** "
+                + ", ".join(f"{k} {v:+.3f}" for k, v in sorted(d.items()))
+                + ". Positive deltas mean removing the time features hurt, i.e. "
+                "P-core (with time features) is better."
+            )
+        if "obsHour" in ablations:
+            d = ablations["obsHour"]
+            lines.append(
+                "- **Obs-end-hour features added to P-core:** deltas are "
+                "P-core+hour minus P-core, so negative values are improvements "
+                "from the hour features: "
+                + ", ".join(f"{k} {v:+.3f}" for k, v in sorted(d.items()))
+                + ". Per plan §2.6 the hour features count as helping only if the "
+                "LORO and/or temporal delta is ≤ −0.030 (an improvement of "
+                "≥ 0.03); a randomised-only gain does not count."
+            )
+        lines.append("")
+
+    if "permutationImportance" in variant_results.get("p_core", {}):
+        importance = variant_results["p_core"]["permutationImportance"]
+        lines.append("## RF permutation importance (P-core, randomised split rep 0; R² drop, 5 repeats)")
+        lines.append("")
+        for entry in importance[:15]:
+            lines.append(f"- {entry['feature']}: {entry['importanceMean']:.3f} ± {entry['importanceStd']:.3f}")
+        lines.append("")
+        groups: dict[str, float] = {}
+        for entry in importance:
+            name = entry["feature"]
+            group = name.split("_")[0] if name.startswith(("t_", "rh_", "ws_")) else name
+            groups[group] = groups.get(group, 0.0) + entry["importanceMean"]
+        lines.append("Grouped importance sums: " + ", ".join(
+            f"{k} {v:.3f}" for k, v in sorted(groups.items(), key=lambda kv: -kv[1])) + ".")
+        lines.append("")
+
+    route_a, route_b = verdict["routeA"], verdict["routeB"]
+    lines.append("## Adoption verdict (plan §7, applied mechanically)")
+    lines.append("")
+    lines.append(f"Better pressure variant: **{better}** (by ENS-EB LORO mean).")
+    lines.append("")
+    lines.append(
+        f"- **Route A (overall): {'PASS' if route_a['passed'] else 'FAIL'}** — LORO gain "
+        f"{route_a['loroGain']:+.3f} (needs ≥ +0.030: {'ok' if route_a['loroGainOk'] else 'no'}); "
+        "headline deltas "
+        + ", ".join(f"{k} {v:+.3f}" for k, v in route_a["headlineDeltas"].items())
+        + f" (none may be < −0.050: {'ok' if route_a['headlineOk'] else 'breached'}); "
+        f"high-tail delta {route_a['tailHighDelta']:+.3f} "
+        f"(must be ≥ −0.200: {'ok' if route_a['tailHighOk'] else 'breached'})."
+    )
+    for region, entry in sorted(route_b["regions"].items()):
+        lines.append(
+            f"- **Route B ({region}): {'PASS' if entry['passed'] else 'FAIL'}** — |bias| "
+            f"{abs(entry['referenceBias']):.3f} → {abs(entry['candidateBias']):.3f} "
+            f"(gain {entry['absBiasGain']:+.3f}, needs ≥ +0.500); region MAE delta "
+            f"{entry['maeDelta']:+.3f} (must be ≥ 0.000)."
+        )
+    lines.append("")
+    if verdict["adopted"]:
+        lines.append(
+            f"**ADOPTED — {better} ENS-EB becomes the research champion.** Production "
+            "calibration gates are unchanged; promotion into production remains a "
+            "separate step-6 decision."
+        )
+    else:
+        lines.append(
+            "**NOT ADOPTED — the AGL champion stands.** The pressure-level tree is "
+            "archived as a judged experiment; its scores above are the record."
+        )
+    lines.append("")
+    lines.append("## Caveats")
+    lines.append("")
+    lines.append("- Tail subsets are small in some splits; read tail MAEs with their n.")
+    lines.append("- The temporal holdout is a single water year (WY2026).")
+    lines.append("- Below-ground pressure levels are represented per the builder's "
+                 "validity/fill rules (fetched-sp majority rule); P-mask exposes those "
+                 "flags to the model, P-core does not.")
+    lines.append("- All artifacts here are research files under the data tree — not app "
+                 "artifacts, never bundled into src/.")
+    lines.append("")
+
+    (pressure_dir / "PRESSURE_MODEL_REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    (pressure_dir / "verdict_pressure.json").write_text(
+        json.dumps(verdict, indent=2), encoding="utf-8")
+    return verdict

@@ -773,6 +773,47 @@ def _evaluate_gold_model_variants(args: argparse.Namespace) -> int:
     return 0
 
 
+def _evaluate_pressure_models(args: argparse.Namespace) -> int:
+    from .gold_model import run_pressure_benchmark
+
+    if args.feature_columns_json is not None:
+        spec = json.loads(args.feature_columns_json.read_text(encoding="utf-8"))
+        columns = list(spec[args.feature_key])
+    else:
+        columns = [c.strip() for c in args.columns.split(",") if c.strip()]
+    if args.drop_columns:
+        drop = {c.strip() for c in args.drop_columns.split(",") if c.strip()}
+        columns = [c for c in columns if c not in drop]
+    if args.add_obs_hour:
+        columns = columns + ["obs_end_hour_sin", "obs_end_hour_cos"]
+    if not columns:
+        raise ValueError("no feature columns selected")
+    splits = tuple(s.strip() for s in args.splits.split(",") if s.strip())
+    results = run_pressure_benchmark(
+        features_path=args.features,
+        output_dir=args.output_dir,
+        columns=columns,
+        variant=args.variant,
+        random_repeats=args.random_repeats,
+        splits=splits,
+        add_obs_hour=args.add_obs_hour,
+        permutation_importance_flag=args.permutation_importance,
+    )
+    print(json.dumps({"variant": args.variant, "accounting": results["accounting"]}, sort_keys=True))
+    return 0
+
+
+def _write_pressure_report(args: argparse.Namespace) -> int:
+    from .gold_model import write_pressure_report_bundle
+
+    verdict = write_pressure_report_bundle(
+        pressure_dir=args.pressure_dir,
+        reference_dir=args.reference_dir,
+    )
+    print(json.dumps({"adopted": verdict["adopted"], "betterVariant": verdict["betterVariant"]}, sort_keys=True))
+    return 0
+
+
 def _evaluate_gold_west(args: argparse.Namespace) -> int:
     from .west_experiment import run_west_experiment, write_west_report
 
@@ -1342,6 +1383,25 @@ def build_parser() -> argparse.ArgumentParser:
     gold_variants.add_argument("--baseline-results", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded/results.json"))
     gold_variants.add_argument("--random-repeats", type=int, default=20)
     gold_variants.set_defaults(func=_evaluate_gold_model_variants)
+
+    pressure_eval = subparsers.add_parser("evaluate-pressure-models", help="pressure-level model: judge one P-core/P-mask variant (or ablation) on the champion's splits/seeds with pressure-level feature columns (research only)")
+    pressure_eval.add_argument("--features", type=Path, required=True, help="features parquet (pressure core or mask build)")
+    pressure_eval.add_argument("--output-dir", type=Path, required=True)
+    pressure_eval.add_argument("--variant", required=True, help="result label, e.g. p_core, p_mask, p_core_notime, p_core_obshour")
+    pressure_eval.add_argument("--columns", default="", help="comma-separated feature columns (alternative to --feature-columns-json)")
+    pressure_eval.add_argument("--feature-columns-json", type=Path, default=None, help="JSON file holding named feature lists (e.g. feature_columns.json)")
+    pressure_eval.add_argument("--feature-key", default="", help="key in the feature-columns JSON (e.g. pCoreFeatures, pMaskFeatures)")
+    pressure_eval.add_argument("--drop-columns", default="", help="comma-separated columns to drop (ablations)")
+    pressure_eval.add_argument("--add-obs-hour", action="store_true", help="derive obs_end_hour_sin/cos from the local valid_time and append them to the columns")
+    pressure_eval.add_argument("--splits", default="random,loro,temporal,stations", help="comma-separated subset of random,loro,temporal,stations")
+    pressure_eval.add_argument("--permutation-importance", action="store_true", help="also compute RF permutation importance on the randomised rep-0 split")
+    pressure_eval.add_argument("--random-repeats", type=int, default=20)
+    pressure_eval.set_defaults(func=_evaluate_pressure_models)
+
+    pressure_report = subparsers.add_parser("write-pressure-report", help="pressure-level model: aggregate the variant results, apply the plan section 7 adoption rule mechanically, and write PRESSURE_MODEL_REPORT.md + verdict_pressure.json")
+    pressure_report.add_argument("--pressure-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v2-pressure"))
+    pressure_report.add_argument("--reference-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2"))
+    pressure_report.set_defaults(func=_write_pressure_report)
 
     gold_west = subparsers.add_parser("evaluate-gold-west", help="west-only experiment: pooled vs west-only vs east-downweighted (0.25) training for RF+EB / ENS-EB, scored on identical western test folds (research only)")
     gold_west.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/features.parquet"))
