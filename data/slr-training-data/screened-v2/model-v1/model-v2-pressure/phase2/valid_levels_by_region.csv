@@ -1,0 +1,7 @@
+region,events,mean_valid_levels,pct_all13_valid,pct_le8_valid,pct_le6_valid
+rockies,9242,6.15,0.0,99.8,58.0
+sierra-nevada,956,6.29,0.0,100.0,76.7
+pacific-northwest,5089,9.85,6.1,20.8,0.0
+alaska,1199,10.62,1.1,1.6,0.0
+great-lakes,19032,11.54,1.9,0.0,0.0
+northeast,21858,11.75,23.2,0.0,0.0

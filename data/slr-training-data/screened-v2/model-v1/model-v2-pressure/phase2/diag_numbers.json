@@ -1,0 +1,191 @@
+{
+ "thresholds": {
+  "300": {
+   "stations": 94,
+   "events": 5030,
+   "pct_events": 8.77,
+   "by_region_events": {
+    "alaska": 680,
+    "great-lakes": 76,
+    "northeast": 362,
+    "pacific-northwest": 1895,
+    "rockies": 1937,
+    "sierra-nevada": 80
+   }
+  },
+  "500": {
+   "stations": 33,
+   "events": 1273,
+   "pct_events": 2.22,
+   "by_region_events": {
+    "alaska": 326,
+    "great-lakes": 76,
+    "pacific-northwest": 811,
+    "rockies": 9,
+    "sierra-nevada": 51
+   }
+  },
+  "700": {
+   "stations": 6,
+   "events": 107,
+   "pct_events": 0.19,
+   "by_region_events": {
+    "alaska": 27,
+    "great-lakes": 21,
+    "pacific-northwest": 59
+   }
+  }
+ },
+ "top15": [
+  {
+   "site_id": "US1MNLS0026",
+   "region": "great-lakes",
+   "latitude": 44.5,
+   "longitude": -93.6,
+   "elevation_m": 3057.8,
+   "implied_m": 287.3,
+   "median_diff_m": 2770.5,
+   "events": 21
+  },
+  {
+   "site_id": "US1AKHB0006",
+   "region": "alaska",
+   "latitude": 59.5,
+   "longitude": -136.0,
+   "elevation_m": 65.2,
+   "implied_m": 1013.3,
+   "median_diff_m": 948.1,
+   "events": 22
+  },
+  {
+   "site_id": "US1WASG0017",
+   "region": "pacific-northwest",
+   "latitude": 48.5,
+   "longitude": -121.5,
+   "elevation_m": 93.9,
+   "implied_m": 945.8,
+   "median_diff_m": 851.9,
+   "events": 29
+  },
+  {
+   "site_id": "US1WASG0031",
+   "region": "pacific-northwest",
+   "latitude": 48.6,
+   "longitude": -121.4,
+   "elevation_m": 107.0,
+   "implied_m": 954.2,
+   "median_diff_m": 847.2,
+   "events": 16
+  },
+  {
+   "site_id": "USC00502642",
+   "region": "alaska",
+   "latitude": 61.2,
+   "longitude": -149.3,
+   "elevation_m": 158.5,
+   "implied_m": 1004.0,
+   "median_diff_m": 845.5,
+   "events": 5
+  },
+  {
+   "site_id": "US1WACM0014",
+   "region": "pacific-northwest",
+   "latitude": 48.1,
+   "longitude": -123.2,
+   "elevation_m": 69.2,
+   "implied_m": 788.1,
+   "median_diff_m": 718.9,
+   "events": 14
+  },
+  {
+   "site_id": "US1CAMN0004",
+   "region": "sierra-nevada",
+   "latitude": 37.5,
+   "longitude": -118.6,
+   "elevation_m": 1949.2,
+   "implied_m": 2630.3,
+   "median_diff_m": 681.1,
+   "events": 21
+  },
+  {
+   "site_id": "US1CAIN0002",
+   "region": "sierra-nevada",
+   "latitude": 37.3,
+   "longitude": -118.5,
+   "elevation_m": 1829.4,
+   "implied_m": 2507.5,
+   "median_diff_m": 678.1,
+   "events": 30
+  },
+  {
+   "site_id": "US1WACM0038",
+   "region": "pacific-northwest",
+   "latitude": 48.1,
+   "longitude": -123.3,
+   "elevation_m": 96.0,
+   "implied_m": 770.6,
+   "median_diff_m": 674.6,
+   "events": 10
+  },
+  {
+   "site_id": "US1WACH0028",
+   "region": "pacific-northwest",
+   "latitude": 47.6,
+   "longitude": -120.6,
+   "elevation_m": 356.3,
+   "implied_m": 1022.4,
+   "median_diff_m": 666.1,
+   "events": 100
+  },
+  {
+   "site_id": "US1WAOK0005",
+   "region": "pacific-northwest",
+   "latitude": 49.0,
+   "longitude": -119.4,
+   "elevation_m": 297.8,
+   "implied_m": 963.0,
+   "median_diff_m": 665.2,
+   "events": 49
+  },
+  {
+   "site_id": "US1AKHB0002",
+   "region": "alaska",
+   "latitude": 59.2,
+   "longitude": -135.4,
+   "elevation_m": 113.1,
+   "implied_m": 771.1,
+   "median_diff_m": 658.0,
+   "events": 80
+  },
+  {
+   "site_id": "US1WAOK0034",
+   "region": "pacific-northwest",
+   "latitude": 48.4,
+   "longitude": -120.3,
+   "elevation_m": 699.2,
+   "implied_m": 1353.3,
+   "median_diff_m": 654.1,
+   "events": 62
+  },
+  {
+   "site_id": "US1WAGH0047",
+   "region": "pacific-northwest",
+   "latitude": 47.5,
+   "longitude": -123.8,
+   "elevation_m": 64.9,
+   "implied_m": 706.2,
+   "median_diff_m": 641.3,
+   "events": 9
+  },
+  {
+   "site_id": "US1ORLA0193",
+   "region": "pacific-northwest",
+   "latitude": 43.7,
+   "longitude": -122.5,
+   "elevation_m": 369.7,
+   "implied_m": 1005.4,
+   "median_diff_m": 635.7,
+   "events": 8
+  }
+ ]
+}
