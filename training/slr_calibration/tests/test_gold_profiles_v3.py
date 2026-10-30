@@ -180,5 +180,38 @@ class AccumuFetchAndAssembleTests(unittest.TestCase):
             self.assertEqual(hourly["tp_profile_cache_mm"], [0.5] * 24)
 
 
+class QPlTests(unittest.TestCase):
+    def test_q_key_layout(self) -> None:
+        self.assertEqual(
+            v3_pl_key(date(2024, 1, 15), "q"),
+            "e5.oper.an.pl/202401/e5.oper.an.pl.128_133_q.ll025sc.2024011500_2024011523.nc",
+        )
+
+    def test_q_fetch_and_assemble_use_their_own_tree(self) -> None:
+        event = _event(datetime(2021, 1, 15, 7, 0, tzinfo=LOCAL))
+        with tempfile.TemporaryDirectory() as tmp:
+            v3_dir = Path(tmp)
+            reader = FakePlReader(value=0.00421)
+            summary = fetch_v3_pl([event], v3_dir, reader=reader, max_workers=2, variable="q")
+            self.assertEqual(summary["daysFailed"], [])
+            self.assertEqual(summary["variable"], "q")
+            self.assertEqual(summary["partsWritten"], 2)
+            self.assertTrue((v3_dir / "pl_parts_q").exists())
+            self.assertFalse((v3_dir / "pl_parts").exists())
+            # Second run is a no-op: q parts are valid at q precision
+            # (5-place rounding would have destroyed 0.00421's tail).
+            summary2 = fetch_v3_pl([event], v3_dir, reader=reader, max_workers=2, variable="q")
+            self.assertEqual(summary2["partsWritten"], 0)
+            self.assertEqual(summary2["partsSkippedValid"], 2)
+            coverage = assemble_v3_pl([event], v3_dir, variable="q")
+            self.assertEqual(coverage["eventsCovered"], 1)
+            chunk_path = next((v3_dir / "pl_chunks_q" / "TEST0001").glob("*.json.gz"))
+            with gzip.open(chunk_path, "rt") as handle:
+                payload = json.load(handle)
+            self.assertEqual(payload["variable"], "q")
+            self.assertEqual(payload["units"], "kg/kg")
+            self.assertEqual(payload["hourly"][_level_field(700, "q")], [0.00421] * 24)
+
+
 if __name__ == "__main__":
     unittest.main()

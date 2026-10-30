@@ -1,10 +1,14 @@
 """Phase 3 companion fetch: vertical velocity + split precipitation.
 
-The Phase 3 physics feature rebuild needs two things the ERA5 profile
+The Phase 3 physics feature rebuild needs three things the ERA5 profile
 cache never retained:
 
 * ``w`` (vertical velocity, Pa/s) on the cache's 13 pressure levels --
   the raw material for the DGZ-ascent / Cobb-overlap bundle.
+* ``q`` (specific humidity, kg/kg) on the same 13 levels -- added
+  2026-10-30 at the user's direction; the raw material for computing
+  ice supersaturation in the DGZ from q + t + p directly, and the
+  humidity variable one western-US forest ranked dominant.
 * the hourly split of precipitation into ``lsp`` and ``cp`` -- the
   profile cache retained only the combined ``precipitation`` (tp) and
   ``snowfall`` (sf) hourly fields, so the convective fraction
@@ -22,6 +26,9 @@ ERA5.
 * ``w`` -- PASS: pressure-level parameter in the open-data set
   (levelist 1000..10 hPa).  Open-Meteo also serves
   ``vertical_velocity_<level>hPa`` at the IFS levels.
+* ``q`` -- PASS: pressure-level parameter in the same audited open-data
+  set (d, gh, q, r, t, u, v, vo, w, z); fetched from an.pl 128_133_q
+  (HDF5 ``Q``).  Added 2026-10-30.
 * ``clwc`` / ``ciwc`` -- FAIL, NOT FETCHED: absent from the open-data
   pressure-level parameter set and the open-data stream carries no
   model-level rows at all; only the column integrals ``tclw``/``tciw``
@@ -38,7 +45,8 @@ ERA5.
 
 Source of record is unchanged: bucket ``nsf-ncar-era5`` (anonymous
 unsigned S3), ``e5.oper.an.pl`` daily files for w (128_135_w, HDF5
-``W``) and ``e5.oper.fc.sfc.accumu`` half-month files for lsp/cp,
+``W``) and q (128_133_q, HDF5 ``Q``), and ``e5.oper.fc.sfc.accumu``
+half-month files for lsp/cp,
 extracted with the same nearest-grid-point, ``read_points`` batching
 and (t-1h, t] differencing conventions as ``gold_profiles_era5``.
 
@@ -47,6 +55,10 @@ CACHE CONTRACT (all under ``model-v1/model-v3-features/``):
 * PL parts: ``pl_parts/{yyyymmdd}/{station_id}.json.gz`` -- the
   station's required hours that day: ``{"time": [...],
   "w_<level>hPa": [Pa/s, ...]}`` for the 13 levels.
+* Q parts: ``pl_parts_q/{yyyymmdd}/{station_id}.json.gz`` -- same
+  layout with ``q_<level>hPa`` fields (kg/kg), assembled into
+  ``pl_chunks_q/`` with coverage in ``coverage_v3_q.json``.  The w
+  tree keeps its original names; a q run never touches it.
 * Accumulation parts: ``accumu_parts/{yyyymm}/{station_id}.json.gz``
   -- ``{"time": [...], "lsp_mm": [...], "cp_mm": [...]}`` hourly
   differenced values for the station's required hours that month.
@@ -105,7 +117,13 @@ V3_DIR_NAME = "model-v3-features"
 # variable -> (GRIB code prefix, filename token, grid suffix, HDF5 name, units)
 V3_PL_VARIABLES = {
     "w": ("128_135", "w", "ll025sc", "W", "Pa/s"),
+    "q": ("128_133", "q", "ll025sc", "Q", "kg/kg"),
 }
+
+# Decimal places kept when writing part/chunk values.  q is O(1e-3)
+# kg/kg, so w's 5 places would truncate it (~1% relative error at dry
+# levels); 8 places keeps it effectively exact.
+V3_PL_ROUND_DIGITS = {"w": 5, "q": 8}
 
 
 def v3_pl_key(day: date, variable: str = "w") -> str:
@@ -117,8 +135,17 @@ def v3_pl_key(day: date, variable: str = "w") -> str:
     )
 
 
-def _level_field(level: int) -> str:
-    return f"w_{level}hPa"
+def _level_field(level: int, variable: str = "w") -> str:
+    return f"{variable}_{level}hPa"
+
+
+def _pl_parts_dir_name(variable: str) -> str:
+    """Parts dir for a PL variable; w keeps its original tree name."""
+    return "pl_parts" if variable == "w" else f"pl_parts_{variable}"
+
+
+def _pl_chunks_dir_name(variable: str) -> str:
+    return "pl_chunks" if variable == "w" else f"pl_chunks_{variable}"
 
 
 # ---------------------------------------------------------------------------
@@ -142,10 +169,13 @@ def day_needs(chunks: list[dict[str, Any]]) -> dict[date, dict[str, list[str]]]:
 # ---------------------------------------------------------------------------
 
 class V3PlReader:
-    """Hourly w reads from the daily an.pl files."""
+    """Hourly reads of one an.pl variable from the daily files."""
 
-    def __init__(self, reader: Era5Reader | None = None) -> None:
+    def __init__(self, reader: Era5Reader | None = None, variable: str = "w") -> None:
+        if variable not in V3_PL_VARIABLES:
+            raise ValueError(f"unknown V3 PL variable: {variable!r}")
         self._reader = reader or Era5Reader()
+        self.variable = variable
 
     def read_day(
         self,
@@ -153,11 +183,11 @@ class V3PlReader:
         stations: list[tuple[str, float, float]],
         hours_by_station: dict[str, list[datetime]],
     ) -> dict[tuple[str, datetime], dict[int, float | None]]:
-        """{(station_id, instant): {level_hpa: w in Pa/s}} for one day."""
-        key = v3_pl_key(day)
+        """{(station_id, instant): {level_hpa: value}} for one day."""
+        key = v3_pl_key(day, self.variable)
         handle = self._reader._open(key)
         coords = self._reader._coords(key)
-        dataset = handle[V3_PL_VARIABLES["w"][3]]
+        dataset = handle[V3_PL_VARIABLES[self.variable][3]]
         level_values = [int(v) for v in coords["level"]]
         level_index = {level: level_values.index(level) for level in PRESSURE_LEVELS_HPA}
         day_start = datetime(day.year, day.month, day.day, tzinfo=timezone.utc)
@@ -186,7 +216,7 @@ def _pl_part_path(parts_dir: Path, day: date, station_id: str) -> Path:
     return parts_dir / f"{day:%Y%m%d}" / f"{station_id}.json.gz"
 
 
-def _pl_part_valid(path: Path, expected_hours: list[str]) -> bool:
+def _pl_part_valid(path: Path, expected_hours: list[str], variable: str = "w") -> bool:
     if not path.exists():
         return False
     try:
@@ -197,7 +227,7 @@ def _pl_part_valid(path: Path, expected_hours: list[str]) -> bool:
     if payload.get("time") != expected_hours:
         return False
     for level in PRESSURE_LEVELS_HPA:
-        values = payload.get(_level_field(level))
+        values = payload.get(_level_field(level, variable))
         if not isinstance(values, list) or len(values) != len(expected_hours):
             return False
         if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in values):
@@ -211,9 +241,10 @@ def fetch_v3_pl(
     shard_index: int = 0,
     shard_count: int = 1,
     max_workers: int = 2,
+    variable: str = "w",
     reader: V3PlReader | None = None,
 ) -> dict[str, Any]:
-    """Fetch this shard's days into per-station-day w part files.
+    """Fetch this shard's days into per-station-day part files.
 
     Resumable: a part whose stored hours exactly match the plan and are
     all finite is skipped.  A day that fails after 3 attempts is
@@ -223,13 +254,14 @@ def fetch_v3_pl(
     chunks = plan_sp_chunks(events)
     needs = day_needs(chunks)
     coords = station_coordinates(events)
-    parts_dir = v3_dir / "pl_parts"
-    active = reader or V3PlReader()
+    parts_dir = v3_dir / _pl_parts_dir_name(variable)
+    active = reader or V3PlReader(variable=variable)
     days = sorted(needs)
     mine = [day for i, day in enumerate(days) if i % shard_count == shard_index]
     summary: dict[str, Any] = {
         "shardIndex": shard_index,
         "shardCount": shard_count,
+        "variable": variable,
         "daysPlanned": [day.isoformat() for day in mine],
         "daysDone": [],
         "daysFailed": [],
@@ -243,7 +275,7 @@ def fetch_v3_pl(
         todo = {
             sid: hours
             for sid, hours in expected.items()
-            if not _pl_part_valid(_pl_part_path(parts_dir, day, sid), hours)
+            if not _pl_part_valid(_pl_part_path(parts_dir, day, sid), hours, variable)
         }
         skipped = len(expected) - len(todo)
         if not todo:
@@ -267,8 +299,8 @@ def fetch_v3_pl(
         for sid, hours in sorted(todo.items()):
             payload: dict[str, Any] = {"time": hours}
             for level in PRESSURE_LEVELS_HPA:
-                payload[_level_field(level)] = [
-                    round(values[(sid, _parse_hour(t))][level], 5)
+                payload[_level_field(level, variable)] = [
+                    round(values[(sid, _parse_hour(t))][level], V3_PL_ROUND_DIGITS[variable])
                     if values.get((sid, _parse_hour(t)), {}).get(level) is not None
                     else None
                     for t in hours
@@ -452,8 +484,10 @@ def fetch_v3_accumu(
 # Assembly: parts -> chunk files + per-event coverage
 # ---------------------------------------------------------------------------
 
-def load_pl_parts(parts_dir: Path, station_id: str) -> dict[datetime, dict[int, float]]:
-    """All fetched w hours for one station: {instant: {level: Pa/s}}."""
+def load_pl_parts(
+    parts_dir: Path, station_id: str, variable: str = "w"
+) -> dict[datetime, dict[int, float]]:
+    """All fetched hours of one PL variable for one station."""
     hours: dict[datetime, dict[int, float]] = {}
     if not parts_dir.exists():
         return hours
@@ -465,25 +499,27 @@ def load_pl_parts(parts_dir: Path, station_id: str) -> dict[datetime, dict[int, 
             payload = json.load(handle)
         for i, text in enumerate(payload["time"]):
             record = {
-                level: payload[_level_field(level)][i]
+                level: payload[_level_field(level, variable)][i]
                 for level in PRESSURE_LEVELS_HPA
-                if payload[_level_field(level)][i] is not None
+                if payload[_level_field(level, variable)][i] is not None
             }
             if len(record) == len(PRESSURE_LEVELS_HPA):
                 hours[_parse_hour(text)] = record
     return hours
 
 
-def assemble_v3_pl(events: list[dict[str, Any]], v3_dir: Path) -> dict[str, Any]:
-    """Assemble w chunk files from parts; per-event coverage as in sp."""
+def assemble_v3_pl(
+    events: list[dict[str, Any]], v3_dir: Path, variable: str = "w"
+) -> dict[str, Any]:
+    """Assemble chunk files from parts; per-event coverage as in sp."""
     chunks = plan_sp_chunks(events)
-    parts_dir = v3_dir / "pl_parts"
-    chunks_dir = v3_dir / "pl_chunks"
+    parts_dir = v3_dir / _pl_parts_dir_name(variable)
+    chunks_dir = v3_dir / _pl_chunks_dir_name(variable)
     station_hours: dict[str, dict[datetime, dict[int, float]]] = {}
 
     def hours_for(station_id: str) -> dict[datetime, dict[int, float]]:
         if station_id not in station_hours:
-            station_hours[station_id] = load_pl_parts(parts_dir, station_id)
+            station_hours[station_id] = load_pl_parts(parts_dir, station_id, variable)
         return station_hours[station_id]
 
     covered: list[str] = []
@@ -507,15 +543,16 @@ def assemble_v3_pl(events: list[dict[str, Any]], v3_dir: Path) -> dict[str, Any]
             continue
         hourly: dict[str, Any] = {"time": chunk["required_hours"]}
         for level in PRESSURE_LEVELS_HPA:
-            hourly[_level_field(level)] = [
-                round(available[_parse_hour(t)][level], 5) for t in chunk["required_hours"]
+            hourly[_level_field(level, variable)] = [
+                round(available[_parse_hour(t)][level], V3_PL_ROUND_DIGITS[variable])
+                for t in chunk["required_hours"]
             ]
         _write_gzip_json(
             path,
             {
                 "hourly": hourly,
-                "variable": "w",
-                "units": "Pa/s",
+                "variable": variable,
+                "units": V3_PL_VARIABLES[variable][4],
                 "levels_hpa": list(PRESSURE_LEVELS_HPA),
                 "profile_source": ERA5_SPEC.source_id,
                 "profile_model": "ERA5",
@@ -665,6 +702,7 @@ def run_fetch_v3(
     assemble_only: bool = False,
     no_assemble: bool = False,
     max_workers: int = 2,
+    pl_variable: str = "w",
 ) -> dict[str, Any]:
     """Fetch w + lsp/cp for the modelling pool into ``model-v3-features``.
 
@@ -672,6 +710,12 @@ def run_fetch_v3(
     the Phase 3 tree lives at ``output_dir/model-v3-features`` and the
     profile cache used for sf/tp at assembly is ``output_dir/
     raw_cache_era5``.
+
+    ``pl_variable`` selects the an.pl variable.  The default ``"w"``
+    run also fetches the lsp/cp split and writes ``coverage_v3.json``;
+    a non-default variable (``"q"``) runs PL-only into its own parts /
+    chunks trees and writes ``coverage_v3_q.json``, so a q run never
+    touches the w tree or the w/accumu assembly path.
     """
     events = load_modelling_events(pool_dir, output_dir / "era5-expanded-v2" / "features.parquet")
     v3_dir = output_dir / V3_DIR_NAME
@@ -679,20 +723,35 @@ def run_fetch_v3(
     summary: dict[str, Any] = {"modellingEvents": len(events), "v3Dir": str(v3_dir)}
     if not assemble_only:
         summary["fetchPl"] = fetch_v3_pl(
-            events, v3_dir, shard_index=shard_index, shard_count=shard_count, max_workers=max_workers
+            events,
+            v3_dir,
+            shard_index=shard_index,
+            shard_count=shard_count,
+            max_workers=max_workers,
+            variable=pl_variable,
         )
-        summary["fetchAccumu"] = fetch_v3_accumu(
-            events, v3_dir, shard_index=shard_index, shard_count=shard_count
-        )
+        if pl_variable == "w":
+            summary["fetchAccumu"] = fetch_v3_accumu(
+                events, v3_dir, shard_index=shard_index, shard_count=shard_count
+            )
     if assemble_only or (not no_assemble and shard_count == 1):
-        summary["coverage"] = {
-            "pl": assemble_v3_pl(events, v3_dir),
-            "accumu": assemble_v3_accumu(events, v3_dir, output_dir / "raw_cache_era5"),
-        }
-        (v3_dir / "coverage_v3.json").write_text(
+        summary["coverage"] = {"pl": assemble_v3_pl(events, v3_dir, variable=pl_variable)}
+        if pl_variable == "w":
+            summary["coverage"]["accumu"] = assemble_v3_accumu(
+                events, v3_dir, output_dir / "raw_cache_era5"
+            )
+            coverage_name = "coverage_v3.json"
+        else:
+            coverage_name = f"coverage_v3_{pl_variable}.json"
+        (v3_dir / coverage_name).write_text(
             json.dumps(summary["coverage"], indent=2, sort_keys=True), encoding="utf-8"
         )
-    (v3_dir / f"v3_fetch_summary_shard{shard_index}.json").write_text(
+    summary_name = (
+        f"v3_fetch_summary_shard{shard_index}.json"
+        if pl_variable == "w"
+        else f"v3_fetch_summary_{pl_variable}_shard{shard_index}.json"
+    )
+    (v3_dir / summary_name).write_text(
         json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8"
     )
     return summary

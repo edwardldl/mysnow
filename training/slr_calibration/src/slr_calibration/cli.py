@@ -706,16 +706,19 @@ def _fetch_gold_v3_era5(args: argparse.Namespace) -> int:
         assemble_only=args.assemble_only,
         no_assemble=args.no_assemble,
         max_workers=args.max_workers,
+        pl_variable=args.pl_variable,
     )
     print(json.dumps(summary, sort_keys=True))
     fetch_pl = summary.get("fetchPl", {})
     fetch_acc = summary.get("fetchAccumu", {})
     coverage = summary.get("coverage", {})
+    pl_cov = coverage.get("pl", {})
+    acc_cov = coverage.get("accumu", {})
     incomplete = bool(fetch_pl.get("daysFailed")) or bool(fetch_acc.get("monthsFailed")) or (
         bool(coverage)
         and (
-            coverage["pl"].get("eventsCovered", 0) < coverage["pl"].get("eventsTotal", 0)
-            or coverage["accumu"].get("eventsCovered", 0) < coverage["accumu"].get("eventsTotal", 0)
+            pl_cov.get("eventsCovered", 0) < pl_cov.get("eventsTotal", 0)
+            or acc_cov.get("eventsCovered", 0) < acc_cov.get("eventsTotal", 0)
         )
     )
     return 2 if incomplete else 0
@@ -1397,12 +1400,13 @@ def build_parser() -> argparse.ArgumentParser:
     gold_sp_fetch.add_argument("--no-assemble", action="store_true", help="fetch parts only (multi-shard runs); assemble afterwards with --assemble-only")
     gold_sp_fetch.set_defaults(func=_fetch_gold_sp_era5)
 
-    gold_v3_fetch = subparsers.add_parser("fetch-gold-v3-era5", help="Phase 3: fetch ERA5 vertical velocity (NSF NCAR an.pl 128_135_w) and hourly lsp/cp split (fc.sfc.accumu) for the v2 modelling pool into model-v3-features (resumable, shardable); clwc/ciwc excluded by the ECMWF-derivability gate")
+    gold_v3_fetch = subparsers.add_parser("fetch-gold-v3-era5", help="Phase 3: fetch ERA5 an.pl variables (w 128_135; q 128_133 via --pl-variable q, PL-only into pl_parts_q) and hourly lsp/cp split (fc.sfc.accumu) for the v2 modelling pool into model-v3-features (resumable, shardable); clwc/ciwc excluded by the ECMWF-derivability gate")
     gold_v3_fetch.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
     gold_v3_fetch.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
     gold_v3_fetch.add_argument("--shard-index", type=int, default=0)
     gold_v3_fetch.add_argument("--shard-count", type=int, default=1)
     gold_v3_fetch.add_argument("--max-workers", type=int, default=2)
+    gold_v3_fetch.add_argument("--pl-variable", choices=["w", "q"], default="w", help="an.pl variable to fetch; q runs PL-only (pl_parts_q/pl_chunks_q, coverage_v3_q.json) and skips the lsp/cp split")
     gold_v3_fetch.add_argument("--assemble-only", action="store_true", help="skip fetching; assemble chunk files from existing parts and report coverage")
     gold_v3_fetch.add_argument("--no-assemble", action="store_true", help="fetch parts only (multi-shard runs); assemble afterwards with --assemble-only")
     gold_v3_fetch.set_defaults(func=_fetch_gold_v3_era5)
