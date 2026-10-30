@@ -753,6 +753,18 @@ def _build_pressure_features(args: argparse.Namespace) -> int:
     return 0 if summary["statusCounts"].get("ok", 0) == summary["eventsTotal"] else 2
 
 
+def _build_v3_features(args: argparse.Namespace) -> int:
+    from .v3_features import run_build_v3_features
+
+    summary = run_build_v3_features(
+        pool_dir=args.pool_dir,
+        model_dir=args.model_dir,
+        output_dir=args.output_dir,
+    )
+    print(json.dumps(summary, sort_keys=True))
+    return 0 if summary["statusCounts"].get("ok", 0) == summary["modellingEvents"] else 2
+
+
 def _fetch_gold_profiles_cds(args: argparse.Namespace) -> int:
     from .gold_profiles_cds import run_fetch_profiles_cds
 
@@ -1435,6 +1447,12 @@ def build_parser() -> argparse.ArgumentParser:
     pressure_features.add_argument("--model-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
     pressure_features.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v2-pressure"))
     pressure_features.set_defaults(func=_build_pressure_features)
+
+    v3_features = subparsers.add_parser("build-v3-features", help="Phase 3 model: build physics feature bundles (DGZ / amount / warm layer / riming / ascent / wind / humidity / surface / aggregation / sub-cloud / regime) joined onto the v2 AGL champion build")
+    v3_features.add_argument("--pool-dir", type=Path, default=Path("data/slr-training-data/screened-v2"))
+    v3_features.add_argument("--model-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1"))
+    v3_features.add_argument("--output-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3"))
+    v3_features.set_defaults(func=_build_v3_features)
 
     gold_variants = subparsers.add_parser("evaluate-gold-model-variants", help="cheap-wins bundle items 3-4: ensembles, median-objective GBM and tail-shrunk RF+EB on identical splits/seeds; appends bundle verdicts to MODEL_REPORT.md")
     gold_variants.add_argument("--features", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/era5-expanded-v2/features.parquet"))
