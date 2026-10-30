@@ -696,6 +696,24 @@ def _fetch_gold_sp_era5(args: argparse.Namespace) -> int:
 
 
 def _fetch_gold_v3_era5(args: argparse.Namespace) -> int:
+    if getattr(args, "sfc", False):
+        from .gold_profiles_v3_sfc import run_fetch_v3_sfc
+
+        summary = run_fetch_v3_sfc(
+            pool_dir=args.pool_dir,
+            output_dir=args.output_dir,
+            shard_index=args.shard_index,
+            shard_count=args.shard_count,
+            assemble_only=args.assemble_only,
+            no_assemble=args.no_assemble,
+        )
+        print(json.dumps(summary, sort_keys=True))
+        fetch = summary.get("fetch", {})
+        coverage = summary.get("coverage", {})
+        incomplete = bool(fetch.get("monthsFailed")) or (
+            bool(coverage) and coverage.get("eventsCovered", 0) < coverage.get("eventsTotal", 0)
+        )
+        return 2 if incomplete else 0
     from .gold_profiles_v3 import run_fetch_v3
 
     summary = run_fetch_v3(
@@ -1407,6 +1425,7 @@ def build_parser() -> argparse.ArgumentParser:
     gold_v3_fetch.add_argument("--shard-count", type=int, default=1)
     gold_v3_fetch.add_argument("--max-workers", type=int, default=2)
     gold_v3_fetch.add_argument("--pl-variable", choices=["w", "q"], default="w", help="an.pl variable to fetch; q runs PL-only (pl_parts_q/pl_chunks_q, coverage_v3_q.json) and skips the lsp/cp split")
+    gold_v3_fetch.add_argument("--sfc", action="store_true", help="fetch ONLY the single-level surface set (2d, tclw, 10u, 10v, skt; an.sfc monthly files) into sfc_parts/sfc_chunks with coverage_v3_sfc.json; skips the PL and lsp/cp stages")
     gold_v3_fetch.add_argument("--assemble-only", action="store_true", help="skip fetching; assemble chunk files from existing parts and report coverage")
     gold_v3_fetch.add_argument("--no-assemble", action="store_true", help="fetch parts only (multi-shard runs); assemble afterwards with --assemble-only")
     gold_v3_fetch.set_defaults(func=_fetch_gold_v3_era5)
