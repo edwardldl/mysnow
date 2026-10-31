@@ -8,6 +8,8 @@ import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
+import ModelForecastPanel from "@/components/ModelForecastPanel";
+import { modelForecastFor } from "@/lib/model-forecast";
 import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
@@ -356,6 +358,12 @@ export default function Home() {
     return calculateRollingStats(allHourly, referenceInstantMs);
   }, [activeDays, displayData, currentHourData, activeSelectedDate, todayStr, mode, locations, currentLocationId]);
 
+  // ENS-EB model panel: catalogue resort points only, ECMWF/HRRR modes
+  // only -- modelForecastFor enforces the gate and returns null otherwise.
+  const modelResult = mode === "forecast"
+    ? modelForecastFor(locations[currentLocationId], modelId, elevationMode, activeSelectedDate)
+    : null;
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header
@@ -441,6 +449,8 @@ export default function Home() {
                   (error && activeDays.length > 0) && "mt-2 md:mt-2"
                 )}
               />
+
+              <ModelForecastPanel result={modelResult} />
 
               {error && activeDays.length === 0 ? (
                 <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pb-20">

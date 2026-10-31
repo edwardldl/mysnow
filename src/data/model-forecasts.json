@@ -1,0 +1,1909 @@
+{
+ "generatedAtUtc": "2026-10-31T23:34:16.001404+00:00",
+ "modelVersion": "ENS-EB v3 champion (model-v3, 64 features)",
+ "modelLabel": "Model forecast",
+ "featureBuilderVersion": "model-serving-test-1 (adapters) + gold_profiles/v3_features (training builders, unmodified)",
+ "nanPolicy": "pass-through (design S5; validated 2026-10-31, nan_validation.json)",
+ "cycles": {
+  "ecmwf": "2026-10-31T12:00:00Z",
+  "hrrr": "2026-10-31T12:00:00Z"
+ },
+ "points": [
+  {
+   "pointId": "palisades-tahoe-base",
+   "resortSlug": "palisades-tahoe",
+   "resortName": "Palisades Tahoe",
+   "pointName": "Village base",
+   "role": "base",
+   "latitude": 39.196999,
+   "longitude": -120.24313,
+   "elevationM": 1889.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.504258676251219,
+      "modelSnowfallCm": 4.81579160318754,
+      "kucheraSlr": 3.246072,
+      "kucheraSnowfallCm": 1.83818565216,
+      "liquidMm": 5.6628
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 10.154220411170856,
+      "modelSnowfallCm": 0.4393731171913629,
+      "kucheraSlr": 3.019125,
+      "kucheraSnowfallCm": 0.13063753875,
+      "liquidMm": 0.4327
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 10.79611310820882,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.589790279602028,
+      "modelSnowfallCm": 10.72005826894333,
+      "kucheraSlr": 3.768256,
+      "kucheraSnowfallCm": 4.702783488,
+      "liquidMm": 12.48
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "palisades-tahoe-mid_mountain",
+   "resortSlug": "palisades-tahoe",
+   "resortName": "Palisades Tahoe",
+   "pointName": "High Camp",
+   "role": "mid_mountain",
+   "latitude": 39.195899,
+   "longitude": -120.260845,
+   "elevationM": 2499.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.100225093208941,
+      "modelSnowfallCm": 6.3945066694448744,
+      "kucheraSlr": 8.156867,
+      "kucheraSnowfallCm": 4.69892637269,
+      "liquidMm": 5.7607
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 13.087404439271815,
+      "modelSnowfallCm": 0.5698255892858948,
+      "kucheraSlr": 8.9,
+      "kucheraSnowfallCm": 0.387506,
+      "liquidMm": 0.4354
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 10.72109012027712,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.392127137744962,
+      "modelSnowfallCm": 12.969374667905715,
+      "kucheraSlr": 9.857041,
+      "kucheraSnowfallCm": 12.301587168000001,
+      "liquidMm": 12.48
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "palisades-tahoe-summit",
+   "resortSlug": "palisades-tahoe",
+   "resortName": "Palisades Tahoe",
+   "pointName": "Upper mountain",
+   "role": "summit",
+   "latitude": 39.181764,
+   "longitude": -120.266494,
+   "elevationM": 2708.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.151271522226331,
+      "modelSnowfallCm": 7.295987960090356,
+      "kucheraSlr": 13.646094,
+      "kucheraSnowfallCm": 8.193524220419999,
+      "liquidMm": 6.0043
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 13.366690089883654,
+      "modelSnowfallCm": 0.5635396541894948,
+      "kucheraSlr": 14.8,
+      "kucheraSnowfallCm": 0.623968,
+      "liquidMm": 0.4216
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 10.27506625466599,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.21872481063248,
+      "modelSnowfallCm": 14.000968563669336,
+      "kucheraSlr": 14.295611,
+      "kucheraSnowfallCm": 17.840922528,
+      "liquidMm": 12.48
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mammoth-mountain-base",
+   "resortSlug": "mammoth-mountain",
+   "resortName": "Mammoth Mountain",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 37.64013,
+   "longitude": -119.019104,
+   "elevationM": 2461.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.429240683827064,
+      "modelSnowfallCm": 18.125735074113926,
+      "kucheraSlr": 5.118652,
+      "kucheraSnowfallCm": 9.839533553079999,
+      "liquidMm": 19.2229
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 13.53021841614037,
+      "modelSnowfallCm": 0.6324024087704009,
+      "kucheraSlr": 7.81771,
+      "kucheraSnowfallCm": 0.36539976539999997,
+      "liquidMm": 0.4674
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.288683319367575,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.159087607018549,
+      "modelSnowfallCm": 39.65884933839031,
+      "kucheraSlr": 6.972149,
+      "kucheraSnowfallCm": 30.189405169999997,
+      "liquidMm": 43.3
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mammoth-mountain-mid_mountain",
+   "resortSlug": "mammoth-mountain",
+   "resortName": "Mammoth Mountain",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 37.64013,
+   "longitude": -119.019104,
+   "elevationM": 2913.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.489771372055436,
+      "modelSnowfallCm": 20.164382610788444,
+      "kucheraSlr": 11.733348,
+      "kucheraSnowfallCm": 22.554897526919998,
+      "liquidMm": 19.2229
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 13.934848054467295,
+      "modelSnowfallCm": 0.6513147980658014,
+      "kucheraSlr": 13.711228,
+      "kucheraSnowfallCm": 0.64086279672,
+      "liquidMm": 0.4674
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.390965125590073,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.414431447427724,
+      "modelSnowfallCm": 49.42448816736204,
+      "kucheraSlr": 12.614863,
+      "kucheraSnowfallCm": 54.62235678999999,
+      "liquidMm": 43.3
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mammoth-mountain-summit",
+   "resortSlug": "mammoth-mountain",
+   "resortName": "Mammoth Mountain",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 37.64013,
+   "longitude": -119.019104,
+   "elevationM": 3365.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.233772505112128,
+      "modelSnowfallCm": 23.516858548851992,
+      "kucheraSlr": 15.650919,
+      "kucheraSnowfallCm": 30.08560508451,
+      "liquidMm": 19.2229
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 15.062928937074368,
+      "modelSnowfallCm": 0.7040412985188559,
+      "kucheraSlr": 18.000025,
+      "kucheraSnowfallCm": 0.8413211685,
+      "liquidMm": 0.4674
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.381026640562492,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.696827587078536,
+      "modelSnowfallCm": 50.647263452050055,
+      "kucheraSlr": 16.056076,
+      "kucheraSnowfallCm": 69.52280908,
+      "liquidMm": 43.3
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "alta-base",
+   "resortSlug": "alta",
+   "resortName": "Alta",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 40.579932,
+   "longitude": -111.622327,
+   "elevationM": 2605.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 7.252543789467785,
+      "modelSnowfallCm": 8.358629242799516,
+      "kucheraSlr": 6.57815,
+      "kucheraSnowfallCm": 7.5813836565,
+      "liquidMm": 11.5251
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 7.471522708402633,
+      "modelSnowfallCm": 20.076803384975797,
+      "kucheraSlr": 10.011321,
+      "kucheraSnowfallCm": 26.90152077231,
+      "liquidMm": 26.8711
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.264314669042166,
+      "modelSnowfallCm": 1.5677673156372887,
+      "kucheraSlr": 8.684492,
+      "kucheraSnowfallCm": 1.20870759656,
+      "liquidMm": 1.3918
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.395366208712062,
+      "modelSnowfallCm": 20.19925109816122,
+      "kucheraSlr": 6.446689,
+      "kucheraSnowfallCm": 15.510733733999999,
+      "liquidMm": 24.06
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "alta-mid_mountain",
+   "resortSlug": "alta",
+   "resortName": "Alta",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 40.579932,
+   "longitude": -111.622327,
+   "elevationM": 2912.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.723562703874563,
+      "modelSnowfallCm": 10.053993251842474,
+      "kucheraSlr": 6.814921,
+      "kucheraSnowfallCm": 7.85426460171,
+      "liquidMm": 11.5251
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.830200839160801,
+      "modelSnowfallCm": 26.41483097691738,
+      "kucheraSlr": 10.228976,
+      "kucheraSnowfallCm": 27.486383699359997,
+      "liquidMm": 26.8711
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.513156974826764,
+      "modelSnowfallCm": 1.602401187756389,
+      "kucheraSlr": 13.809035,
+      "kucheraSnowfallCm": 1.9219414912999997,
+      "liquidMm": 1.3918
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.473698245631663,
+      "modelSnowfallCm": 22.793717978989783,
+      "kucheraSlr": 7.42324,
+      "kucheraSnowfallCm": 17.86031544,
+      "liquidMm": 24.06
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "alta-summit",
+   "resortSlug": "alta",
+   "resortName": "Alta",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 40.579932,
+   "longitude": -111.622327,
+   "elevationM": 3219.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.598298822628292,
+      "modelSnowfallCm": 11.062135376067333,
+      "kucheraSlr": 12.033252,
+      "kucheraSnowfallCm": 13.86844326252,
+      "liquidMm": 11.5251
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 10.950186078018866,
+      "modelSnowfallCm": 29.424354512105275,
+      "kucheraSlr": 14.181874,
+      "kucheraSnowfallCm": 38.10825544414,
+      "liquidMm": 26.8711
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.847427382633889,
+      "modelSnowfallCm": 1.6489249431149844,
+      "kucheraSlr": 15.791947,
+      "kucheraSnowfallCm": 2.19792318346,
+      "liquidMm": 1.3918
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.885591869740738,
+      "modelSnowfallCm": 23.784734038596213,
+      "kucheraSlr": 12.575802,
+      "kucheraSnowfallCm": 30.257379612,
+      "liquidMm": 24.06
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "jackson-hole-base",
+   "resortSlug": "jackson-hole",
+   "resortName": "Jackson Hole",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 43.603245,
+   "longitude": -110.849982,
+   "elevationM": 1931.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.74872771692602,
+      "modelSnowfallCm": 4.830689558291181,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 1.4865599999999999,
+      "liquidMm": 4.9552
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 7.236383751632507,
+      "modelSnowfallCm": 7.762324122701159,
+      "kucheraSlr": 3.003793,
+      "kucheraSnowfallCm": 3.2221086752400003,
+      "liquidMm": 10.7268
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.884090468067468,
+      "modelSnowfallCm": 0.25668982945571217,
+      "kucheraSlr": 3.282053,
+      "kucheraSnowfallCm": 0.08523491641,
+      "liquidMm": 0.2597
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.5417358264197,
+      "modelSnowfallCm": 3.6263571242883765,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 1.032,
+      "liquidMm": 3.44
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "jackson-hole-mid_mountain",
+   "resortSlug": "jackson-hole",
+   "resortName": "Jackson Hole",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 43.603245,
+   "longitude": -110.849982,
+   "elevationM": 2550.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.570676244861515,
+      "modelSnowfallCm": 4.246941492853777,
+      "kucheraSlr": 3.002344,
+      "kucheraSnowfallCm": 1.4877214988799998,
+      "liquidMm": 4.9552
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 8.2452176764649,
+      "modelSnowfallCm": 8.84448009719037,
+      "kucheraSlr": 9.19889,
+      "kucheraSnowfallCm": 9.867465325200001,
+      "liquidMm": 10.7268
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.513883319169071,
+      "modelSnowfallCm": 0.32498554979882077,
+      "kucheraSlr": 9.490308,
+      "kucheraSnowfallCm": 0.24646329876,
+      "liquidMm": 0.2597
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.410320207872655,
+      "modelSnowfallCm": 2.893150151508193,
+      "kucheraSlr": 3.485841,
+      "kucheraSnowfallCm": 1.199129304,
+      "liquidMm": 3.44
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "jackson-hole-summit",
+   "resortSlug": "jackson-hole",
+   "resortName": "Jackson Hole",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 43.603245,
+   "longitude": -110.849982,
+   "elevationM": 3169.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.030151771656207,
+      "modelSnowfallCm": 5.961180805891083,
+      "kucheraSlr": 12.848831,
+      "kucheraSnowfallCm": 6.36685273712,
+      "liquidMm": 4.9552
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.516858565825226,
+      "modelSnowfallCm": 12.353903846389404,
+      "kucheraSlr": 14.140941,
+      "kucheraSnowfallCm": 15.168704591880001,
+      "liquidMm": 10.7268
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 13.591192760502736,
+      "modelSnowfallCm": 0.352963275990256,
+      "kucheraSlr": 15.155993,
+      "kucheraSnowfallCm": 0.39360113821,
+      "liquidMm": 0.2597
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.111055659411036,
+      "modelSnowfallCm": 3.8222031468373965,
+      "kucheraSlr": 13.360472,
+      "kucheraSnowfallCm": 4.596002368,
+      "liquidMm": 3.44
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "aspen-base",
+   "resortSlug": "aspen",
+   "resortName": "Aspen",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 39.165589,
+   "longitude": -106.819323,
+   "elevationM": 2429.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.428986524729904,
+      "modelSnowfallCm": 2.5350635010503404,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.6654300000000001,
+      "liquidMm": 2.2181
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.303064633718655,
+      "modelSnowfallCm": 27.491486299101997,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 8.8653,
+      "liquidMm": 29.551
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 8.017993064519779,
+      "modelSnowfallCm": 5.6999110896364655,
+      "kucheraSlr": 4.176809,
+      "kucheraSnowfallCm": 2.96925175001,
+      "liquidMm": 7.1089
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.445240178612906,
+      "modelSnowfallCm": 0.09156192142890325,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.08
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "aspen-mid_mountain",
+   "resortSlug": "aspen",
+   "resortName": "Aspen",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 39.165589,
+   "longitude": -106.819323,
+   "elevationM": 2933.5,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.618254099356708,
+      "modelSnowfallCm": 2.1334249417783115,
+      "kucheraSlr": 3.126145,
+      "kucheraSnowfallCm": 0.6934102224500001,
+      "liquidMm": 2.2181
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 7.54045482718285,
+      "modelSnowfallCm": 22.282798059808037,
+      "kucheraSlr": 4.261988,
+      "kucheraSnowfallCm": 12.594600738799999,
+      "liquidMm": 29.551
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 10.337336000087607,
+      "modelSnowfallCm": 7.34870878910228,
+      "kucheraSlr": 11.240615,
+      "kucheraSnowfallCm": 7.990840797350001,
+      "liquidMm": 7.1089
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.809835550199645,
+      "modelSnowfallCm": 0.08647868440159716,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.08
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "aspen-summit",
+   "resortSlug": "aspen",
+   "resortName": "Aspen",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 39.165589,
+   "longitude": -106.819323,
+   "elevationM": 3438.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.970885681088829,
+      "modelSnowfallCm": 2.2116421529223134,
+      "kucheraSlr": 7.27373,
+      "kucheraSnowfallCm": 1.6133860513000002,
+      "liquidMm": 2.2181
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.217467123327225,
+      "modelSnowfallCm": 27.238537096144277,
+      "kucheraSlr": 8.301222,
+      "kucheraSnowfallCm": 24.530941132199995,
+      "liquidMm": 29.551
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.944977913969723,
+      "modelSnowfallCm": 8.491565349261936,
+      "kucheraSlr": 15.247295,
+      "kucheraSnowfallCm": 10.83914954255,
+      "liquidMm": 7.1089
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.47018911408978,
+      "modelSnowfallCm": 0.09176151291271825,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.08
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "big-sky-base",
+   "resortSlug": "big-sky",
+   "resortName": "Big Sky",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 45.273921,
+   "longitude": -111.419449,
+   "elevationM": 2080.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.867477487836414,
+      "modelSnowfallCm": 1.0100233577195163,
+      "kucheraSlr": 3.039137,
+      "kucheraSnowfallCm": 0.28245739278000004,
+      "liquidMm": 0.9294
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 6.944709864316371,
+      "modelSnowfallCm": 10.084968770762949,
+      "kucheraSlr": 6.971208,
+      "kucheraSnowfallCm": 10.12344883344,
+      "liquidMm": 14.5218
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.972480940873947,
+      "modelSnowfallCm": 0.674698733734854,
+      "kucheraSlr": 5.646783,
+      "kucheraSnowfallCm": 0.29368918383000003,
+      "liquidMm": 0.5201
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.316723247214725,
+      "modelSnowfallCm": 5.389236664195142,
+      "kucheraSlr": 3.181403,
+      "kucheraSnowfallCm": 2.061549144,
+      "liquidMm": 6.48
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "big-sky-mid_mountain",
+   "resortSlug": "big-sky",
+   "resortName": "Big Sky",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 45.273921,
+   "longitude": -111.419449,
+   "elevationM": 2740.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.443090216760083,
+      "modelSnowfallCm": 1.0635208047456821,
+      "kucheraSlr": 9.805393,
+      "kucheraSnowfallCm": 0.91131322542,
+      "liquidMm": 0.9294
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 10.915608758785961,
+      "modelSnowfallCm": 15.851428727333797,
+      "kucheraSlr": 12.773194,
+      "kucheraSnowfallCm": 18.54897686292,
+      "liquidMm": 14.5218
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 13.69033950133225,
+      "modelSnowfallCm": 0.7120345574642903,
+      "kucheraSlr": 15.761397,
+      "kucheraSnowfallCm": 0.81975025797,
+      "liquidMm": 0.5201
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.130263990454024,
+      "modelSnowfallCm": 6.564411065814208,
+      "kucheraSlr": 10.837998,
+      "kucheraSnowfallCm": 7.023022704000001,
+      "liquidMm": 6.48
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "big-sky-summit",
+   "resortSlug": "big-sky",
+   "resortName": "Big Sky",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 45.273921,
+   "longitude": -111.419449,
+   "elevationM": 3400.0,
+   "timezone": "America/Denver",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 14.179445578840355,
+      "modelSnowfallCm": 1.3178376720974225,
+      "kucheraSlr": 14.257097,
+      "kucheraSnowfallCm": 1.32505459518,
+      "liquidMm": 0.9294
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T14:00:00Z",
+      "windowEndUtc": "2026-11-02T14:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 12.388827236909691,
+      "modelSnowfallCm": 17.990807136895516,
+      "kucheraSlr": 15.444822,
+      "kucheraSnowfallCm": 22.428661611960003,
+      "liquidMm": 14.5218
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T14:00:00Z",
+      "windowEndUtc": "2026-11-03T14:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 14.86486622335455,
+      "modelSnowfallCm": 0.7731216922766702,
+      "kucheraSlr": 17.464734,
+      "kucheraSnowfallCm": 0.9083408153400001,
+      "liquidMm": 0.5201
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T14:00:00Z",
+      "windowEndUtc": "2026-11-01T14:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 13.286783148107556,
+      "modelSnowfallCm": 8.609835479973697,
+      "kucheraSlr": 15.092987,
+      "kucheraSnowfallCm": 9.780255576000002,
+      "liquidMm": 6.48
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mt-baker-base",
+   "resortSlug": "mt-baker",
+   "resortName": "Mt. Baker",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 48.857115,
+   "longitude": -121.665157,
+   "elevationM": 1109.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.919567673364497,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 12.85146587516559,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.719779697340677,
+      "modelSnowfallCm": 0.20509614470346182,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.05249999999999999,
+      "liquidMm": 0.175
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.707981277785183,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mt-baker-mid_mountain",
+   "resortSlug": "mt-baker",
+   "resortName": "Mt. Baker",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 48.857115,
+   "longitude": -121.665157,
+   "elevationM": 1331.5,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.795594974357027,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 12.751866030021713,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.324300498316132,
+      "modelSnowfallCm": 0.1981752587205323,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.05249999999999999,
+      "liquidMm": 0.175
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.690781823870356,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mt-baker-summit",
+   "resortSlug": "mt-baker",
+   "resortName": "Mt. Baker",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 48.857115,
+   "longitude": -121.665157,
+   "elevationM": 1554.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 14.087035063884656,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 12.934081489513304,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.295054231040398,
+      "modelSnowfallCm": 0.19766344904320693,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.05249999999999999,
+      "liquidMm": 0.175
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 14.477606094478826,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "stevens-pass-base",
+   "resortSlug": "stevens-pass",
+   "resortName": "Stevens Pass",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 47.737573,
+   "longitude": -121.09043,
+   "elevationM": 1168.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.387468587019363,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 12.792540254267342,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.899829448460078,
+      "modelSnowfallCm": 1.9734677157326197,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.49752,
+      "liquidMm": 1.6584
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.144979696411072,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "stevens-pass-mid_mountain",
+   "resortSlug": "stevens-pass",
+   "resortName": "Stevens Pass",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 47.737573,
+   "longitude": -121.09043,
+   "elevationM": 1449.5,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.331503135469166,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 13.006790194014265,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.845864923042235,
+      "modelSnowfallCm": 1.9645182388373243,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.49752,
+      "liquidMm": 1.6584
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.269209879462123,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "stevens-pass-summit",
+   "resortSlug": "stevens-pass",
+   "resortName": "Stevens Pass",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 47.737573,
+   "longitude": -121.09043,
+   "elevationM": 1731.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 13.27403116764697,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 13.254932078217614,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.937860913821616,
+      "modelSnowfallCm": 1.979774853948177,
+      "kucheraSlr": 4.743158,
+      "kucheraSnowfallCm": 0.78660532272,
+      "liquidMm": 1.6584
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 13.022147564612757,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "stowe-base",
+   "resortSlug": "stowe",
+   "resortName": "Stowe",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 44.53036,
+   "longitude": -72.788162,
+   "elevationM": 397.0,
+   "timezone": "America/New_York",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.969632368825085,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.046632691486886,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T12:00:00Z",
+      "windowEndUtc": "2026-11-03T12:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 11.833697085542799,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.893488265014222,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.47058379359001,
+      "modelSnowfallCm": 0.01147058379359001,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.01
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "stowe-mid_mountain",
+   "resortSlug": "stowe",
+   "resortName": "Stowe",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 44.53036,
+   "longitude": -72.788162,
+   "elevationM": 753.0,
+   "timezone": "America/New_York",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.90985919520908,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.065364128437935,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T12:00:00Z",
+      "windowEndUtc": "2026-11-03T12:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.192684420915239,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 13.24678577589074,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.424464173414531,
+      "modelSnowfallCm": 0.011424464173414531,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.01
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "stowe-summit",
+   "resortSlug": "stowe",
+   "resortName": "Stowe",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 44.53036,
+   "longitude": -72.788162,
+   "elevationM": 1109.0,
+   "timezone": "America/New_York",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 13.666118111736195,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.285952668541647,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T12:00:00Z",
+      "windowEndUtc": "2026-11-03T12:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 12.122582815173665,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 14.23868842936281,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.712500265424449,
+      "modelSnowfallCm": 0.01171250026542445,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.01
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "sugarloaf-base",
+   "resortSlug": "sugarloaf",
+   "resortName": "Sugarloaf",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 45.046037,
+   "longitude": -70.31471,
+   "elevationM": 425.0,
+   "timezone": "America/New_York",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.811633242053752,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.059605861265558,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T12:00:00Z",
+      "windowEndUtc": "2026-11-03T12:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.508346087783533,
+      "modelSnowfallCm": 1.1454704531952822,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.2047
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.594963014512938,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.064659928937619,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "sugarloaf-mid_mountain",
+   "resortSlug": "sugarloaf",
+   "resortName": "Sugarloaf",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 45.046037,
+   "longitude": -70.31471,
+   "elevationM": 846.5,
+   "timezone": "America/New_York",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.942150763552686,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.224029341977367,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T12:00:00Z",
+      "windowEndUtc": "2026-11-03T12:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.380858579326919,
+      "modelSnowfallCm": 1.130112033051514,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.2047
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.896967738541623,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.3096935750211,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "sugarloaf-summit",
+   "resortSlug": "sugarloaf",
+   "resortName": "Sugarloaf",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 45.046037,
+   "longitude": -70.31471,
+   "elevationM": 1268.0,
+   "timezone": "America/New_York",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.576456962110493,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.242273865251445,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T12:00:00Z",
+      "windowEndUtc": "2026-11-03T12:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.50123861393652,
+      "modelSnowfallCm": 1.1446142158209327,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.2047
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T12:00:00Z",
+      "windowEndUtc": "2026-11-01T12:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.05087989037178,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T12:00:00Z",
+      "windowEndUtc": "2026-11-02T12:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 9.800183586313835,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ]
+   }
+  }
+ ]
+}
