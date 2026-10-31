@@ -359,7 +359,8 @@ export default function Home() {
   }, [activeDays, displayData, currentHourData, activeSelectedDate, todayStr, mode, locations, currentLocationId]);
 
   // ENS-EB model panel: catalogue resort points only, ECMWF/HRRR modes
-  // only -- modelForecastFor enforces the gate and returns null otherwise.
+  // only (including the default hrrr_ecmwf blend) -- modelForecastFor
+  // enforces the gate and returns null otherwise.
   const modelResult = mode === "forecast"
     ? modelForecastFor(locations[currentLocationId], modelId, elevationMode, activeSelectedDate)
     : null;

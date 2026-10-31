@@ -3,11 +3,18 @@
  *
  * The model is served ONLY at catalogue resort points (the tracking
  * registry's pilot resorts x base / mid / summit) and ONLY inside the
- * ECMWF and HRRR forecast-source modes: its features are derived wholly
- * from those two sources, so the panel follows the active mode (ECMWF
- * mode -> ECMWF arm, HRRR mode -> HRRR arm) and does not exist in any
- * other mode. Every other location keeps Kuchera only, exactly as
- * before. Data is produced by the offline serving batch
+ * ECMWF and HRRR forecast-source modes -- including the default
+ * `hrrr_ecmwf` blend of the two: its features are derived wholly from
+ * those two sources, so no other mode can show it. In the literal
+ * `ecmwf` / `hrrr` modes the panel shows that source's arm. In blend
+ * mode it mirrors the app's own blend (blendForecasts in lib/data.ts,
+ * fed by the hrrr_ecmwf branch of fetchWeatherData in lib/api.ts):
+ * ECMWF is the spine and HRRR overrides inside its 0-48 h horizon, so
+ * per window the blend-privileged arm is HRRR for lead days 1-2 and
+ * ECMWF for lead day 3, with fallback to the other arm when the
+ * privileged arm has no scored record for that window. Every other
+ * location keeps Kuchera only, exactly as before. Data is produced by
+ * the offline serving batch
  * (training/slr_calibration/scripts/run_model_serving.py) and imported
  * as static JSON -- this app has no database; the JSON is the serving
  * layer in the workspace.
@@ -55,11 +62,45 @@ export interface ModelForecastData {
 
 export const modelForecastData = rawData as unknown as ModelForecastData;
 
-/** The design's mode gate: the model exists only in ECMWF / HRRR modes. */
+/** The app's default forecast-source mode: the HRRR+ECMWF blend. */
+export const BLEND_MODEL_ID = 'hrrr_ecmwf';
+
+/**
+ * Lead days whose 24 h windows fall inside HRRR's 0-48 h horizon -- the
+ * span the app fetches HRRR for in blend mode (fetchWeatherData:
+ * "Fetch HRRR (0-48 hours)") and the span the serving batch scores for
+ * the HRRR arm.
+ */
+const BLEND_HRRR_MAX_LEAD_DAY = 2;
+
+/** The single arm a literal source mode maps to, or null. */
 export function modelArmForMode(modelId: string): ModelSourceArm | null {
   if (modelId === 'ecmwf') return 'ecmwf';
   if (modelId === 'hrrr') return 'hrrr';
   return null;
+}
+
+/**
+ * Arm preference order for one window, most preferred first.
+ *
+ * Literal `ecmwf` / `hrrr` modes: that arm only -- no cross-source
+ * fallback, exactly as the panel behaved before blend support.
+ *
+ * Blend mode (`hrrr_ecmwf`) mirrors blendForecasts: HRRR overrides
+ * ECMWF hour-by-hour wherever HRRR data exists inside its 0-48 h
+ * horizon, and ECMWF supplies everything beyond it. At the panel's
+ * window granularity that is HRRR for lead days 1-2 and ECMWF for
+ * lead day 3; the non-privileged arm remains as a fallback for windows
+ * the privileged arm has no scored record for (e.g. HRRR day-2 windows
+ * beyond the 48 h horizon from the 12Z cycle).
+ *
+ * Any other mode: no arms -- the panel does not exist there.
+ */
+export function modelArmPreference(modelId: string, leadDay: number): ModelSourceArm[] {
+  const single = modelArmForMode(modelId);
+  if (single) return [single];
+  if (modelId !== BLEND_MODEL_ID) return [];
+  return leadDay <= BLEND_HRRR_MAX_LEAD_DAY ? ['hrrr', 'ecmwf'] : ['ecmwf', 'hrrr'];
 }
 
 const MAX_POINT_DISTANCE_DEG = 0.05;
@@ -95,7 +136,10 @@ export function cataloguePointForLocation(
 
 export interface ModelForecastResult {
   point: ModelForecastPoint;
+  /** The arm actually shown for this window (per-window in blend mode). */
   arm: ModelSourceArm;
+  /** True when resolved in the hrrr_ecmwf blend mode. */
+  blended: boolean;
   cycleUtc: string | null;
   forecast: ModelWindowForecast;
 }
@@ -103,8 +147,9 @@ export interface ModelForecastResult {
 /**
  * Resolve the model forecast to display, or null when the panel must not
  * appear: wrong mode, non-catalogue location, or no prediction stored
- * for that source / window (missing predictions are never carried
- * forward).
+ * for that window (missing predictions are never carried forward). In
+ * blend mode the resolved arm is the one actually shown for the window,
+ * so the panel's source label is per-window truthful.
  */
 export function modelForecastFor(
   location: Location | undefined,
@@ -113,13 +158,35 @@ export function modelForecastFor(
   windowEndLocalDate: string | null,
 ): ModelForecastResult | null {
   if (!location || !windowEndLocalDate) return null;
-  const arm = modelArmForMode(modelId);
-  if (!arm) return null;
+  const blended = modelId === BLEND_MODEL_ID;
+  if (!blended && !modelArmForMode(modelId)) return null;
   const point = cataloguePointForLocation(location, elevationMode);
   if (!point) return null;
-  const rows = point.forecasts[arm];
-  if (!rows) return null;
-  const forecast = rows.find((row) => row.windowEndLocalDate === windowEndLocalDate);
-  if (!forecast || forecast.modelSlr === null) return null;
-  return { point, arm, cycleUtc: modelForecastData.cycles[arm] ?? null, forecast };
+
+  const rowFor = (arm: ModelSourceArm): ModelWindowForecast | null =>
+    point.forecasts[arm]?.find((row) => row.windowEndLocalDate === windowEndLocalDate) ?? null;
+
+  if (!blended) {
+    const arm = modelArmForMode(modelId) as ModelSourceArm;
+    const forecast = rowFor(arm);
+    if (!forecast || forecast.modelSlr === null) return null;
+    return { point, arm, blended: false, cycleUtc: modelForecastData.cycles[arm] ?? null, forecast };
+  }
+
+  // Blend mode: find the window in either arm to learn its lead day,
+  // then walk the blend's preference order with fallback.
+  const rows: Partial<Record<ModelSourceArm, ModelWindowForecast>> = {};
+  for (const arm of ['ecmwf', 'hrrr'] as ModelSourceArm[]) {
+    const row = rowFor(arm);
+    if (row) rows[arm] = row;
+  }
+  const anyRow = rows.ecmwf ?? rows.hrrr;
+  if (!anyRow) return null;
+  for (const arm of modelArmPreference(modelId, anyRow.leadDay)) {
+    const forecast = rows[arm];
+    if (forecast && forecast.modelSlr !== null) {
+      return { point, arm, blended: true, cycleUtc: modelForecastData.cycles[arm] ?? null, forecast };
+    }
+  }
+  return null;
 }

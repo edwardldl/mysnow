@@ -26,14 +26,18 @@ function fmt(value: number | null, digits = 1): string {
 
 /**
  * Labelled model panel (design SS7): shown only at catalogue resort
- * points and only in ECMWF / HRRR source modes -- the gating lives in
- * lib/model-forecast.ts; this component renders nothing without a
- * resolved result. Model values sit alongside the same-window Kuchera
- * comparison and never replace the production figures.
+ * points and only in the ECMWF / HRRR source modes, including the
+ * default hrrr_ecmwf blend -- the gating lives in lib/model-forecast.ts;
+ * this component renders nothing without a resolved result. In blend
+ * mode the source named here is the arm actually resolved for this
+ * window (HRRR inside its 48 h horizon, ECMWF beyond, with fallback),
+ * so the label is per-window truthful. Model values sit alongside the
+ * same-window Kuchera comparison and never replace the production
+ * figures.
  */
 export default function ModelForecastPanel({ result }: ModelForecastPanelProps) {
   if (!result) return null;
-  const { point, arm, cycleUtc, forecast } = result;
+  const { point, arm, blended, cycleUtc, forecast } = result;
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 mt-4">
@@ -78,6 +82,13 @@ export default function ModelForecastPanel({ result }: ModelForecastPanelProps) 
         <div className="mt-3 text-[10px] md:text-[11px] text-slate-500">
           24 h window ending 07:00 local · {point.resortName} · Experimental model output, shown for
           comparison alongside the production forecast
+          {blended && (
+            <>
+              {" "}· Blended (HRRR+ECMWF) mode: this window is served by the {SOURCE_LABEL[arm]}{" "}
+              model arm — the blend uses HRRR inside its 48 h horizon and ECMWF beyond it, and each
+              window is labelled with the source actually shown
+            </>
+          )}
         </div>
       </div>
     </div>
