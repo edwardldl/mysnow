@@ -178,16 +178,12 @@ def fetch_ranges(url: str, ranges: list[tuple[int, int]], *, merge_gap: int = 65
 # ---------------------------------------------------------------------------
 
 
-def _grib_messages(data: bytes):
+def _gid(data: bytes) -> int:
+    """ecCodes handle for a single-message payload (codes_new_from_message
+    avoids the real-file fileno that codes_grib_new_from_file requires)."""
     import eccodes
 
-    with io.BytesIO(data) as buf:
-        while True:
-            gid = eccodes.codes_grib_new_from_file(buf)
-            if gid is None:
-                break
-            yield gid
-            eccodes.codes_release(gid)
+    return eccodes.codes_new_from_message(data)
 
 
 def grib_values(data: bytes) -> np.ndarray:
@@ -196,15 +192,18 @@ def grib_values(data: bytes) -> np.ndarray:
     source index rather than trusting decoder short names)."""
     import eccodes
 
-    for gid in _grib_messages(data):
+    gid = _gid(data)
+    try:
         return np.asarray(eccodes.codes_get_values(gid), dtype=float)
-    raise ValueError("no GRIB message in payload")
+    finally:
+        eccodes.codes_release(gid)
 
 
 def grib_regular_geometry(data: bytes) -> dict[str, float]:
     import eccodes
 
-    for gid in _grib_messages(data):
+    gid = _gid(data)
+    try:
         return {
             "ni": int(eccodes.codes_get(gid, "Ni")),
             "nj": int(eccodes.codes_get(gid, "Nj")),
@@ -213,19 +212,22 @@ def grib_regular_geometry(data: bytes) -> dict[str, float]:
             "di": float(eccodes.codes_get(gid, "iDirectionIncrementInDegrees")),
             "dj": -float(eccodes.codes_get(gid, "jDirectionIncrementInDegrees")),
         }
-    raise ValueError("no GRIB message in payload")
+    finally:
+        eccodes.codes_release(gid)
 
 
 def grib_latlons(data: bytes) -> tuple[np.ndarray, np.ndarray]:
     import eccodes
 
-    for gid in _grib_messages(data):
+    gid = _gid(data)
+    try:
         ni = int(eccodes.codes_get(gid, "Ni"))
         nj = int(eccodes.codes_get(gid, "Nj"))
         lats = np.asarray(eccodes.codes_get_array(gid, "latitudes"), dtype=float)
         lons = np.asarray(eccodes.codes_get_array(gid, "longitudes"), dtype=float)
         return lats.reshape(nj, ni), lons.reshape(nj, ni)
-    raise ValueError("no GRIB message in payload")
+    finally:
+        eccodes.codes_release(gid)
 
 
 def sample_regular_grid(values: np.ndarray, ni: int, nj: int,
