@@ -34,6 +34,7 @@ from __future__ import annotations
 import io
 import json
 import math
+import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -126,8 +127,18 @@ def hours_between(start: datetime, end: datetime) -> list[datetime]:
 
 def http_get(url: str, *, headers: dict[str, str] | None = None, timeout: int = 120) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": "mysnow-model-serving/1.0", **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
+    last_exc: Exception | None = None
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read()
+        except Exception as exc:  # transient proxy / connection resets
+            last_exc = exc
+            if isinstance(exc, urllib.error.HTTPError) and exc.code < 500:
+                raise
+            time.sleep(2.0 * (attempt + 1))
+    assert last_exc is not None
+    raise last_exc
 
 
 def fetch_ranges(url: str, ranges: list[tuple[int, int]], *, merge_gap: int = 65536,
@@ -259,7 +270,10 @@ def hrrr_cell_indices(lats: np.ndarray, lons: np.ndarray,
     flat_lon = lons.ravel()
     for p in points:
         dlat = (flat_lat - p["latitude"]) * 111.32
-        dlon = (flat_lon - p["longitude"]) * 111.32 * math.cos(math.radians(p["latitude"]))
+        # Grid longitudes may be stored 0..360 while point longitudes are
+        # -180..180: use the circular difference so the seam never wins.
+        dlon_deg = (flat_lon - p["longitude"] + 180.0) % 360.0 - 180.0
+        dlon = dlon_deg * 111.32 * math.cos(math.radians(p["latitude"]))
         out.append(int(np.argmin(dlat * dlat + dlon * dlon)))
     return out
 

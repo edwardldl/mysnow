@@ -185,7 +185,7 @@ def hrrr_idx(date: str, cycle: int, kind: str, fxx: int) -> tuple[str, list[dict
     for line in text.splitlines():
         parts = line.split(":")
         if len(parts) >= 6 and parts[0].isdigit():
-            rows.append({"offset": int(parts[1]), "field": parts[3], "level": parts[4]})
+            rows.append({"offset": int(parts[1]), "field": parts[3], "level": parts[4], "span": parts[5]})
     # lengths from next offset
     total_order = sorted(rows, key=lambda r: r["offset"])
     for j, row in enumerate(total_order):
@@ -217,10 +217,18 @@ def build_hrrr_series(points: list[dict], date: str, cycle: int, max_step: int =
                 key = (row["field"], row["level"])
                 if kind == "wrfprs" and row["field"] in HRRR_PL_FIELDS and row["level"] in era5_level_strs:
                     wanted[key] = (row["offset"], row["length"])
-                elif kind == "wrfsfc" and key in (
-                    ("TMP", "2 m above ground"), ("DPT", "2 m above ground"),
-                    ("UGRD", "10 m above ground"), ("VGRD", "10 m above ground"),
-                    ("TMP", "surface"), ("APCP", "surface"), ("ASNOW", "surface"),
+                elif kind == "wrfsfc" and (
+                    key in (
+                        ("TMP", "2 m above ground"), ("DPT", "2 m above ground"),
+                        ("UGRD", "10 m above ground"), ("VGRD", "10 m above ground"),
+                        ("TMP", "surface"),
+                    )
+                    # APCP/ASNOW appear twice per file: the cycle
+                    # accumulation ("0-N hour acc") and a 1-hour
+                    # accumulation ("N-1-N hour acc"). Only the cycle
+                    # accumulation may be differenced into hourly amounts.
+                    or (key in (("APCP", "surface"), ("ASNOW", "surface"))
+                        and row["span"].startswith("0-"))
                 ):
                     wanted[key] = (row["offset"], row["length"])
             payloads = fetch_ranges(url, list(wanted.values()))
