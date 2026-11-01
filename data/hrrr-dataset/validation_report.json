@@ -1,8 +1,8 @@
 {
   "dataset_dir": "data/hrrr-dataset",
-  "elapsed_seconds": 12.6,
+  "elapsed_seconds": 13.2,
   "forecast_source": "noaa",
-  "generated_at_utc": "2026-10-19T15:20:36.325741Z",
+  "generated_at_utc": "2026-11-01T03:07:03.399617Z",
   "hrrr": {
     "cached_chunks": 0,
     "failed_chunks": [],
@@ -24,6 +24,7 @@
       "2026-03",
       "2026-04",
       "2026-05",
+      "2026-10",
       "2023-10",
       "2023-11",
       "2023-12",
@@ -33,9 +34,7 @@
       "2024-04",
       "2024-05"
     ],
-    "months_missing": [
-      "2026-10"
-    ],
+    "months_missing": [],
     "planned_chunks": 0,
     "source": "noaa_grib_00z",
     "stations_with_data": 476
@@ -79,26 +78,26 @@
     "row_count": 549763
   },
   "output": {
-    "days_with_hrrr": 347480,
+    "days_with_hrrr": 362236,
     "null_rates": {
-      "delta_swe_mm": 0.0175,
-      "fcst_kuchera_slr": 0.7117,
-      "fcst_snowfall_cm": 0.3717,
-      "fcst_t2m_mean_c": 0.3717,
-      "observed_slr_diff": 0.9602,
-      "precip_mm": 0.0178,
-      "snow_depth_mm": 0.0102,
-      "swe_mm": 0.0164
+      "delta_swe_mm": 0.0301,
+      "fcst_kuchera_slr": 0.7079,
+      "fcst_snowfall_cm": 0.3534,
+      "fcst_t2m_mean_c": 0.3534,
+      "observed_slr_diff": 0.9607,
+      "precip_mm": 0.0304,
+      "snow_depth_mm": 0.0229,
+      "swe_mm": 0.029
     },
     "qc_passed_event_days": 21994,
     "rows_by_water_year": {
       "2024": 181454,
       "2025": 181716,
       "2026": 181909,
-      "2027": 7942
+      "2027": 15122
     },
     "stations_with_obs_days": 499,
-    "total_rows": 553021
+    "total_rows": 560201
   },
   "requests": {
     "awdb": {

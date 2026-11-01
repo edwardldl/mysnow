@@ -12,26 +12,22 @@ forecasts are populated by `extract-noaa-months`
 `validation_report.json` next to this file is the machine-readable
 report of the build that produced the committed Parquet.
 
-## Status of this build (2026-10-19) — read first
+## Status of this build (2026-11-01) — read first
 
 - **Observations: complete.** All 499 stations, 2023-10-01 → 2026-10-18
   (370/370 AWDB chunks fetched and cached; rebuilds make zero AWDB
   requests).
-- **Forecasts (NOAA): the full WY2024, WY2025 and WY2026 seasons
-  are extracted** (2023-10 → 2024-05, 2024-10 → 2025-05 and
-  2025-10 → 2026-05). Every CONUS station-day in those months has
-  `hrrr_status = "ok"` (347,480 station-days = 116,144 for WY2024
-  (476 CONUS stations × 244 days, leap-year February) plus 115,668
-  per full Oct-May season for WY2025 and WY2026, 100% coverage).
-  The only remaining planned month is 2026-10, which can only
-  complete on/after 2026-11-01; its station-days carry
-  `hrrr_status = "not_requested"` and null forecast fields until it
-  lands. Per-month extraction state (completeness, files, bytes, wall
-  time) lives in `noaa-monthly/manifest.json`.
-- **Oct 2026 caveat:** a month extraction needs GRIB cycles through the
-  day after the month ends, so 2026-10 can only complete on/after
-  2026-11-01. Cycles that already exist are fetched and cached in the
-  meantime; the manifest stays incomplete until then.
+- **Forecasts (NOAA): complete.** All 25 planned months are
+  extracted (2023-10 → 2024-05, 2024-10 → 2025-05,
+  2025-10 → 2026-05, and 2026-10). Every CONUS station-day in those
+  months has `hrrr_status = "ok"` (362,236 station-days = 347,480
+  for the three full Oct-May seasons plus 14,756 for Oct 2026,
+  100% coverage). Per-month extraction state (completeness, files,
+  bytes, wall time) lives in `noaa-monthly/manifest.json`.
+- **Oct 2026 completed 2026-11-01:** a month extraction needs GRIB
+  cycles through the day after the month ends, so 2026-10 completed
+  only once the 2026-11-01 00Z cycle published; its final 48 files
+  were fetched in the 2026-11-01 rerun with zero failures.
 - **Resume the campaign** (safe to repeat; completed months and files
   are skipped from cache at zero network cost):
 
