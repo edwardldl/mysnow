@@ -82,6 +82,8 @@ describe('model mode gate', () => {
     expect(modelArmPreference(BLEND_MODEL_ID, 1)).toEqual(['hrrr', 'ecmwf']);
     expect(modelArmPreference(BLEND_MODEL_ID, 2)).toEqual(['hrrr', 'ecmwf']);
     expect(modelArmPreference(BLEND_MODEL_ID, 3)).toEqual(['ecmwf', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 4)).toEqual(['ecmwf', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 9)).toEqual(['ecmwf', 'hrrr']);
   });
 });
 
@@ -189,6 +191,18 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
     expect(result?.forecast.modelSlr).toBe(ecmwfRows[2]?.modelSlr);
   });
 
+  it('serves the ECMWF arm for the extended-horizon day-5 window', () => {
+    const day5Date = ecmwfRows[4]?.windowEndLocalDate;
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day5Date);
+    expect(result?.arm).toBe('ecmwf');
+    expect(result?.forecast.leadDay).toBe(5);
+    expect(result?.forecast.modelSlr).toBe(ecmwfRows[4]?.modelSlr);
+    // Same values the literal ECMWF mode shows for this window.
+    expect(result?.forecast).toEqual(
+      modelForecastFor(palisades, 'ecmwf', 'min', day5Date)?.forecast,
+    );
+  });
+
   it('shows no panel at a non-catalogue location in blend mode', () => {
     expect(modelForecastFor(farAway, BLEND_MODEL_ID, 'avg', day1Date)).toBeNull();
   });
@@ -220,6 +234,15 @@ describe('panel rendering and per-window source labelling', () => {
     expect(html).toContain('MODEL FORECAST');
     expect(html).toContain('ECMWF IFS');
     expect(html).not.toContain('served by the NOAA HRRR model arm');
+  });
+
+  it('labels the day-5 blend window as ECMWF IFS with the model label intact', () => {
+    const day5Date = ecmwfRows[4]?.windowEndLocalDate;
+    const html = render(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day5Date));
+    expect(html).toContain('MODEL FORECAST');
+    expect(html).toContain('Produced by the MySnow ENS-EB model');
+    expect(html).toContain('ECMWF IFS');
+    expect(html).not.toContain('NOAA HRRR');
   });
 
   it('renders nothing without a resolved result', () => {

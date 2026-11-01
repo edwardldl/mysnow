@@ -13,6 +13,15 @@ champion, and publishes:
 
 Windows a source cannot cover (HRRR's 48 h horizon vs western 07:00-local
 day-2 windows from a 12Z cycle) are recorded as missing, never filled.
+
+ECMWF horizon extension (2026-10-31, user decision: cover all days of
+ECMWF data): the ECMWF arm scores leads 1-10 against the full step-240
+open-data ceiling (steps 0-144 3-hourly, 150-240 6-hourly), gated by
+scripts/audit_serving_sources_extended.py (phase0_audit_extended.json:
+no parameter/level gaps at any step; accumulation semantics unchanged).
+Per-point ceilings: lead 9 for America/Los_Angeles + America/Denver
+points, lead 10 for America/New_York; beyond-ceiling windows are
+recorded missing like HRRR's.
 """
 
 from __future__ import annotations
@@ -73,17 +82,28 @@ def ecmwf_index(date: str, cycle: int, step: int) -> tuple[str, list[dict]]:
     return f"{base}/{name}.grib2", entries
 
 
-def build_ecmwf_series(points: list[dict], date: str, cycle: int, max_step: int = 75):
+def ecmwf_steps(max_step: int) -> list[int]:
+    """IFS oper open-data step schedule for 00/12Z cycles: 3-hourly to
+    step 144, then 6-hourly to the step-240 open-data ceiling (verified
+    per-step against the live .index catalogue by
+    audit_serving_sources_extended.py, phase0_audit_extended.json)."""
+    steps = list(range(0, min(max_step, 144) + 1, 3))
+    if max_step > 144:
+        steps += list(range(150, max_step + 1, 6))
+    return steps
+
+
+def build_ecmwf_series(points: list[dict], date: str, cycle: int, max_step: int = 240):
     """Returns (per-point series dict, stamp t2m per point for cross-checks)."""
     cycle_dt = datetime.strptime(date, "%Y%m%d").replace(hour=cycle, tzinfo=timezone.utc)
-    stamps = [cycle_dt + timedelta(hours=s) for s in range(0, max_step + 1, 3)]
+    steps = ecmwf_steps(max_step)
+    stamps = [cycle_dt + timedelta(hours=s) for s in steps]
     # per point per stamp raw extracts
     raw: list[dict[str, Any]] = [dict() for _ in points]  # unused placeholder shape
     per_point_stamps: list[list[dict[str, Any]]] = [[] for _ in points]
     t2m_check: dict[str, dict[datetime, float]] = {p["point_id"]: {} for p in points}
     geometry = None
-    for step_i, stamp in enumerate(stamps):
-        step = step_i * 3
+    for step, stamp in zip(steps, stamps):
         url, entries = ecmwf_index(date, cycle, step)
         wanted: dict[tuple[str, str, int | None], tuple[int, int]] = {}
         for e in entries:
@@ -412,11 +432,19 @@ def main() -> int:
     if "ecmwf" in args.sources:
         series, t2m = build_ecmwf_series(points, args.date, args.cycle)
         t2m_by_arm["ecmwf"] = t2m
-        recs, feats = score_arm("ecmwf", SOURCE_ID_ECMWF, [1, 2, 3], cycle_dt,
+        # Leads 1-10 requested for every point; each point's coverable
+        # ceiling falls out of the 240 h open-data horizon inside
+        # score_arm (window end beyond the series -> recorded missing):
+        # 9 for America/Los_Angeles and America/Denver points, 10 for
+        # America/New_York (phase0_audit_extended.json).
+        recs, feats = score_arm("ecmwf", SOURCE_ID_ECMWF, list(range(1, 11)), cycle_dt,
                                 points, series, model, sidecar_features)
         all_records += recs; all_features += feats
         manifest["arms"]["ecmwf"] = {"records": len(recs),
-                                     "predicted": sum(1 for r in recs if not r["missing"])}
+                                     "predicted": sum(1 for r in recs if not r["missing"]),
+                                     "leads_requested": list(range(1, 11)),
+                                     "step_schedule": "0-144 by 3, 150-240 by 6",
+                                     "max_step": 240}
     if "hrrr" in args.sources:
         series, t2m = build_hrrr_series(points, args.date, args.cycle)
         t2m_by_arm["hrrr"] = t2m

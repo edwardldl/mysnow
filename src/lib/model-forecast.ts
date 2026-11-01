@@ -11,7 +11,9 @@
  * fed by the hrrr_ecmwf branch of fetchWeatherData in lib/api.ts):
  * ECMWF is the spine and HRRR overrides inside its 0-48 h horizon, so
  * per window the blend-privileged arm is HRRR for lead days 1-2 and
- * ECMWF for lead day 3, with fallback to the other arm when the
+ * ECMWF for lead day 3 and beyond (the ECMWF arm is precomputed out to
+ * the step-240 open-data ceiling -- lead day 9 or 10 depending on the
+ * point's timezone), with fallback to the other arm when the
  * privileged arm has no scored record for that window. Every other
  * location keeps Kuchera only, exactly as before. Data is produced by
  * the offline serving batch
@@ -90,7 +92,7 @@ export function modelArmForMode(modelId: string): ModelSourceArm | null {
  * ECMWF hour-by-hour wherever HRRR data exists inside its 0-48 h
  * horizon, and ECMWF supplies everything beyond it. At the panel's
  * window granularity that is HRRR for lead days 1-2 and ECMWF for
- * lead day 3; the non-privileged arm remains as a fallback for windows
+ * lead day 3 and beyond; the non-privileged arm remains as a fallback for windows
  * the privileged arm has no scored record for (e.g. HRRR day-2 windows
  * beyond the 48 h horizon from the 12Z cycle).
  *

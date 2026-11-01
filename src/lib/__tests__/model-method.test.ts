@@ -46,11 +46,34 @@ const farAway: Location = {
   isCustom: true,
 } as Location;
 
+const stowe: Location = {
+  id: 'stowe',
+  name: 'Stowe',
+  latitude: 44.53036,
+  longitude: -72.788162,
+  elevationFt: 2467,
+  elevationM: 753,
+  minElevationM: 397,
+  maxElevationM: 1109,
+  referencePoints: [
+    { id: 'stowe-base', name: 'Base estimate', role: 'base', latitude: 44.53036, longitude: -72.788162, elevationM: 397, geometrySource: 'estimated' },
+    { id: 'stowe-mid', name: 'Mid-mountain estimate', role: 'mid_mountain', latitude: 44.53036, longitude: -72.788162, elevationM: 753, geometrySource: 'estimated' },
+    { id: 'stowe-summit', name: 'Summit estimate', role: 'summit', latitude: 44.53036, longitude: -72.788162, elevationM: 1109, geometrySource: 'estimated' },
+  ],
+  timezone: 'America/New_York',
+  isCustom: false,
+} as Location;
+
 const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
 const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
 const day1Date = ecmwfRows[0]?.windowEndLocalDate;
 const day2Date = ecmwfRows[1]?.windowEndLocalDate;
 const day3Date = ecmwfRows[2]?.windowEndLocalDate;
+const day4Date = ecmwfRows[3]?.windowEndLocalDate;
+const day5Date = ecmwfRows[4]?.windowEndLocalDate;
+const day9Date = ecmwfRows[8]?.windowEndLocalDate;
+const stowePoint = modelForecastData.points.find((p) => p.pointId === 'stowe-base');
+const stoweEcmwfRows = stowePoint?.forecasts.ecmwf ?? [];
 
 describe('ENS-EB menu option', () => {
   it('is listed in the Physics menu (ALGORITHMS) with a model label', () => {
@@ -104,27 +127,31 @@ describe('model method availability matrix', () => {
 });
 
 describe('model window statuses (shared menu/panel view)', () => {
-  it('blend mode: all three Palisades windows resolve to the model with truthful arms', () => {
+  it('blend mode: every Palisades window resolves to the model with truthful arms', () => {
     const ctx = modelWindowStatuses(palisades, BLEND_MODEL_ID, 'min');
     expect(ctx?.point.pointId).toBe('palisades-tahoe-base');
-    expect(ctx?.windows.map((w) => w.windowEndLocalDate)).toEqual([day1Date, day2Date, day3Date]);
+    expect(ctx?.windows.map((w) => w.windowEndLocalDate)).toEqual(
+      ecmwfRows.map((r) => r.windowEndLocalDate),
+    );
     expect(ctx?.windows.map((w) => [w.status, w.arm])).toEqual([
       ['model', 'hrrr'],
-      ['model', 'ecmwf'],
-      ['model', 'ecmwf'],
+      ...ecmwfRows.slice(1).map(() => ['model', 'ecmwf']),
     ]);
   });
 
-  it('literal hrrr mode: day-2 and day-3 windows are marked fallback, never silently filled', () => {
+  it('literal hrrr mode: windows past day 1 are marked fallback, never silently filled', () => {
     const ctx = modelWindowStatuses(palisades, 'hrrr', 'min');
-    expect(ctx?.windows.map((w) => w.status)).toEqual(['model', 'fallback', 'fallback']);
+    expect(ctx?.windows.map((w) => w.status)).toEqual([
+      'model',
+      ...ecmwfRows.slice(1).map(() => 'fallback'),
+    ]);
     expect(ctx?.windows[1].result).toBeNull();
     expect(ctx?.windows[2].result).toBeNull();
   });
 
   it('literal ecmwf mode: every stored window resolves to the model', () => {
     const ctx = modelWindowStatuses(palisades, 'ecmwf', 'min');
-    expect(ctx?.windows.map((w) => w.status)).toEqual(['model', 'model', 'model']);
+    expect(ctx?.windows.map((w) => w.status)).toEqual(ecmwfRows.map(() => 'model'));
   });
 
   it('returns null where the method is unavailable', () => {
@@ -177,6 +204,72 @@ describe('applyModelMethodToDays', () => {
     expect(applyModelMethodToDays(days, palisades, 'gfs', 'min')).toBe(days);
     expect(applyModelMethodToDays(days, farAway, 'ecmwf', 'avg')).toBe(days);
     expect(applyModelMethodToDays(days, undefined, 'ecmwf', 'min')).toBe(days);
+  });
+});
+
+describe('extended ECMWF horizon (step-240 open-data ceiling)', () => {
+  const mkDay = (dateStr: string, totalSnowfall: number): DayData =>
+    ({ dateStr, totalSnowfall }) as DayData;
+
+  it('covers lead days 1-9 at Palisades (America/Los_Angeles) and 1-10 at Stowe (America/New_York)', () => {
+    // The 07:00-local window end for lead k lands at step 24k+3 in
+    // Los Angeles and 24k in New York: the step-240 ceiling admits
+    // k <= 9 in the west and k <= 10 in the east (phase0_audit_extended).
+    expect(ecmwfRows.map((r) => r.leadDay)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(stoweEcmwfRows.map((r) => r.leadDay)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it('resolves the day-5 window to the ECMWF arm in literal ecmwf mode', () => {
+    const result = modelForecastFor(palisades, 'ecmwf', 'min', day5Date);
+    expect(result?.arm).toBe('ecmwf');
+    expect(result?.blended).toBe(false);
+    expect(result?.forecast.leadDay).toBe(5);
+    expect(result?.forecast.modelSlr).toBe(ecmwfRows[4]?.modelSlr);
+    expect(result?.forecast.modelSnowfallCm).toBe(ecmwfRows[4]?.modelSnowfallCm);
+  });
+
+  it('resolves blend day 4 and day 5 to the ECMWF arm (HRRR horizon is 48 h)', () => {
+    const cases: Array<[string, (typeof ecmwfRows)[number] | undefined]> = [
+      [day4Date, ecmwfRows[3]],
+      [day5Date, ecmwfRows[4]],
+    ];
+    for (const [date, row] of cases) {
+      const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', date);
+      expect(result?.blended).toBe(true);
+      expect(result?.arm).toBe('ecmwf');
+      expect(result?.forecast.leadDay).toBe(row?.leadDay);
+      expect(result?.forecast.modelSlr).toBe(row?.modelSlr);
+      expect(result?.cycleUtc).toBe(modelForecastData.cycles.ecmwf);
+    }
+  });
+
+  it('resolves the day-9 window (Palisades ceiling) and the day-10 window at Stowe', () => {
+    const day9 = modelForecastFor(palisades, 'ecmwf', 'min', day9Date);
+    expect(day9?.forecast.leadDay).toBe(9);
+    expect(day9?.forecast.modelSlr).toBe(ecmwfRows[8]?.modelSlr);
+    const stoweDay10 = stoweEcmwfRows[9];
+    const day10 = modelForecastFor(stowe, 'ecmwf', 'min', stoweDay10?.windowEndLocalDate);
+    expect(day10?.forecast.leadDay).toBe(10);
+    expect(day10?.forecast.modelSlr).toBe(stoweDay10?.modelSlr);
+  });
+
+  it('has no Palisades record beyond the ceiling: the day-10 date stays Kuchera', () => {
+    // Stowe's day-10 window-end date is the same calendar date a
+    // Palisades day-10 window would end on -- but that window ends at
+    // step 243 > 240, so no Palisades record exists for it.
+    const beyondDate = stoweEcmwfRows[9]?.windowEndLocalDate;
+    expect(ecmwfRows.find((r) => r.windowEndLocalDate === beyondDate)).toBeUndefined();
+    expect(modelForecastFor(palisades, 'ecmwf', 'min', beyondDate)).toBeNull();
+    const out = applyModelMethodToDays([mkDay(beyondDate, 7.5)], palisades, 'ecmwf', 'min');
+    expect(out[0].totalSnowfall).toBe(7.5);
+    expect(out[0].modelWindow?.kind).toBe('kuchera_fallback');
+  });
+
+  it('replaces the day-5 total with the record snowfall under the menu method', () => {
+    const out = applyModelMethodToDays([mkDay(day5Date, 999)], palisades, BLEND_MODEL_ID, 'min');
+    expect(out[0].totalSnowfall).toBe(ecmwfRows[4]?.modelSnowfallCm);
+    expect(out[0].modelWindow?.kind).toBe('model');
+    expect(out[0].modelWindow?.arm).toBe('ecmwf');
   });
 });
 

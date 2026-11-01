@@ -1,5 +1,5 @@
 {
- "generatedAtUtc": "2026-10-31T23:34:16.001404+00:00",
+ "generatedAtUtc": "2026-11-01T01:15:02.308471+00:00",
  "modelVersion": "ENS-EB v3 champion (model-v3, 64 features)",
  "modelLabel": "Model forecast",
  "featureBuilderVersion": "model-serving-test-1 (adapters) + gold_profiles/v3_features (training builders, unmodified)",
@@ -49,6 +49,72 @@
       "windowEndUtc": "2026-11-03T15:00:00Z",
       "windowEndLocalDate": "2026-11-03",
       "modelSlr": 10.79611310820882,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 8.913383483421192,
+      "modelSnowfallCm": 3.2526719007700615,
+      "kucheraSlr": 3.513242,
+      "kucheraSnowfallCm": 1.28205227064,
+      "liquidMm": 3.6492
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.755026235821841,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 10.942501342171681,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.958237545281214,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 11.098181060321085,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.739848295805572,
       "modelSnowfallCm": 0.0,
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
@@ -114,6 +180,72 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 9.641420720885542,
+      "modelSnowfallCm": 3.6728028094141387,
+      "kucheraSlr": 8.703724,
+      "kucheraSnowfallCm": 3.3155966205599996,
+      "liquidMm": 3.8094
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.2005411703241,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 9.854634808162437,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.544826898116956,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 11.021790936580796,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.170412802406396,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -171,6 +303,72 @@
       "windowEndUtc": "2026-11-03T15:00:00Z",
       "windowEndLocalDate": "2026-11-03",
       "modelSlr": 10.27506625466599,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 11.036761598912877,
+      "modelSnowfallCm": 4.268798651227522,
+      "kucheraSlr": 13.900218,
+      "kucheraSnowfallCm": 5.37632631804,
+      "liquidMm": 3.8678
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.43085014352931,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 10.398595808435486,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.15569825683851,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.821697105457769,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.133755213214862,
       "modelSnowfallCm": 0.0,
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
@@ -236,6 +434,72 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 11.472106311901339,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.909583302106563,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 12.237741770290441,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.501387577696036,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.194380196563497,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.407751421990135,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -293,6 +557,72 @@
       "windowEndUtc": "2026-11-03T15:00:00Z",
       "windowEndLocalDate": "2026-11-03",
       "modelSlr": 12.390965125590073,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 11.697115157368813,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.82073663521653,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 12.106382112339286,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.863395859879505,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 9.870805411128876,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.562572628702492,
       "modelSnowfallCm": 0.0,
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
@@ -358,6 +688,72 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.266120663377368,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.982878753166865,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 12.184250516859564,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 9.8,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.856224020529433,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.229131019625864,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.220956825662999,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -419,6 +815,72 @@
       "kucheraSlr": 8.684492,
       "kucheraSnowfallCm": 1.20870759656,
       "liquidMm": 1.3918
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.535855560124364,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.436691526235627,
+      "modelSnowfallCm": 3.6543031709961427,
+      "kucheraSlr": 12.21452,
+      "kucheraSnowfallCm": 4.2767920328,
+      "liquidMm": 3.5014
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 11.545613697957712,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 4.533333,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.734218926353691,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 13.03750587767873,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 12.455899734167144,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -480,6 +942,72 @@
       "kucheraSlr": 13.809035,
       "kucheraSnowfallCm": 1.9219414912999997,
       "liquidMm": 1.3918
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.623113495038732,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.649560049026395,
+      "modelSnowfallCm": 4.078976955566102,
+      "kucheraSlr": 12.629589,
+      "kucheraSnowfallCm": 4.4221242924599995,
+      "liquidMm": 3.5014
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 11.533412524215873,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 11.433333,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.821728423516948,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 13.515911832086573,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 12.55140875599163,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -541,6 +1069,72 @@
       "kucheraSlr": 15.791947,
       "kucheraSnowfallCm": 2.19792318346,
       "liquidMm": 1.3918
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.619491486315093,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 13.476390462231892,
+      "modelSnowfallCm": 4.718623356445875,
+      "kucheraSlr": 16.052349,
+      "kucheraSnowfallCm": 5.62056947886,
+      "liquidMm": 3.5014
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 12.667102990149427,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 14.3,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 13.294336546527914,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 13.668142433726311,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 12.474913379139666,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -602,6 +1196,72 @@
       "kucheraSlr": 3.282053,
       "kucheraSnowfallCm": 0.08523491641,
       "liquidMm": 0.2597
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.444021096137517,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 13.223479163814673,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 11.652569695859745,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.033333,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.804814427273461,
+      "modelSnowfallCm": 3.428354205968758,
+      "kucheraSlr": 5.030472,
+      "kucheraSnowfallCm": 1.46094967824,
+      "liquidMm": 2.9042
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 12.601375574294561,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.584886348317132,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -663,6 +1323,72 @@
       "kucheraSlr": 9.490308,
       "kucheraSnowfallCm": 0.24646329876,
       "liquidMm": 0.2597
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.449598860847237,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 13.650914393762061,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 13.176768378244674,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 9.3,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 13.497402377662102,
+      "modelSnowfallCm": 3.9199155985206273,
+      "kucheraSlr": 11.546314,
+      "kucheraSnowfallCm": 3.35328051188,
+      "liquidMm": 2.9042
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 13.20200225962612,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.158478455973974,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -724,6 +1450,72 @@
       "kucheraSlr": 15.155993,
       "kucheraSnowfallCm": 0.39360113821,
       "liquidMm": 0.2597
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.531098249323993,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 13.755268113662943,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 14.78863787419947,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 14.3,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 15.134997176579432,
+      "modelSnowfallCm": 4.395505880022198,
+      "kucheraSlr": 15.625921,
+      "kucheraSnowfallCm": 4.53807997682,
+      "liquidMm": 2.9042
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 15.661952745890936,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.31772879609139,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -785,6 +1577,72 @@
       "kucheraSlr": 4.176809,
       "kucheraSnowfallCm": 2.96925175001,
       "liquidMm": 7.1089
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 12.620420672896858,
+      "modelSnowfallCm": 0.04921964062429775,
+      "kucheraSlr": 5.78,
+      "kucheraSnowfallCm": 0.022542,
+      "liquidMm": 0.039
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.815380477410285,
+      "modelSnowfallCm": 7.460990222341485,
+      "kucheraSlr": 4.242442,
+      "kucheraSnowfallCm": 2.9266486137,
+      "liquidMm": 6.8985
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 13.133114730126525,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 13.31510699138718,
+      "modelSnowfallCm": 0.38773591558919474,
+      "kucheraSlr": 5.4,
+      "kucheraSnowfallCm": 0.157248,
+      "liquidMm": 0.2912
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 13.837382623870674,
+      "modelSnowfallCm": 8.02582029567123,
+      "kucheraSlr": 9.948028,
+      "kucheraSnowfallCm": 5.7699557202800005,
+      "liquidMm": 5.8001
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.891578824852338,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -846,6 +1704,72 @@
       "kucheraSlr": 11.240615,
       "kucheraSnowfallCm": 7.990840797350001,
       "liquidMm": 7.1089
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.532394325755279,
+      "modelSnowfallCm": 0.05277633787044559,
+      "kucheraSlr": 12.32,
+      "kucheraSnowfallCm": 0.048048,
+      "liquidMm": 0.039
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 15.173031732621373,
+      "modelSnowfallCm": 10.467115940748855,
+      "kucheraSlr": 10.616791,
+      "kucheraSnowfallCm": 7.32399327135,
+      "liquidMm": 6.8985
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 13.084249131405912,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 16.086026132716444,
+      "modelSnowfallCm": 0.4684250809847029,
+      "kucheraSlr": 12.3,
+      "kucheraSnowfallCm": 0.35817600000000005,
+      "liquidMm": 0.2912
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 15.697978227963898,
+      "modelSnowfallCm": 9.10498435200134,
+      "kucheraSlr": 14.711255,
+      "kucheraSnowfallCm": 8.532675012549998,
+      "liquidMm": 5.8001
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.990494314909132,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -907,6 +1831,72 @@
       "kucheraSlr": 15.247295,
       "kucheraSnowfallCm": 10.83914954255,
       "liquidMm": 7.1089
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.906199332577668,
+      "modelSnowfallCm": 0.054234177397052906,
+      "kucheraSlr": 14.58,
+      "kucheraSnowfallCm": 0.056862,
+      "liquidMm": 0.039
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 15.909652227508118,
+      "modelSnowfallCm": 10.975273589146477,
+      "kucheraSlr": 15.055319,
+      "kucheraSnowfallCm": 10.38591181215,
+      "liquidMm": 6.8985
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 15.424466509130966,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 17.712625219280397,
+      "modelSnowfallCm": 0.5157916463854452,
+      "kucheraSlr": 15.75,
+      "kucheraSnowfallCm": 0.45864000000000005,
+      "liquidMm": 0.2912
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 15.126392006755767,
+      "modelSnowfallCm": 8.773458627838412,
+      "kucheraSlr": 18.809959,
+      "kucheraSnowfallCm": 10.90996431959,
+      "liquidMm": 5.8001
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 15.163038648312337,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -968,6 +1958,72 @@
       "kucheraSlr": 5.646783,
       "kucheraSnowfallCm": 0.29368918383000003,
       "liquidMm": 0.5201
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.624109918913486,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 13.461933493220936,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 13.243180552921672,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 12.334974169765736,
+      "modelSnowfallCm": 4.28442992812643,
+      "kucheraSlr": 6.032499,
+      "kucheraSnowfallCm": 2.0953282026599998,
+      "liquidMm": 3.4734
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 13.13680368286299,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.066090922037969,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -1029,6 +2085,72 @@
       "kucheraSlr": 15.761397,
       "kucheraSnowfallCm": 0.81975025797,
       "liquidMm": 0.5201
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.795511158796813,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 13.774984485681074,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 14.823191268548022,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 15.905951267042092,
+      "modelSnowfallCm": 5.524773113094399,
+      "kucheraSlr": 15.896495,
+      "kucheraSnowfallCm": 5.521488573299999,
+      "liquidMm": 3.4734
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 15.198676906461138,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.00074005968054,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -1090,6 +2212,72 @@
       "kucheraSlr": 17.464734,
       "kucheraSnowfallCm": 0.9083408153400001,
       "liquidMm": 0.5201
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T14:00:00Z",
+      "windowEndUtc": "2026-11-04T14:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 13.688838270290509,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T14:00:00Z",
+      "windowEndUtc": "2026-11-05T14:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 15.106222930659627,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T14:00:00Z",
+      "windowEndUtc": "2026-11-06T14:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 16.049302082397826,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T14:00:00Z",
+      "windowEndUtc": "2026-11-07T14:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 17.219408778104935,
+      "modelSnowfallCm": 5.980989444986967,
+      "kucheraSlr": 19.518029,
+      "kucheraSnowfallCm": 6.779392192859999,
+      "liquidMm": 3.4734
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T14:00:00Z",
+      "windowEndUtc": "2026-11-08T14:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 15.226143329108933,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T14:00:00Z",
+      "windowEndUtc": "2026-11-09T14:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 13.086760349203432,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -1151,6 +2339,72 @@
       "kucheraSlr": 3.0,
       "kucheraSnowfallCm": 0.05249999999999999,
       "liquidMm": 0.175
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.892916705625172,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 7.73187526917819,
+      "modelSnowfallCm": 7.497908723532857,
+      "kucheraSlr": 4.482113,
+      "kucheraSnowfallCm": 4.3464842606200005,
+      "liquidMm": 9.6974
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 7.4932854471115125,
+      "modelSnowfallCm": 6.98037005825673,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 2.79465,
+      "liquidMm": 9.3155
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 6.94438845570239,
+      "modelSnowfallCm": 8.314724629666141,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 3.59199,
+      "liquidMm": 11.9733
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 12.777622694854244,
+      "modelSnowfallCm": 0.11780968124655614,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0922
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.002563120804343,
+      "modelSnowfallCm": 3.1744134320184663,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.9520799999999999,
+      "liquidMm": 3.1736
      }
     ],
     "hrrr": [
@@ -1212,6 +2466,72 @@
       "kucheraSlr": 3.0,
       "kucheraSnowfallCm": 0.05249999999999999,
       "liquidMm": 0.175
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.617986409437618,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 8.576110958846638,
+      "modelSnowfallCm": 8.316597841231939,
+      "kucheraSlr": 5.59301,
+      "kucheraSnowfallCm": 5.4237655174,
+      "liquidMm": 9.6974
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 8.025484699628262,
+      "modelSnowfallCm": 7.476140271938708,
+      "kucheraSlr": 7.234366,
+      "kucheraSnowfallCm": 6.7391736472999995,
+      "liquidMm": 9.3155
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 8.296708983424118,
+      "modelSnowfallCm": 9.9338985671232,
+      "kucheraSlr": 7.611581,
+      "kucheraSnowfallCm": 9.11357427873,
+      "liquidMm": 11.9733
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 12.747459018888243,
+      "modelSnowfallCm": 0.1175315721541496,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0922
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.854473768836542,
+      "modelSnowfallCm": 3.127415795277965,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.9520799999999999,
+      "liquidMm": 3.1736
      }
     ],
     "hrrr": [
@@ -1273,6 +2593,72 @@
       "kucheraSlr": 3.0,
       "kucheraSnowfallCm": 0.05249999999999999,
       "liquidMm": 0.175
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.938065329750124,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.252592987953612,
+      "modelSnowfallCm": 8.972609524138136,
+      "kucheraSlr": 5.59301,
+      "kucheraSnowfallCm": 5.4237655174,
+      "liquidMm": 9.6974
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 9.169512756607086,
+      "modelSnowfallCm": 8.54185960841733,
+      "kucheraSlr": 7.234366,
+      "kucheraSnowfallCm": 6.7391736472999995,
+      "liquidMm": 9.3155
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 9.414281758979891,
+      "modelSnowfallCm": 11.272001978479393,
+      "kucheraSlr": 7.611581,
+      "kucheraSnowfallCm": 9.11357427873,
+      "liquidMm": 11.9733
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 12.597124759578243,
+      "modelSnowfallCm": 0.1161454902833114,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0922
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.789924030220641,
+      "modelSnowfallCm": 3.1069302902308227,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.9520799999999999,
+      "liquidMm": 3.1736
      }
     ],
     "hrrr": [
@@ -1334,6 +2720,72 @@
       "kucheraSlr": 3.0,
       "kucheraSnowfallCm": 0.49752,
       "liquidMm": 1.6584
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.347920433663656,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 8.37170898310773,
+      "modelSnowfallCm": 4.938722280404743,
+      "kucheraSlr": 5.087859,
+      "kucheraSnowfallCm": 3.0014806598700003,
+      "liquidMm": 5.8993
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 8.270080873907283,
+      "modelSnowfallCm": 3.758255552338426,
+      "kucheraSlr": 6.124236,
+      "kucheraSnowfallCm": 2.78309780784,
+      "liquidMm": 4.5444
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 8.343280768826354,
+      "modelSnowfallCm": 7.943804485614949,
+      "kucheraSlr": 6.086138,
+      "kucheraSnowfallCm": 5.79473371256,
+      "liquidMm": 9.5212
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 11.190023472530076,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.680431381474445,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -1395,6 +2847,72 @@
       "kucheraSlr": 3.0,
       "kucheraSnowfallCm": 0.49752,
       "liquidMm": 1.6584
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.15650592118183,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 8.929140668747124,
+      "modelSnowfallCm": 5.267567954713991,
+      "kucheraSlr": 5.087859,
+      "kucheraSnowfallCm": 3.0014806598700003,
+      "liquidMm": 5.8993
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 8.871995245284861,
+      "modelSnowfallCm": 4.031789519267252,
+      "kucheraSlr": 6.124236,
+      "kucheraSnowfallCm": 2.78309780784,
+      "liquidMm": 4.5444
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 8.94675711427238,
+      "modelSnowfallCm": 8.518386383641019,
+      "kucheraSlr": 6.762846,
+      "kucheraSnowfallCm": 6.43904093352,
+      "liquidMm": 9.5212
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 11.342243988454719,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.705663975579185,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -1456,6 +2974,72 @@
       "kucheraSlr": 4.743158,
       "kucheraSnowfallCm": 0.78660532272,
       "liquidMm": 1.6584
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.307192706269923,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.626000292138787,
+      "modelSnowfallCm": 6.268596352341435,
+      "kucheraSlr": 10.394731,
+      "kucheraSnowfallCm": 6.132163658830001,
+      "liquidMm": 5.8993
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 10.020855855719887,
+      "modelSnowfallCm": 4.553877735073346,
+      "kucheraSlr": 10.527732,
+      "kucheraSnowfallCm": 4.78422253008,
+      "liquidMm": 4.5444
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.950653769468273,
+      "modelSnowfallCm": 10.426336466986132,
+      "kucheraSlr": 10.989207,
+      "kucheraSnowfallCm": 10.46304376884,
+      "liquidMm": 9.5212
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 11.414865776036745,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.28681312782555,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
      }
     ],
     "hrrr": [
@@ -1517,6 +3101,83 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T12:00:00Z",
+      "windowEndUtc": "2026-11-04T12:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.383483600877227,
+      "modelSnowfallCm": 4.242483729646418,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.0858
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T12:00:00Z",
+      "windowEndUtc": "2026-11-05T12:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.424707032180155,
+      "modelSnowfallCm": 0.03735879199522911,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0327
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T12:00:00Z",
+      "windowEndUtc": "2026-11-06T12:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 11.083756998152705,
+      "modelSnowfallCm": 9.129247289098455,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 8.2366
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T12:00:00Z",
+      "windowEndUtc": "2026-11-07T12:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.372598262034558,
+      "modelSnowfallCm": 0.2828365187767995,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.2487
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T12:00:00Z",
+      "windowEndUtc": "2026-11-08T12:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.501100064022165,
+      "modelSnowfallCm": 5.3922098718747415,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 5.1349
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T12:00:00Z",
+      "windowEndUtc": "2026-11-09T12:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 11.503272539191862,
+      "modelSnowfallCm": 1.4006384643720011,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.2176
+     },
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T12:00:00Z",
+      "windowEndUtc": "2026-11-10T12:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 11.280458824067985,
+      "modelSnowfallCm": 1.6730048481975228,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.4831
      }
     ],
     "hrrr": [
@@ -1589,6 +3250,83 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T12:00:00Z",
+      "windowEndUtc": "2026-11-04T12:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.427423750069853,
+      "modelSnowfallCm": 4.260436795803541,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.0858
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T12:00:00Z",
+      "windowEndUtc": "2026-11-05T12:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.444873757558447,
+      "modelSnowfallCm": 0.037424737187216124,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0327
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T12:00:00Z",
+      "windowEndUtc": "2026-11-06T12:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 11.189047295009871,
+      "modelSnowfallCm": 9.21597069500783,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 8.2366
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T12:00:00Z",
+      "windowEndUtc": "2026-11-07T12:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.195224927899858,
+      "modelSnowfallCm": 0.27842524395686946,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.2487
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T12:00:00Z",
+      "windowEndUtc": "2026-11-08T12:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.522629451133481,
+      "modelSnowfallCm": 5.403264996862531,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 5.1349
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T12:00:00Z",
+      "windowEndUtc": "2026-11-09T12:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 11.56953689134172,
+      "modelSnowfallCm": 1.4087068118897679,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.2176
+     },
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T12:00:00Z",
+      "windowEndUtc": "2026-11-10T12:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 11.05320557378824,
+      "modelSnowfallCm": 1.6393009186485341,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.4831
      }
     ],
     "hrrr": [
@@ -1661,6 +3399,83 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T12:00:00Z",
+      "windowEndUtc": "2026-11-04T12:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 10.474954851391255,
+      "modelSnowfallCm": 4.279857053181439,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.0858
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T12:00:00Z",
+      "windowEndUtc": "2026-11-05T12:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 11.246283148327697,
+      "modelSnowfallCm": 0.03677534589503157,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0327
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T12:00:00Z",
+      "windowEndUtc": "2026-11-06T12:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 11.232228584777538,
+      "modelSnowfallCm": 9.251537396137866,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 8.2366
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T12:00:00Z",
+      "windowEndUtc": "2026-11-07T12:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 11.584497606396976,
+      "modelSnowfallCm": 0.2881064554710928,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.2487
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T12:00:00Z",
+      "windowEndUtc": "2026-11-08T12:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.543424283784134,
+      "modelSnowfallCm": 5.413942935480315,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 5.1349
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T12:00:00Z",
+      "windowEndUtc": "2026-11-09T12:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 11.12238065124654,
+      "modelSnowfallCm": 1.3542610680957787,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.2176
+     },
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T12:00:00Z",
+      "windowEndUtc": "2026-11-10T12:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.703223163021931,
+      "modelSnowfallCm": 1.5873950273077828,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 1.4831
      }
     ],
     "hrrr": [
@@ -1733,6 +3548,83 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 1.2047
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T12:00:00Z",
+      "windowEndUtc": "2026-11-04T12:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 8.679783252859824,
+      "modelSnowfallCm": 3.9381044596550305,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.5371
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T12:00:00Z",
+      "windowEndUtc": "2026-11-05T12:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.181499915318614,
+      "modelSnowfallCm": 0.8713243419637365,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.949
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T12:00:00Z",
+      "windowEndUtc": "2026-11-06T12:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 9.433498329111716,
+      "modelSnowfallCm": 4.522136094026283,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.7937
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T12:00:00Z",
+      "windowEndUtc": "2026-11-07T12:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 9.744187832303911,
+      "modelSnowfallCm": 4.809243904633595,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.9355
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T12:00:00Z",
+      "windowEndUtc": "2026-11-08T12:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 9.477719114524422,
+      "modelSnowfallCm": 0.7536682239869821,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.7952
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T12:00:00Z",
+      "windowEndUtc": "2026-11-09T12:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.327311163630329,
+      "modelSnowfallCm": 0.5992797422632485,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.6425
+     },
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T12:00:00Z",
+      "windowEndUtc": "2026-11-10T12:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.21386745914467,
+      "modelSnowfallCm": 0.3674490342706894,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.3988
      }
     ],
     "hrrr": [
@@ -1805,6 +3697,83 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 1.2047
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T12:00:00Z",
+      "windowEndUtc": "2026-11-04T12:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 8.766817934156617,
+      "modelSnowfallCm": 3.977592964906198,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.5371
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T12:00:00Z",
+      "windowEndUtc": "2026-11-05T12:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.36437658496703,
+      "modelSnowfallCm": 0.8886793379133711,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.949
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T12:00:00Z",
+      "windowEndUtc": "2026-11-06T12:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 9.66210131718703,
+      "modelSnowfallCm": 4.631721508419947,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.7937
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T12:00:00Z",
+      "windowEndUtc": "2026-11-07T12:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 9.968013106934315,
+      "modelSnowfallCm": 4.919712868927432,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.9355
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T12:00:00Z",
+      "windowEndUtc": "2026-11-08T12:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 9.27834735731331,
+      "modelSnowfallCm": 0.7378141818535544,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.7952
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T12:00:00Z",
+      "windowEndUtc": "2026-11-09T12:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.439079262932228,
+      "modelSnowfallCm": 0.6064608426433956,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.6425
+     },
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T12:00:00Z",
+      "windowEndUtc": "2026-11-10T12:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.057550801960986,
+      "modelSnowfallCm": 0.3612151259822041,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.3988
      }
     ],
     "hrrr": [
@@ -1877,6 +3846,83 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 1.2047
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T12:00:00Z",
+      "windowEndUtc": "2026-11-04T12:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 8.823727252680898,
+      "modelSnowfallCm": 4.0034132918138505,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.5371
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T12:00:00Z",
+      "windowEndUtc": "2026-11-05T12:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.150380214375772,
+      "modelSnowfallCm": 0.8683710823442607,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.949
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T12:00:00Z",
+      "windowEndUtc": "2026-11-06T12:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 9.336435871288785,
+      "modelSnowfallCm": 4.475607263619706,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.7937
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T12:00:00Z",
+      "windowEndUtc": "2026-11-07T12:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.430309650295467,
+      "modelSnowfallCm": 5.147879327903327,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.9355
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T12:00:00Z",
+      "windowEndUtc": "2026-11-08T12:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 9.233343286455177,
+      "modelSnowfallCm": 0.7342354581389158,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.7952
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T12:00:00Z",
+      "windowEndUtc": "2026-11-09T12:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.201557806744674,
+      "modelSnowfallCm": 0.5912000890833452,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.6425
+     },
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T12:00:00Z",
+      "windowEndUtc": "2026-11-10T12:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.22295697462669,
+      "modelSnowfallCm": 0.3678115241481124,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.3988
      }
     ],
     "hrrr": [
