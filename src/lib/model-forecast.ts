@@ -35,8 +35,9 @@
  * app has no database; the JSON is the serving layer in the workspace.
  */
 import rawData from '../data/model-forecasts.json';
-import type { DayData, Location } from './types';
+import type { BlendedHour, DayData, Location } from './types';
 import { referencePointForMode } from './snow/resort/geometry';
+import { addCalendarDays } from './time';
 
 export type ModelSourceArm = 'ecmwf' | 'hrrr' | 'ecmwf_openmeteo';
 
@@ -338,6 +339,230 @@ export function modelWindowStatuses(
   return { point, windows };
 }
 
+const MODEL_WINDOW_END_HOUR_LOCAL = 7;
+
+const windowPartsFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function localPartsAt(
+  epochMs: number,
+  timeZone: string,
+): { date: string; hour: number; minute: number; second: number } | null {
+  let formatter = windowPartsFormatters.get(timeZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US-u-ca-iso8601', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    });
+    windowPartsFormatters.set(timeZone, formatter);
+  }
+  const parts: Record<string, string> = {};
+  for (const part of formatter.formatToParts(new Date(epochMs))) {
+    parts[part.type] = part.value;
+  }
+  if (!parts.year || !parts.month || !parts.day || parts.hour === undefined) return null;
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    hour: Number(parts.hour),
+    minute: Number(parts.minute ?? 0),
+    second: Number(parts.second ?? 0),
+  };
+}
+
+/**
+ * The model window an hourly entry belongs to, identified by the window's
+ * end date (the local date of its 07:00 end), or null when the entry cannot
+ * be placed. UI hourly snowfall values are amounts for the hour ENDING at
+ * the entry's timestamp -- the preceding-hour convention of the provider
+ * feed, and the same convention the serving batch's accumulation
+ * differencing produces -- so the window ending 07:00 local on date D
+ * comprises the labelled hours D-1 08:00 ... D 07:00. The assignment uses
+ * the entry's absolute instant evaluated one second before its end, so a
+ * 07:00 label lands inside its own window and the duplicated fall-back
+ * 01:00 labels (distinct instants, same label) both land in the window
+ * that contains them. When the instant is unavailable, the provider-local
+ * label decides instead.
+ */
+export function modelWindowEndDateForHour(hour: BlendedHour, timeZone: string): string | null {
+  if (Number.isFinite(hour.instantMs)) {
+    const parts = localPartsAt(hour.instantMs - 1000, timeZone);
+    if (parts) {
+      const pastEnd =
+        parts.hour > MODEL_WINDOW_END_HOUR_LOCAL ||
+        (parts.hour === MODEL_WINDOW_END_HOUR_LOCAL && (parts.minute > 0 || parts.second > 0));
+      return pastEnd ? addCalendarDays(parts.date, 1) : parts.date;
+    }
+  }
+  const label = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/.exec(hour.time ?? '');
+  if (!label) return null;
+  const hh = Number(label[2]);
+  const mm = Number(label[3]);
+  const pastEnd = hh > MODEL_WINDOW_END_HOUR_LOCAL || (hh === MODEL_WINDOW_END_HOUR_LOCAL && mm > 0);
+  return pastEnd ? addCalendarDays(label[1], 1) : label[1];
+}
+
+interface ModelHourSlot {
+  dayIndex: number;
+  hourIndex: number;
+  hour: BlendedHour;
+}
+
+function rebuildSnowfallAggregates(day: DayData, hourly: BlendedHour[]): Partial<DayData> {
+  const out: Partial<DayData> = {};
+  if (day.maxHourlySnowfall !== undefined) {
+    out.maxHourlySnowfall = hourly.reduce((max, h) => Math.max(max, h.snowfall), 0);
+  }
+  if (Array.isArray(day.windows) && day.windows.length > 0) {
+    const windows = day.windows.map((window, index) => {
+      const bucket = hourly.filter(
+        (h) => Math.floor(Number(h.time.slice(11, 13)) / 3) === index,
+      );
+      if (bucket.length === 0) return window;
+      const snowfall = bucket.reduce((sum, h) => sum + (h.snowfall > 0 ? h.snowfall : 0), 0);
+      const liquid = bucket.reduce((sum, h) => sum + (h.liquidMM ?? 0), 0);
+      return {
+        ...window,
+        snowfall,
+        avgSlr: snowfall > 0 && liquid > 0 ? (snowfall * 10) / liquid : window.avgSlr,
+      };
+    });
+    out.windows = windows;
+    if (day.maxWindowSnowfall !== undefined) {
+      out.maxWindowSnowfall = windows.reduce((max, w) => Math.max(max, w.snowfall), 0);
+    }
+  }
+  return out;
+}
+
+/**
+ * Rescale the hourly snowfall inside each model window so the window's
+ * hours sum EXACTLY to the serving record's snowfall -- the same record
+ * value the day total shows -- so the hourly chart, the rolling 24/48 h
+ * statistics and every other consumer of the hourly series agree with the
+ * headline total (one forecast, one series). Hours live on the real
+ * timeline: an hour belongs to exactly one window, so a calendar day's
+ * 00:00-24:00 display straddles two windows and each part is scaled by its
+ * own window's factor; the "24 h window ending 07:00 local" caption covers
+ * that accounting. Windows without a record are not touched.
+ *
+ * Rule per window, with R = record snowfall and S = sum of the UI hourly
+ * snowfall over the window's hours:
+ * - R = 0: every hour in the window becomes 0.
+ * - S > 0: every hour is scaled by R / S (and its per-hour SLR by the same
+ *   factor, keeping the chart's SLR colouring coherent); the floating
+ *   point residue is absorbed into the largest scaled hour so the sum is
+ *   exact.
+ * - S = 0 with R > 0 (zero denominator): R is distributed in proportion
+ *   to the UI's hourly liquid amounts (liquidMM, falling back to the raw
+ *   precipitation field); if those are also all zero, R is split evenly
+ *   across the window's displayed hours. (The record carries no hourly
+ *   shape of its own, so that branch of the distribution rule cannot
+ *   apply.) Per-hour SLR is left unchanged in the distribution cases --
+ *   there is no UI snowfall shape to scale it with.
+ * Only `snowfall` (and, in the scaling case, `slr`) change: the UI's
+ * liquid, frozen SWE and precipitation are the live feed's own values,
+ * the snowpack/depth outputs are the layer model's sequential state and
+ * cannot be re-run post hoc, and `snowfallResult` remains the substrate
+ * calculation's audit trail. Input days and hours are never mutated.
+ */
+function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): DayData[] {
+  const recordByWindowEnd = new Map<string, number>();
+  for (const day of days) {
+    if (day.modelWindow?.kind === 'model') recordByWindowEnd.set(day.dateStr, day.totalSnowfall);
+  }
+  if (recordByWindowEnd.size === 0) return days;
+
+  const slotsByWindow = new Map<string, ModelHourSlot[]>();
+  days.forEach((day, dayIndex) => {
+    (day.hourly ?? []).forEach((hour, hourIndex) => {
+      const end = modelWindowEndDateForHour(hour, point.timezone);
+      if (end === null || !recordByWindowEnd.has(end)) return;
+      const slots = slotsByWindow.get(end) ?? [];
+      slots.push({ dayIndex, hourIndex, hour });
+      slotsByWindow.set(end, slots);
+    });
+  });
+  if (slotsByWindow.size === 0) return days;
+
+  const key = (slot: ModelHourSlot) => `${slot.dayIndex}:${slot.hourIndex}`;
+  const newValues = new Map<string, { snowfall: number; slr: number | null }>();
+
+  for (const [end, slots] of slotsByWindow) {
+    const record = recordByWindowEnd.get(end) as number;
+    if (slots.length === 0) continue;
+    if (record === 0) {
+      for (const slot of slots) {
+        newValues.set(key(slot), { snowfall: 0, slr: slot.hour.slr });
+      }
+      continue;
+    }
+    const uiTotal = slots.reduce(
+      (sum, s) => sum + (s.hour.snowfall > 0 ? s.hour.snowfall : 0),
+      0,
+    );
+    if (uiTotal > 0) {
+      const factor = record / uiTotal;
+      let scaledTotal = 0;
+      let largest: ModelHourSlot | null = null;
+      let largestValue = -1;
+      for (const slot of slots) {
+        const base = slot.hour.snowfall > 0 ? slot.hour.snowfall : 0;
+        const value = base * factor;
+        scaledTotal += value;
+        if (value > largestValue) {
+          largestValue = value;
+          largest = slot;
+        }
+        newValues.set(key(slot), {
+          snowfall: value,
+          slr: slot.hour.slr !== null && slot.hour.slr !== undefined ? slot.hour.slr * factor : slot.hour.slr,
+        });
+      }
+      if (largest) {
+        const current = newValues.get(key(largest));
+        if (current) current.snowfall += record - scaledTotal;
+      }
+      continue;
+    }
+    const weights = slots.map((s) => {
+      const w = Number.isFinite(s.hour.liquidMM) ? s.hour.liquidMM : s.hour.precipitation;
+      return w > 0 ? w : 0;
+    });
+    const weightTotal = weights.reduce((a, b) => a + b, 0);
+    let assigned = 0;
+    let largestIndex = 0;
+    let largestShare = -1;
+    slots.forEach((slot, i) => {
+      const value = weightTotal > 0 ? (record * weights[i]) / weightTotal : record / slots.length;
+      assigned += value;
+      if (value > largestShare) {
+        largestShare = value;
+        largestIndex = i;
+      }
+      newValues.set(key(slot), { snowfall: value, slr: slot.hour.slr });
+    });
+    const anchor = newValues.get(key(slots[largestIndex]));
+    if (anchor) anchor.snowfall += record - assigned;
+  }
+
+  const changedDays = new Set<number>();
+  for (const k of newValues.keys()) changedDays.add(Number(k.split(':')[0]));
+  if (changedDays.size === 0) return days;
+  return days.map((day, dayIndex) => {
+    if (!changedDays.has(dayIndex)) return day;
+    const hourly = (day.hourly ?? []).map((hour, hourIndex) => {
+      const value = newValues.get(`${dayIndex}:${hourIndex}`);
+      return value ? { ...hour, snowfall: value.snowfall, slr: value.slr } : hour;
+    });
+    return { ...day, hourly, ...rebuildSnowfallAggregates(day, hourly) };
+  });
+}
+
 /**
  * Apply the ENS-EB menu method to grouped forecast days: for each calendar
  * day, the 24 h model window ending 07:00 local on that date -- when a
@@ -350,7 +575,11 @@ export function modelWindowStatuses(
  * conditioning and make the menu display disagree with the panel. Days
  * without a record keep their Kuchera totals and are marked as fallback.
  * Returns the days unchanged when the method is unavailable in context.
- * Hourly data is never altered: the model serves window aggregates only.
+ * The hourly snowfall series is rescaled per model window (see
+ * rescaleModelWindowHours) so the displayed hours sum to the same record
+ * total the day shows; the model still serves window aggregates only --
+ * the rescale distributes the record total over the UI's own hourly
+ * shape, it does not invent a model hourly forecast.
  */
 export function applyModelMethodToDays(
   days: DayData[],
@@ -361,7 +590,7 @@ export function applyModelMethodToDays(
   if (!location) return days;
   const availability = modelMethodAvailability(modelId, location, elevationMode);
   if (!availability.available) return days;
-  return days.map((day) => {
+  const marked = days.map((day) => {
     const result = modelForecastFor(location, modelId, elevationMode, day.dateStr);
     if (result !== null && result.forecast.modelSnowfallCm !== null) {
       return {
@@ -387,4 +616,7 @@ export function applyModelMethodToDays(
       },
     };
   });
+  const point = cataloguePointForLocation(location, elevationMode);
+  if (!point) return marked;
+  return rescaleModelWindowHours(marked, point);
 }
