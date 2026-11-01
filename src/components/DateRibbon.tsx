@@ -54,6 +54,7 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
           const isStorm = day.totalSnowfall >= 15;
           const frozenSweMm = day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
           const avgSlr = frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
+          const isModelDay = day.modelWindow?.kind === 'model';
           const slrColor = getSlrColor(avgSlr);
 
           return (
@@ -119,8 +120,8 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
                     {day.totalSnowfall > 0 && (
                       <div className={cn(
                         "flex items-center gap-0.5 px-1 rounded-sm",
-                        "bg-accent-blue/20"
-                      )} title="Reference fresh snowfall (cm)">
+                        isModelDay ? "bg-accent-violet/30" : "bg-accent-blue/20"
+                      )} title={isModelDay ? "ENS-EB model snowfall for the 24 h window ending 07:00 local (cm)" : "Reference fresh snowfall (cm)"}>
                         <Snowflake className={cn(
                           "w-2 h-2",
                           isSelected ? "text-white" : (isStorm ? "text-white" : "text-accent-cyan"),
@@ -131,6 +132,9 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
                           isStorm && !isSelected ? "text-white" : "text-accent-cyan",
                           isPast && !isSelected && "opacity-70"
                         )}>{day.totalSnowfall.toFixed(0)}</span>
+                        {isModelDay && (
+                          <span className="text-[7px] font-black tracking-wide text-violet-300">ML</span>
+                        )}
                       </div>
                     )}
                   </div>

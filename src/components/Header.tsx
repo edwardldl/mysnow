@@ -7,6 +7,7 @@ import { Location } from "@/lib/types";
 import LocationDropdown from "./LocationDropdown";
 import CompactSelector from "./CompactSelector";
 import { MODELS, ALGORITHMS, ELEVATION_MODES } from "@/lib/constants";
+import { ENS_EB_METHOD_ID, modelMethodAvailability } from "@/lib/model-forecast";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -41,6 +42,21 @@ export default function Header({
   setElevationMode,
   isOffline,
 }: HeaderProps) {
+  // The ENS-EB model option is only selectable where the model can serve:
+  // ECMWF / HRRR / blended source modes at catalogue resort points. Elsewhere
+  // it stays visible in the menu but disabled, with the reason as its
+  // description, so users can see the model exists and why it is unavailable.
+  const modelAvailability = modelMethodAvailability(modelId, locations[currentLocationId], elevationMode);
+  const physicsOptions = ALGORITHMS.map((opt) => {
+    if (opt.id !== ENS_EB_METHOD_ID || modelAvailability.available) return opt;
+    return {
+      ...opt,
+      disabled: true,
+      desc: modelAvailability.reason === 'unsupported-mode'
+        ? "Unavailable in this forecast source mode -- the model is derived from ECMWF/HRRR cycles. Switch the Model selector to ECMWF, HRRR, or Blended (HRRR+ECMWF)."
+        : "Unavailable here -- the model is precomputed only for MySnow catalogue resort points (base / mid / summit). Other locations keep the standard physics methods.",
+    };
+  });
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full h-[calc(60px+var(--sat,0px))] md:h-[calc(72px+var(--sat,0px))] pt-[var(--sat,0px)] glass-panel border-b border-white/5 shadow-2xl transition-all duration-300">
       <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-5 lg:px-8 h-full flex items-center justify-center min-[400px]:justify-between gap-1.5 sm:gap-2 lg:gap-4">
@@ -92,7 +108,7 @@ export default function Header({
           <CompactSelector
             label="Physics"
             icon={Zap}
-            options={ALGORITHMS}
+            options={physicsOptions}
             selectedId={algoId}
             onSelect={setAlgoId}
             accentColor="violet"

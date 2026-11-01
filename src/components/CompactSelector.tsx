@@ -129,11 +129,14 @@ export default function CompactSelector({
                     <div
                       key={opt.id}
                       onClick={() => {
+                        if (opt.disabled) return;
                         onSelect(opt.id);
                         setIsOpen(false);
                       }}
+                      aria-disabled={opt.disabled || undefined}
                       className={cn(
-                        "group flex flex-col p-3 rounded-xl cursor-pointer transition-all mb-1 last:mb-0",
+                        "group flex flex-col p-3 rounded-xl transition-all mb-1 last:mb-0",
+                        opt.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
                         opt.id === selectedId
                           ? accentClasses
                           : "hover:bg-white/5 text-slate-400 hover:text-slate-200"

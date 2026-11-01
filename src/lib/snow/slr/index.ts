@@ -16,6 +16,13 @@ const LEGACY_METHOD_MAP: Record<string, SlrMethod> = {
 
 /** Migrates saved legacy selection ids without exposing them in the UI. */
 export function toSlrMethod(method: string | undefined): SlrMethod {
+  // The ENS-EB model menu option ('ens_eb_model'; see ENS_EB_METHOD_ID in
+  // src/lib/model-forecast.ts) is not an hourly SLR estimator: the model
+  // serves precomputed 24 h window aggregates that replace day totals at
+  // display time (applyModelMethodToDays). The hourly substrate underneath
+  // -- which also fills windows with no model record -- is Kuchera, so map
+  // the option to it explicitly rather than relying on the default.
+  if (method === 'ens_eb_model') return 'kuchera';
   return LEGACY_METHOD_MAP[method ?? ''] ?? DEFAULT_SLR_METHOD;
 }
 

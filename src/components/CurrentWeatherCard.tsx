@@ -37,6 +37,8 @@ interface CurrentWeatherCardProps {
   minElevationM?: number;
   maxElevationM?: number;
   className?: string;
+  /** Provenance note for the daily Fresh Snow value (e.g. "ENS-EB model"). */
+  freshSnowSourceNote?: string | null;
 }
 
 export default function CurrentWeatherCard({ 
@@ -50,6 +52,7 @@ export default function CurrentWeatherCard({
   dataStatus,
   minElevationM,
   maxElevationM,
+  freshSnowSourceNote,
   className 
 }: CurrentWeatherCardProps) {
   const weather = currentData ? getWeatherDescription(currentData.weatherCode) : null;
@@ -239,6 +242,7 @@ export default function CurrentWeatherCard({
                         label={isDaily ? "Fresh Snow" : "Fresh Rate"}
                         value={currentData.snowfall.toFixed(1)}
                         unit={isDaily ? "cm" : "cm/h"}
+                        subValue={isDaily ? (freshSnowSourceNote ?? undefined) : undefined}
                     />
                     {rollingStats && (
                         <>

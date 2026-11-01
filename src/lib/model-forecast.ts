@@ -20,7 +20,7 @@
  * layer in the workspace.
  */
 import rawData from '../data/model-forecasts.json';
-import type { Location } from './types';
+import type { DayData, Location } from './types';
 import { referencePointForMode } from './snow/resort/geometry';
 
 export type ModelSourceArm = 'ecmwf' | 'hrrr';
@@ -189,4 +189,149 @@ export function modelForecastFor(
     }
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// ENS-EB as a selectable snow-physics method (the "Physics" menu)
+// ---------------------------------------------------------------------------
+
+/**
+ * Option id of the ENS-EB model in the snow-physics (ALGORITHMS) menu.
+ * NOTE: src/lib/snow/slr/index.ts maps this same literal to the Kuchera
+ * substrate in toSlrMethod -- keep the two in sync (a test pins both).
+ */
+export const ENS_EB_METHOD_ID = 'ens_eb_model';
+
+/** Why the ENS-EB menu option is unavailable in the current context. */
+export type ModelMethodUnavailableReason = 'unsupported-mode' | 'non-catalogue-location';
+
+export interface ModelMethodAvailability {
+  available: boolean;
+  reason: ModelMethodUnavailableReason | null;
+  /** The matched catalogue point when the location is a catalogue point. */
+  point: ModelForecastPoint | null;
+}
+
+/**
+ * The model option is available only where the model can actually serve:
+ * a forecast-source mode with a serving arm (literal ECMWF, literal HRRR,
+ * or the hrrr_ecmwf blend) AND a catalogue resort point for the location.
+ * Per-window record coverage is NOT part of availability -- a missing
+ * window is a marked fallback, not an unavailable option.
+ */
+export function modelMethodAvailability(
+  modelId: string,
+  location: Location | null | undefined,
+  elevationMode: string,
+): ModelMethodAvailability {
+  if (modelArmForMode(modelId) === null && modelId !== BLEND_MODEL_ID) {
+    return { available: false, reason: 'unsupported-mode', point: null };
+  }
+  const point = location ? cataloguePointForLocation(location, elevationMode) : null;
+  if (point === null) {
+    return { available: false, reason: 'non-catalogue-location', point: null };
+  }
+  return { available: true, reason: null, point };
+}
+
+export interface ModelWindowStatus {
+  windowEndLocalDate: string;
+  leadDay: number;
+  /** 'model' when a serving record resolved for this window, else the Kuchera fallback applies. */
+  status: 'model' | 'fallback';
+  /** Serving arm when status is 'model'. */
+  arm: ModelSourceArm | null;
+  result: ModelForecastResult | null;
+}
+
+export interface ModelWindowStatuses {
+  point: ModelForecastPoint;
+  windows: ModelWindowStatus[];
+}
+
+/**
+ * Per-window model/fallback status for every window stored for the matched
+ * catalogue point, resolved through modelForecastFor so the menu-driven
+ * display and the panel can never disagree. Returns null when the model
+ * method is unavailable in this context (unsupported mode / non-catalogue).
+ */
+export function modelWindowStatuses(
+  location: Location | null | undefined,
+  modelId: string,
+  elevationMode: string,
+): ModelWindowStatuses | null {
+  const availability = modelMethodAvailability(modelId, location, elevationMode);
+  if (!availability.available || availability.point === null || !location) return null;
+  const point = availability.point;
+  const byDate = new Map<string, ModelWindowForecast>();
+  for (const arm of ['ecmwf', 'hrrr'] as const) {
+    for (const row of point.forecasts[arm] ?? []) {
+      const existing = byDate.get(row.windowEndLocalDate);
+      if (!existing || row.leadDay < existing.leadDay) byDate.set(row.windowEndLocalDate, row);
+    }
+  }
+  const windows = [...byDate.values()]
+    .sort((a, b) => a.leadDay - b.leadDay)
+    .map((row) => {
+      const result = modelForecastFor(location, modelId, elevationMode, row.windowEndLocalDate);
+      return {
+        windowEndLocalDate: row.windowEndLocalDate,
+        leadDay: row.leadDay,
+        status: result !== null ? ('model' as const) : ('fallback' as const),
+        arm: result?.arm ?? null,
+        result,
+      };
+    });
+  return { point, windows };
+}
+
+/**
+ * Apply the ENS-EB menu method to grouped forecast days: for each calendar
+ * day, the 24 h model window ending 07:00 local on that date -- when a
+ * serving record exists -- replaces the day total with the record's model
+ * snowfall, the same value the panel shows. The record snowfall is used,
+ * not model SLR x UI liquid: the model SLR was predicted conditioned on the
+ * serving window's own liquid (fcst_liquid_mm is an input feature) over the
+ * exact window, while the UI day liquid covers a different period from a
+ * different, live cycle -- recombining them would break the prediction's
+ * conditioning and make the menu display disagree with the panel. Days
+ * without a record keep their Kuchera totals and are marked as fallback.
+ * Returns the days unchanged when the method is unavailable in context.
+ * Hourly data is never altered: the model serves window aggregates only.
+ */
+export function applyModelMethodToDays(
+  days: DayData[],
+  location: Location | null | undefined,
+  modelId: string,
+  elevationMode: string,
+): DayData[] {
+  if (!location) return days;
+  const availability = modelMethodAvailability(modelId, location, elevationMode);
+  if (!availability.available) return days;
+  return days.map((day) => {
+    const result = modelForecastFor(location, modelId, elevationMode, day.dateStr);
+    if (result !== null && result.forecast.modelSnowfallCm !== null) {
+      return {
+        ...day,
+        totalSnowfall: result.forecast.modelSnowfallCm,
+        modelWindow: {
+          kind: 'model' as const,
+          slr: result.forecast.modelSlr,
+          arm: result.arm,
+          blended: result.blended,
+          cycleUtc: result.cycleUtc,
+        },
+      };
+    }
+    return {
+      ...day,
+      modelWindow: {
+        kind: 'kuchera_fallback' as const,
+        slr: null,
+        arm: null,
+        blended: modelId === BLEND_MODEL_ID,
+        cycleUtc: null,
+      },
+    };
+  });
 }

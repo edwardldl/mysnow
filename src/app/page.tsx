@@ -9,7 +9,7 @@ import HistorySection from "@/components/HistorySection";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import ModelForecastPanel from "@/components/ModelForecastPanel";
-import { modelForecastFor } from "@/lib/model-forecast";
+import { applyModelMethodToDays, ENS_EB_METHOD_ID, modelForecastFor, modelMethodAvailability, modelWindowStatuses } from "@/lib/model-forecast";
 import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
@@ -56,6 +56,19 @@ export default function Home() {
     setHistoryDays([]);
     setHistorySelectedDate(null);
   }, [currentLocationId]);
+
+  // The ENS-EB model Physics option is only valid where the model can serve
+  // (ECMWF/HRRR/blend source modes at catalogue resort points). If the user
+  // changes the source mode or location out from under the selection, fall
+  // back to the default physics method instead of leaving a selection active
+  // that cannot produce model numbers.
+  useEffect(() => {
+    if (algoId !== ENS_EB_METHOD_ID) return;
+    if (Object.keys(locations).length === 0) return;
+    if (!modelMethodAvailability(modelId, locations[currentLocationId], elevationMode).available) {
+      setAlgoId(DEFAULT_SLR_METHOD);
+    }
+  }, [algoId, modelId, locations, currentLocationId, elevationMode]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -295,7 +308,16 @@ export default function Home() {
     return found;
   }, [forecastDays, currentTimeMs, todayStr]);
 
-  const activeDays = mode === "forecast" ? forecastDays : historyDays;
+  // When the ENS-EB model Physics option is selected, forecast day totals
+  // are replaced by the precomputed model window values (each day marked
+  // model vs Kuchera fallback by applyModelMethodToDays). Every other
+  // method sees the grouped days untouched.
+  const displayForecastDays = React.useMemo(() => {
+    if (algoId !== ENS_EB_METHOD_ID) return forecastDays;
+    return applyModelMethodToDays(forecastDays, locations[currentLocationId], modelId, elevationMode);
+  }, [forecastDays, algoId, locations, currentLocationId, modelId, elevationMode]);
+
+  const activeDays = mode === "forecast" ? displayForecastDays : historyDays;
   const activeSelectedDate = mode === "forecast" ? selectedDate : historySelectedDate;
   const setActiveSelectedDate = mode === "forecast" ? setSelectedDate : setHistorySelectedDate;
 
@@ -363,6 +385,21 @@ export default function Home() {
   // enforces the gate and returns null otherwise.
   const modelResult = mode === "forecast"
     ? modelForecastFor(locations[currentLocationId], modelId, elevationMode, activeSelectedDate)
+    : null;
+
+  // When the ENS-EB Physics option is selected, the panel also renders for
+  // fallback windows and shows the per-window coverage strip.
+  const modelMethodContext = mode === "forecast" && algoId === ENS_EB_METHOD_ID
+    ? modelWindowStatuses(locations[currentLocationId], modelId, elevationMode)
+    : null;
+
+  const activeSelectedDay = activeDays.find(d => d.dateStr === activeSelectedDate) || null;
+  const freshSnowSourceNote = mode === "forecast"
+    ? activeSelectedDay?.modelWindow?.kind === "model"
+      ? "ENS-EB model"
+      : activeSelectedDay?.modelWindow?.kind === "kuchera_fallback"
+        ? "Kuchera fallback"
+        : null
     : null;
 
   return (
@@ -445,13 +482,14 @@ export default function Home() {
                 maxElevationM={locations[currentLocationId]?.maxElevationM}
                 timezone={locations[currentLocationId]?.timezone}
                 dataStatus={dataStatus}
+                freshSnowSourceNote={freshSnowSourceNote}
                 className={cn(
                   "mt-4 md:mt-4",
                   (error && activeDays.length > 0) && "mt-2 md:mt-2"
                 )}
               />
 
-              <ModelForecastPanel result={modelResult} />
+              <ModelForecastPanel result={modelResult} methodContext={modelMethodContext} selectedDate={activeSelectedDate} />
 
               {error && activeDays.length === 0 ? (
                 <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pb-20">

@@ -136,6 +136,11 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   if (days.length === 0) return null;
 
   const selectedDay = days.find((d) => d.dateStr === selectedDate) || days[0];
+  const freshSnowTrend = selectedDay.modelWindow?.kind === 'model'
+    ? `ENS-EB model · 24 h window ending 07:00 local · ${selectedDay.modelWindow.arm === 'hrrr' ? 'NOAA HRRR' : 'ECMWF IFS'} arm`
+    : selectedDay.modelWindow?.kind === 'kuchera_fallback'
+      ? 'Kuchera fallback · no ENS-EB record for this window'
+      : 'Selected sheltered reference site';
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 md:px-8 flex flex-col gap-8 md:gap-10 pb-20 mt-4 md:mt-4">
@@ -225,7 +230,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
 
           {/* Redone Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-            <StatBox label="Reference Fresh Snow" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend="Selected sheltered reference site" />
+            <StatBox label="Reference Fresh Snow" value={`${selectedDay.totalSnowfall.toFixed(1)} cm`} trend={freshSnowTrend} />
             <StatBox label="Liquid QPF" value={`${selectedDay.totalPrecipitation.toFixed(1)} mm`} trend="Daily Unified Total" />
             <StatBox label="Provider Snow Depth" value={selectedDay.providerSnowDepth || "--"} trend="Provider/model total depth" />
             <StatBox
