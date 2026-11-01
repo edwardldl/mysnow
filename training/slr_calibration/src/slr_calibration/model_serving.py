@@ -55,6 +55,7 @@ SOURCE_ID_HRRR = "noaa-hrrr-aws-bdp"
 REGION_BY_SLUG = {
     "palisades-tahoe": "sierra-nevada",
     "mammoth-mountain": "sierra-nevada",
+    "mount-rose": "sierra-nevada",
     "alta": "rockies",
     "jackson-hole": "rockies",
     "aspen": "rockies",

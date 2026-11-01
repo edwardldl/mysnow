@@ -528,6 +528,50 @@
       "snotel_station": null,
       "state": "ME",
       "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Mount Rose Ski Tahoe",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2421.0,
+          "geometry_source": "estimated",
+          "latitude": 39.320736,
+          "longitude": -119.884359,
+          "name": "Base estimate",
+          "point_id": "mount-rose-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2666.5,
+          "geometry_source": "estimated",
+          "latitude": 39.320736,
+          "longitude": -119.884359,
+          "name": "Mid-mountain estimate",
+          "point_id": "mount-rose-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2912.0,
+          "geometry_source": "estimated",
+          "latitude": 39.320736,
+          "longitude": -119.884359,
+          "name": "Summit estimate",
+          "point_id": "mount-rose-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.320736,
+      "longitude": -119.884359,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Nevada).",
+      "max_elevation_m": 2912.0,
+      "min_elevation_m": 2421.0,
+      "pilot_name": "Mount Rose",
+      "resort_slug": "mount-rose",
+      "snotel_station": null,
+      "state": "NV",
+      "timezone": "America/Los_Angeles"
     }
   ],
   "schema_version": 1,

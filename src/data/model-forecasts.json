@@ -5739,6 +5739,573 @@
      }
     ]
    }
+  },
+  {
+   "pointId": "mount-rose-base",
+   "resortSlug": "mount-rose",
+   "resortName": "Mount Rose",
+   "pointName": "Base estimate",
+   "role": "base",
+   "latitude": 39.320736,
+   "longitude": -119.884359,
+   "elevationM": 2421.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.507587588724796,
+      "modelSnowfallCm": 5.925318737045067,
+      "kucheraSlr": 8.407871,
+      "kucheraSnowfallCm": 5.23995336462,
+      "liquidMm": 6.2322
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 11.967403173480735,
+      "modelSnowfallCm": 0.5303953086486661,
+      "kucheraSlr": 9.928114,
+      "kucheraSnowfallCm": 0.44001401248,
+      "liquidMm": 0.4432
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.9479560957422,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 9.940354760341016,
+      "modelSnowfallCm": 1.0603376422855761,
+      "kucheraSlr": 7.760096,
+      "kucheraSnowfallCm": 0.82776944032,
+      "liquidMm": 1.0667
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.877736268644895,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 9.655911023409153,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.117598592876199,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.247028359713351,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.968784473690185,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.517040542068763,
+      "modelSnowfallCm": 15.117746962172054,
+      "kucheraSlr": 7.827187,
+      "kucheraSnowfallCm": 13.893256925,
+      "liquidMm": 17.75
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.588777424735918,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.705301066269817,
+      "modelSnowfallCm": 0.3211590319880945,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.887489911097884,
+      "modelSnowfallCm": 32.662469733293655,
+      "kucheraSlr": 6.55443,
+      "kucheraSnowfallCm": 19.66329,
+      "liquidMm": 30.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 11.253752602828207,
+      "modelSnowfallCm": 3.713738358933308,
+      "kucheraSlr": 12.072727,
+      "kucheraSnowfallCm": 3.98399991,
+      "liquidMm": 3.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 10.978923747255312,
+      "modelSnowfallCm": 66.20291019594953,
+      "kucheraSlr": 8.537819,
+      "kucheraSnowfallCm": 51.48304857000001,
+      "liquidMm": 60.3,
+      "reducedFeatureVariant": true
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mount-rose-mid_mountain",
+   "resortSlug": "mount-rose",
+   "resortName": "Mount Rose",
+   "pointName": "Mid-mountain estimate",
+   "role": "mid_mountain",
+   "latitude": 39.320736,
+   "longitude": -119.884359,
+   "elevationM": 2666.5,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 11.598339193728702,
+      "modelSnowfallCm": 7.2283169523156,
+      "kucheraSlr": 13.941504,
+      "kucheraSnowfallCm": 8.68862412288,
+      "liquidMm": 6.2322
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 12.5896589137255,
+      "modelSnowfallCm": 0.5579736830563141,
+      "kucheraSlr": 15.087873,
+      "kucheraSnowfallCm": 0.66869453136,
+      "liquidMm": 0.4432
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.640506563415677,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 12.32623310042597,
+      "modelSnowfallCm": 1.3148392848224382,
+      "kucheraSlr": 13.709595,
+      "kucheraSnowfallCm": 1.46240249865,
+      "liquidMm": 1.0667
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.723156121010199,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 10.058757175642267,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 9.780160794482331,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 10.228365632349767,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.638014426079247,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 9.70676687007356,
+      "modelSnowfallCm": 17.22951119438057,
+      "kucheraSlr": 13.463413,
+      "kucheraSnowfallCm": 23.897558075,
+      "liquidMm": 17.75
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 8.925989519303549,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.319080049227509,
+      "modelSnowfallCm": 0.30957240147682524,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.78392425883616,
+      "modelSnowfallCm": 35.35177277650848,
+      "kucheraSlr": 11.886076,
+      "kucheraSnowfallCm": 35.658227999999994,
+      "liquidMm": 30.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 11.6001345772828,
+      "modelSnowfallCm": 3.828044410503324,
+      "kucheraSlr": 15.972727,
+      "kucheraSnowfallCm": 5.27099991,
+      "liquidMm": 3.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 11.654983535018744,
+      "modelSnowfallCm": 70.27955071616302,
+      "kucheraSlr": 13.787053,
+      "kucheraSnowfallCm": 83.13592959,
+      "liquidMm": 60.3,
+      "reducedFeatureVariant": true
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "mount-rose-summit",
+   "resortSlug": "mount-rose",
+   "resortName": "Mount Rose",
+   "pointName": "Summit estimate",
+   "role": "summit",
+   "latitude": 39.320736,
+   "longitude": -119.884359,
+   "elevationM": 2912.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 12.739935804273195,
+      "modelSnowfallCm": 7.93978279193914,
+      "kucheraSlr": 13.941504,
+      "kucheraSnowfallCm": 8.68862412288,
+      "liquidMm": 6.2322
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 14.504216530444587,
+      "modelSnowfallCm": 0.642826876629304,
+      "kucheraSlr": 15.087873,
+      "kucheraSnowfallCm": 0.66869453136,
+      "liquidMm": 0.4432
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 9.401455550152424,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 12.575138149776105,
+      "modelSnowfallCm": 1.341389986436617,
+      "kucheraSlr": 13.709595,
+      "kucheraSnowfallCm": 1.46240249865,
+      "liquidMm": 1.0667
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 9.932869387083372,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 10.256903353558101,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 9.5337860827748,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 9.864785251459692,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 9.652381857130058,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.394309490494265,
+      "modelSnowfallCm": 18.449899345627323,
+      "kucheraSlr": 13.463413,
+      "kucheraSnowfallCm": 23.897558075,
+      "liquidMm": 17.75
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.675850803452473,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.592384128594862,
+      "modelSnowfallCm": 0.31777152385784585,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 12.089216221104305,
+      "modelSnowfallCm": 36.26764866331292,
+      "kucheraSlr": 11.886076,
+      "kucheraSnowfallCm": 35.658227999999994,
+      "liquidMm": 30.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 12.577775584657065,
+      "modelSnowfallCm": 4.150665942936831,
+      "kucheraSlr": 15.972727,
+      "kucheraSnowfallCm": 5.27099991,
+      "liquidMm": 3.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 13.537722158116667,
+      "modelSnowfallCm": 81.63246461344349,
+      "kucheraSlr": 13.787053,
+      "kucheraSnowfallCm": 83.13592959,
+      "liquidMm": 60.3,
+      "reducedFeatureVariant": true
+     }
+    ]
+   }
   }
  ],
  "openMeteoArm": {

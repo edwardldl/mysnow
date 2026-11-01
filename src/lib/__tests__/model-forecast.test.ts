@@ -48,6 +48,24 @@ const stowe: Location = {
   isCustom: false,
 } as Location;
 
+const mountRose: Location = {
+  id: 'mount-rose',
+  name: 'Mount Rose',
+  latitude: 39.320736,
+  longitude: -119.884359,
+  elevationFt: 8748,
+  elevationM: 2666.5,
+  minElevationM: 2421,
+  maxElevationM: 2912,
+  referencePoints: [
+    { id: 'mount-rose-base', name: 'Base estimate', role: 'base', latitude: 39.320736, longitude: -119.884359, elevationM: 2421, geometrySource: 'estimated' },
+    { id: 'mount-rose-mid', name: 'Mid-mountain estimate', role: 'mid_mountain', latitude: 39.320736, longitude: -119.884359, elevationM: 2666.5, geometrySource: 'estimated' },
+    { id: 'mount-rose-summit', name: 'Summit estimate', role: 'summit', latitude: 39.320736, longitude: -119.884359, elevationM: 2912, geometrySource: 'estimated' },
+  ],
+  timezone: 'America/Los_Angeles',
+  isCustom: false,
+} as Location;
+
 const farAway: Location = {
   id: 'nowhere',
   name: 'Nowhere',
@@ -114,7 +132,7 @@ describe('model forecast resolution', () => {
   const firstDate = ecmwfRows[0]?.windowEndLocalDate;
 
   it('serving data covers the catalogue', () => {
-    expect(modelForecastData.points.length).toBe(30);
+    expect(modelForecastData.points.length).toBe(33);
     expect(ecmwfRows.length).toBeGreaterThan(0);
   });
 
@@ -348,5 +366,62 @@ describe('Open-Meteo long-range arm (third source, beyond the GRIB ceiling)', ()
     expect(html).toContain('not cycle-verified');
     // The OM arm's values are the stored record's.
     expect(html).toContain(day12Row?.modelSnowfallCm?.toFixed(1));
+  });
+});
+
+describe('Mount Rose (catalogue addition, estimated geometry)', () => {
+  const mrPoint = modelForecastData.points.find((p) => p.pointId === 'mount-rose-base');
+  const mrEcmwf = mrPoint?.forecasts.ecmwf ?? [];
+  const mrOm = mrPoint?.forecasts.ecmwf_openmeteo ?? [];
+  const day2Row = mrEcmwf.find((r) => r.leadDay === 2) as (typeof mrEcmwf)[number];
+  const day12Row = mrOm.find((r) => r.leadDay === 12) as (typeof mrOm)[number];
+
+  it('matches the Mount Rose points by elevation mode', () => {
+    expect(cataloguePointForLocation(mountRose, 'min')?.pointId).toBe('mount-rose-base');
+    expect(cataloguePointForLocation(mountRose, 'avg')?.pointId).toBe('mount-rose-mid_mountain');
+    expect(cataloguePointForLocation(mountRose, 'max')?.pointId).toBe('mount-rose-summit');
+  });
+
+  it('stores GRIB leads 1-9, the HRRR day-1 row, and Open-Meteo leads 10-14', () => {
+    expect(mrEcmwf.map((r) => r.leadDay)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect((mrPoint?.forecasts.hrrr ?? []).map((r) => r.leadDay)).toEqual([1]);
+    expect(mrOm.map((r) => r.leadDay)).toEqual([10, 11, 12, 13, 14]);
+    expect(mrOm.every((r) => r.reducedFeatureVariant === true)).toBe(true);
+  });
+
+  it('resolves the day-2 window to the GRIB ECMWF arm', () => {
+    const result = modelForecastFor(mountRose, 'ecmwf', 'min', day2Row.windowEndLocalDate);
+    expect(result?.arm).toBe('ecmwf');
+    expect(result?.forecast.modelSlr).toBe(day2Row.modelSlr);
+    expect(result?.forecast.modelSnowfallCm).toBe(day2Row.modelSnowfallCm);
+  });
+
+  it('resolves the day-12 window to the Open-Meteo arm in ecmwf and blend modes, never hrrr', () => {
+    const literal = modelForecastFor(mountRose, 'ecmwf', 'min', day12Row.windowEndLocalDate);
+    expect(literal?.arm).toBe('ecmwf_openmeteo');
+    expect(literal?.forecast.modelSlr).toBe(day12Row.modelSlr);
+    const blend = modelForecastFor(mountRose, BLEND_MODEL_ID, 'min', day12Row.windowEndLocalDate);
+    expect(blend?.arm).toBe('ecmwf_openmeteo');
+    expect(modelForecastFor(mountRose, 'hrrr', 'min', day12Row.windowEndLocalDate)).toBeNull();
+  });
+
+  it('labels the day-2 panel ECMWF IFS and the day-12 panel as the Open-Meteo arm', () => {
+    const grib = renderToString(
+      createElement(ModelForecastPanel, {
+        result: modelForecastFor(mountRose, 'ecmwf', 'min', day2Row.windowEndLocalDate),
+      }),
+    );
+    expect(grib).toContain('MODEL FORECAST');
+    expect(grib).toContain('ECMWF IFS');
+    expect(grib).not.toContain('via Open-Meteo');
+    const om = renderToString(
+      createElement(ModelForecastPanel, {
+        result: modelForecastFor(mountRose, 'ecmwf', 'min', day12Row.windowEndLocalDate),
+      }),
+    );
+    expect(om).toContain('ECMWF IFS via Open-Meteo');
+    expect(om).toContain('anchored to the 2026-10-31 12Z cycle');
+    expect(om).toContain('Reduced-feature variant');
+    expect(om).toContain(day12Row.modelSnowfallCm?.toFixed(1));
   });
 });

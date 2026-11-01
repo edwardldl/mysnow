@@ -64,6 +64,24 @@ const stowe: Location = {
   isCustom: false,
 } as Location;
 
+const mountRose: Location = {
+  id: 'mount-rose',
+  name: 'Mount Rose',
+  latitude: 39.320736,
+  longitude: -119.884359,
+  elevationFt: 8748,
+  elevationM: 2666.5,
+  minElevationM: 2421,
+  maxElevationM: 2912,
+  referencePoints: [
+    { id: 'mount-rose-base', name: 'Base estimate', role: 'base', latitude: 39.320736, longitude: -119.884359, elevationM: 2421, geometrySource: 'estimated' },
+    { id: 'mount-rose-mid', name: 'Mid-mountain estimate', role: 'mid_mountain', latitude: 39.320736, longitude: -119.884359, elevationM: 2666.5, geometrySource: 'estimated' },
+    { id: 'mount-rose-summit', name: 'Summit estimate', role: 'summit', latitude: 39.320736, longitude: -119.884359, elevationM: 2912, geometrySource: 'estimated' },
+  ],
+  timezone: 'America/Los_Angeles',
+  isCustom: false,
+} as Location;
+
 const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
 const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
 const omRows = palisadesPoint?.forecasts.ecmwf_openmeteo ?? [];
@@ -99,6 +117,15 @@ describe('model method availability matrix', () => {
       expect(availability.available).toBe(true);
       expect(availability.reason).toBeNull();
       expect(availability.point?.pointId).toBe('palisades-tahoe-base');
+    }
+  });
+
+  it('is available at Mount Rose (estimated-geometry catalogue point)', () => {
+    for (const mode of ['ecmwf', 'hrrr', BLEND_MODEL_ID]) {
+      const availability = modelMethodAvailability(mode, mountRose, 'min');
+      expect(availability.available).toBe(true);
+      expect(availability.reason).toBeNull();
+      expect(availability.point?.pointId).toBe('mount-rose-base');
     }
   });
 
