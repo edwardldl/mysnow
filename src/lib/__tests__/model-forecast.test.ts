@@ -71,19 +71,24 @@ describe('model mode gate', () => {
     expect(modelArmForMode('icon_global')).toBeNull();
   });
 
-  it('gives literal modes a single-arm preference with no fallback', () => {
-    expect(modelArmPreference('ecmwf', 1)).toEqual(['ecmwf']);
+  it('confines literal modes to their own source family', () => {
+    // Literal HRRR: that arm only, no fallback of any kind.
     expect(modelArmPreference('hrrr', 3)).toEqual(['hrrr']);
+    // Literal ECMWF: the GRIB arm, then the Open-Meteo tail arm (same
+    // ECMWF family; it holds only beyond-ceiling windows) -- never HRRR.
+    expect(modelArmPreference('ecmwf', 1)).toEqual(['ecmwf', 'ecmwf_openmeteo']);
+    expect(modelArmPreference('ecmwf', 12)).toEqual(['ecmwf', 'ecmwf_openmeteo']);
     expect(modelArmPreference('gfs', 1)).toEqual([]);
     expect(modelArmPreference('best_match', 2)).toEqual([]);
   });
 
   it('mirrors the app blend: HRRR privileged inside 48 h, ECMWF beyond', () => {
-    expect(modelArmPreference(BLEND_MODEL_ID, 1)).toEqual(['hrrr', 'ecmwf']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 2)).toEqual(['hrrr', 'ecmwf']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 3)).toEqual(['ecmwf', 'hrrr']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 4)).toEqual(['ecmwf', 'hrrr']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 9)).toEqual(['ecmwf', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 1)).toEqual(['hrrr', 'ecmwf', 'ecmwf_openmeteo']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 2)).toEqual(['hrrr', 'ecmwf', 'ecmwf_openmeteo']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 3)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 4)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 9)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 12)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
   });
 });
 
@@ -248,5 +253,100 @@ describe('panel rendering and per-window source labelling', () => {
   it('renders nothing without a resolved result', () => {
     expect(render(null)).toBe('');
     expect(render(modelForecastFor(palisades, 'gfs', 'min', day1Date))).toBe('');
+  });
+});
+
+describe('Open-Meteo long-range arm (third source, beyond the GRIB ceiling)', () => {
+  const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
+  const omRows = palisadesPoint?.forecasts.ecmwf_openmeteo ?? [];
+  const day10Row = omRows.find((r) => r.leadDay === 10) as (typeof omRows)[number];
+  const day12Row = omRows.find((r) => r.leadDay === 12) as (typeof omRows)[number];
+  const day10Date = day10Row.windowEndLocalDate;
+  const day12Date = day12Row.windowEndLocalDate;
+  // Lead day 15 would end 2026-11-15 at Palisades; no arm stores it.
+  const day15Date = '2026-11-15';
+
+  it('stores only the tail windows: leads 10-14 at Palisades, 11-14 at Stowe', () => {
+    expect(omRows.map((r) => r.leadDay)).toEqual([10, 11, 12, 13, 14]);
+    expect(omRows.every((r) => r.reducedFeatureVariant === true)).toBe(true);
+    const stoweOmRows =
+      modelForecastData.points.find((p) => p.pointId === 'stowe-base')?.forecasts.ecmwf_openmeteo ?? [];
+    expect(stoweOmRows.map((r) => r.leadDay)).toEqual([11, 12, 13, 14]);
+    expect(modelForecastData.openMeteoArm?.displayName).toBe('ECMWF IFS via Open-Meteo');
+    expect(modelForecastData.openMeteoArm?.reducedFeatureVariant).toBe(true);
+    expect(modelForecastData.cycles.ecmwf_openmeteo).toBe(modelForecastData.cycles.ecmwf);
+  });
+
+  it('resolves the day-12 window to the Open-Meteo arm in literal ecmwf mode', () => {
+    const result = modelForecastFor(palisades, 'ecmwf', 'min', day12Date);
+    expect(result?.arm).toBe('ecmwf_openmeteo');
+    expect(result?.blended).toBe(false);
+    expect(result?.forecast.leadDay).toBe(12);
+    expect(result?.forecast.modelSlr).toBe(day12Row?.modelSlr);
+    expect(result?.forecast.modelSnowfallCm).toBe(day12Row?.modelSnowfallCm);
+    expect(result?.forecast.reducedFeatureVariant).toBe(true);
+    expect(result?.cycleUtc).toBe(modelForecastData.cycles.ecmwf_openmeteo);
+    expect(result?.retrievedAtUtc).toBe(modelForecastData.openMeteoArm?.retrievedAtUtc);
+  });
+
+  it('resolves the day-12 window to the Open-Meteo arm in blend mode too', () => {
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day12Date);
+    expect(result?.blended).toBe(true);
+    expect(result?.arm).toBe('ecmwf_openmeteo');
+    expect(result?.forecast.modelSlr).toBe(day12Row?.modelSlr);
+    // Same values the literal ECMWF mode shows for this window.
+    expect(result?.forecast).toEqual(
+      modelForecastFor(palisades, 'ecmwf', 'min', day12Date)?.forecast,
+    );
+  });
+
+  it('serves the first tail window (day 10 at Palisades) from Open-Meteo, not GRIB', () => {
+    expect(
+      palisadesPoint?.forecasts.ecmwf?.find((r) => r.windowEndLocalDate === day10Date),
+    ).toBeUndefined();
+    const result = modelForecastFor(palisades, 'ecmwf', 'min', day10Date);
+    expect(result?.arm).toBe('ecmwf_openmeteo');
+    expect(result?.forecast.leadDay).toBe(10);
+  });
+
+  it('keeps Stowe day 10 on the GRIB arm and day 11 on Open-Meteo', () => {
+    const stowePoint = modelForecastData.points.find((p) => p.pointId === 'stowe-base');
+    const gribDay10 = stowePoint?.forecasts.ecmwf?.find((r) => r.leadDay === 10) as
+      | (typeof omRows)[number]
+      | undefined;
+    const omDay11 = stowePoint?.forecasts.ecmwf_openmeteo?.find((r) => r.leadDay === 11) as
+      | (typeof omRows)[number]
+      | undefined;
+    const day10 = modelForecastFor(stowe, 'ecmwf', 'min', gribDay10?.windowEndLocalDate ?? null);
+    expect(day10?.arm).toBe('ecmwf');
+    const day11 = modelForecastFor(stowe, BLEND_MODEL_ID, 'min', omDay11?.windowEndLocalDate ?? null);
+    expect(day11?.arm).toBe('ecmwf_openmeteo');
+    expect(day11?.forecast.modelSlr).toBe(omDay11?.modelSlr);
+  });
+
+  it('never resolves the Open-Meteo arm in literal hrrr mode', () => {
+    expect(modelForecastFor(palisades, 'hrrr', 'min', day12Date)).toBeNull();
+    expect(modelForecastFor(palisades, 'hrrr', 'min', day10Date)).toBeNull();
+  });
+
+  it('has no model record beyond day 14 in any mode', () => {
+    expect(modelForecastFor(palisades, 'ecmwf', 'min', day15Date)).toBeNull();
+    expect(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day15Date)).toBeNull();
+    expect(modelForecastFor(palisades, 'hrrr', 'min', day15Date)).toBeNull();
+  });
+
+  it('labels the day-12 panel as ECMWF IFS via Open-Meteo with the reduced-feature note', () => {
+    const html = renderToString(
+      createElement(ModelForecastPanel, {
+        result: modelForecastFor(palisades, 'ecmwf', 'min', day12Date),
+      }),
+    );
+    expect(html).toContain('MODEL FORECAST');
+    expect(html).toContain('ECMWF IFS via Open-Meteo');
+    expect(html).toContain('anchored to the 2026-10-31 12Z cycle');
+    expect(html).toContain('Reduced-feature variant');
+    expect(html).toContain('not cycle-verified');
+    // The OM arm's values are the stored record's.
+    expect(html).toContain(day12Row?.modelSnowfallCm?.toFixed(1));
   });
 });

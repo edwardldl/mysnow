@@ -5,7 +5,7 @@
  * registry's pilot resorts x base / mid / summit) and ONLY inside the
  * ECMWF and HRRR forecast-source modes -- including the default
  * `hrrr_ecmwf` blend of the two: its features are derived wholly from
- * those two sources, so no other mode can show it. In the literal
+ * those sources, so no other mode can show it. In the literal
  * `ecmwf` / `hrrr` modes the panel shows that source's arm. In blend
  * mode it mirrors the app's own blend (blendForecasts in lib/data.ts,
  * fed by the hrrr_ecmwf branch of fetchWeatherData in lib/api.ts):
@@ -14,18 +14,31 @@
  * ECMWF for lead day 3 and beyond (the ECMWF arm is precomputed out to
  * the step-240 open-data ceiling -- lead day 9 or 10 depending on the
  * point's timezone), with fallback to the other arm when the
- * privileged arm has no scored record for that window. Every other
- * location keeps Kuchera only, exactly as before. Data is produced by
- * the offline serving batch
- * (training/slr_calibration/scripts/run_model_serving.py) and imported
- * as static JSON -- this app has no database; the JSON is the serving
- * layer in the workspace.
+ * privileged arm has no scored record for that window.
+ *
+ * Beyond the GRIB ceiling, a THIRD arm serves the tail windows (lead
+ * days ceiling+1 through 14): `ecmwf_openmeteo` -- ECMWF IFS via
+ * Open-Meteo, added 2026-11-01 under the third-source treatment from
+ * the E1 parity report. It is NOT the GRIB ECMWF arm continued:
+ * Open-Meteo publishes no cycle metadata and its forecast instance
+ * could not be cycle-verified against the GRIB arm, and it is scored
+ * as a reduced-feature variant (total column liquid water is
+ * unavailable from Open-Meteo, so the tclw feature pair is NaN under
+ * the validated pass-through). It resolves only where the GRIB ECMWF
+ * arm has no record, in the literal `ecmwf` mode and in the blend --
+ * never in literal `hrrr` mode -- and is always labelled distinctly.
+ * Windows beyond lead day 14 have no model record from any arm.
+ * Every other location keeps Kuchera only, exactly as before. Data is
+ * produced by the offline serving batches
+ * (training/slr_calibration/scripts/run_model_serving.py and
+ * run_model_serving_openmeteo.py) and imported as static JSON -- this
+ * app has no database; the JSON is the serving layer in the workspace.
  */
 import rawData from '../data/model-forecasts.json';
 import type { DayData, Location } from './types';
 import { referencePointForMode } from './snow/resort/geometry';
 
-export type ModelSourceArm = 'ecmwf' | 'hrrr';
+export type ModelSourceArm = 'ecmwf' | 'hrrr' | 'ecmwf_openmeteo';
 
 export interface ModelWindowForecast {
   leadDay: number;
@@ -37,6 +50,24 @@ export interface ModelWindowForecast {
   kucheraSlr: number | null;
   kucheraSnowfallCm: number | null;
   liquidMm: number | null;
+  /**
+   * True on Open-Meteo arm rows: the window was scored as a
+   * reduced-feature variant (tclw pair NaN -- total column liquid
+   * water is not available from Open-Meteo).
+   */
+  reducedFeatureVariant?: boolean;
+}
+
+/** Provenance metadata for the Open-Meteo third arm (see file header). */
+export interface OpenMeteoArmMetadata {
+  sourceId: string;
+  displayName: string;
+  /** The GRIB serving cycle the arm's windows are anchored on. */
+  anchorCycleUtc: string;
+  /** When the Open-Meteo data was retrieved (it publishes no cycle). */
+  retrievedAtUtc: string;
+  reducedFeatureVariant: boolean;
+  note: string;
 }
 
 export interface ModelForecastPoint {
@@ -59,6 +90,8 @@ export interface ModelForecastData {
   featureBuilderVersion: string;
   nanPolicy: string;
   cycles: Partial<Record<ModelSourceArm, string>>;
+  /** Present when the serving JSON carries the Open-Meteo third arm. */
+  openMeteoArm?: OpenMeteoArmMetadata;
   points: ModelForecastPoint[];
 }
 
@@ -85,24 +118,32 @@ export function modelArmForMode(modelId: string): ModelSourceArm | null {
 /**
  * Arm preference order for one window, most preferred first.
  *
- * Literal `ecmwf` / `hrrr` modes: that arm only -- no cross-source
- * fallback, exactly as the panel behaved before blend support.
+ * Literal `hrrr` mode: that arm only -- no cross-source fallback.
+ * Literal `ecmwf` mode: the GRIB ECMWF arm, then the Open-Meteo arm --
+ * the tail extension of the same ECMWF family (it holds only windows
+ * beyond the GRIB ceiling, so the two never compete for a window);
+ * never HRRR.
  *
  * Blend mode (`hrrr_ecmwf`) mirrors blendForecasts: HRRR overrides
  * ECMWF hour-by-hour wherever HRRR data exists inside its 0-48 h
  * horizon, and ECMWF supplies everything beyond it. At the panel's
  * window granularity that is HRRR for lead days 1-2 and ECMWF for
- * lead day 3 and beyond; the non-privileged arm remains as a fallback for windows
- * the privileged arm has no scored record for (e.g. HRRR day-2 windows
- * beyond the 48 h horizon from the 12Z cycle).
+ * lead day 3 and beyond; the non-privileged arms remain as fallbacks
+ * for windows the privileged arm has no scored record for (e.g. HRRR
+ * day-2 windows beyond the 48 h horizon from the 12Z cycle), with the
+ * Open-Meteo arm last inside the horizon and ahead of HRRR beyond it
+ * (HRRR holds no records there anyway).
  *
  * Any other mode: no arms -- the panel does not exist there.
  */
 export function modelArmPreference(modelId: string, leadDay: number): ModelSourceArm[] {
   const single = modelArmForMode(modelId);
-  if (single) return [single];
+  if (single === 'ecmwf') return ['ecmwf', 'ecmwf_openmeteo'];
+  if (single === 'hrrr') return ['hrrr'];
   if (modelId !== BLEND_MODEL_ID) return [];
-  return leadDay <= BLEND_HRRR_MAX_LEAD_DAY ? ['hrrr', 'ecmwf'] : ['ecmwf', 'hrrr'];
+  return leadDay <= BLEND_HRRR_MAX_LEAD_DAY
+    ? ['hrrr', 'ecmwf', 'ecmwf_openmeteo']
+    : ['ecmwf', 'ecmwf_openmeteo', 'hrrr'];
 }
 
 const MAX_POINT_DISTANCE_DEG = 0.05;
@@ -143,6 +184,12 @@ export interface ModelForecastResult {
   /** True when resolved in the hrrr_ecmwf blend mode. */
   blended: boolean;
   cycleUtc: string | null;
+  /**
+   * Open-Meteo arm only: when its data was retrieved. Open-Meteo
+   * publishes no cycle, so for that arm cycleUtc is the anchor cycle
+   * the windows are defined on, and this is the retrieval time.
+   */
+  retrievedAtUtc?: string | null;
   forecast: ModelWindowForecast;
 }
 
@@ -168,26 +215,30 @@ export function modelForecastFor(
   const rowFor = (arm: ModelSourceArm): ModelWindowForecast | null =>
     point.forecasts[arm]?.find((row) => row.windowEndLocalDate === windowEndLocalDate) ?? null;
 
-  if (!blended) {
-    const arm = modelArmForMode(modelId) as ModelSourceArm;
-    const forecast = rowFor(arm);
-    if (!forecast || forecast.modelSlr === null) return null;
-    return { point, arm, blended: false, cycleUtc: modelForecastData.cycles[arm] ?? null, forecast };
-  }
-
-  // Blend mode: find the window in either arm to learn its lead day,
-  // then walk the blend's preference order with fallback.
+  // Find the window in any arm to learn its lead day, then walk the
+  // mode's preference order (modelArmPreference). The preference order
+  // is what confines each mode to its own arms: literal HRRR can never
+  // resolve the ECMWF or Open-Meteo rows gathered here, and literal
+  // ECMWF can never resolve HRRR.
   const rows: Partial<Record<ModelSourceArm, ModelWindowForecast>> = {};
-  for (const arm of ['ecmwf', 'hrrr'] as ModelSourceArm[]) {
+  for (const arm of ['ecmwf', 'hrrr', 'ecmwf_openmeteo'] as ModelSourceArm[]) {
     const row = rowFor(arm);
     if (row) rows[arm] = row;
   }
-  const anyRow = rows.ecmwf ?? rows.hrrr;
+  const anyRow = rows.ecmwf ?? rows.ecmwf_openmeteo ?? rows.hrrr;
   if (!anyRow) return null;
   for (const arm of modelArmPreference(modelId, anyRow.leadDay)) {
     const forecast = rows[arm];
     if (forecast && forecast.modelSlr !== null) {
-      return { point, arm, blended: true, cycleUtc: modelForecastData.cycles[arm] ?? null, forecast };
+      return {
+        point,
+        arm,
+        blended,
+        cycleUtc: modelForecastData.cycles[arm] ?? null,
+        retrievedAtUtc:
+          arm === 'ecmwf_openmeteo' ? (modelForecastData.openMeteoArm?.retrievedAtUtc ?? null) : null,
+        forecast,
+      };
     }
   }
   return null;
@@ -266,7 +317,7 @@ export function modelWindowStatuses(
   if (!availability.available || availability.point === null || !location) return null;
   const point = availability.point;
   const byDate = new Map<string, ModelWindowForecast>();
-  for (const arm of ['ecmwf', 'hrrr'] as const) {
+  for (const arm of ['ecmwf', 'hrrr', 'ecmwf_openmeteo'] as const) {
     for (const row of point.forecasts[arm] ?? []) {
       const existing = byDate.get(row.windowEndLocalDate);
       if (!existing || row.leadDay < existing.leadDay) byDate.set(row.windowEndLocalDate, row);

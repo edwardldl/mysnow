@@ -21,6 +21,12 @@ interface ModelForecastPanelProps {
 const SOURCE_LABEL: Record<string, string> = {
   ecmwf: "ECMWF IFS",
   hrrr: "NOAA HRRR",
+  ecmwf_openmeteo: "ECMWF IFS via Open-Meteo",
+};
+
+/** Shorter per-window chip labels where the full name is too long. */
+const CHIP_LABEL: Record<string, string> = {
+  ecmwf_openmeteo: "ECMWF (Open-Meteo)",
 };
 
 function formatCycle(cycleUtc: string | null): string {
@@ -41,9 +47,13 @@ function fmt(value: number | null, digits = 1): string {
  * this component renders nothing without a resolved result. In blend
  * mode the source named here is the arm actually resolved for this
  * window (HRRR inside its 48 h horizon, ECMWF beyond, with fallback),
- * so the label is per-window truthful. Model values sit alongside the
- * same-window Kuchera comparison and never replace the production
- * figures.
+ * so the label is per-window truthful. Windows beyond the GRIB ECMWF
+ * arm's step-240 ceiling resolve to the Open-Meteo third arm and are
+ * labelled "ECMWF IFS via Open-Meteo" -- never plain "ECMWF IFS" --
+ * with a reduced-feature note (that arm is scored without the tclw
+ * feature pair, and its forecast instance is not cycle-verified
+ * against the GRIB arm). Model values sit alongside the same-window
+ * Kuchera comparison and never replace the production figures.
  *
  * When the ENS-EB Physics-menu method is selected, the page passes
  * methodContext: the panel then also renders on fallback windows (with
@@ -68,7 +78,9 @@ export default function ModelForecastPanel({ result, methodContext = null, selec
           </span>
           <span className="text-[10px] md:text-[11px] text-slate-400 ml-auto">
             {result
-              ? `${SOURCE_LABEL[result.arm]} · ${formatCycle(result.cycleUtc)}`
+              ? result.arm === "ecmwf_openmeteo"
+                ? `${SOURCE_LABEL[result.arm]} · anchored to the ${formatCycle(result.cycleUtc)}`
+                : `${SOURCE_LABEL[result.arm]} · ${formatCycle(result.cycleUtc)}`
               : "Kuchera fallback for the selected window"}
           </span>
         </div>
@@ -111,6 +123,16 @@ export default function ModelForecastPanel({ result, methodContext = null, selec
           </div>
         )}
 
+        {result?.forecast.reducedFeatureVariant && (
+          <div className="mt-3 rounded-xl border border-accent-violet/30 bg-accent-violet/10 px-3 py-2 text-[11px] md:text-xs text-violet-100/90 leading-relaxed">
+            Reduced-feature variant — this window is served by the Open-Meteo arm: total column
+            liquid water is not available from Open-Meteo, so the window was scored without that
+            feature pair (validated NaN pass-through). Open-Meteo publishes no cycle metadata, so
+            its forecast instance is not cycle-verified against the GRIB ECMWF arm, and this arm
+            keeps its own evidence clock.
+          </div>
+        )}
+
         {methodContext && (
           <div className="mt-4 flex flex-wrap items-center gap-1.5" aria-label="Model coverage by window">
             <span className="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-bold mr-1">
@@ -128,7 +150,9 @@ export default function ModelForecastPanel({ result, methodContext = null, selec
                 }
               >
                 {w.windowEndLocalDate.slice(5)} ·{" "}
-                {w.status === "model" ? `Model · ${SOURCE_LABEL[w.arm ?? ""]}` : "Kuchera fallback"}
+                {w.status === "model"
+                  ? `Model · ${CHIP_LABEL[w.arm ?? ""] ?? SOURCE_LABEL[w.arm ?? ""]}`
+                  : "Kuchera fallback"}
               </span>
             ))}
           </div>
@@ -142,8 +166,11 @@ export default function ModelForecastPanel({ result, methodContext = null, selec
               {result.blended && (
                 <>
                   {" "}· Blended (HRRR+ECMWF) mode: this window is served by the {SOURCE_LABEL[result.arm]}{" "}
-                  model arm — the blend uses HRRR inside its 48 h horizon and ECMWF beyond it, and each
-                  window is labelled with the source actually shown
+                  model arm — the blend uses HRRR inside its 48 h horizon and ECMWF beyond it
+                  {result.arm === "ecmwf_openmeteo"
+                    ? ", with the Open-Meteo arm covering the long-range tail past the GRIB ceiling"
+                    : ""}
+                  , and each window is labelled with the source actually shown
                 </>
               )}
             </>

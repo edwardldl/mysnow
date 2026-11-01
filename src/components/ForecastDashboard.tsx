@@ -137,7 +137,7 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
 
   const selectedDay = days.find((d) => d.dateStr === selectedDate) || days[0];
   const freshSnowTrend = selectedDay.modelWindow?.kind === 'model'
-    ? `ENS-EB model · 24 h window ending 07:00 local · ${selectedDay.modelWindow.arm === 'hrrr' ? 'NOAA HRRR' : 'ECMWF IFS'} arm`
+    ? `ENS-EB model · 24 h window ending 07:00 local · ${selectedDay.modelWindow.arm === 'hrrr' ? 'NOAA HRRR' : selectedDay.modelWindow.arm === 'ecmwf_openmeteo' ? 'ECMWF (Open-Meteo)' : 'ECMWF IFS'} arm`
     : selectedDay.modelWindow?.kind === 'kuchera_fallback'
       ? 'Kuchera fallback · no ENS-EB record for this window'
       : 'Selected sheltered reference site';

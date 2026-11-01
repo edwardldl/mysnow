@@ -6,7 +6,8 @@
  "nanPolicy": "pass-through (design S5; validated 2026-10-31, nan_validation.json)",
  "cycles": {
   "ecmwf": "2026-10-31T12:00:00Z",
-  "hrrr": "2026-10-31T12:00:00Z"
+  "hrrr": "2026-10-31T12:00:00Z",
+  "ecmwf_openmeteo": "2026-10-31T12:00:00Z"
  },
  "points": [
   {
@@ -132,6 +133,68 @@
       "kucheraSlr": 3.768256,
       "kucheraSnowfallCm": 4.702783488,
       "liquidMm": 12.48
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.722684120047173,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.149165992660304,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 8.955346196072725,
+      "modelSnowfallCm": 33.851208621154896,
+      "kucheraSlr": 3.806897,
+      "kucheraSnowfallCm": 14.390070660000001,
+      "liquidMm": 37.8,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 9.484082003628496,
+      "modelSnowfallCm": 3.4142695213062586,
+      "kucheraSlr": 7.083333,
+      "kucheraSnowfallCm": 2.54999988,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 8.90385388284838,
+      "modelSnowfallCm": 72.92256330052825,
+      "kucheraSlr": 3.825885,
+      "kucheraSnowfallCm": 31.333998150000003,
+      "liquidMm": 81.9,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -260,6 +323,68 @@
       "kucheraSnowfallCm": 12.301587168000001,
       "liquidMm": 12.48
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.828317332098873,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.475555977288098,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.875481391849677,
+      "modelSnowfallCm": 44.88931966119178,
+      "kucheraSlr": 13.567803,
+      "kucheraSnowfallCm": 51.286295339999995,
+      "liquidMm": 37.8,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 12.363954614114242,
+      "modelSnowfallCm": 4.451023661081127,
+      "kucheraSlr": 12.875,
+      "kucheraSnowfallCm": 4.635,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 11.624380193065717,
+      "modelSnowfallCm": 95.20367378120822,
+      "kucheraSlr": 13.9779,
+      "kucheraSnowfallCm": 114.47900100000001,
+      "liquidMm": 81.9,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -386,6 +511,68 @@
       "kucheraSlr": 14.295611,
       "kucheraSnowfallCm": 17.840922528,
       "liquidMm": 12.48
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.343081287713154,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 9.972973497639085,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 12.844374531761826,
+      "modelSnowfallCm": 48.5517357300597,
+      "kucheraSlr": 13.100862,
+      "kucheraSnowfallCm": 49.52125836,
+      "liquidMm": 37.8,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 13.45882094373395,
+      "modelSnowfallCm": 4.845175539744223,
+      "kucheraSlr": 16.475,
+      "kucheraSnowfallCm": 5.931000000000001,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 13.498705600197543,
+      "modelSnowfallCm": 110.55439886561787,
+      "kucheraSlr": 14.29536,
+      "kucheraSnowfallCm": 117.07899840000002,
+      "liquidMm": 81.9,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -514,6 +701,68 @@
       "kucheraSnowfallCm": 30.189405169999997,
       "liquidMm": 43.3
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.327697884678726,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.89090671249228,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.342892667272896,
+      "modelSnowfallCm": 33.00781766176413,
+      "kucheraSlr": 7.350923,
+      "kucheraSnowfallCm": 21.39118593,
+      "liquidMm": 29.1,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 13.248845224785986,
+      "modelSnowfallCm": 1.1923960702307388,
+      "kucheraSlr": 10.133333,
+      "kucheraSnowfallCm": 0.9119999700000001,
+      "liquidMm": 0.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 10.166448600214352,
+      "modelSnowfallCm": 41.78410374688099,
+      "kucheraSlr": 6.531127,
+      "kucheraSnowfallCm": 26.842931970000002,
+      "liquidMm": 41.1,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -640,6 +889,68 @@
       "kucheraSlr": 12.614863,
       "kucheraSnowfallCm": 54.62235678999999,
       "liquidMm": 43.3
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 11.172869111282346,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 9.928275013070056,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.153554925547688,
+      "modelSnowfallCm": 38.27684483334377,
+      "kucheraSlr": 12.911808,
+      "kucheraSnowfallCm": 37.57336128000001,
+      "liquidMm": 29.1,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 13.728861450729452,
+      "modelSnowfallCm": 1.2355975305656508,
+      "kucheraSlr": 14.8,
+      "kucheraSnowfallCm": 1.332,
+      "liquidMm": 0.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 11.25818560636625,
+      "modelSnowfallCm": 46.27114284216529,
+      "kucheraSlr": 12.908088,
+      "kucheraSnowfallCm": 53.052241679999995,
+      "liquidMm": 41.1,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -768,6 +1079,68 @@
       "kucheraSnowfallCm": 69.52280908,
       "liquidMm": 43.3
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 11.415116777072996,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 11.185242715510755,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 15.141029165936743,
+      "modelSnowfallCm": 44.060394872875925,
+      "kucheraSlr": 16.483026,
+      "kucheraSnowfallCm": 47.96560566,
+      "liquidMm": 29.1,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 14.713042251317695,
+      "modelSnowfallCm": 1.3241738026185925,
+      "kucheraSlr": 18.366667,
+      "kucheraSnowfallCm": 1.65300003,
+      "liquidMm": 0.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 14.212966209009984,
+      "modelSnowfallCm": 58.41529111903104,
+      "kucheraSlr": 15.435539,
+      "kucheraSnowfallCm": 63.44006529000001,
+      "liquidMm": 41.1,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -894,6 +1267,68 @@
       "kucheraSlr": 6.446689,
       "kucheraSnowfallCm": 15.510733733999999,
       "liquidMm": 24.06
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.835796121000378,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.497251713221283,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.653674520328309,
+      "modelSnowfallCm": 2.556881884878794,
+      "kucheraSlr": 6.658333,
+      "kucheraSnowfallCm": 1.59799992,
+      "liquidMm": 2.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 11.897363774518958,
+      "modelSnowfallCm": 20.46346569217261,
+      "kucheraSlr": 12.698305,
+      "kucheraSnowfallCm": 21.8410846,
+      "liquidMm": 17.2,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 12.840036233853713,
+      "modelSnowfallCm": 6.163217392249782,
+      "kucheraSlr": 13.31875,
+      "kucheraSnowfallCm": 6.392999999999999,
+      "liquidMm": 4.8,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -1022,6 +1457,68 @@
       "kucheraSnowfallCm": 17.86031544,
       "liquidMm": 24.06
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.567429510708614,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.47536656746205,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.999440580507034,
+      "modelSnowfallCm": 2.879865739321688,
+      "kucheraSlr": 6.658333,
+      "kucheraSnowfallCm": 1.59799992,
+      "liquidMm": 2.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 13.147506402198943,
+      "modelSnowfallCm": 22.61371101178218,
+      "kucheraSlr": 12.698305,
+      "kucheraSnowfallCm": 21.8410846,
+      "liquidMm": 17.2,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 14.118181246347817,
+      "modelSnowfallCm": 6.776726998246952,
+      "kucheraSlr": 13.31875,
+      "kucheraSnowfallCm": 6.392999999999999,
+      "liquidMm": 4.8,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -1148,6 +1645,68 @@
       "kucheraSlr": 12.575802,
       "kucheraSnowfallCm": 30.257379612,
       "liquidMm": 24.06
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.5960379675156,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.640476047782478,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.288905079531144,
+      "modelSnowfallCm": 3.1893372190874745,
+      "kucheraSlr": 13.525,
+      "kucheraSnowfallCm": 3.246,
+      "liquidMm": 2.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 13.429031078269684,
+      "modelSnowfallCm": 23.097933454623856,
+      "kucheraSlr": 16.092373,
+      "kucheraSnowfallCm": 27.678881559999997,
+      "liquidMm": 17.2,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 14.902119252423091,
+      "modelSnowfallCm": 7.153017241163083,
+      "kucheraSlr": 15.652083,
+      "kucheraSnowfallCm": 7.512999839999999,
+      "liquidMm": 4.8,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -1276,6 +1835,68 @@
       "kucheraSnowfallCm": 1.032,
       "liquidMm": 3.44
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.565301747906204,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.535100938965961,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 12.302101068162655,
+      "modelSnowfallCm": 0.7381260640897592,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 9.072007695566409,
+      "modelSnowfallCm": 2.721602308669923,
+      "kucheraSlr": 6.45,
+      "kucheraSnowfallCm": 1.935,
+      "liquidMm": 3.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 9.434918817479755,
+      "modelSnowfallCm": 3.0191740215935217,
+      "kucheraSlr": 3.251437,
+      "kucheraSnowfallCm": 1.04045984,
+      "liquidMm": 3.2,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -1402,6 +2023,68 @@
       "kucheraSlr": 3.485841,
       "kucheraSnowfallCm": 1.199129304,
       "liquidMm": 3.44
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.33087286970147,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.64914506203772,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.055942847109957,
+      "modelSnowfallCm": 0.7833565708265974,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 10.642859994415883,
+      "modelSnowfallCm": 3.1928579983247647,
+      "kucheraSlr": 16.8,
+      "kucheraSnowfallCm": 5.040000000000001,
+      "liquidMm": 3.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 13.320271253039687,
+      "modelSnowfallCm": 4.262486800972701,
+      "kucheraSlr": 13.428736,
+      "kucheraSnowfallCm": 4.297195520000001,
+      "liquidMm": 3.2,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -1530,6 +2213,68 @@
       "kucheraSnowfallCm": 4.596002368,
       "liquidMm": 3.44
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.648540156963836,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 14.142732277024692,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 14.518348315372652,
+      "modelSnowfallCm": 0.8711008989223592,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 12.975143329698284,
+      "modelSnowfallCm": 3.892542998909485,
+      "kucheraSlr": 18.8,
+      "kucheraSnowfallCm": 5.640000000000001,
+      "liquidMm": 3.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 16.25614368949808,
+      "modelSnowfallCm": 5.201965980639386,
+      "kucheraSlr": 16.751724,
+      "kucheraSnowfallCm": 5.36055168,
+      "liquidMm": 3.2,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -1656,6 +2401,68 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.08
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 13.093592904081923,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.838566050176707,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 12.730753092342486,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 11.343995564462528,
+      "modelSnowfallCm": 2.2687991128925056,
+      "kucheraSlr": 4.342857,
+      "kucheraSnowfallCm": 0.8685714000000001,
+      "liquidMm": 2.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 12.160137388395729,
+      "modelSnowfallCm": 0.4864054955358291,
+      "kucheraSlr": 4.4,
+      "kucheraSnowfallCm": 0.17600000000000002,
+      "liquidMm": 0.4,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -1784,6 +2591,68 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.08
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.488765751884735,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.649800726962553,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 12.54193699730573,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 14.226420124130204,
+      "modelSnowfallCm": 2.8452840248260407,
+      "kucheraSlr": 11.3,
+      "kucheraSnowfallCm": 2.2600000000000002,
+      "liquidMm": 2.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 13.145812587000858,
+      "modelSnowfallCm": 0.5258325034800343,
+      "kucheraSlr": 11.675,
+      "kucheraSnowfallCm": 0.4670000000000001,
+      "liquidMm": 0.4,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -1910,6 +2779,68 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.08
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.919312410965878,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 13.239920473747802,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.55463662191261,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 14.836579285054782,
+      "modelSnowfallCm": 2.9673158570109566,
+      "kucheraSlr": 15.25,
+      "kucheraSnowfallCm": 3.05,
+      "liquidMm": 2.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 15.115827824731117,
+      "modelSnowfallCm": 0.6046331129892447,
+      "kucheraSlr": 15.75,
+      "kucheraSnowfallCm": 0.6300000000000001,
+      "liquidMm": 0.4,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -2038,6 +2969,68 @@
       "kucheraSnowfallCm": 2.061549144,
       "liquidMm": 6.48
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 11.97342549183844,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.856835955113791,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.911381237016261,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 9.757126084409443,
+      "modelSnowfallCm": 2.3417102602582665,
+      "kucheraSlr": 6.583117,
+      "kucheraSnowfallCm": 1.5799480799999999,
+      "liquidMm": 2.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 12.669034685883776,
+      "modelSnowfallCm": 2.787187630894431,
+      "kucheraSlr": 7.641532,
+      "kucheraSnowfallCm": 1.68113704,
+      "liquidMm": 2.2,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -2164,6 +3157,68 @@
       "kucheraSlr": 10.837998,
       "kucheraSnowfallCm": 7.023022704000001,
       "liquidMm": 6.48
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.31645150715,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.901374747936806,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.506239030508604,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 12.015794069213909,
+      "modelSnowfallCm": 2.883790576611338,
+      "kucheraSlr": 12.831169,
+      "kucheraSnowfallCm": 3.0794805599999995,
+      "liquidMm": 2.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 15.28179691151282,
+      "modelSnowfallCm": 3.361995320532821,
+      "kucheraSlr": 13.206048,
+      "kucheraSnowfallCm": 2.9053305600000003,
+      "liquidMm": 2.2,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -2292,6 +3347,68 @@
       "kucheraSnowfallCm": 9.780255576000002,
       "liquidMm": 6.48
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T14:00:00Z",
+      "windowEndUtc": "2026-11-10T14:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 12.625425026515455,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T14:00:00Z",
+      "windowEndUtc": "2026-11-11T14:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 14.232716179211717,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T14:00:00Z",
+      "windowEndUtc": "2026-11-12T14:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.390217389307331,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T14:00:00Z",
+      "windowEndUtc": "2026-11-13T14:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 15.301989567065473,
+      "modelSnowfallCm": 3.6724774960957136,
+      "kucheraSlr": 16.281818,
+      "kucheraSnowfallCm": 3.9076363200000004,
+      "liquidMm": 2.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T14:00:00Z",
+      "windowEndUtc": "2026-11-14T14:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 15.804861934042954,
+      "modelSnowfallCm": 3.47706962548945,
+      "kucheraSlr": 16.173387,
+      "kucheraSnowfallCm": 3.5581451400000006,
+      "liquidMm": 2.2,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -2418,6 +3535,68 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.962957130500463,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.507076320649382,
+      "modelSnowfallCm": 11.662854715920814,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 11.1,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.554279655897098,
+      "modelSnowfallCm": 19.947588549645513,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 18.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 8.60791054654445,
+      "modelSnowfallCm": 7.747119491890004,
+      "kucheraSlr": 4.922727,
+      "kucheraSnowfallCm": 4.4304543,
+      "liquidMm": 9.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 8.499276968644025,
+      "modelSnowfallCm": 17.083546706974495,
+      "kucheraSlr": 4.70398,
+      "kucheraSnowfallCm": 9.4549998,
+      "liquidMm": 20.1,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -2546,6 +3725,68 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.92957691254341,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.642219979433932,
+      "modelSnowfallCm": 11.812864177171665,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 11.1,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 9.874603960856147,
+      "modelSnowfallCm": 18.663001486018118,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 18.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 8.837831575028986,
+      "modelSnowfallCm": 7.954048417526087,
+      "kucheraSlr": 4.922727,
+      "kucheraSnowfallCm": 4.4304543,
+      "liquidMm": 9.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 8.575670294428251,
+      "modelSnowfallCm": 17.237097291800787,
+      "kucheraSlr": 4.70398,
+      "kucheraSnowfallCm": 9.4549998,
+      "liquidMm": 20.1,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -2672,6 +3913,68 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.318980897430658,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 8.960717519582941,
+      "modelSnowfallCm": 9.946396446737065,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 11.1,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.081642970001933,
+      "modelSnowfallCm": 19.054305213303653,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 18.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 11.462611893245946,
+      "modelSnowfallCm": 10.316350703921351,
+      "kucheraSlr": 10.571212,
+      "kucheraSnowfallCm": 9.5140908,
+      "liquidMm": 9.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 11.164737079157119,
+      "modelSnowfallCm": 22.44112152910581,
+      "kucheraSlr": 9.274627,
+      "kucheraSnowfallCm": 18.642000270000004,
+      "liquidMm": 20.1,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -2800,6 +4103,68 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.738683590751538,
+      "modelSnowfallCm": 0.5843210154450923,
+      "kucheraSlr": 3.266667,
+      "kucheraSnowfallCm": 0.19600002,
+      "liquidMm": 0.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 8.479380447856705,
+      "modelSnowfallCm": 3.815721201535517,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.5,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 7.973089312075862,
+      "modelSnowfallCm": 7.414973060230553,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 2.79,
+      "liquidMm": 9.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 7.233894420003612,
+      "modelSnowfallCm": 4.991387149802493,
+      "kucheraSlr": 5.009563,
+      "kucheraSnowfallCm": 3.4565984700000003,
+      "liquidMm": 6.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 7.754206532630757,
+      "modelSnowfallCm": 8.839795447199062,
+      "kucheraSlr": 6.731579,
+      "kucheraSnowfallCm": 7.67400006,
+      "liquidMm": 11.4,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -2927,6 +4292,68 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 9.570721881814823,
+      "modelSnowfallCm": 0.5742433129088893,
+      "kucheraSlr": 3.266667,
+      "kucheraSnowfallCm": 0.19600002,
+      "liquidMm": 0.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 6.893583291931526,
+      "modelSnowfallCm": 3.1021124813691867,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.5,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 6.452553154580783,
+      "modelSnowfallCm": 6.000874433760129,
+      "kucheraSlr": 5.2,
+      "kucheraSnowfallCm": 4.836,
+      "liquidMm": 9.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 7.928454537578193,
+      "modelSnowfallCm": 5.470633630928953,
+      "kucheraSlr": 8.31694,
+      "kucheraSnowfallCm": 5.738688600000001,
+      "liquidMm": 6.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 8.773834568129748,
+      "modelSnowfallCm": 10.002171407667912,
+      "kucheraSlr": 10.57807,
+      "kucheraSnowfallCm": 12.0589998,
+      "liquidMm": 11.4,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -3053,6 +4480,68 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.326029267081719,
+      "modelSnowfallCm": 0.619561756024903,
+      "kucheraSlr": 7.066667,
+      "kucheraSnowfallCm": 0.42400002,
+      "liquidMm": 0.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 6.94839199025769,
+      "modelSnowfallCm": 3.1267763956159604,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 4.5,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 6.7573635732807125,
+      "modelSnowfallCm": 6.284348123151063,
+      "kucheraSlr": 5.2,
+      "kucheraSnowfallCm": 4.836,
+      "liquidMm": 9.3,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 10.306772890066117,
+      "modelSnowfallCm": 7.11167329414562,
+      "kucheraSlr": 9.653689,
+      "kucheraSnowfallCm": 6.66104541,
+      "liquidMm": 6.9,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 10.675301964035611,
+      "modelSnowfallCm": 12.169844239000598,
+      "kucheraSlr": 10.57807,
+      "kucheraSnowfallCm": 12.0589998,
+      "liquidMm": 11.4,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -3203,6 +4692,56 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.01
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T12:00:00Z",
+      "windowEndUtc": "2026-11-11T12:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.294267112619606,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T12:00:00Z",
+      "windowEndUtc": "2026-11-12T12:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.327856969676557,
+      "modelSnowfallCm": 6.11704276362534,
+      "kucheraSlr": 7.324074,
+      "kucheraSnowfallCm": 3.9549999600000008,
+      "liquidMm": 5.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T12:00:00Z",
+      "windowEndUtc": "2026-11-13T12:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 13.995352744105448,
+      "modelSnowfallCm": 5.038326987877961,
+      "kucheraSlr": 8.472222,
+      "kucheraSnowfallCm": 3.0499999200000003,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T12:00:00Z",
+      "windowEndUtc": "2026-11-14T12:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 12.241945019293631,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -3351,6 +4890,56 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.01
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T12:00:00Z",
+      "windowEndUtc": "2026-11-11T12:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.532291830112284,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T12:00:00Z",
+      "windowEndUtc": "2026-11-12T12:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.466448638817361,
+      "modelSnowfallCm": 7.271882264961375,
+      "kucheraSlr": 9.661111,
+      "kucheraSnowfallCm": 5.21699994,
+      "liquidMm": 5.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T12:00:00Z",
+      "windowEndUtc": "2026-11-13T12:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 15.076533363541326,
+      "modelSnowfallCm": 5.427552010874878,
+      "kucheraSlr": 11.905556,
+      "kucheraSnowfallCm": 4.28600016,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T12:00:00Z",
+      "windowEndUtc": "2026-11-14T12:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 12.601117632146245,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -3501,6 +5090,56 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.01
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T12:00:00Z",
+      "windowEndUtc": "2026-11-11T12:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 12.61325223184987,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T12:00:00Z",
+      "windowEndUtc": "2026-11-12T12:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 13.949171932841292,
+      "modelSnowfallCm": 7.532552843734298,
+      "kucheraSlr": 16.062963,
+      "kucheraSnowfallCm": 8.674000020000001,
+      "liquidMm": 5.4,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T12:00:00Z",
+      "windowEndUtc": "2026-11-13T12:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 17.48756565877865,
+      "modelSnowfallCm": 6.295523637160314,
+      "kucheraSlr": 17.933333,
+      "kucheraSnowfallCm": 6.45599988,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T12:00:00Z",
+      "windowEndUtc": "2026-11-14T12:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 14.113667225295252,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -3649,6 +5288,56 @@
       "kucheraSlr": null,
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T12:00:00Z",
+      "windowEndUtc": "2026-11-11T12:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 11.268153361153043,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T12:00:00Z",
+      "windowEndUtc": "2026-11-12T12:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.313760138961463,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T12:00:00Z",
+      "windowEndUtc": "2026-11-13T12:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 12.216858070118537,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 9.1,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T12:00:00Z",
+      "windowEndUtc": "2026-11-14T12:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 10.038353665229355,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
      }
     ]
    }
@@ -3799,6 +5488,56 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T12:00:00Z",
+      "windowEndUtc": "2026-11-11T12:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 11.21957584819996,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T12:00:00Z",
+      "windowEndUtc": "2026-11-12T12:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 11.14037103725895,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T12:00:00Z",
+      "windowEndUtc": "2026-11-13T12:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 11.487608240781663,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 14.05,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T12:00:00Z",
+      "windowEndUtc": "2026-11-14T12:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 10.465943152915907,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   },
@@ -3948,8 +5687,66 @@
       "kucheraSnowfallCm": null,
       "liquidMm": 0.0
      }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T12:00:00Z",
+      "windowEndUtc": "2026-11-11T12:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.962254642735108,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T12:00:00Z",
+      "windowEndUtc": "2026-11-12T12:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 10.839542975550533,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T12:00:00Z",
+      "windowEndUtc": "2026-11-13T12:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 14.51747565746047,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 18.225,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T12:00:00Z",
+      "windowEndUtc": "2026-11-14T12:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 10.888500206403062,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     }
     ]
    }
   }
- ]
+ ],
+ "openMeteoArm": {
+  "sourceId": "open-meteo-ecmwf-ifs025",
+  "displayName": "ECMWF IFS via Open-Meteo",
+  "anchorCycleUtc": "2026-10-31T12:00:00Z",
+  "retrievedAtUtc": "2026-11-01T07:48:09.809701Z",
+  "reducedFeatureVariant": true,
+  "note": "Third serving source (user decision 2026-11-01): Open-Meteo ecmwf_ifs025, covering only the windows beyond the GRIB step-240 ceiling. Open-Meteo publishes no cycle metadata and the E1 parity check could not cycle-verify its forecast instance against the GRIB arm, so this arm is labelled distinctly and keeps its own evidence clock. Reduced-feature variant: total column liquid water is unavailable from Open-Meteo, so tclw_pwt / tclw_max are NaN under the validated pass-through."
+ }
 }

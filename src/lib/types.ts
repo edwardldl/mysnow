@@ -189,7 +189,7 @@ export interface DayModelWindowMark {
     /** Model SLR for the window when kind is 'model', else null. */
     slr: number | null;
     /** Serving arm that produced the model value, when kind is 'model'. */
-    arm: 'ecmwf' | 'hrrr' | null;
+    arm: 'ecmwf' | 'hrrr' | 'ecmwf_openmeteo' | null;
     /** True when the value was resolved in the blended HRRR+ECMWF mode. */
     blended: boolean;
     /** Cycle the model value was computed from, when kind is 'model'. */

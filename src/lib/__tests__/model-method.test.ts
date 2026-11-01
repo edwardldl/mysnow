@@ -66,6 +66,8 @@ const stowe: Location = {
 
 const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
 const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
+const omRows = palisadesPoint?.forecasts.ecmwf_openmeteo ?? [];
+const allStoredDates = [...ecmwfRows, ...omRows].map((r) => r.windowEndLocalDate);
 const day1Date = ecmwfRows[0]?.windowEndLocalDate;
 const day2Date = ecmwfRows[1]?.windowEndLocalDate;
 const day3Date = ecmwfRows[2]?.windowEndLocalDate;
@@ -130,28 +132,36 @@ describe('model window statuses (shared menu/panel view)', () => {
   it('blend mode: every Palisades window resolves to the model with truthful arms', () => {
     const ctx = modelWindowStatuses(palisades, BLEND_MODEL_ID, 'min');
     expect(ctx?.point.pointId).toBe('palisades-tahoe-base');
-    expect(ctx?.windows.map((w) => w.windowEndLocalDate)).toEqual(
-      ecmwfRows.map((r) => r.windowEndLocalDate),
-    );
+    expect(ctx?.windows.map((w) => w.windowEndLocalDate)).toEqual(allStoredDates);
     expect(ctx?.windows.map((w) => [w.status, w.arm])).toEqual([
       ['model', 'hrrr'],
       ...ecmwfRows.slice(1).map(() => ['model', 'ecmwf']),
+      ...omRows.map(() => ['model', 'ecmwf_openmeteo']),
     ]);
   });
 
   it('literal hrrr mode: windows past day 1 are marked fallback, never silently filled', () => {
     const ctx = modelWindowStatuses(palisades, 'hrrr', 'min');
+    // The Open-Meteo tail windows are in the stored set, but literal
+    // HRRR never resolves them -- they stay marked fallback.
+    expect(ctx?.windows.map((w) => w.windowEndLocalDate)).toEqual(allStoredDates);
     expect(ctx?.windows.map((w) => w.status)).toEqual([
       'model',
-      ...ecmwfRows.slice(1).map(() => 'fallback'),
+      ...[...ecmwfRows.slice(1), ...omRows].map(() => 'fallback'),
     ]);
     expect(ctx?.windows[1].result).toBeNull();
     expect(ctx?.windows[2].result).toBeNull();
+    expect(ctx?.windows[ctx.windows.length - 1].result).toBeNull();
   });
 
   it('literal ecmwf mode: every stored window resolves to the model', () => {
     const ctx = modelWindowStatuses(palisades, 'ecmwf', 'min');
-    expect(ctx?.windows.map((w) => w.status)).toEqual(ecmwfRows.map(() => 'model'));
+    expect(ctx?.windows.map((w) => w.windowEndLocalDate)).toEqual(allStoredDates);
+    expect(ctx?.windows.map((w) => w.status)).toEqual(allStoredDates.map(() => 'model'));
+    expect(ctx?.windows.map((w) => w.arm)).toEqual([
+      ...ecmwfRows.map(() => 'ecmwf'),
+      ...omRows.map(() => 'ecmwf_openmeteo'),
+    ]);
   });
 
   it('returns null where the method is unavailable', () => {
@@ -253,16 +263,30 @@ describe('extended ECMWF horizon (step-240 open-data ceiling)', () => {
     expect(day10?.forecast.modelSlr).toBe(stoweDay10?.modelSlr);
   });
 
-  it('has no Palisades record beyond the ceiling: the day-10 date stays Kuchera', () => {
+  it('has no Palisades GRIB record beyond the ceiling: the day-10 date is served by Open-Meteo', () => {
     // Stowe's day-10 window-end date is the same calendar date a
     // Palisades day-10 window would end on -- but that window ends at
-    // step 243 > 240, so no Palisades record exists for it.
+    // step 243 > 240, so no Palisades GRIB record exists for it. Since
+    // the Open-Meteo arm was added (2026-11-01) the date resolves to
+    // that third arm instead of staying Kuchera.
     const beyondDate = stoweEcmwfRows[9]?.windowEndLocalDate;
     expect(ecmwfRows.find((r) => r.windowEndLocalDate === beyondDate)).toBeUndefined();
-    expect(modelForecastFor(palisades, 'ecmwf', 'min', beyondDate)).toBeNull();
+    const result = modelForecastFor(palisades, 'ecmwf', 'min', beyondDate);
+    expect(result?.arm).toBe('ecmwf_openmeteo');
+    expect(result?.forecast.leadDay).toBe(10);
+    const omDay10 = omRows.find((r) => r.leadDay === 10);
     const out = applyModelMethodToDays([mkDay(beyondDate, 7.5)], palisades, 'ecmwf', 'min');
+    expect(out[0].totalSnowfall).toBe(omDay10?.modelSnowfallCm);
+    expect(out[0].modelWindow?.kind).toBe('model');
+    expect(out[0].modelWindow?.arm).toBe('ecmwf_openmeteo');
+  });
+
+  it('stays Kuchera beyond day 14, where no arm holds a record', () => {
+    const out = applyModelMethodToDays([mkDay('2026-11-15', 7.5)], palisades, 'ecmwf', 'min');
     expect(out[0].totalSnowfall).toBe(7.5);
     expect(out[0].modelWindow?.kind).toBe('kuchera_fallback');
+    const outBlend = applyModelMethodToDays([mkDay('2026-11-15', 7.5)], palisades, BLEND_MODEL_ID, 'min');
+    expect(outBlend[0].modelWindow?.kind).toBe('kuchera_fallback');
   });
 
   it('replaces the day-5 total with the record snowfall under the menu method', () => {
@@ -295,7 +319,24 @@ describe('panel in ENS-EB menu-method mode', () => {
     );
     expect(html).toContain('Model · NOAA HRRR');
     expect(html).toContain('Model · ECMWF IFS');
+    expect(html).toContain('Model · ECMWF (Open-Meteo)');
     expect(html).not.toContain('Kuchera fallback');
+  });
+
+  it('labels the Open-Meteo tail windows distinctly in the coverage strip', () => {
+    const ctx = modelWindowStatuses(palisades, BLEND_MODEL_ID, 'min');
+    const day12 = omRows.find((r) => r.leadDay === 12) as (typeof omRows)[number];
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day12.windowEndLocalDate);
+    const html = renderToString(
+      createElement(ModelForecastPanel, {
+        result,
+        methodContext: ctx,
+        selectedDate: day12.windowEndLocalDate,
+      }),
+    );
+    expect(html).toContain('Model · ECMWF (Open-Meteo)');
+    expect(html).toContain('ECMWF IFS via Open-Meteo');
+    expect(html).toContain('Reduced-feature variant');
   });
 
   it('still renders nothing with neither a result nor a method context', () => {
@@ -303,5 +344,30 @@ describe('panel in ENS-EB menu-method mode', () => {
     expect(
       renderToString(createElement(ModelForecastPanel, { result: null, methodContext: null })),
     ).toBe('');
+  });
+});
+
+describe('Open-Meteo tail under the ENS-EB menu method', () => {
+  const mkDay = (dateStr: string, totalSnowfall: number): DayData =>
+    ({ dateStr, totalSnowfall }) as DayData;
+  const day12 = omRows.find((r) => r.leadDay === 12) as (typeof omRows)[number];
+  const day12Date = day12.windowEndLocalDate;
+
+  it('replaces the day-12 total with the Open-Meteo record in ecmwf and blend modes', () => {
+    for (const mode of ['ecmwf', BLEND_MODEL_ID]) {
+      const out = applyModelMethodToDays([mkDay(day12Date, 999)], palisades, mode, 'min');
+      expect(out[0].totalSnowfall).toBe(day12?.modelSnowfallCm);
+      expect(out[0].modelWindow?.kind).toBe('model');
+      expect(out[0].modelWindow?.arm).toBe('ecmwf_openmeteo');
+      expect(out[0].modelWindow?.slr).toBe(day12?.modelSlr);
+      expect(out[0].modelWindow?.cycleUtc).toBe(modelForecastData.cycles.ecmwf_openmeteo);
+    }
+  });
+
+  it('keeps the day-12 total on Kuchera in literal hrrr mode', () => {
+    const out = applyModelMethodToDays([mkDay(day12Date, 7.5)], palisades, 'hrrr', 'min');
+    expect(out[0].totalSnowfall).toBe(7.5);
+    expect(out[0].modelWindow?.kind).toBe('kuchera_fallback');
+    expect(out[0].modelWindow?.arm).toBeNull();
   });
 });
