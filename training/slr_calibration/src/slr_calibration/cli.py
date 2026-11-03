@@ -971,6 +971,137 @@ def _package_champion(args: argparse.Namespace) -> int:
     return 0
 
 
+def _alpine_form_pairs(args: argparse.Namespace) -> int:
+    from .alpine_benchmark import (
+        dump_json,
+        form_alta_pairs,
+        form_slf_pairs,
+        viability,
+        write_pairs_csv,
+    )
+
+    bench_dir = args.bench_dir
+    bench_dir.mkdir(parents=True, exist_ok=True)
+    alta_pairs, alta_funnel = form_alta_pairs(args.alta_csv)
+    write_pairs_csv(alta_pairs, bench_dir / "pairs_alta.csv")
+    slf_pairs, slf_funnel, stations = form_slf_pairs(args.slf_dir)
+    write_pairs_csv(slf_pairs, bench_dir / "pairs_slf.csv")
+    verdict = viability(alta_pairs, slf_pairs)
+    dump_json(
+        {
+            "alta": alta_funnel,
+            "slf": slf_funnel,
+            "viability": verdict,
+            "slf_stations": {
+                sid: {k: meta[k] for k in ("latitude", "longitude", "elevation_m")}
+                for sid, meta in sorted(stations.items())
+            },
+            "licenses": {
+                "alta": "CC BY-NC 4.0 (DOI 10.7278/S50d-nsy5-8bje)",
+                "slf": "CC BY 4.0 (DOI 10.16904/envidat.590)",
+            },
+        },
+        bench_dir / "funnel.json",
+    )
+    print(json.dumps({"alta_pairs": len(alta_pairs), "slf_pairs": len(slf_pairs),
+                      "viability": verdict}, sort_keys=True))
+    return 0
+
+
+def _alpine_fetch_profiles(args: argparse.Namespace) -> int:
+    from .alpine_benchmark import load_pairs_csv
+    from .alpine_profiles import fetch_source, fetch_source_ncar
+
+    pairs = [p for p in load_pairs_csv(args.pairs) if p["source"] == args.source]
+    stations_by_id: dict[str, dict] = {}
+    for pair in pairs:
+        stations_by_id[pair["station_id"]] = {
+            "station_id": pair["station_id"],
+            "latitude": pair["latitude"],
+            "longitude": pair["longitude"],
+            "elevation_m": pair["elevation_m"],
+            "stage": pair["stage"],
+        }
+    years = None
+    if args.years:
+        years = {int(y) for y in args.years.split(",") if y.strip()}
+    if args.route == "ncar":
+        cost = fetch_source_ncar(
+            args.source, pairs, list(stations_by_id.values()), args.bench_dir,
+            limit_units=args.limit_units,
+            stage_rank={"single": 0, "A": 0, "B": 1, "C": 2},
+            years=years,
+        )
+    else:
+        cost = fetch_source(
+            args.source, pairs, list(stations_by_id.values()), args.bench_dir,
+            limit_units=args.limit_units,
+            stage_rank={"single": 0, "A": 0, "B": 1, "C": 2},
+            years=years,
+            cost_name=(f"pairing_cost_{args.cost_tag}.json" if args.cost_tag
+                       else "pairing_cost.json"),
+        )
+    print(json.dumps({"source": args.source,
+                      "units_done_total": cost.get("units_done_total"),
+                      "units_planned_total": cost.get("units_planned_total")},
+                     sort_keys=True))
+    return 0
+
+
+def _alpine_build_features(args: argparse.Namespace) -> int:
+    import pandas as pd
+
+    from .alpine_benchmark import dump_json, load_pairs_csv
+    from .alpine_profiles import build_features_for_source
+
+    pairs = [p for p in load_pairs_csv(args.pairs) if p["source"] == args.source]
+    rows, funnel = build_features_for_source(args.source, pairs, args.bench_dir)
+    features_path = args.bench_dir / "features.parquet"
+    new_frame = pd.DataFrame(rows)
+    if features_path.exists() and len(new_frame):
+        existing = pd.read_parquet(features_path)
+        existing = existing[~existing["pair_id"].isin(set(new_frame["pair_id"]))]
+        combined = pd.concat([existing, new_frame], ignore_index=True)
+    else:
+        combined = new_frame
+    combined.to_parquet(features_path, index=False)
+    funnel_path = args.bench_dir / "features_funnel.json"
+    all_funnels = {}
+    if funnel_path.exists():
+        all_funnels = json.loads(funnel_path.read_text(encoding="utf-8"))
+    all_funnels[args.source] = funnel
+    dump_json(all_funnels, funnel_path)
+    print(json.dumps({"source": args.source, "rows": len(rows), "funnel": funnel},
+                     sort_keys=True))
+    return 0
+
+
+def _alpine_score(args: argparse.Namespace) -> int:
+    import pandas as pd
+
+    from .alpine_benchmark import (
+        dump_json,
+        load_pairs_csv,
+        score_benchmark,
+        write_predictions_csv,
+    )
+
+    pairs = load_pairs_csv(args.bench_dir / "pairs_alta.csv") + \
+        load_pairs_csv(args.bench_dir / "pairs_slf.csv")
+    features = pd.read_parquet(args.bench_dir / "features.parquet")
+    rows, scoring = score_benchmark(
+        pairs, features, args.champion_dir, args.wall_dir, args.w1500_dir)
+    write_predictions_csv(rows, args.bench_dir / "predictions.csv")
+    scoring["licenses"] = {
+        "alta": "CC BY-NC 4.0 (DOI 10.7278/S50d-nsy5-8bje)",
+        "slf": "CC BY 4.0 (DOI 10.16904/envidat.590)",
+    }
+    dump_json(scoring, args.bench_dir / "scoring.json")
+    print(json.dumps({"scored": len(rows), "funnel": scoring["funnel"]},
+                     sort_keys=True))
+    return 0
+
+
 def _predict_champion(args: argparse.Namespace) -> int:
     from .champion import predict_file
 
@@ -1530,6 +1661,32 @@ def build_parser() -> argparse.ArgumentParser:
     predict_champion.add_argument("--input", type=Path, required=True)
     predict_champion.add_argument("--output", type=Path, required=True)
     predict_champion.set_defaults(func=_predict_champion)
+
+    alpine_pairs = subparsers.add_parser("alpine-form-pairs", help="queue item 4: form Alta + SLF benchmark pairs with gold hygiene")
+    alpine_pairs.add_argument("--bench-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-alpine-benchmark"))
+    alpine_pairs.add_argument("--alta-csv", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-alpine-benchmark/raw/CLN_1999_2023_complete_v2.csv"))
+    alpine_pairs.add_argument("--slf-dir", type=Path, default=Path("data/swiss-alps-slr/extracted/new_snow_dataset_v1"))
+    alpine_pairs.set_defaults(func=_alpine_form_pairs)
+    alpine_fetch = subparsers.add_parser("alpine-fetch-profiles", help="queue item 4: fetch ERA5 (CDS) units for benchmark pairs, resumable")
+    alpine_fetch.add_argument("--bench-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-alpine-benchmark"))
+    alpine_fetch.add_argument("--pairs", type=Path, required=True)
+    alpine_fetch.add_argument("--source", choices=("alta", "slf"), required=True)
+    alpine_fetch.add_argument("--limit-units", type=int, default=None)
+    alpine_fetch.add_argument("--years", type=str, default=None, help="comma-separated unit years to restrict this run to")
+    alpine_fetch.add_argument("--cost-tag", type=str, default=None, help="CDS route: write pairing_cost_<tag>.json instead of pairing_cost.json")
+    alpine_fetch.add_argument("--route", choices=("cds", "ncar"), default="ncar", help="ERA5 route: NCAR S3 range reads (executed route; CDS throttled 2026-11-03) or CDS API")
+    alpine_fetch.set_defaults(func=_alpine_fetch_profiles)
+    alpine_build = subparsers.add_parser("alpine-build-features", help="queue item 4: build 64-feature rows for benchmark pairs from fetched ERA5")
+    alpine_build.add_argument("--bench-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-alpine-benchmark"))
+    alpine_build.add_argument("--pairs", type=Path, required=True)
+    alpine_build.add_argument("--source", choices=("alta", "slf"), required=True)
+    alpine_build.set_defaults(func=_alpine_build_features)
+    alpine_score = subparsers.add_parser("alpine-score", help="queue item 4: score champion/Kuchera/WALL/W1500 on the benchmark")
+    alpine_score.add_argument("--bench-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-alpine-benchmark"))
+    alpine_score.add_argument("--champion-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3/champion"))
+    alpine_score.add_argument("--wall-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-western/candidate"))
+    alpine_score.add_argument("--w1500-dir", type=Path, default=Path("data/slr-training-data/screened-v2/model-v1/model-v3-western/candidate-1500"))
+    alpine_score.set_defaults(func=_alpine_score)
 
     return parser
 
