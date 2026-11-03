@@ -49,6 +49,21 @@ EB_HIERARCHICAL: dict[str, Any] = {
 _RF_SPEC = "RandomForestRegressor(n_estimators=500,sklearn_defaults)"
 _GBM_SPEC = "HistGradientBoostingRegressor(sklearn_defaults)"
 
+# Canonical EB spec for the median hierarchy of queue item 3: identical
+# parameters to EB_HIERARCHICAL; only the node statistic differs
+# (weighted median of the log residuals in place of the weighted mean).
+EB_HIERARCHICAL_MEDIAN: dict[str, Any] = {
+    "kind": "hierarchical-log-residual-median-eb",
+    "prior_ess": 30.0,
+    "min_ess": 5.0,
+    "factor_clamp": [0.5, 2.0],
+    "slr_clamp": [3.0, 30.0],
+    "region_resolution": 4,
+    "climate_resolution": 2,
+}
+
+_GBM_AE_SPEC = "HistGradientBoostingRegressor(loss='absolute_error',sklearn_defaults)"
+
 MODEL_SPECS: dict[str, dict[str, Any]] = {
     "rf": {"kind": "fitted", "estimator": _RF_SPEC, "eb": None},
     "gbm": {"kind": "fitted", "estimator": _GBM_SPEC, "eb": None},
@@ -58,6 +73,13 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
     "ens_eb": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_eb")},
     "ens_rg": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm")},
     "tail_rf_eb": {"kind": "derived", "rule": "tail_shrink", "derived_from": ("rf", "rf_eb")},
+    # Queue item 3 (median experiment M): absolute-error GBM component.
+    "gbm_med": {"kind": "fitted", "estimator": _GBM_AE_SPEC, "eb": None},
+    "gbm_med_eb": {"kind": "fitted", "estimator": _GBM_AE_SPEC, "eb": EB_HIERARCHICAL_MEDIAN},
+    "gbm_med_mean_eb": {"kind": "fitted", "estimator": _GBM_AE_SPEC, "eb": EB_HIERARCHICAL},
+    "ens_med_m": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_med_eb")},
+    "ens_med_d1": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_med")},
+    "ens_med_d2": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_med_mean_eb")},
 }
 
 
