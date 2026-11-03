@@ -428,7 +428,9 @@ class TooLargeError(RuntimeError):
 
 def _retrieve(client: Any, dataset: str, request: dict[str, Any], target: Path) -> None:
     last: Exception | None = None
-    for attempt in range(3):
+    queued_waits = 0
+    attempt = 0
+    while True:
         try:
             client.retrieve(dataset, request, str(target))
             return
@@ -438,10 +440,25 @@ def _retrieve(client: Any, dataset: str, request: dict[str, Any], target: Path) 
                 raise FatalCdsError(str(exc)) from exc
             if "cost limits" in message or "too large" in message:
                 raise TooLargeError(str(exc)) from exc
+            if "maximum number queued" in message:
+                # CDS caps queued jobs per dataset for this account
+                # and instructs sequential requesting: wait for the
+                # queue to drain instead of dying (observed
+                # 2026-11-03; parallel submitters were rejected).
+                queued_waits += 1
+                if queued_waits > 40:
+                    raise RuntimeError(
+                        f"CDS queue cap persisted after 40 waits: {exc}") from exc
+                print(f"[alpine-fetch] CDS queue cap; waiting 240s "
+                      f"({queued_waits})", flush=True)
+                time.sleep(240)
+                continue
             last = exc
-            if attempt < 2:
-                time.sleep(20 * (attempt + 1))
-    raise RuntimeError(f"CDS retrieve failed after retries: {last}")
+            attempt += 1
+            if attempt >= 3:
+                raise RuntimeError(
+                    f"CDS retrieve failed after retries: {last}") from exc
+            time.sleep(20 * attempt)
 
 
 def _dataset_files(client: Any, dataset: str, variables: tuple[str, ...],
