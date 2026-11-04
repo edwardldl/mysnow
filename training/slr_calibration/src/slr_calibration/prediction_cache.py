@@ -80,6 +80,21 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
     "ens_med_m": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_med_eb")},
     "ens_med_d1": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_med")},
     "ens_med_d2": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_med_mean_eb")},
+    # Queue item 5 (feature-based Kuchera gate): per-fold fitted gate;
+    # predictions are computed directly (fitted kind) by run_gate.
+    "ens_gate": {
+        "kind": "fitted",
+        "estimator": (
+            "KucheraGate(tree=DecisionTreeRegressor(max_depth=2,"
+            "min_samples_leaf=200,random_state=fit_seed),"
+            "target=abs_err_advantage,weights=(0,0.25,0.5,0.75,1),"
+            "features=(tmax_warmnose_pwt,warm_layer_depth_m_pwt,"
+            "sfc_wetbulb_c_pwt,freezing_level_m_agl_pwt,ws10m_pwt,"
+            "dgz_t_pwt,dgz_precip_frac,habit_frac_dendrite,"
+            "disagree_abs,disagree_ratio))"
+        ),
+        "eb": None,
+    },
 }
 
 
