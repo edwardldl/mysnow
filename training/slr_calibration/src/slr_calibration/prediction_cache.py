@@ -95,6 +95,27 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
         ),
         "eb": None,
     },
+    # Queue item 6 (full-pool 62-feature model for the Open-Meteo
+    # configuration): the 64-feature ENS-EB fold fits scored with the
+    # tclw pair masked to NaN at predict time.  The mask is part of the
+    # estimator string so masked predictions can never collide with
+    # unmasked cache keys.  CANDIDATE-62 itself uses the plain rf_eb /
+    # gbm_eb specs under a 62-column feature hash.
+    "rf_eb_masked62": {
+        "kind": "fitted",
+        "estimator": _RF_SPEC + ";predict-time NaN mask on (tclw_pwt,tclw_max)",
+        "eb": EB_HIERARCHICAL,
+    },
+    "gbm_eb_masked62": {
+        "kind": "fitted",
+        "estimator": _GBM_SPEC + ";predict-time NaN mask on (tclw_pwt,tclw_max)",
+        "eb": EB_HIERARCHICAL,
+    },
+    "ens_eb_masked62": {
+        "kind": "derived",
+        "rule": "mean",
+        "derived_from": ("rf_eb_masked62", "gbm_eb_masked62"),
+    },
 }
 
 
