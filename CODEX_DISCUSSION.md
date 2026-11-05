@@ -1,0 +1,232 @@
+# Discussion record: improving the MySnow SLR model — Muse × Codex, 2026-11-02
+
+*Five rounds. Codex (GPT-6 family; rounds 1–2 on its configured astra/xhigh, rounds 3–5 on sol/xhigh at the user's usage direction) received `model-problem-brief.md`, challenged it, was given the pipeline's actual configuration from the code, and converged under two added constraints: experimentation must get cheaper, and the model must apply across regions. Codex's sandbox shell could not run in the Coder container (bubblewrap/user-namespace block), so the brief and all evidence were supplied in the prompts; Codex modified nothing. Total Codex usage across the discussion: ≈777k tokens (34k + 79k + 194k + 204k + 266k by round).*
+
+## What Codex challenged, and how it resolved
+
+- **"Is the target even defined right?"** — It asked whether the label denominator was WESF or total precipitation. From the code: the gold label is **SNOW/WESF**, with hygiene screens (amount floors, the SLR=10 placeholder dropped, [2,50] range, multi-day and QFLAG exclusions, a station screen rejecting WESF copied from gauge PRCP). Challenge closed — the pipeline already does this.
+- **"ERA5 skill ≠ served skill."** — Stands in part: transfer was measured for the old 27-feature champion (HRRR-input MAE 3.018 vs Kuchera-on-HRRR 4.101, 6/6 regions, 15,201 events) but **never for the v3 64-feature set**. The often-quoted "+1.04 transfer cost" compares against an in-sample ERA5 number; the honest gap is unmeasured for v3 and likely ~+0.16-scale. Resolution: a *paired* transfer check (same held-out events, both sources) enters the queue; a correction is fitted only if a ≥0.10 stable paired penalty appears.
+- **Station-relative geometry (its proposal): withdrawn by Codex itself** once shown v3 features are already station-relative AGL constructions and the raw-pressure-level experiment's skipped "P-geometry" ablation is the only untested residue.
+- **Storm chronology: downgraded by Codex** to a single feature (post-snow warm exposure) after learning the v3 set is pervasively precipitation-weighted with coincidence fractions; the rest is largely captured.
+- **Alaska level correction: declined by Codex** — a mean bias does not establish an MAE improvement. Consistent with the project's earlier findings.
+
+## Agreed findings about the model itself
+
+- **EB defined:** the champion's "EB" is an empirical-Bayes hierarchical log-residual layer (global → climate regime → H3 cell → site; shrinkage ESS/(ESS+30); correction factor clamped [0.5, 2.0]; final SLR clamped [3, 30]) over the trees' station-grouped out-of-fold predictions. Both trees regress **raw SLR under squared-error loss at sklearn defaults** — i.e. the ensemble estimates conditional *means* while it is judged by MAE, which conditional *medians* minimise.
+- **Model families beyond RF/GBM, ranked:** (1) hierarchical spline model with shrunk regional *slopes* (EB pools levels, not slopes — the untested axis); (2) physics-gated mixture of experts (warm mixed-phase vs cold growth regimes); (3) small regularised neural net; (4) approximate kernel regression (cheap check). All framed as blends/corrections to the incumbent with expected gains 0–0.08; stand-alone variants mostly expected to lose. Profile CNNs rejected (inputs are engineered summaries, not consistent vertical arrays across serving sources).
+
+## The efficiency protocol (adopted as queue item 1)
+
+- **Frozen manifests + stored incumbent fold predictions are the permanent baseline.** No more incumbent refits per experiment; comparisons are paired event-by-event at zero fidelity loss. The RF component is reconstructed and cached once. Artefact cache keyed by cohort/feature hashes, split ID, estimator + EB settings, seed, library version.
+- **Two-stage judging:** a screen (all six LORO folds + one rep of each other family; kill if pooled LORO gain <0.02, any region worse by >0.05, any sampled family worse by >0.10) feeding the full judge. The screen must itself be validated on ≥6 known configurations (rank correlation ≥0.8, **zero false rejections** of a would-be adopter) before its kill rule is trusted.
+- **GBM-only as the research/packaging default** if it qualifies (four-family mean within 0.02 of the ensemble, pooled LORO no worse, no region losing >0.05, temporal/unseen losses ≤0.03): 0.5 MB, trains in seconds; the 2.5 GB RF is produced only when a candidate proves value against it.
+
+## The cross-region gate (now part of every adoption rule)
+
+Adoption requires **all** of: four-family mean SLR MAE improves ≥0.03 vs the stored incumbent; **pooled LORO improves ≥0.02**; **no individual held-out region worsens by >0.05**; temporal and unseen-station do not worsen; randomised worsens ≤0.02; slice, masked-feature, and packaging checks pass. A pooled win cannot override a failed region clause.
+
+## The final experiment queue
+
+1. **Cache + validate the two-stage judge** (~1 day setup). Adopt exact-match caching after reconstruction checks; sampled-fold kill rule only after the correlation audit passes.
+2. **Qualify GBM-only** as the efficient default (~0.5–1 day) under the gates above. Serving remains a separate decision.
+3. **Median experiment M** (~0.5–1.5 days): GBM refit with `loss="absolute_error"` **plus a median-log-residual EB** (a mean EB could shift a median-optimal base off the MAE optimum — the design's key subtlety), RF + its mean EB unchanged, judged end-to-end on the frozen manifests under the amended rule. Diagnostics (median tree with mean EB, or without EB) are scored but **not adoptable** in this experiment.
+4. **Screen + externally benchmark Alta-Collins and SLF manual pairs** (inserted by the data round; displaces the spline trial from this queue). Build high-elevation gold-definition benchmarks before any training use.
+5. **Feature-based Kuchera gate** (~0.5–1 day): a depth-2 gate on physical predictors + model–Kuchera disagreement, trained on out-of-fold predictions, blending toward Kuchera only where identifiable *before* the observation. Must pass the same LORO gates. (An observed-SLR<5 win alone is not evidence a usable gate exists.)
+6. **Full-pool 62-feature model for the Open-Meteo configuration** (~0.5–1 day): isolates the tclw-drop effect from geography (WALL changed both). Adopt for that arm only if masked-input LORO gain ≥0.03 with no region loss >0.05.
+7. **Paired v3 HRRR transfer check** (~1–3 days, retrieval-bound): extend the cached HRRR extraction with the fields the v3 builders need (vertical velocity, humidity species, cloud liquid water); correction only under the ≥0.10 paired-penalty rule.
+
+*Parked:* hierarchical spline blend (displaced by item 4; first reserve if the queue thins), mixture-of-experts and NN trials, the single sequencing feature, W1500/WALL serving questions.
+
+## Data verdict (round 5)
+
+**Current data are good — for what they measure.** Grades: label fidelity **B+** (SNOW/WESF with strong hygiene; residual error is observer practice, clearing/compaction timing, rounding, gauge undercatch raising SLR); profile representativeness **B** nationally, uncertain at resorts (ERA5's ~31 km grid vs ridge/valley structure; no defensible % of MAE attributable — the randomised→unseen-station +0.22 and randomised→LORO +0.40 gaps bundle profile, physics, practice, and generalisation effects); mountain label coverage **D for the served target** — **zero alpine gold** in 57,376 events is the single largest accuracy cap, ahead of any modelling choice. 57,376 *more lowland pairs* would scarcely answer the resort question.
+
+Named public sources, with verdicts:
+- **SLF manual study plots (Switzerland) — strongest new find.** CC BY 4.0; publishes `HN_1D` + `HNW_1D` — 24 h new snow *and its water equivalent*, the exact gold-label definition — plausibly 10⁴–10⁵ candidate pairs (unverified; HNW absent at some sites), mostly 1,000–2,000 m with a subset at resort elevations. **Adopt as external benchmark**; train only if U.S. held-out regions still improve. (CERRA's 5.5 km European profiles could later test whether finer profiles help this benchmark.)
+- **Alta-Collins (2,945 m)** — CC BY-NC 4.0; 9,940 12-hour records → ~1,000–3,000 screened 24 h pairs. Benchmark first (latest winters reserved untouched), then a limited low-weight training trial; pairs are summed over the actual **04:00–04:00** window (ratio of sums, never the mean of ratios) and labelled as a 04:00-ending benchmark, not a 07:00 product check. Licence recorded with any artefact; commercial use would need revisiting.
+- **CSSL / HLY files (Veals et al. 2025)** — public, reuse licence unverified; tens to a few hundred pairs each. Benchmark first; terms before training.
+- **ECCC/MSC (Canada): rejected for training** — snowfall water equivalent at ordinary stations is commonly *derived as snowfall/10*; such labels would teach the answer. **JMA: rejected** — no fresh-snow SWE. **ERA5-Land: rejected** as a profile source (no vertical profiles). **ERA5 remains the practical profile ceiling** for the U.S. pool; archived HRRR serves as the profile-transfer benchmark, not a replacement.
+
+## What remains genuinely undecided
+
+Measurable, in queue order: whether GBM-only passes all gates; whether the screen predicts full judging; whether median loss survives median-EB; whether high-site benchmarks (Alta + SLF) expose transferable gains or merely reproduce lowland rankings; whether a Kuchera gate travels; whether v3 has a paired HRRR penalty ≥0.10. User decisions unchanged: what serves, the production cadence/backend, and the §7 items (branch merge, push, gitignored data tree, mountain-design ratification).
+
+## Addendum 2026-11-02 — queue items 1–2 results, put to Codex
+
+Item 1 (cached two-stage judge, commit dd5d764): reconstruction of the incumbent ensemble from stored components was exact (max diff 0.0); screen validation on six configurations gave Spearman 1.000 and zero false rejections — kill rule declared trusted under the pre-registered criteria. Item 2: GBM-only FAILED qualification (four-family +0.0351 vs limit 0.02; unseen-station +0.0704 vs limit 0.03; randomised +0.0674) while pooled LORO improved −0.0042 and all per-region diffs stayed within ±0.05.
+
+Codex's read (round 6): (1) the screen's validation is ONE-SIDED — zero false rejections among zero adopters; it has never preserved a boundary candidate. Prescription: for median M, run screen AND full judge regardless of the screen result, declared in advance; the screen is advisory for that run; if M passes the full gate after a screen kill, withdraw the kill rule. (2) The GBM verdict is CORRECT and the thresholds stand — unseen-station performance is precisely the resort-point case, and +0.067 randomised is not rounding; GBM-only remains a cheap component-experiment tool, not the accuracy reference. (3) Queue order and M's design unchanged; add one scored, non-adoptable diagnostic to M's report: paired per-fold loss changes of old vs median HGB components on unseen-station folds (beside RF and both ensembles), split by EB site-node availability, plus the error correlation between the median HGB and RF.
+
+
+---
+
+## Addendum — Round 8 (2026-11-04, results review: items 5, 6, frozen-fold report)
+
+**Uphold both verdicts, keep ENS-EB serving, and run the paired v3 HRRR check. These results justify ending the current model-search round; they do not establish a data-imposed accuracy ceiling.**
+
+1. **Kuchera gate: closed. Pool62: real improvement, correctly rejected under its registration.**
+
+   The gate’s exact null is decisive for the tested design. Every learned leaf prefers ENS-EB, including extreme disagreement. The observed-SLR<5 advantage does not support an operational fallback. “Unreachable by *any* forecast-time rule” is stronger than this experiment proves, but there is no evidence worth pursuing another gate now.
+
+   Pool62 exposes a distinction in the adoption policy: **portability and minimum improvement are different requirements**. Its LORO result shows improvement, and every region stays inside the harm guard. Calling this a failure to travel would be inaccurate. It failed the required *size* of the portable improvement.
+
+   I would prospectively judge input-availability remedies by meaningful improvement on the affected configuration plus LORO non-inferiority and regional harm guards. Requiring a fresh minimum LORO gain makes more sense when justifying a new model’s complexity. **That policy change cannot approve pool62 on the same already-examined folds.** Confirmation needs untouched evidence; another random split is not untouched evidence.
+
+2. **“No adopted challenger” is supported; “dataset ceiling” is not.**
+
+   Pool62 itself demonstrates recoverable error. The other outcomes show that several specific changes failed, that RF contributes useful complementary predictions, and that geographically portable gains are harder to obtain than pooled gains. None identifies how much error comes from labels, profiles, missing predictors, or the estimator.
+
+   I would **keep the hierarchical spline parked**. Its regional slope deviations disappear in a fully held-out region, leaving shared slopes or climate terms learned elsewhere. Shared smoothness could help, but the present results give no reason to expect its gains to concentrate in LORO.
+
+   The residual report supports a narrower positive conclusion: the champion retains its edge at higher **Rockies-dominated observed stations**. It does not validate alpine PNW or Alaska. The Sierra cell is a useful investigation flag, but 46 events do not justify a local correction. The outcome-selected tails likewise do not establish an available switching rule.
+
+3. **Item 7 is still worth running as designed.**
+
+   It measures a different uncertainty from every completed challenge: whether the same fold-trained v3 model loses skill when its inputs become actual HRRR forecasts.
+
+   Use identical held-out events, actual report windows, representative forecast lead times, and the complete v3 field set. If the cache still contains only the old 27-feature fields, complete the extraction before calling the result a v3 transfer measurement.
+
+   Its result should change the following decisions:
+
+   | Result | Consequence |
+   |---|---|
+   | Penalty below 0.10, with no substantial regional concentration | Close the proposed HRRR correction study; retain evidence that v3 transfers reasonably on this gold cohort. |
+   | Penalty at least 0.10 | Open the already conditional correction study; promotion still requires held-out-region success. |
+   | Small pooled penalty but a large regional or lead-time penalty | Document and investigate that concentration; the pooled number does not establish uniform transfer. |
+
+   This measures SLR transfer, not total snowfall forecast accuracy or alpine validity.
+
+4. **Keep the current OM configuration pending independent confirmation.**
+
+   The measured masking tax is small on average and now quantified. Preserve the reduced-feature/source label. There is no evidence here for changing blend weights toward another forecast source: an ERA5 feature ablation does not compare those sources’ forecast errors.
+
+   The **81.9 versus 18.3 mm** precipitation difference deserves more attention than the average masking tax. First establish whether those are genuinely comparable 24-hour, phase-consistent quantities. Changing weights or clipping inputs before that check could conceal an accumulation or representation problem.
+
+5. **I would run one final cheap diagnostic after item 7: an audit of input coverage during snow-producing windows.**
+
+   Using existing serving records, restrict to windows for which the source predicts snow, verify units and accumulation intervals, and tabulate the fraction of windows outside gold support by source, lead, and resort. Inspect the precipitation and subcloud extremes explicitly. “Some feature exceeds a training maximum somewhere” is too coarse to assess operational exposure.
+
+   This can distinguish mostly dry-window differences from persistent extrapolation during forecast snowfall. It needs no new model or external labels.
+
+   The screen now tracks a **positive scalar improvement** accurately, so its evidence is stronger than the earlier all-loser audit. It still has not demonstrated retention of a full-gate adopter. Matching the deciding clause validates implementation; it does not validate that clause’s scientific threshold.
+
+**Recommendation: run item 7, complete the snow-window input-coverage audit, then close this search round. Keep the mountain benchmark parked and make matched mountain observations and profiles the next accuracy investment before authorising alpine training or reviving the spline.**
+## Round 9 — 2026-11-05: item 7 interim HRRR transfer result
+
+Questions put to Codex (fresh thread; all evidence embedded in the prompt, as Codex cannot read files in this environment): (1) commission the correction study's design now vs wait for the formal full-cohort verdict, and what the full cohort could change; (2) preferred correction shape — second EB-style residual layer, per-region/per-source corrections, input harmonisation, or HRRR retraining — and what paired-data evidence discriminates; (3) how much of the penalty is the missing convective-split features vs genuine HRRR/ERA5 differences, and whether a masked-ERA5 decomposition is the right split; (4) whether Kuchera improving on HRRR inputs reopens the item-5 gate or serving conclusions; (5) whether the round-8 closing sequence changes and where a correction study sits. Codex's response, verbatim:
+
+**Commission the correction study’s design now. Keep item 7’s formal verdict pending, and make the first design stage diagnostic.** My preferred starting point is a small, HRRR-specific residual adapter, conditional on the masked-ERA5 decomposition and full-cohort results supporting it. Mountain observations remain the next substantial accuracy investment.
+
+I’m treating your supplied results as the experiment record; local inspection was unavailable.
+
+1. **The interim result justifies design work, but does not settle the correction’s scope.**
+
+   The +0.4370 pooled and +0.1911 LORO-unique penalties provide enough evidence to justify a bounded investigation. They are overlapping views of the same selected cohort, however—not independent confirmations. The breadth gate prevents an extremely narrow snapshot; it does not remove fetch-order selection bias.
+
+   The full cohort could change the design in several consequential ways:
+
+   - **Later winters could change the apparent geography.** Eastern penalties might persist, disappear, or turn out to depend mainly on particular storm regimes or model eras.
+   - **Temporal coverage could change the generalisation story.** Forty-six Alaska events cannot establish whether a correction transfers across winters.
+   - **The source of the error could change.** A stable directional bias supports a residual correction; greater scatter without predictable direction offers much less correctable signal.
+   - **Mountain and serving exposure could change the priority.** Station-region averages do not establish performance at catalogue resorts. Sierra’s positive penalty also prevents a simple “mountains are fine” interpretation.
+   - **The aggregate could cross back below the commissioning threshold.** Most eligible events are outside this interim cohort. Its size cannot compensate for systematic selection.
+
+   More fetching **cannot resolve lead versus domain confounding if the sampling design stays unchanged**, and cannot establish performance beyond the sampled short leads.
+
+   Preserve item 7’s decision rule exactly. If the full result has pooled penalty below 0.10 but a region or lead band at or above 0.15, that satisfies neither transfer acceptance nor the stated pooled trigger for commissioning. Record that unresolved branch explicitly rather than inventing a retrospective pass.
+
+2. **Favour a small HRRR-specific residual adapter, with regional effects allowed only through strong partial pooling.**
+
+   Options (a) and (b) are partly complementary: the adapter can use an EB-style structure while being restricted to the HRRR arm. I would start with a strongly regularised adjustment to the **complete ENS-EB prediction**, testing a simple intercept/slope before adding a few serving-available regime variables.
+
+   Crucially, **positive transfer penalty does not mean positive prediction bias**. Alaska’s +0.4658 does not tell you which direction to adjust predictions. Likewise, negative penalties in the Rockies and PNW do not prove that their predictions are unbiased.
+
+   | Shape | Evidence that would favour it |
+   |---|---|
+   | **HRRR residual adapter — preferred first candidate** | Conditional signed residuals show stable, predictable structure across held-out stations and winters. A simple adjustment improves original-scale SLR MAE. |
+   | **Regional effects** | Regional residual differences persist after accounting for temperature regime, elevation mismatch, season and year, and replicate across winters. Use shrinkage; an unseen region must fall back to a shared effect. |
+   | **Input harmonisation** | Paired features reveal stable, physically interpretable discrepancies, and correcting them improves held-out SLR predictions. Resolve unit, accumulation-window, interpolation or missing-value inconsistencies before considering statistical mappings. |
+   | **HRRR retraining** | The useful feature–SLR relationships differ broadly or nonlinearly, simple adapters fail, and sufficiently representative HRRR training data exist. This is a later, larger investment. |
+
+   I would oppose independent regional offsets selected from the current map. They could encode fetch order, winter mix or storm composition, and they cannot learn a held-out region’s offset without violating LORO.
+
+   I would also oppose wholesale marginal distribution matching. Making HRRR features resemble ERA5 does not establish that their relationship with observed SLR improves; domain adaptation depends on the type of distribution shift. [Zhang et al.](https://proceedings.mlr.press/v28/zhang13d.html)
+
+   Fit the correction against **observed SLR**, not against ERA5-input predictions as a teacher. Otherwise, the procedure could deliberately erase HRRR’s genuine improvements. A log-scale parameterisation is reasonable, but a mean log-residual correction is not automatically optimal for original-scale MAE.
+
+3. **Run the masked-ERA5 decomposition first. No defensible numerical attribution is possible yet.**
+
+   For each fixed fold model and exactly the same paired events, calculate:
+
+   - \(L_E\): MAE using ordinary ERA5 inputs.
+   - \(L_{E,m}\): MAE using ERA5 inputs with the three convective-split features represented exactly as the HRRR serving adapter represents their absence.
+   - \(L_H\): MAE using production-equivalent HRRR inputs.
+
+   Then, with identical event weights,
+
+   \[
+   L_H-L_E
+   =
+   \underbrace{L_{E,m}-L_E}_{\text{masking penalty on ERA5}}
+   +
+   \underbrace{L_H-L_{E,m}}_{\text{remaining input-package difference}}.
+   \]
+
+   **Reuse the masked-judging machinery, not the 62-feature model.** Keep the fitted model fixed. Apply the actual missing-value/default/imputation behaviour, including affected derived features and indicators; simply dropping columns or zeroing values could test a different intervention.
+
+   This gives an exact accounting decomposition, but not a unique causal attribution:
+
+   - The masking term measures the effect of absence **on ERA5 inputs**.
+   - The remainder includes source differences, adapter differences and interactions with missingness. It is not automatically “genuine profile error.”
+   - Either term can be negative, or exceed the total. Avoid forcing them into percentages summing to a causal explanation.
+
+   Report both terms by evaluation family, region and winter. The Open-Meteo tclw tax of +0.0461 provides no quantitative estimate for this different feature block.
+
+   If masking explains most of the degradation, I would move a **training-time availability-mask candidate** ahead of profile harmonisation or wholesale HRRR retraining. That tests whether the model can learn to operate without the unavailable fields. It cannot recreate information those fields contained.
+
+   If the two terms substantially cancel, an optional diagnostic is to insert paired ERA5 convective-split values into otherwise HRRR inputs and examine the interaction. Treat that as an offline hybrid experiment: it uses unavailable information and may produce inconsistent feature combinations.
+
+   Thus: **design the diagnostic stage now; complete it before selecting and fitting the correction family.**
+
+4. **Kuchera’s improvement does not reopen item 5 automatically. It does delimit what item 5 established.**
+
+   The ERA5-tested gate’s exact null remains a valid result for that experiment. It does not establish that a gate fitted and evaluated on HRRR inputs would also assign zero weight.
+
+   A temperature-only rule can improve under a source change while a richer model degrades. The two predictors depend on different features and learned relationships; Kuchera also avoids the absent convective-split block. This behaviour is compatible with source shift, but **does not identify its cause** or prove HRRR temperature profiles are more accurate.
+
+   ENS-EB’s roughly 0.61 LORO advantage over Kuchera on these HRRR events argues against a wholesale switch. Average superiority does not rule out useful error complementarity, however. I would reconsider an HRRR-specific gate only if **serving-identifiable conditions predict repeatable Kuchera advantages**, followed by independently judged gains from a fitted gate. The opposite signs of the two transfer penalties alone are insufficient.
+
+   Serving implications are limited:
+
+   - Keep production calibration disabled pending a qualified correction.
+   - Keep the old 27-feature HRRR comparison retracted; it supplies no supporting evidence.
+   - Do not generalise this result to ECMWF GRIB, Open-Meteo or longer HRRR leads.
+   - Verify that the UTC/cache repair reaches every affected consumer. ERA5 prediction-cache agreement validates the refits, not HRRR timestamps or payload identity.
+
+5. **Keep the round-8 closing recommendation, with a bounded correction-study handoff.**
+
+   My sequence is:
+
+   **Finish item 7 → complete the snow-window coverage audit → close this search round, carrying a separately registered correction study if warranted.**
+
+   The decomposition and design document can proceed while fetching finishes. The audit should precede committing to a fitted correction because it establishes the operational target: which resorts, elevations, sources, lead times and missing-feature patterns occur during snow windows.
+
+   A correction aimed at heavily represented lowland observations could have little catalogue benefit. Conversely, meaningful Alaska or eastern-resort exposure could justify a small correction study promptly.
+
+   Continue the mountain-data work in parallel, including resolving the ERA5 pairing bottleneck. A bounded adapter experiment can precede its completion; an expanding search over regional models, feature mappings and HRRR retraining should not displace it. Matched mountain observations are also the evidence needed to judge whether a correction helps the intended product.
+
+I would impose the following pre-registration requirements on the correction study:
+
+1. **Freeze provenance and scope.** Record cohort membership, exclusions, folds, model and builder versions, UTC cycle/valid-time checks, cache identity, and production-equivalent missingness. Declare supported domains and leads. Report fetch failures and coverage gaps without removing difficult cases based on scores.
+
+2. **Declare the estimands and comparator.** Correction gain is the uncorrected v3 **HRRR-input** MAE minus corrected HRRR-input MAE on identical events. Report the remaining transfer penalty against ERA5 separately. Preserve four-family weighting and LORO-unique reporting; do not treat repeated predictions of an event as independent observations.
+
+3. **Use nested validation for the whole adapter pipeline.** Within each outer fold, train the adapter using inner out-of-fold predictions produced entirely within the outer training set. This includes the existing EB layer and any learned preprocessing or harmonisation. Merely fitting a correction to the pooled existing OOF residuals and rescoring those rows is invalid. Keep outer region, station and temporal exclusions intact throughout.
+
+4. **Freeze a small candidate budget after the diagnostic stage.** Declare predictors, hierarchy, shrinkage, tuning ranges, clipping and fallback behaviour before judging correction candidates. Use only information available at serving time. Region/lead effects that the design cannot separate must remain explicitly confounded.
+
+5. **Retain the adoption bars.** Require four-family mean gain ≥0.03, pooled LORO gain ≥0.02, no held-out region worsening by >0.05, temporal and unseen-station non-worsening, and existing slice guards—all against the uncorrected HRRR baseline. Include adequately supported mountain, domain and lead slices. Insufficient temporal support is inconclusive, not a pass. A qualifying improvement does not by itself mean the original transfer limits have been satisfied.
+
+6. **Predeclare uncertainty and confirmation.** Preserve pairing and station/storm dependence in uncertainty estimates, with minimum support rules fixed before scoring. Because this benchmark has already influenced several design decisions, reserve independent station/year confirmation before production activation. Repeated model selection on a fixed benchmark can itself bias reported gains. [Cawley and Talbot](https://jmlr.org/papers/v11/cawley10a.html)
+
+The evidence that would most change my recommendation is **a large masking penalty with little remaining source penalty**, which would favour availability-aware training; **unstable signed residuals across winters**, which would weaken the adapter case; or **persistent, predictable source discrepancies after masking**, which would strengthen targeted harmonisation.
