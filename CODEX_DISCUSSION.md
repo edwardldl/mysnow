@@ -306,3 +306,61 @@ The evidence most likely to **kill the adapter hypothesis** would be:
 - C3 succeeds only where regional effects can be estimated and loses its advantage under the required LORO fallback.
 
 Failure of C1 alone would not kill the hypothesis. Failure of the entire frozen C1–C3 budget under the adoption and uncertainty rules would. A benchmark pass followed by failure on the reserved independent confirmation would kill the case for production activation.
+
+## Round 11 — 2026-11-05: snow-window audit + correction-study registration
+
+Questions put to Codex (fresh thread; all evidence embedded in the prompt): (1) whether the snow-window input-coverage audit narrows the correction study's claims or requires a formal design amendment, and whether the registration's claim-scope clause suffices; (2) whether the audit's comparability verdict (the 81.9 mm served liquid extreme is a genuine 24 h total; conditioning, not bookkeeping, is the asymmetry) is the right reading and what it changes; (3) whether the registration addendum (complete nesting specification, frozen C1/C2/C3 budget, executable decision rule, support and slice rules) is complete enough that fitting could be authorised; (4) rulings on point-estimate thresholds with the inconclusive overlay vs confidence-bound thresholds, and on the frozen C3 shrinkage constant (30) and C2 transform (log(1 + L/5mm)). Codex's response, verbatim:
+
+**My ruling: accept the audit’s principal findings and narrow the study’s claims. The scientific design remains viable, but I would not certify the registration as fully executable yet.** Several specific points need freezing before fitting. Item 7’s `correction_study_warranted` verdict stands.
+
+1. **The audit calls for registration-level narrowing, not a redesign. §R4 needs more precise scope language.**
+
+   Keeping the complete paired cohort, candidates, targets, and judging criteria unchanged makes this a limitation on interpretation. A dated reference from `DESIGN.md` to §R4 is sufficient, provided §R4 explicitly supersedes any broader serving claims.
+
+   Three corrections matter:
+
+   - **Forecast hours and daily-window leads are different.** Training inputs at HRRR forecast hour 1 CONUS / hours 1–3 Alaska do not establish coverage of served daily-window leads 1–2. The 18/204 figure establishes **8.8% HRRR-arm exposure**. Calling it arm/**lead** coverage requires provenance showing the forecast hours supplying those windows. Otherwise, record forecast-hour overlap as unestablished.
+   - **Full-gold bounds do not automatically become paired-cohort bounds.** The stated reference comes from 57,376 events. The 22,202-event subset can have narrower extrema and different percentiles. Unless equality has been verified, label 67.6% as “inside the full-gold liquid/elevation bounding rectangle,” not “within paired-cohort support.” Exceeding the full-gold maximum certainly exceeds the paired maximum; being below it does not establish paired support.
+   - **A two-feature bounding rectangle is only a support diagnostic.** It does not establish regional or multivariate support. Report the HRRR-specific 55.6% alongside the overall 67.6%, with the same reference-envelope qualification.
+
+   Exact forecast-hour provenance and paired-cohort bounds could resolve the first two issues without changing the study. Broadening claims to alpine serving conditions would require relevant validation observations; this single serving cycle cannot supply them.
+
+2. **Yes: accept the liquid-total comparability verdict, with the stated incomplete-window exception.**
+
+   The reconstruction, unit checks, accumulation differencing, and independent parity evidence support genuine totals for complete 24-hour windows. Conditioning on observed qualifying snow versus forecast snow-gated windows is a substantive asymmetry. Nothing presented justifies dividing Open-Meteo totals by six or capping precipitation at the gold maximum.
+
+   The Big Sky row is explicitly a **20-hour observed input sum**, so it should remain visibly separate from claims about complete 24-hour totals. Do not silently rescale it.
+
+   There is also an important limit to the verdict: **total-liquid comparability does not establish hourly-feature comparability.** Uniform six-hour disaggregation preserves totals but can affect hours above an intensity threshold, peak rates, and precipitation’s timing relative to temperature. Thus the liquid exceedance is established; the interpretation of the entire precipitation-feature cluster requires more care.
+
+   Reporting exposure fractions is sufficient to support this **limited offline study**. It is insufficient to establish deployment suitability for extreme windows. Keep the fitting cohort intact and introduce no unregistered clipping, filtering, or reweighting. Any subsequent serving gate, fallback, or input treatment needs its own explicit rationale and validation.
+
+   Evidence of incorrect accumulation semantics would change the bookkeeping ruling. Observations from these warm, high-liquid mountain storms would change the performance assessment. The zero masking term establishes the decomposition result; it does not establish that the remainder is correctable.
+
+3. **Not yet: five execution specifications need completion or an exact reference to an existing frozen definition.**
+
+   These are concrete potential sources of mid-study choices:
+
+   - **Resolve the literal fit-budget conflict.** Three candidates × four lambdas gives 12 **configurations**. Validation across multiple folds requires more than 12 actual adapter fits, followed by final refits and the necessary base-model refits. Register the configuration budget and actual fitting ledger separately. If “≤12 fits” is a literal hard cap, it must be amended before fitting.
+   - **Close the remaining nesting ambiguity.** For each lambda-validation split, exclude its validation data from the entire fitting pipeline: both the models generating adapter-training OOF predictions and the models generating validation predictions. Regenerating only predictions for the held-out tuning region is insufficient if adapter-training predictions came from models trained using that region. Apply this recursively to trees and EB, with the temporal equivalent. A frozen split diagram or pseudocode can settle this.
+   - **Specify the complete candidate objectives.** State whether gamma is penalised; how regional shifts are estimated and penalised; the ESS definition; the order of estimation, shrinkage, and clipping; and the loss/penalty normalisation. A jointly optimised, freely rescaled regional coefficient can compensate for a multiplicative shrinkage factor, so the stated scaling alone does not uniquely define an EB-style estimator.
+   - **Freeze tuning and scoring details.** Specify the lambda-selection metric and fold aggregation, tie-breaking, fold assignments and temporal boundaries, numerical seeds, and slice boundaries. Predicted-SLR bands should use a fixed reference such as C0 predictions. Existing frozen definitions can be incorporated by exact reference rather than duplicated.
+   - **Make bootstrap execution unambiguous.** Resample shared station or storm identities consistently across repeated outer-test appearances, candidates, and families, then recompute the registered statistics. Define treatment of empty or degenerate bootstrap slices. Also define “wider interval governs”: the longer interval need not contain the shorter. I recommend the envelope of their endpoints, or declaring a clause inconclusive whenever either interval triggers that condition. If choosing the literal larger-width interval, freeze that choice and its tie rule without describing it as necessarily conservative relative to both.
+
+   The stated precedence—any binding inconclusive clause makes the candidate inconclusive overall—is already explicit. Preserve it in implementation, including when another clause has a point-estimate breach.
+
+4. **Both substantive choices are acceptable freezes. Neither requires expanding the tuning search.**
+
+   **(a) Point-estimate thresholds with an inconclusive overlay: approved.** This is a decision rule combining estimated practical benefit with an uncertainty veto. It does **not** demonstrate that the true gain exceeds every adoption threshold.
+
+   For example, a gain of 0.04 with an interval of [0.01, 0.06] can pass a 0.03 bar under your rule. That is coherent, although the interval includes gains below 0.03. Applying thresholds to confidence bounds would impose a materially stronger criterion and change the registered design. I do not require that change.
+
+   Describe the intervals as nominal uncertainty assessments, without implying simultaneous 95% protection across all candidates and clauses. I would require stronger confidence-based criteria if the intended claim were specifically that minimum benefits had been statistically established.
+
+   **(b) C3’s constant 30 and C2’s `log(1 + L/5 mm)`: approved as fixed modelling choices.** They do not need to become tuning dimensions. Borrowing 30 does not establish its optimality or transferability, but a prospectively fixed choice is legitimate. The essential prerequisite is a fully specified estimator, particularly the C3 issue above.
+
+   C3’s zero regional fallback in LORO is appropriate. Its LORO predictions can still differ from C2 because fitting regional terms can change the shared coefficients. Its evaluation should therefore retain the full registered judging procedure.
+
+   Poor results would justify rejecting a candidate or registering a subsequent study. They would not justify adjusting these constants after inspecting outer-test performance.
+
+**Final pre-registration requirement:** correct §R4’s forecast-hour and support-envelope language, and close the five execution items above. Once those are frozen, I would approve fitting the three registered candidates under the narrowed scope. The user’s separate fitting authorisation remains the final gate.
