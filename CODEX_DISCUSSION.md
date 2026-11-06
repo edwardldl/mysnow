@@ -456,3 +456,57 @@ Questions put to Codex (fresh thread; the complete revised REGISTRATION.md embed
 **Overall verdict: not yet fully executable as written.** The remaining execution choices are the optimiser procedure and failure handling, exact elevation endpoint membership, integrity-check comparator, composite-bootstrap validity handling, and bootstrap RNG/percentile conventions. The λ-selection invariant also needs correction. The temporal ESS explanation needs cleanup, although §R6 already determines its implementation.
 
 These specification closures still block fitting under a fully frozen registration, independently of the user’s outstanding authorisation. No new candidate, changed constant, revised adoption bar, or broader scientific redesign is required. §R5’s statement that **only** user authorisation remains is therefore premature.
+
+## Round 13 — 2026-11-05: §R5 revision certification
+
+Questions put to Codex (fresh thread; the complete revised REGISTRATION.md, now including the §R7 round-12 closure, embedded in the prompt): (1) item-by-item, whether the six round-12 residuals — the λ-selection invariant, the optimiser freeze, the temporal ESS prose, the elevation endpoints, the integrity-check comparator, and the bootstrap composite-validity + RNG/percentile freezes — are now closed as written; (2) whether the registration is fully executable as written; (3) whether anything beyond the user's separate fitting authorisation still blocks fitting the three registered candidates under the narrowed scope. Codex's response, verbatim:
+
+**Not yet fully executable as written.** Five residuals are closed; the optimiser residual still leaves consequential implementation and failure-handling choices.
+
+1. **λ-selection invariant — CLOSED.**  
+   The revised invariant correctly permits V to determine validation scores and λ selection while excluding it from base-model fitting and adapter parameter estimation at a fixed λ. It now agrees with §R6(iv).
+
+2. **Optimiser freeze — NOT FULLY CLOSED.**  
+   The method, starting point, initial-simplex construction, numerical tolerances, stopping limits and prohibition on altered-setting retries are specified. Three gaps remain.
+
+   **Boundary handling:** §R7(a) says:
+
+   > “Parameters are clamped into their registered box at every objective evaluation … the returned point is the solver's best in-box result.”
+
+   This permits two different procedures: passing native `bounds` to SciPy, which clips simplex vertices, or running an unbounded simplex against `J(clip(x))` and clipping the returned parameters. These can follow different search paths and apply `xatol` to different coordinates. SciPy explicitly documents vertex clipping for native bounds. [SciPy Nelder–Mead documentation](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-neldermead.html)
+
+   **Required closure:** specify which procedure is used, including the `bounds` argument or its omission, the objective wrapper, and the exact mapping from `result.x` to fitted parameters. “Best in-box result” alone does not determine those choices.
+
+   **Implementation version:** §R7(a) says:
+
+   > “The scipy version is the training venv's at fitting time and is recorded in the executed ledger.”
+
+   This specifies provenance recording, but leaves the library revision mutable until fitting. For the claimed implementation freeze, identify the SciPy version or an immutable training-environment reference before fitting.
+
+   **Failure propagation:** §R7(a) says:
+
+   > “A λ with any failed tuning fit is ineligible for selection for that candidate and outer instance”
+
+   and:
+
+   > “if the final refit at a selected λ fails, the candidate is reported fit-failed for that outer instance.”
+
+   It does not specify the branch where **all four λ values are ineligible**, or how an outer-instance failure determines the candidate’s overall judging status. An implementer must decide whether to terminate that candidate, report partial results, or attempt a reduced-set judgment.
+
+   **Required closure:** define the no-eligible-λ outcome and its propagation through scoring and selection. A sufficient rule would mark that candidate/outer instance fit-failed, make any candidate lacking a complete registered prediction set ineligible for adoption or nomination, prohibit reduced-cohort judgment, and permit the other candidates to proceed. Distinguish fit failure from statistical rejection and inconclusiveness.
+
+3. **Temporal ESS prose — CLOSED.**  
+   The text now correctly distinguishes complete station-family OOF coverage from temporal burn-in. ESS counts the actual rows: blocks 3–5 for the final adapter fit and blocks 3–4 for temporal λ-validation.
+
+4. **Elevation endpoints — CLOSED.**  
+   The bands explicitly assign 1000 m to the middle band and 1500 m to the upper band, without overlap or a gap.
+
+5. **Integrity-check comparator — CLOSED as a comparator specification.**  
+   The registration identifies the queue-1 cache, instance O, ENS-EB prediction and ERA5-input arm. It requires comparison against the **same refit’s ERA5-input predictions on X**, with the stated tolerance. The HRRR predictions are correctly excluded from that comparison. This certifies the specified comparison, not the existence or contents of the referenced artifact.
+
+6. **Bootstrap composite validity and RNG/percentile conventions — CLOSED.**  
+   All four family gains must be defined for a composite replicate. Cluster ordering, separate seeded generators, draw calls, sequential replicate allocation and linear percentile interpolation are specified. §R6’s precedence resolves the secondary seed’s difference from §R3’s abbreviated seed statement.
+
+**Overall verdict: certification withheld pending completion of residual 2.** An implementer still needs to choose the optimiser’s boundary procedure and resolve unhandled failure branches; the numerical implementation identity also remains unfrozen.
+
+Those specification gaps still block certification beyond the user’s outstanding fitting authorisation. Item (i) remains closed, and the narrowed claim scope remains consistent. §R5’s conditional statement that only user authorisation remains has therefore **not yet taken effect**.
