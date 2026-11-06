@@ -510,3 +510,17 @@ Questions put to Codex (fresh thread; the complete revised REGISTRATION.md, now 
 **Overall verdict: certification withheld pending completion of residual 2.** An implementer still needs to choose the optimiser’s boundary procedure and resolve unhandled failure branches; the numerical implementation identity also remains unfrozen.
 
 Those specification gaps still block certification beyond the user’s outstanding fitting authorisation. Item (i) remains closed, and the narrowed claim scope remains consistent. §R5’s conditional statement that only user authorisation remains has therefore **not yet taken effect**.
+
+## Round 14 — 2026-11-05: §R5 revision certification
+
+Questions put to Codex (fresh thread; the complete revised REGISTRATION.md, now including the §R8 round-13 closure, embedded in the prompt): (1) whether the three round-13 optimiser gaps — boundary procedure, implementation identity, failure propagation — are now closed as written; (2) whether the registration is fully executable as written; (3) whether anything beyond the user's separate fitting authorisation still blocks fitting the three registered candidates under the narrowed scope. Codex's response, verbatim:
+
+1. **Boundary procedure — CLOSED.** §R7(a) now fixes native `bounds`, excludes an objective-clipping wrapper and post-hoc boundary repair, and takes `result.x` exactly. There is no remaining choice between the two previously permitted procedures. For C3 stage B, the solver’s returned scalar is **δ̂_r**; the separately registered estimate → shrink → clip sequence then produces **δ_r**.
+
+2. **Implementation identity — CLOSED.** SciPy **1.18.1** is explicitly pinned, with verification before any fit, abort on mismatch, and ledger recording. “The training venv’s version” no longer leaves the revision mutable because the numeric pin governs. The named version is an [officially released SciPy version](https://scipy.org/news/).
+
+3. **Failure propagation — CLOSED.** Both previously missing branches are specified: no eligible λ and failure of the selected-λ final refit produce a candidate/outer-instance fit failure. Any such instance makes the candidate terminally **fit-failed**, ineligible for adoption or nomination, with no partial-instance judgment. Other candidates proceed, and fit failure remains distinct from statistical rejection and inconclusiveness.
+
+**Overall verdict — CERTIFIED.** The supplied registration is now fully executable as a fitting-and-judging protocol. The amendments close the sole outstanding round-13 residual without reopening the previously closed provisions. No further study-specification choice or registration amendment is required before implementing the registered procedure.
+
+Beyond the user’s separate fitting authorisation, **no unresolved design-registration blocker remains** for C1–C3 under the narrowed §R4 scope. Execution must satisfy the registered version and integrity gates and follow the prescribed failure handling. This certification does not grant fitting authorisation or change the production and independent-confirmation gates.
