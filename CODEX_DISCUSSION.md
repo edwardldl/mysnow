@@ -230,3 +230,79 @@ I would impose the following pre-registration requirements on the correction stu
 6. **Predeclare uncertainty and confirmation.** Preserve pairing and station/storm dependence in uncertainty estimates, with minimum support rules fixed before scoring. Because this benchmark has already influenced several design decisions, reserve independent station/year confirmation before production activation. Repeated model selection on a fixed benchmark can itself bias reported gains. [Cawley and Talbot](https://jmlr.org/papers/v11/cawley10a.html)
 
 The evidence that would most change my recommendation is **a large masking penalty with little remaining source penalty**, which would favour availability-aware training; **unstable signed residuals across winters**, which would weaken the adapter case; or **persistent, predictable source discrepancies after masking**, which would strengthen targeted harmonisation.
+
+## Round 10 — 2026-11-05: correction-study design + masked decomposition
+
+Questions put to Codex (fresh thread; all evidence embedded in the prompt): (1) review the registered correction-study design (model-v3-hrrr-correction/DESIGN.md) against the round-9 requirements, incl. the nested-validation construction, the candidate budget and the four fitting gates; (2) rule on whether the decomposition (masking exactly 0.0 at full precision; the penalty entirely remainder, with strongly directional signed residuals) supports the adapter-first candidate order C1 -> C2 -> C3, and whether the liquid-band interaction changes C2; (3) whether the masking interpretation (trees never route on the near-constant regime features) is accepted and generalises; (4) flag anything that must change before fitting is authorised. Item 7's formal full-cohort verdict (pooled +0.5141 -> correction_study_warranted) was supplied. Codex's response, verbatim:
+
+**Conditional approval.** The design substantially meets round 9, and the evidence supports proceeding toward an adapter study. Item 7’s verdict is settled: **correction study warranted**. It does not establish that an adapter will succeed.
+
+I require a short registration addendum before fitting. These are specification requirements, not a request to expand the study or repeat the eight-hour decomposition.
+
+1. **Nested validation: the proposed construction is correct for evaluating a fixed adapter.**
+
+   Within each outer training set, inner ENS-EB refits generate predictions for events excluded from those refits; the adapter trains against observed SLR using those predictions. The outer-training ENS-EB refit then supplies the complete prediction that the adapter corrects on the outer test set.
+
+   Make three details explicit:
+
+   - Inner splits preserve the relevant exclusion: region for LORO, station for unseen-station, and chronological separation for temporal validation.
+   - All learned preprocessing, tree parameters, EB effects and hyperparameters, and adapter parameters obey those exclusions.
+   - Adapter tuning receives its own valid validation within the outer training set. Generating inner OOF base predictions does **not**, by itself, validate adapter hyperparameters. Naively cross-validating an adapter over one precomputed OOF table can leak validation labels through the base models that generated adapter-training rows.
+
+   Fully fixed candidates can each receive valid outer-fold evaluations without another selection layer. If outer results select the winner, report that as benchmark-based selection; the selected winner’s score is not an unbiased estimate of the selection procedure. Your reserved independent confirmation remains essential.
+
+   For C3 specifically, the held-out LORO region must receive the shared-effect fallback. Its diagnostic residuals cannot supply a regional offset or inform a fitted regional prior.
+
+2. **Candidate order: retain C1 → C2 → C3.**
+
+   The directional residual pattern makes intercept/slope correction a sensible first hypothesis. However, negative **mean** signed errors do not establish an MAE benefit: conditional medians govern absolute-error minimisation. Tail errors could drive the reported means.
+
+   Forecast liquid amount should be in the frozen C2 specification. My preferred initial C2 is C1 plus a simple, strongly regularised function of serving-available forecast liquid, with its transformation fixed in advance. The diagnostic establishes liquid-dependent residual structure; it does not yet establish a statistical interaction requiring a liquid-by-SLR product term.
+
+   The remaining proposed variables need narrower justification:
+
+   - Predicted-SLR bands add nonlinear flexibility beyond C1’s slope; specify that purpose and freeze the form.
+   - Column temperature is plausible, but the supplied diagnostics do not demonstrate its incremental value.
+   - Domain/lead must not be interpreted as an independently identified lead effect: Alaska and lead are confounded here.
+
+   The liquid pattern does **not** justify replacing C1 with a liquid-only first candidate. Keeping C1 first reveals whether a simple correction captures most of the attainable gain. C3 remains last because regional flexibility can improve familiar regions without transferring to a genuinely held-out region.
+
+3. **Masking: accept the empirical result, qualify the mechanism and extrapolation.**
+
+   The demonstrated conclusion is strong: **under the tested masking intervention, the fitted pipeline’s predictions and losses are unchanged to numerical precision on the reduced cohort.** Consequently, the measured penalty on that cohort is entirely the remainder term.
+
+   “The trees never route on these features” is a stronger claim. Identical predictions could also arise because missing and observed values follow equivalent paths, or because affected paths produce equivalent outputs. Near-constant convective inputs are a plausible explanation, not a demonstrated structural proof.
+
+   I accept skipping the full-cohort decomposition for this decision. The large, replicated total penalty and the negligible tested masking sensitivity make that a reasonable allocation of effort. Replace “cannot plausibly become material” with a scoped statement: the audit gives no evidence that masking materially contributes, and provides insufficient justification for an expensive refresh. The full-cohort remainder has not itself been measured.
+
+   **Formally close availability-mask retraining as a candidate in this correction study.** Do not describe retraining as scientifically disproven: inference-time masking and training without features are different interventions. Reopening would require new evidence, such as material masking sensitivity in another cohort or a changed model.
+
+4. **The four fitting gates are appropriate and remain binding.**
+
+   Item 7 is complete. This review supports the design subject to the registration details below. The snow-window audit remains required unless the user explicitly waives it, and fitting still requires separate user authorisation.
+
+   The audit should establish whether the paired lowland cohort adequately represents the intended snow windows. Material coverage gaps should narrow the study’s claims or require a documented design amendment. They must not silently disappear through completeness filtering.
+
+Before fitting, the following details must be explicit in the registration. Where the existing document already specifies them, no additional change is needed:
+
+- **Complete the nesting specification described above.** State the inner split construction, treatment of all learned ENS-EB/adapter components, tuning procedure, and unseen-region fallback.
+- **Freeze the actual candidate budget.** C2 currently describes a family of possible models. Freeze its variables, transformations, interactions, regularisation, and any tuning grid; do the same for C3’s regional effects. Specify any log-scale, positivity, or clipping rules. Use original-scale MAE for tuning and selection. Count tried variants within the budget.
+- **Make the decision rule executable.** Define four-family aggregation weights, paired event weighting, confidence level and interval construction, and whether adoption thresholds apply to estimates or confidence bounds. State how station- and storm/date-cluster uncertainty will be reconciled, and what produces an inconclusive result. Preserve the agreed numerical bars.
+- **Complete support and slice rules.** The supplied region and water-year event minima do not fully specify temporal support or slice guards. Define these using unique events and relevant independent clusters. The full temporal sample resolves the earlier reduced-cohort shortage for item 7; correction-stage conclusions still require their own support assessment.
+- **Qualify the decomposition claims.** Keep the empirical zero scoped to the tested cohort and intervention, and distinguish the observed result from the proposed tree-routing explanation.
+
+Optional improvements would strengthen interpretation without becoming new fitting gates:
+
+- Inspect split usage or prediction paths in the existing fitted models. An absence of splits on those features would directly support the proposed mechanism without a full scoring rerun.
+- Report median signed error alongside means, and examine liquid dependence within broad region and predicted-SLR strata. This would show whether the pattern is broadly shared or mainly reflects geographic composition and sparse tails.
+- Apply comparable audits to feature blocks implicated in any future harmonisation proposal. Use serving-realistic interventions and inspect interactions. A block ablation measures sensitivity; it does not establish that harmonising that block will help.
+
+The evidence most likely to **kill the adapter hypothesis** would be:
+
+- Correcting mean under-prediction fails to improve original-scale MAE because the directional signal is concentrated in tails.
+- Gains occur mainly in randomised splits, then disappear under LORO, temporal, or unseen-station validation.
+- A global uplift improves Alaska, the Northeast, and Great Lakes but breaches the regional guards elsewhere.
+- Liquid-dependent gains disappear across years or regions, or require increasingly flexible specifications.
+- C3 succeeds only where regional effects can be estimated and loses its advantage under the required LORO fallback.
+
+Failure of C1 alone would not kill the hypothesis. Failure of the entire frozen C1–C3 budget under the adoption and uncertainty rules would. A benchmark pass followed by failure on the reserved independent confirmation would kill the case for production activation.
