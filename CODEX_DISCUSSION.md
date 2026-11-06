@@ -364,3 +364,95 @@ Questions put to Codex (fresh thread; all evidence embedded in the prompt): (1) 
    Poor results would justify rejecting a candidate or registering a subsequent study. They would not justify adjusting these constants after inspecting outer-test performance.
 
 **Final pre-registration requirement:** correct §R4’s forecast-hour and support-envelope language, and close the five execution items above. Once those are frozen, I would approve fitting the three registered candidates under the narrowed scope. The user’s separate fitting authorisation remains the final gate.
+
+## Round 12 — 2026-11-05: §R5 revision certification
+
+Questions put to Codex (fresh thread; the complete revised REGISTRATION.md embedded in the prompt): (1) certify item-by-item whether each round-11 execution item — (i) configuration budget vs fitting ledger, (ii) full-pipeline nesting exclusion, (iii) complete candidate objectives, (iv) frozen tuning and scoring details, (v) bootstrap execution — is now closed executably as written, naming any residual ambiguity precisely; (2) whether the §R4 claim-scope language is consistent with round 11's corrections (8.8% as HRRR-arm exposure; forecast-hour overlap unestablished; paired-cohort envelope with the full-gold rectangle labelled); (3) whether the registration is fully executable as written, listing every remaining mid-study choice; (4) whether anything beyond the user's separate fitting authorisation still blocks fitting the three registered candidates under the narrowed scope. Codex's response, verbatim:
+
+**I would not yet certify the registration as fully executable.** The substantive closures are largely sound, but several decision-relevant execution details remain unspecified, alongside one direct textual contradiction.
+
+1. **(i) Configuration budget and fitting ledger — CLOSED under the stated counting definitions.**
+
+   The configuration budget is now clearly separated from executed fits. The arithmetic is consistent:
+
+   - ENS-EB refits: \(27\times36+4=976\).
+   - Adapter fits: \(27\times63+15=1,716\).
+   - Tree fits: \(976\times12=11,712\).
+   - EB-layer derivations: \(976\times2=1,952\).
+
+   Counting C3’s two stages together as one adapter fit is explicitly defined. The temporal reuse is also explicitly accounted for. These are registered execution counts, rather than minimum counts achievable through additional caching.
+
+2. **(ii) Full-pipeline nesting — CONSTRUCTION CLOSED; one contradictory invariant prevents literal certification.**
+
+   The pseudocode correctly regenerates adapter-training predictions inside T′ and generates validation predictions from a fit on T′. Validation exclusion therefore extends through the trees and EB layers. The temporal reuse is valid: the generators for B3/B4 and the predictor for B5 all exclude B5.
+
+   However, the invariant says:
+
+   > “during tuning neither does V … not to the trees, not to any EB node, not to the adapter, **not to lambda selection**.”
+
+   That contradicts §R6(iv), which selects λ using validation MAE. Validation data necessarily inform λ selection.
+
+   Replace that restriction with: **V participates only in validation scoring and λ selection; it contributes to no base-model fit or adapter parameter estimation at a fixed λ.** No additional nesting level is needed.
+
+3. **(iii) Candidate objectives — STATISTICAL DEFINITION CLOSED; numerical estimator not completely frozen.**
+
+   The revised objective resolves the substantive questions: mean-loss normalisation, natural parameter units, penalised γ, unpenalised regional shifts, fixed shared parameters during regional estimation, and estimate → shrink → clip. The previous rescaling freedom is removed.
+
+   The remaining problem is:
+
+   > “Nelder–Mead from the zero correction, fixed tolerance 1e-8, iterates projected onto the stated parameter boxes.”
+
+   This does not uniquely specify a numerical procedure. An implementer still chooses the optimiser implementation, initial simplex, interpretation of tolerance, stopping limits, and precise bounds/projection behaviour. The treatment of nonconvergence also remains unspecified. Flat or nonunique regional minima make deterministic solution selection relevant.
+
+   Freeze an exact optimiser callable/version and options—or an equivalent complete algorithm reference—including termination and unsuccessful-fit handling. A pinned deterministic solver can supply solution selection; a separate global-optimisation requirement is unnecessary.
+
+   There is also a **nonblocking prose correction**:
+
+   > “the inner OOF rows cover every training event exactly once”
+
+   This is false for temporal fitting because of burn-in. §R6’s governing definition, **ESS_r = |S_r|**, already resolves execution: temporal final-fit ESS counts rows from B3–B5, and tuning ESS counts rows from B3–B4. Correct the explanatory sentence without changing that definition.
+
+4. **(iv) Tuning and scoring details — MOSTLY CLOSED; two details need tightening.**
+
+   The supplied references and constructions freeze outer assignments, station folds, temporal blocks, seeds, pooled validation MAE, λ tie-breaking, and C0-based predicted-SLR bands.
+
+   Two remaining points prevent an unconditional executable verdict:
+
+   - **Elevation endpoint membership.** The labels  
+     > “<1000, 1000–1500, ≥1500 m”  
+     should explicitly make the middle band **1000 ≤ elevation < 1500**. Otherwise the range notation leaves possible overlap at exactly 1500 m. This requires no threshold change.
+
+   - **Integrity-check comparator.** The pseudocode defines `base_X` using HRRR inputs, then specifies:  
+     > “integrity gate vs the queue-1 cache (max abs diff <= 1e-6)”  
+     Name the exact cache artifact and prediction field, including its input arm. The supplied text does not establish that the comparator contains HRRR predictions. If it contains ERA5 predictions, the integrity check must compare separately generated ERA5 predictions against that reference; an HRRR-versus-ERA5 comparison would test something different.
+
+   The optimiser details identified under (iii) also need freezing, but are not a separate additional issue here.
+
+5. **(v) Bootstrap execution — CORE PROTOCOL CLOSED; composite-statistic and numerical execution details remain.**
+
+   Shared cluster multiplicities across candidates, families and repeated appearances are correctly specified. The either-interval rule and candidate-level inconclusive precedence are explicit. Empty individual-statistic samples and the 1,000-valid-replicate threshold are also specified.
+
+   Two gaps remain:
+
+   - **Four-family composite and its validity rule.** §R6(v) says:
+
+     > “Every registered statistic is recomputed … MAE_C = Σ w·|ŷ_C − y| / Σ w over the statistic’s rows”
+
+     That formula directly defines a pooled MAE, but the registered four-family statistic is an **unweighted mean of four separately normalised family gains**. Explicitly preserve:
+     \[
+     G_b=\frac14\sum_{f=1}^{4}G_{f,b}.
+     \]
+
+     The degenerate rule currently addresses only a statistic whose row set has total weight zero. It does not explicitly handle a composite whose union has positive weight but one constituent family has zero weight. Freeze that **a four-family replicate is valid only when all four family gains are defined**; otherwise it contributes no composite value. Neither pooling all families nor averaging only the surviving families is acceptable.
+
+   - **Reproducible draws and percentile calculation.**  
+     > “B = 2000, seed 20261105”  
+     and  
+     > “95% percentile interval”  
+     leave the RNG implementation, cluster ordering, allocation of random streams between clusterings, and percentile interpolation convention unspecified. Freeze these through an exact routine/reference or explicit settings. They can affect classification near a decision boundary.
+
+**The §R4 claim-scope language is now consistent with the round-11 corrections.** It identifies 18/204, or 8.8%, as HRRR-arm exposure; distinguishes daily-window leads from forecast hours; states that forecast-hour overlap is unestablished; labels 67.6% against the full-gold rectangle; and distinguishes the paired-cohort figures of 66.2% overall and 38.9% within the HRRR arm. It also expressly limits the two-feature support interpretation.
+
+**Overall verdict: not yet fully executable as written.** The remaining execution choices are the optimiser procedure and failure handling, exact elevation endpoint membership, integrity-check comparator, composite-bootstrap validity handling, and bootstrap RNG/percentile conventions. The λ-selection invariant also needs correction. The temporal ESS explanation needs cleanup, although §R6 already determines its implementation.
+
+These specification closures still block fitting under a fully frozen registration, independently of the user’s outstanding authorisation. No new candidate, changed constant, revised adoption bar, or broader scientific redesign is required. §R5’s statement that **only** user authorisation remains is therefore premature.
