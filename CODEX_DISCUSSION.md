@@ -524,3 +524,64 @@ Questions put to Codex (fresh thread; the complete revised REGISTRATION.md, now 
 **Overall verdict — CERTIFIED.** The supplied registration is now fully executable as a fitting-and-judging protocol. The amendments close the sole outstanding round-13 residual without reopening the previously closed provisions. No further study-specification choice or registration amendment is required before implementing the registered procedure.
 
 Beyond the user’s separate fitting authorisation, **no unresolved design-registration blocker remains** for C1–C3 under the narrowed §R4 scope. Execution must satisfy the registered version and integrity gates and follow the prescribed failure handling. This certification does not grant fitting authorisation or change the production and independent-confirmation gates.
+
+
+## Round 15 — 2026-11-05/06: correction-study fitting results
+
+Questions put to Codex (fresh thread; the complete fitting results embedded in the prompt — execution fidelity and ledger reconciliation, the three verdicts with full clause evidence, the structural support analysis, and the C2/C3 LORO-equality and Rockies details): (1) whether the three INCONCLUSIVE verdicts correctly apply the registration (clause definitions, straddle semantics including the C1-vs-C2/C3 Rockies asymmetry, support thresholds, precedence, parsimony); (2) closure versus follow-up — close the study, amend the §R4 support thresholds under a new registration, or designate a candidate of record for a future DESIGN §6 independent confirmation; (3) whether anything in the execution record warrants audit or a caveat before closure. Execution record as reported to Codex: SciPy 1.18.1 gate verified; executed ledger exactly the registered ledger (976 ENS-EB refits, 1,716 adapter fits, 0 failed; per-instance counts exact for all 28 instances); integrity max abs diff 8.88e-15 across all instances; 434-test suite green; implementation committed as d728871. Verdicts: C1, C2, C3 all INCONCLUSIVE (temporal clause support-inconclusive — frozen test span is water year 2026 only; regional clause support-inconclusive — Alaska 17 and Sierra Nevada 7 paired stations; C2/C3 additionally carry the binding Rockies interval straddle), nominee none, no candidate fit-failed, no binding clause failed on its point estimate, all 83 binding slice guards passed. Codex's response, verbatim:
+
+**Q1 — Verdict review.** I uphold **C1: INCONCLUSIVE; C2: INCONCLUSIVE; C3: INCONCLUSIVE; nominee: none**, against the registration as reproduced here. One regional clause interpretation needs an explicit registration citation, but it cannot change the overall verdicts.
+
+- **Temporal support:** one evaluation water year cannot satisfy a three-water-year minimum. More events, dates, bootstrap draws, or refits cannot repair that deficiency.
+- **C1 Rockies:** the point gain, −0.0458, clears the −0.05 bar. Both intervals extend below −0.05 but remain entirely negative. Under the stated rule requiring an interval to reach both unacceptable harm and zero-or-better gain, neither straddles the band. The registered pass is therefore correct. It is nevertheless evidence of deterioration, with uncertainty extending into unacceptable harm. A procedural pass must not be described as demonstrated regional safety.
+- **C2/C3 Rockies:** the reported station-cluster interval reaches below −0.05 and above zero. That satisfies the registered straddle condition and makes the sub-clause inconclusive.
+- **Positive-gain thresholds:** C1’s four-family and pooled-LORO point estimates clear their bars. Their intervals do **not** establish +0.03 and +0.02 as lower confidence bounds. Passing is consistent with the stated point-estimate rule; the record should preserve that distinction.
+- **Precedence and parsimony:** inconclusive precedence is applied consistently, although no reported point-estimate rejection competes with it here. Parsimony cannot select an adopted nominee when no candidate is eligible.
+
+The regional qualification is this: **“report-only” does not by itself imply that the parent regional clause is inconclusive.** The ≥30-station threshold establishes which regions bind. A separate coverage requirement must establish that insufficient support in Alaska or Sierra Nevada blocks the parent clause. Cite that requirement explicitly. If §R4 merely excludes unsupported regions from binding assessment, correct the parent clause’s support-inconclusive label. All three overall verdicts would remain inconclusive because of temporal support; C2/C3 would additionally retain their Rockies blocker.
+
+**Q2 — Ruling on closure and follow-up.** I endorse **(a) closure plus (c) prospective designation of C2 for independent confirmation**. I do not endorse lowering support thresholds to obtain acceptance from these results.
+
+Close the present study with no adopted nominee, nothing packaged or served, and production calibration disabled. Replace “strongly positive on every evaluable clause” with:
+
+> All candidates showed positive four-family and pooled-LORO gains, passed the reported point-estimate checks and all 83 binding slice guards, but did not establish adoption eligibility under the registration. C1 showed Rockies deterioration; C2/C3 retained unresolved Rockies harm uncertainty.
+
+C2 is a reasonable **candidate of record for future confirmation**, explicitly selected using this study’s results. That designation is separate from the registered adoption nomination. C3’s additional four-family gain is approximately 0.0045 SLR units. Its reported advantages also include temporal and unseen-station performance, so the comparison should not describe its advantage as confined to randomised evaluation. Rounded LORO equality does not establish equivalence. Nevertheless, choosing C2’s simpler specification for one independent confirmatory test is defensible.
+
+The DESIGN §6 confirmation addendum should contain:
+
+1. **A single locked comparison: C2 against C0.** Freeze the candidate equations, features, transformations, constraints, loss, regularisation grid, selection and tie rules, and baseline construction. Specify whether confirmation tests a frozen fitted artifact or a learning procedure with prescribed refitting. The 28 instance-specific fits are not automatically one deployable artifact.
+
+2. **An independent evaluation cohort.** Previously judged outcomes must not become independent confirmation evidence. Prespecified training may use existing data where permitted, but test outcomes must remain unused for candidate selection, tuning, and protocol amendment. Untouched historical data could qualify if it satisfies independence and temporal-order requirements.
+
+3. **A support feasibility gate before fitting or judging.** Require ≥3 distinct water years in the temporal **evaluation set**, and ≥30 eligible stations in every regional paired-LORO evaluation slice required for the original coverage claim, including Alaska and Sierra Nevada. Apply all other registered support requirements. Count support in the relevant evaluation slices, not across training and testing together.
+
+4. **Frozen sampling, splits, and estimands.** Specify the population, gold screening, HRRR/ERA5 pairing, station identity handling, temporal boundaries, four-family weighting, regional aggregation, slices, and overlap rules. Enforce the station, region, and time separation appropriate to each generalisation claim. Determine eligibility without examining candidate gains.
+
+5. **A precision plan, especially for Rockies.** Three water years and thirty stations are minimum support conditions, not guarantees of a decisive result. Plan sample size and clustering to assess the registered benefit and harm margins with useful precision. Use conservative assumptions rather than treating the selected candidate’s observed gains as assured.
+
+6. **A complete decision and stopping rule.** Preserve the existing adoption rules unless a replacement is explicitly justified in a new protocol. Fix bootstrap procedures, uncertainty semantics, precedence, accrual horizon, and analysis timing before judging new outcomes. If C2 is inconclusive or unsuccessful, do not automatically switch to C3 using the same confirmation set.
+
+A principled version of **(b)** is possible, but “precommitted before new data” is necessary rather than sufficient. A new protocol must justify its support requirements through the scientific target, dependence structure, precision, and error control. A narrower geographic claim could also be legitimate, with unsupported regions explicitly outside its scope.
+
+Any such protocol must be identified as informed by these results, preserve this study’s verdicts, and receive independent evaluation. Thresholds chosen simply to admit 17 Alaska stations, seven Sierra stations, or one water year would be cosmetic. A prospective revision of the unusual harm-straddle rule could also be considered; it cannot be applied retrospectively.
+
+**Q3 — Execution caveats and focused audit.** The supplied execution evidence is strong. The ledger arithmetic reconciles: 27 instances × 36 refits plus four temporal refits gives 976; 27 × 63 adapter fits plus 15 temporal fits gives 1,716. The environment gate, exact instance counts, zero failed fits, and ERA5 reconstruction agreement support execution fidelity. Nothing supplied warrants a blanket rerun.
+
+Before closure, resolve or document these specific points:
+
+- **Regularisation selections:** replace “one further instance” with its identifier and archive the complete selection table and tuning losses. Confirm the objective scaling, penalty implementation, and largest-λ tie handling. The concentration at λ=3 is not itself suspicious. If 3 is a grid endpoint, record that limitation without extending the grid for this study. These selections also do not automatically authorise replacing future nested tuning with a universal λ=3.
+- **C2/C3 LORO equality:** report full-precision values and explain whether the equality follows from the registered model construction or is an empirical near-equality. Centred regional shifts do not generally cancel under absolute-error loss. Verify the prescribed treatment of a held-out region before attributing equality to “pooling out.”
+- **“Liquid-term fix”:** C2 improves the Rockies point gain over C1 by 0.0375, but its own gain remains negative and its interval still includes unacceptable harm. Call this attenuation of the observed deterioration, not a resolved regional failure. Attribution specifically to the liquid term requires the candidate definitions and refitting differences to support that interpretation.
+- **Transfer-penalty accounting:** document the denominators and weights connecting item 7’s +0.5141 pooled penalty, family-specific penalties, and the equal-family gain. The reported residual penalties reconcile with the candidate gains at the supplied precision; different aggregation schemes should remain clearly labelled.
+- **Integrity scope:** matching ERA5 predictions validates reconstruction of that reference path. Retain the audit evidence for adapter training isolation, validation-only λ selection, and HRRR pairing and units; the ERA5 gate alone does not establish those properties.
+
+**Required amendments to the study record.**
+
+First, correct the round-14 feasibility assessment. **The computation was executable, but the frozen design could not produce an adoption verdict under the temporal requirement.** That contradiction was discoverable before fitting and should have been flagged in my round-14 review. The regional deficiency adds another structural blocker if the parent coverage requirement is confirmed. Record this as a design-review oversight, not an execution deviation or candidate failure.
+
+Second, retain a complete clause table showing support counts, binding/report-only status, point thresholds, both bootstrap intervals, and the exact reason for each verdict. Include the regional parent-clause citation.
+
+Third, replace the blanket positive-clause claim and “Rockies fix” wording, and resolve the selection-table and LORO-equality details above.
+
+Finally, record two separate decisions: **the registered study is closed without adoption; C2 is selected for a future, independently registered confirmation.** The original study’s verdicts remain unchanged by subsequent work.
