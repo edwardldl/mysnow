@@ -64,14 +64,124 @@ REGION_BY_SLUG = {
     "heavenly": "sierra-nevada",
     "northstar": "sierra-nevada",
     "kirkwood": "sierra-nevada",
+    "sugar-bowl": "sierra-nevada",
     "alta": "rockies",
     "jackson-hole": "rockies",
     "aspen": "rockies",
     "big-sky": "rockies",
+    "sun-valley": "rockies",
+    "arapahoe-basin": "rockies",
+    "aspen-highlands": "rockies",
+    "buttermilk": "rockies",
+    "snowmass": "rockies",
+    "brighton": "rockies",
+    "copper-mountain": "rockies",
+    "deer-valley": "rockies",
+    "eldora": "rockies",
+    "snowbasin": "rockies",
+    "snowbird": "rockies",
+    "solitude": "rockies",
+    "steamboat": "rockies",
+    "taos": "rockies",
+    "winter-park": "rockies",
+    "banff-sunshine": "rockies",
+    "lake-louise": "rockies",
+    "mt-norquay": "rockies",
+    "tamarack": "rockies",
+    "vail": "rockies",
+    "beaver-creek": "rockies",
+    "breckenridge": "rockies",
+    "keystone": "rockies",
+    "crested-butte": "rockies",
+    "park-city": "rockies",
+    "telluride": "rockies",
+    "fernie": "rockies",
+    "nakiska": "rockies",
+    "powder-mountain": "rockies",
+    "grand-targhee": "rockies",
+    "whitefish": "rockies",
+    "bridger-bowl": "rockies",
+    "loveland": "rockies",
+    "wolf-creek": "rockies",
+    "monarch": "rockies",
+    "purgatory": "rockies",
+    "marmot-basin": "rockies",
     "mt-baker": "pacific-northwest",
     "stevens-pass": "pacific-northwest",
+    "the-summit-at-snoqualmie": "pacific-northwest",
+    "alpental": "pacific-northwest",
+    "crystal-mountain": "pacific-northwest",
+    "mt-bachelor": "pacific-northwest",
+    "schweitzer": "pacific-northwest",
+    "cypress-mountain": "pacific-northwest",
+    "panorama": "pacific-northwest",
+    "red-mountain": "pacific-northwest",
+    "revelstoke": "pacific-northwest",
+    "silverstar": "pacific-northwest",
+    "sun-peaks": "pacific-northwest",
+    "grouse-mountain": "pacific-northwest",
+    "whistler-blackcomb": "pacific-northwest",
+    "kicking-horse": "pacific-northwest",
+    "kimberley": "pacific-northwest",
+    "mt-hood-meadows": "pacific-northwest",
+    "timberline": "pacific-northwest",
     "stowe": "northeast",
     "sugarloaf": "northeast",
+    "blue-mountain-pa": "northeast",
+    "camelback": "northeast",
+    "killington": "northeast",
+    "pico-mountain": "northeast",
+    "loon-mountain": "northeast",
+    "snowshoe": "northeast",
+    "stratton": "northeast",
+    "sugarbush": "northeast",
+    "sunday-river": "northeast",
+    "le-massif": "northeast",
+    "tremblant": "northeast",
+    "cranmore": "northeast",
+    "jiminy-peak": "northeast",
+    "ski-butternut": "northeast",
+    "okemo": "northeast",
+    "mount-snow": "northeast",
+    "mount-sunapee": "northeast",
+    "attitash": "northeast",
+    "wildcat": "northeast",
+    "crotched-mountain": "northeast",
+    "hunter-mountain": "northeast",
+    "liberty-mountain": "northeast",
+    "roundtop": "northeast",
+    "whitetail": "northeast",
+    "jack-frost": "northeast",
+    "big-boulder": "northeast",
+    "seven-springs": "northeast",
+    "hidden-valley-pa": "northeast",
+    "laurel-mountain": "northeast",
+    "mont-sainte-anne": "northeast",
+    "stoneham": "northeast",
+    "jay-peak": "northeast",
+    "mad-river-glen": "northeast",
+    "cannon-mountain": "northeast",
+    "saddleback": "northeast",
+    "whiteface": "northeast",
+    "boyne-mountain": "great-lakes",
+    "granite-peak": "great-lakes",
+    "lutsen-mountains": "great-lakes",
+    "snowriver": "great-lakes",
+    "the-highlands": "great-lakes",
+    "blue-mountain-on": "great-lakes",
+    "devils-head": "great-lakes",
+    "wild-mountain": "great-lakes",
+    "buck-hill": "great-lakes",
+    "afton-alps": "great-lakes",
+    "wilmot-mountain": "great-lakes",
+    "mt-brighton": "great-lakes",
+    "alpine-valley-oh": "great-lakes",
+    "mad-river-mountain": "great-lakes",
+    "boston-mills-brandywine": "great-lakes",
+    "paoli-peaks": "great-lakes",
+    "hidden-valley-mo": "great-lakes",
+    "snow-creek": "great-lakes",
+    "alyeska": "alaska",
 }
 
 # ---------------------------------------------------------------------------
@@ -98,6 +208,7 @@ def load_catalogue(registry_path: Path) -> list[dict[str, Any]]:
                 "timezone": resort["timezone"],
                 "state": resort["state"],
                 "climate_regime": resort.get("climate_regime", "unclassified"),
+                "country": resort.get("country", "United States"),
                 "geometry_source": point["geometry_source"],
                 "region": REGION_BY_SLUG[slug],
             })
@@ -285,6 +396,53 @@ def hrrr_cell_indices(lats: np.ndarray, lons: np.ndarray,
         dlon = dlon_deg * 111.32 * math.cos(math.radians(p["latitude"]))
         out.append(int(np.argmin(dlat * dlat + dlon * dlon)))
     return out
+
+
+def hrrr_cell_distances_km(lats: np.ndarray, lons: np.ndarray,
+                           points: list[dict[str, Any]]) -> list[float]:
+    """Distance (km) from each point to its nearest HRRR cell centre.
+
+    Uses the same equirectangular metric as hrrr_cell_indices. On-domain
+    points sit within ~half a grid diagonal (~2.2 km at 3 km spacing) of a
+    cell centre; points outside the CONUS footprint are far away, which is
+    what the serving batch uses to detect off-domain points.
+    """
+    out = []
+    flat_lat = lats.ravel()
+    flat_lon = lons.ravel()
+    for p in points:
+        dlat = (flat_lat - p["latitude"]) * 111.32
+        dlon_deg = (flat_lon - p["longitude"] + 180.0) % 360.0 - 180.0
+        dlon = dlon_deg * 111.32 * math.cos(math.radians(p["latitude"]))
+        out.append(float(np.sqrt(np.min(dlat * dlat + dlon * dlon))))
+    return out
+
+
+HRRR_POLICY_REASON = (
+    "HRRR arm not served for points outside the United States "
+    "(CONUS-only product)"
+)
+HRRR_DOMAIN_REASON = "outside HRRR CONUS domain (arm not applicable)"
+HRRR_MAX_CELL_DISTANCE_KM = 10.0
+
+
+def hrrr_domain_exclusion(country: str, distance_km: float) -> str | None:
+    """Why the HRRR arm does not serve a point, or None if it does.
+
+    Two distinct exclusions (Codex review 2026-11-10): a SERVING POLICY
+    exclusion — HRRR is a CONUS product, so points outside the United
+    States are not served even where the grid's lat/lon footprint
+    overlaps southern Canada and nearby cells exist — and a GEOMETRIC
+    exclusion for US points whose nearest cell centre is implausibly
+    far for a 3 km grid (on-domain maximum ~2.2 km; the 10 km threshold
+    is a coarse safeguard, not an exact footprint boundary — it catches
+    Alaska). The policy clause takes precedence when both apply.
+    """
+    if country != "United States":
+        return HRRR_POLICY_REASON
+    if distance_km > HRRR_MAX_CELL_DISTANCE_KM:
+        return HRRR_DOMAIN_REASON
+    return None
 
 
 # ---------------------------------------------------------------------------

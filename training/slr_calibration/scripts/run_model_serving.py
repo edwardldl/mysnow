@@ -53,7 +53,9 @@ from slr_calibration.model_serving import (
     grib_values,
     hourly_amounts,
     http_get,
+    hrrr_cell_distances_km,
     hrrr_cell_indices,
+    hrrr_domain_exclusion,
     interp_level_series,
     load_catalogue,
     predict_with_passthrough,
@@ -222,6 +224,19 @@ def build_hrrr_series(points: list[dict], date: str, cycle: int, max_step: int =
     first_bytes = fetch_ranges(url0, [(first["offset"], first["length"])])[first["offset"]]
     lats, lons = grib_latlons(first_bytes)
     cells = hrrr_cell_indices(lats, lons, points)
+    # HRRR covers CONUS only; points it does not serve must not silently
+    # inherit border-cell data. hrrr_domain_exclusion separates the two
+    # cases: non-US points are excluded by serving policy (the grid's
+    # footprint overlaps southern Canada, so nearby cells can exist), and
+    # US points implausibly far from any cell centre are excluded
+    # geometrically (Alaska).
+    cell_distances = hrrr_cell_distances_km(lats, lons, points)
+    domain_excluded = {}
+    for point, dist in zip(points, cell_distances):
+        reason = hrrr_domain_exclusion(
+            point.get("country", "United States"), dist)
+        if reason is not None:
+            domain_excluded[point["point_id"]] = reason
 
     per_point_stamps: list[list[dict[str, Any]]] = [[] for _ in points]
     t2m_check: dict[str, dict[datetime, float]] = {p["point_id"]: {} for p in points}
@@ -296,6 +311,14 @@ def build_hrrr_series(points: list[dict], date: str, cycle: int, max_step: int =
 
     series_by_point: dict[str, dict[str, Any]] = {}
     for i, point in enumerate(points):
+        if point["point_id"] in domain_excluded:
+            series_by_point[point["point_id"]] = {
+                "domain_missing_reason": domain_excluded[point["point_id"]],
+                "profile_hours": {}, "w": {}, "q": {}, "accumu": {},
+                "sfc": {}, "first": stamps[0], "last": stamps[-1],
+            }
+            t2m_check[point["point_id"]] = {}
+            continue
         rows = per_point_stamps[i]
         profile_hours = {s: r["record"] for s, r in zip(stamps, rows)}
         apcp_acc = {s: r["apcp_acc_mm"] for s, r in zip(stamps, rows)}
@@ -356,6 +379,11 @@ def score_arm(arm: str, source_id: str, leads: list[int], cycle_dt: datetime,
                 "missing": False,
             }
             first_needed = start + timedelta(hours=1)
+            if series.get("domain_missing_reason"):
+                record["missing"] = True
+                record["missing_reason"] = series["domain_missing_reason"]
+                records.append(record)
+                continue
             if first_needed < series["first"] or end > series["last"]:
                 record["missing"] = True
                 record["missing_reason"] = (
@@ -451,8 +479,13 @@ def main() -> int:
         recs, feats = score_arm("hrrr", SOURCE_ID_HRRR, [1, 2], cycle_dt,
                                 points, series, model, sidecar_features)
         all_records += recs; all_features += feats
-        manifest["arms"]["hrrr"] = {"records": len(recs),
-                                    "predicted": sum(1 for r in recs if not r["missing"])}
+        manifest["arms"]["hrrr"] = {
+            "records": len(recs),
+            "predicted": sum(1 for r in recs if not r["missing"]),
+            "domain_excluded_points": sorted(
+                pid for pid, srs in series.items()
+                if srs.get("domain_missing_reason")),
+        }
 
     if len(t2m_by_arm) == 2:
         diffs = []

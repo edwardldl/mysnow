@@ -924,6 +924,4867 @@
       "snotel_station": null,
       "state": "CA",
       "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Three Summits",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 797.0,
+          "geometry_source": "estimated",
+          "latitude": 47.403717,
+          "longitude": -121.414767,
+          "name": "Base estimate",
+          "point_id": "the-summit-at-snoqualmie-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 986.0,
+          "geometry_source": "estimated",
+          "latitude": 47.403717,
+          "longitude": -121.414767,
+          "name": "Mid-mountain estimate",
+          "point_id": "the-summit-at-snoqualmie-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1175.0,
+          "geometry_source": "estimated",
+          "latitude": 47.403717,
+          "longitude": -121.414767,
+          "name": "Summit estimate",
+          "point_id": "the-summit-at-snoqualmie-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.403717,
+      "longitude": -121.414767,
+      "match_note": "Catalog entry 'Three Summits' in src/data/ski-areas.json (Washington): the dataset's name for The Summit at Snoqualmie's connected Summit West/Central/East cluster at Snoqualmie Pass; Alpental is a separate catalogue resort.",
+      "max_elevation_m": 1175.0,
+      "min_elevation_m": 797.0,
+      "pilot_name": "The Summit at Snoqualmie",
+      "resort_slug": "the-summit-at-snoqualmie",
+      "snotel_station": null,
+      "state": "WA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Alpental",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 954.0,
+          "geometry_source": "estimated",
+          "latitude": 47.442481,
+          "longitude": -121.432635,
+          "name": "Base estimate",
+          "point_id": "alpental-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1302.0,
+          "geometry_source": "estimated",
+          "latitude": 47.442481,
+          "longitude": -121.432635,
+          "name": "Mid-mountain estimate",
+          "point_id": "alpental-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1650.0,
+          "geometry_source": "estimated",
+          "latitude": 47.442481,
+          "longitude": -121.432635,
+          "name": "Summit estimate",
+          "point_id": "alpental-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.442481,
+      "longitude": -121.432635,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Washington). Alpental is listed as a separate Ikon destination from The Summit at Snoqualmie and is a separate base area.",
+      "max_elevation_m": 1650.0,
+      "min_elevation_m": 954.0,
+      "pilot_name": "Alpental",
+      "resort_slug": "alpental",
+      "snotel_station": null,
+      "state": "WA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Alyeska Resort",
+      "climate_regime": "maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 86.0,
+          "geometry_source": "estimated",
+          "latitude": 60.961802,
+          "longitude": -149.086629,
+          "name": "Base estimate",
+          "point_id": "alyeska-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 462.0,
+          "geometry_source": "estimated",
+          "latitude": 60.961802,
+          "longitude": -149.086629,
+          "name": "Mid-mountain estimate",
+          "point_id": "alyeska-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 838.0,
+          "geometry_source": "estimated",
+          "latitude": 60.961802,
+          "longitude": -149.086629,
+          "name": "Summit estimate",
+          "point_id": "alyeska-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 60.961802,
+      "longitude": -149.086629,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Alaska).",
+      "max_elevation_m": 838.0,
+      "min_elevation_m": 86.0,
+      "pilot_name": "Alyeska Resort",
+      "resort_slug": "alyeska",
+      "snotel_station": null,
+      "state": "AK",
+      "timezone": "America/Anchorage"
+    },
+    {
+      "catalog_name": "Crystal Mountain",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1346.0,
+          "geometry_source": "estimated",
+          "latitude": 46.934822,
+          "longitude": -121.49019,
+          "name": "Base estimate",
+          "point_id": "crystal-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1702.5,
+          "geometry_source": "estimated",
+          "latitude": 46.934822,
+          "longitude": -121.49019,
+          "name": "Mid-mountain estimate",
+          "point_id": "crystal-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2059.0,
+          "geometry_source": "estimated",
+          "latitude": 46.934822,
+          "longitude": -121.49019,
+          "name": "Summit estimate",
+          "point_id": "crystal-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 46.934822,
+      "longitude": -121.49019,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Washington).",
+      "max_elevation_m": 2059.0,
+      "min_elevation_m": 1346.0,
+      "pilot_name": "Crystal Mountain",
+      "resort_slug": "crystal-mountain",
+      "snotel_station": null,
+      "state": "WA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Mt. Bachelor",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1742.0,
+          "geometry_source": "estimated",
+          "latitude": 43.993883,
+          "longitude": -121.682948,
+          "name": "Base estimate",
+          "point_id": "mt-bachelor-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2233.0,
+          "geometry_source": "estimated",
+          "latitude": 43.993883,
+          "longitude": -121.682948,
+          "name": "Mid-mountain estimate",
+          "point_id": "mt-bachelor-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2724.0,
+          "geometry_source": "estimated",
+          "latitude": 43.993883,
+          "longitude": -121.682948,
+          "name": "Summit estimate",
+          "point_id": "mt-bachelor-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.993883,
+      "longitude": -121.682948,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Oregon).",
+      "max_elevation_m": 2724.0,
+      "min_elevation_m": 1742.0,
+      "pilot_name": "Mt. Bachelor",
+      "resort_slug": "mt-bachelor",
+      "snotel_station": null,
+      "state": "OR",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Schweitzer Mountain Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1226.0,
+          "geometry_source": "estimated",
+          "latitude": 48.385814,
+          "longitude": -116.620418,
+          "name": "Base estimate",
+          "point_id": "schweitzer-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1585.5,
+          "geometry_source": "estimated",
+          "latitude": 48.385814,
+          "longitude": -116.620418,
+          "name": "Mid-mountain estimate",
+          "point_id": "schweitzer-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1945.0,
+          "geometry_source": "estimated",
+          "latitude": 48.385814,
+          "longitude": -116.620418,
+          "name": "Summit estimate",
+          "point_id": "schweitzer-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 48.385814,
+      "longitude": -116.620418,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Idaho).",
+      "max_elevation_m": 1945.0,
+      "min_elevation_m": 1226.0,
+      "pilot_name": "Schweitzer",
+      "resort_slug": "schweitzer",
+      "snotel_station": null,
+      "state": "ID",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Sun Valley - Bald Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1758.0,
+          "geometry_source": "estimated",
+          "latitude": 43.667482,
+          "longitude": -114.39124,
+          "name": "Base estimate",
+          "point_id": "sun-valley-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2273.0,
+          "geometry_source": "estimated",
+          "latitude": 43.667482,
+          "longitude": -114.39124,
+          "name": "Mid-mountain estimate",
+          "point_id": "sun-valley-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2788.0,
+          "geometry_source": "estimated",
+          "latitude": 43.667482,
+          "longitude": -114.39124,
+          "name": "Summit estimate",
+          "point_id": "sun-valley-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.667482,
+      "longitude": -114.39124,
+      "match_note": "Catalog entry 'Sun Valley - Bald Mountain' in src/data/ski-areas.json (Idaho): Bald Mountain is Sun Valley's main mountain; the Dollar Mountain beginner area is not separately catalogued.",
+      "max_elevation_m": 2788.0,
+      "min_elevation_m": 1758.0,
+      "pilot_name": "Sun Valley",
+      "resort_slug": "sun-valley",
+      "snotel_station": null,
+      "state": "ID",
+      "timezone": "America/Boise"
+    },
+    {
+      "catalog_name": "Arapahoe Basin Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 3295.0,
+          "geometry_source": "estimated",
+          "latitude": 39.631997,
+          "longitude": -105.876991,
+          "name": "Base estimate",
+          "point_id": "arapahoe-basin-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3549.0,
+          "geometry_source": "estimated",
+          "latitude": 39.631997,
+          "longitude": -105.876991,
+          "name": "Mid-mountain estimate",
+          "point_id": "arapahoe-basin-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3803.0,
+          "geometry_source": "estimated",
+          "latitude": 39.631997,
+          "longitude": -105.876991,
+          "name": "Summit estimate",
+          "point_id": "arapahoe-basin-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.631997,
+      "longitude": -105.876991,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3803.0,
+      "min_elevation_m": 3295.0,
+      "pilot_name": "Arapahoe Basin",
+      "resort_slug": "arapahoe-basin",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Aspen Highlands",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2472.0,
+          "geometry_source": "estimated",
+          "latitude": 39.163082,
+          "longitude": -106.862015,
+          "name": "Base estimate",
+          "point_id": "aspen-highlands-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3000.5,
+          "geometry_source": "estimated",
+          "latitude": 39.163082,
+          "longitude": -106.862015,
+          "name": "Mid-mountain estimate",
+          "point_id": "aspen-highlands-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3529.0,
+          "geometry_source": "estimated",
+          "latitude": 39.163082,
+          "longitude": -106.862015,
+          "name": "Summit estimate",
+          "point_id": "aspen-highlands-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.163082,
+      "longitude": -106.862015,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3529.0,
+      "min_elevation_m": 2472.0,
+      "pilot_name": "Aspen Highlands",
+      "resort_slug": "aspen-highlands",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Buttermilk",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2406.0,
+          "geometry_source": "estimated",
+          "latitude": 39.192297,
+          "longitude": -106.870089,
+          "name": "Base estimate",
+          "point_id": "buttermilk-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2710.0,
+          "geometry_source": "estimated",
+          "latitude": 39.192297,
+          "longitude": -106.870089,
+          "name": "Mid-mountain estimate",
+          "point_id": "buttermilk-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3014.0,
+          "geometry_source": "estimated",
+          "latitude": 39.192297,
+          "longitude": -106.870089,
+          "name": "Summit estimate",
+          "point_id": "buttermilk-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.192297,
+      "longitude": -106.870089,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3014.0,
+      "min_elevation_m": 2406.0,
+      "pilot_name": "Buttermilk",
+      "resort_slug": "buttermilk",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Aspen Snowmass",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2477.0,
+          "geometry_source": "estimated",
+          "latitude": 39.198633,
+          "longitude": -106.949794,
+          "name": "Base estimate",
+          "point_id": "snowmass-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3147.5,
+          "geometry_source": "estimated",
+          "latitude": 39.198633,
+          "longitude": -106.949794,
+          "name": "Mid-mountain estimate",
+          "point_id": "snowmass-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3818.0,
+          "geometry_source": "estimated",
+          "latitude": 39.198633,
+          "longitude": -106.949794,
+          "name": "Summit estimate",
+          "point_id": "snowmass-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.198633,
+      "longitude": -106.949794,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3818.0,
+      "min_elevation_m": 2477.0,
+      "pilot_name": "Snowmass",
+      "resort_slug": "snowmass",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Brighton Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2674.0,
+          "geometry_source": "estimated",
+          "latitude": 40.594564,
+          "longitude": -111.582041,
+          "name": "Base estimate",
+          "point_id": "brighton-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2931.5,
+          "geometry_source": "estimated",
+          "latitude": 40.594564,
+          "longitude": -111.582041,
+          "name": "Mid-mountain estimate",
+          "point_id": "brighton-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3189.0,
+          "geometry_source": "estimated",
+          "latitude": 40.594564,
+          "longitude": -111.582041,
+          "name": "Summit estimate",
+          "point_id": "brighton-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.594564,
+      "longitude": -111.582041,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 3189.0,
+      "min_elevation_m": 2674.0,
+      "pilot_name": "Brighton",
+      "resort_slug": "brighton",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Copper Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2965.0,
+          "geometry_source": "estimated",
+          "latitude": 39.491493,
+          "longitude": -106.158353,
+          "name": "Base estimate",
+          "point_id": "copper-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3363.5,
+          "geometry_source": "estimated",
+          "latitude": 39.491493,
+          "longitude": -106.158353,
+          "name": "Mid-mountain estimate",
+          "point_id": "copper-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3762.0,
+          "geometry_source": "estimated",
+          "latitude": 39.491493,
+          "longitude": -106.158353,
+          "name": "Summit estimate",
+          "point_id": "copper-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.491493,
+      "longitude": -106.158353,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3762.0,
+      "min_elevation_m": 2965.0,
+      "pilot_name": "Copper Mountain",
+      "resort_slug": "copper-mountain",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Deer Valley Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1969.0,
+          "geometry_source": "estimated",
+          "latitude": 40.627667,
+          "longitude": -111.482878,
+          "name": "Base estimate",
+          "point_id": "deer-valley-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2439.5,
+          "geometry_source": "estimated",
+          "latitude": 40.627667,
+          "longitude": -111.482878,
+          "name": "Mid-mountain estimate",
+          "point_id": "deer-valley-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2910.0,
+          "geometry_source": "estimated",
+          "latitude": 40.627667,
+          "longitude": -111.482878,
+          "name": "Summit estimate",
+          "point_id": "deer-valley-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.627667,
+      "longitude": -111.482878,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 2910.0,
+      "min_elevation_m": 1969.0,
+      "pilot_name": "Deer Valley",
+      "resort_slug": "deer-valley",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Eldora",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2831.0,
+          "geometry_source": "estimated",
+          "latitude": 39.939864,
+          "longitude": -105.591787,
+          "name": "Base estimate",
+          "point_id": "eldora-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3033.5,
+          "geometry_source": "estimated",
+          "latitude": 39.939864,
+          "longitude": -105.591787,
+          "name": "Mid-mountain estimate",
+          "point_id": "eldora-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3236.0,
+          "geometry_source": "estimated",
+          "latitude": 39.939864,
+          "longitude": -105.591787,
+          "name": "Summit estimate",
+          "point_id": "eldora-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.939864,
+      "longitude": -105.591787,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3236.0,
+      "min_elevation_m": 2831.0,
+      "pilot_name": "Eldora",
+      "resort_slug": "eldora",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Snowbasin Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1938.0,
+          "geometry_source": "estimated",
+          "latitude": 41.200663,
+          "longitude": -111.863024,
+          "name": "Base estimate",
+          "point_id": "snowbasin-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2386.5,
+          "geometry_source": "estimated",
+          "latitude": 41.200663,
+          "longitude": -111.863024,
+          "name": "Mid-mountain estimate",
+          "point_id": "snowbasin-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2835.0,
+          "geometry_source": "estimated",
+          "latitude": 41.200663,
+          "longitude": -111.863024,
+          "name": "Summit estimate",
+          "point_id": "snowbasin-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.200663,
+      "longitude": -111.863024,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 2835.0,
+      "min_elevation_m": 1938.0,
+      "pilot_name": "Snowbasin",
+      "resort_slug": "snowbasin",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Snowbird",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2368.0,
+          "geometry_source": "estimated",
+          "latitude": 40.570455,
+          "longitude": -111.648965,
+          "name": "Base estimate",
+          "point_id": "snowbird-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2855.0,
+          "geometry_source": "estimated",
+          "latitude": 40.570455,
+          "longitude": -111.648965,
+          "name": "Mid-mountain estimate",
+          "point_id": "snowbird-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3342.0,
+          "geometry_source": "estimated",
+          "latitude": 40.570455,
+          "longitude": -111.648965,
+          "name": "Summit estimate",
+          "point_id": "snowbird-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.570455,
+      "longitude": -111.648965,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 3342.0,
+      "min_elevation_m": 2368.0,
+      "pilot_name": "Snowbird",
+      "resort_slug": "snowbird",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Solitude Mountain Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2445.0,
+          "geometry_source": "estimated",
+          "latitude": 40.614572,
+          "longitude": -111.600985,
+          "name": "Base estimate",
+          "point_id": "solitude-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2745.5,
+          "geometry_source": "estimated",
+          "latitude": 40.614572,
+          "longitude": -111.600985,
+          "name": "Mid-mountain estimate",
+          "point_id": "solitude-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3046.0,
+          "geometry_source": "estimated",
+          "latitude": 40.614572,
+          "longitude": -111.600985,
+          "name": "Summit estimate",
+          "point_id": "solitude-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.614572,
+      "longitude": -111.600985,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 3046.0,
+      "min_elevation_m": 2445.0,
+      "pilot_name": "Solitude",
+      "resort_slug": "solitude",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Steamboat Ski Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2105.0,
+          "geometry_source": "estimated",
+          "latitude": 40.461581,
+          "longitude": -106.767394,
+          "name": "Base estimate",
+          "point_id": "steamboat-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2656.5,
+          "geometry_source": "estimated",
+          "latitude": 40.461581,
+          "longitude": -106.767394,
+          "name": "Mid-mountain estimate",
+          "point_id": "steamboat-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3208.0,
+          "geometry_source": "estimated",
+          "latitude": 40.461581,
+          "longitude": -106.767394,
+          "name": "Summit estimate",
+          "point_id": "steamboat-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.461581,
+      "longitude": -106.767394,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3208.0,
+      "min_elevation_m": 2105.0,
+      "pilot_name": "Steamboat",
+      "resort_slug": "steamboat",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Taos Ski Valley",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2856.0,
+          "geometry_source": "estimated",
+          "latitude": 36.577859,
+          "longitude": -105.450991,
+          "name": "Base estimate",
+          "point_id": "taos-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3231.0,
+          "geometry_source": "estimated",
+          "latitude": 36.577859,
+          "longitude": -105.450991,
+          "name": "Mid-mountain estimate",
+          "point_id": "taos-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3606.0,
+          "geometry_source": "estimated",
+          "latitude": 36.577859,
+          "longitude": -105.450991,
+          "name": "Summit estimate",
+          "point_id": "taos-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 36.577859,
+      "longitude": -105.450991,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New Mexico).",
+      "max_elevation_m": 3606.0,
+      "min_elevation_m": 2856.0,
+      "pilot_name": "Taos Ski Valley",
+      "resort_slug": "taos",
+      "snotel_station": null,
+      "state": "NM",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Winter Park Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2775.0,
+          "geometry_source": "estimated",
+          "latitude": 39.86723,
+          "longitude": -105.779117,
+          "name": "Base estimate",
+          "point_id": "winter-park-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3216.0,
+          "geometry_source": "estimated",
+          "latitude": 39.86723,
+          "longitude": -105.779117,
+          "name": "Mid-mountain estimate",
+          "point_id": "winter-park-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3657.0,
+          "geometry_source": "estimated",
+          "latitude": 39.86723,
+          "longitude": -105.779117,
+          "name": "Summit estimate",
+          "point_id": "winter-park-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.86723,
+      "longitude": -105.779117,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3657.0,
+      "min_elevation_m": 2775.0,
+      "pilot_name": "Winter Park",
+      "resort_slug": "winter-park",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Blue Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 141.0,
+          "geometry_source": "estimated",
+          "latitude": 40.816429,
+          "longitude": -75.511839,
+          "name": "Base estimate",
+          "point_id": "blue-mountain-pa-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 305.0,
+          "geometry_source": "estimated",
+          "latitude": 40.816429,
+          "longitude": -75.511839,
+          "name": "Mid-mountain estimate",
+          "point_id": "blue-mountain-pa-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 469.0,
+          "geometry_source": "estimated",
+          "latitude": 40.816429,
+          "longitude": -75.511839,
+          "name": "Summit estimate",
+          "point_id": "blue-mountain-pa-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.816429,
+      "longitude": -75.511839,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 469.0,
+      "min_elevation_m": 141.0,
+      "pilot_name": "Blue Mountain (PA)",
+      "resort_slug": "blue-mountain-pa",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Boyne Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 217.0,
+          "geometry_source": "estimated",
+          "latitude": 45.164969,
+          "longitude": -84.943524,
+          "name": "Base estimate",
+          "point_id": "boyne-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 283.5,
+          "geometry_source": "estimated",
+          "latitude": 45.164969,
+          "longitude": -84.943524,
+          "name": "Mid-mountain estimate",
+          "point_id": "boyne-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 350.0,
+          "geometry_source": "estimated",
+          "latitude": 45.164969,
+          "longitude": -84.943524,
+          "name": "Summit estimate",
+          "point_id": "boyne-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.164969,
+      "longitude": -84.943524,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Michigan).",
+      "max_elevation_m": 350.0,
+      "min_elevation_m": 217.0,
+      "pilot_name": "Boyne Mountain",
+      "resort_slug": "boyne-mountain",
+      "snotel_station": null,
+      "state": "MI",
+      "timezone": "America/Detroit"
+    },
+    {
+      "catalog_name": "Camelback Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 376.0,
+          "geometry_source": "estimated",
+          "latitude": 41.048034,
+          "longitude": -75.354203,
+          "name": "Base estimate",
+          "point_id": "camelback-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 498.0,
+          "geometry_source": "estimated",
+          "latitude": 41.048034,
+          "longitude": -75.354203,
+          "name": "Mid-mountain estimate",
+          "point_id": "camelback-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 620.0,
+          "geometry_source": "estimated",
+          "latitude": 41.048034,
+          "longitude": -75.354203,
+          "name": "Summit estimate",
+          "point_id": "camelback-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.048034,
+      "longitude": -75.354203,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 620.0,
+      "min_elevation_m": 376.0,
+      "pilot_name": "Camelback",
+      "resort_slug": "camelback",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Granite Peak Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 373.0,
+          "geometry_source": "estimated",
+          "latitude": 44.924737,
+          "longitude": -89.684795,
+          "name": "Base estimate",
+          "point_id": "granite-peak-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 474.5,
+          "geometry_source": "estimated",
+          "latitude": 44.924737,
+          "longitude": -89.684795,
+          "name": "Mid-mountain estimate",
+          "point_id": "granite-peak-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 576.0,
+          "geometry_source": "estimated",
+          "latitude": 44.924737,
+          "longitude": -89.684795,
+          "name": "Summit estimate",
+          "point_id": "granite-peak-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.924737,
+      "longitude": -89.684795,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Wisconsin).",
+      "max_elevation_m": 576.0,
+      "min_elevation_m": 373.0,
+      "pilot_name": "Granite Peak",
+      "resort_slug": "granite-peak",
+      "snotel_station": null,
+      "state": "WI",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Killington Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 356.0,
+          "geometry_source": "estimated",
+          "latitude": 43.612518,
+          "longitude": -72.794821,
+          "name": "Base estimate",
+          "point_id": "killington-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 809.0,
+          "geometry_source": "estimated",
+          "latitude": 43.612518,
+          "longitude": -72.794821,
+          "name": "Mid-mountain estimate",
+          "point_id": "killington-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1262.0,
+          "geometry_source": "estimated",
+          "latitude": 43.612518,
+          "longitude": -72.794821,
+          "name": "Summit estimate",
+          "point_id": "killington-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.612518,
+      "longitude": -72.794821,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1262.0,
+      "min_elevation_m": 356.0,
+      "pilot_name": "Killington",
+      "resort_slug": "killington",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Pico Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 613.0,
+          "geometry_source": "estimated",
+          "latitude": 43.655077,
+          "longitude": -72.840606,
+          "name": "Base estimate",
+          "point_id": "pico-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 908.0,
+          "geometry_source": "estimated",
+          "latitude": 43.655077,
+          "longitude": -72.840606,
+          "name": "Mid-mountain estimate",
+          "point_id": "pico-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1203.0,
+          "geometry_source": "estimated",
+          "latitude": 43.655077,
+          "longitude": -72.840606,
+          "name": "Summit estimate",
+          "point_id": "pico-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.655077,
+      "longitude": -72.840606,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1203.0,
+      "min_elevation_m": 613.0,
+      "pilot_name": "Pico Mountain",
+      "resort_slug": "pico-mountain",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Loon Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 261.0,
+          "geometry_source": "estimated",
+          "latitude": 44.048803,
+          "longitude": -71.636589,
+          "name": "Base estimate",
+          "point_id": "loon-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 594.5,
+          "geometry_source": "estimated",
+          "latitude": 44.048803,
+          "longitude": -71.636589,
+          "name": "Mid-mountain estimate",
+          "point_id": "loon-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 928.0,
+          "geometry_source": "estimated",
+          "latitude": 44.048803,
+          "longitude": -71.636589,
+          "name": "Summit estimate",
+          "point_id": "loon-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.048803,
+      "longitude": -71.636589,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New Hampshire).",
+      "max_elevation_m": 928.0,
+      "min_elevation_m": 261.0,
+      "pilot_name": "Loon Mountain",
+      "resort_slug": "loon-mountain",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Lutsen Mountains",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 274.0,
+          "geometry_source": "estimated",
+          "latitude": 47.658586,
+          "longitude": -90.719285,
+          "name": "Base estimate",
+          "point_id": "lutsen-mountains-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 389.5,
+          "geometry_source": "estimated",
+          "latitude": 47.658586,
+          "longitude": -90.719285,
+          "name": "Mid-mountain estimate",
+          "point_id": "lutsen-mountains-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 505.0,
+          "geometry_source": "estimated",
+          "latitude": 47.658586,
+          "longitude": -90.719285,
+          "name": "Summit estimate",
+          "point_id": "lutsen-mountains-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.658586,
+      "longitude": -90.719285,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Minnesota).",
+      "max_elevation_m": 505.0,
+      "min_elevation_m": 274.0,
+      "pilot_name": "Lutsen Mountains",
+      "resort_slug": "lutsen-mountains",
+      "snotel_station": null,
+      "state": "MN",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Jackson Creek Summit",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 366.0,
+          "geometry_source": "estimated",
+          "latitude": 46.504009,
+          "longitude": -89.971882,
+          "name": "Base estimate",
+          "point_id": "snowriver-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 451.0,
+          "geometry_source": "estimated",
+          "latitude": 46.504009,
+          "longitude": -89.971882,
+          "name": "Mid-mountain estimate",
+          "point_id": "snowriver-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 536.0,
+          "geometry_source": "estimated",
+          "latitude": 46.504009,
+          "longitude": -89.971882,
+          "name": "Summit estimate",
+          "point_id": "snowriver-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 46.504009,
+      "longitude": -89.971882,
+      "match_note": "Catalog entry 'Jackson Creek Summit' in src/data/ski-areas.json (Michigan): Snowriver Mountain Resort's main mountain; the resort's second area (Black River Basin) is one pass destination with it and its app location 2.7 km away is served by the same point.",
+      "max_elevation_m": 536.0,
+      "min_elevation_m": 366.0,
+      "pilot_name": "Snowriver",
+      "resort_slug": "snowriver",
+      "snotel_station": null,
+      "state": "MI",
+      "timezone": "America/Menominee"
+    },
+    {
+      "catalog_name": "Snowshoe Mountain",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 999.0,
+          "geometry_source": "estimated",
+          "latitude": 38.422199,
+          "longitude": -79.993263,
+          "name": "Base estimate",
+          "point_id": "snowshoe-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1233.5,
+          "geometry_source": "estimated",
+          "latitude": 38.422199,
+          "longitude": -79.993263,
+          "name": "Mid-mountain estimate",
+          "point_id": "snowshoe-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1468.0,
+          "geometry_source": "estimated",
+          "latitude": 38.422199,
+          "longitude": -79.993263,
+          "name": "Summit estimate",
+          "point_id": "snowshoe-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.422199,
+      "longitude": -79.993263,
+      "match_note": "Catalog name match in src/data/ski-areas.json (West Virginia); the widest-range of the dataset's duplicate entries was used.",
+      "max_elevation_m": 1468.0,
+      "min_elevation_m": 999.0,
+      "pilot_name": "Snowshoe",
+      "resort_slug": "snowshoe",
+      "snotel_station": null,
+      "state": "WV",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Stratton Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 606.0,
+          "geometry_source": "estimated",
+          "latitude": 43.102148,
+          "longitude": -72.911555,
+          "name": "Base estimate",
+          "point_id": "stratton-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 892.0,
+          "geometry_source": "estimated",
+          "latitude": 43.102148,
+          "longitude": -72.911555,
+          "name": "Mid-mountain estimate",
+          "point_id": "stratton-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1178.0,
+          "geometry_source": "estimated",
+          "latitude": 43.102148,
+          "longitude": -72.911555,
+          "name": "Summit estimate",
+          "point_id": "stratton-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.102148,
+      "longitude": -72.911555,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1178.0,
+      "min_elevation_m": 606.0,
+      "pilot_name": "Stratton",
+      "resort_slug": "stratton",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Sugarbush Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 459.0,
+          "geometry_source": "estimated",
+          "latitude": 44.148173,
+          "longitude": -72.908087,
+          "name": "Base estimate",
+          "point_id": "sugarbush-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 847.5,
+          "geometry_source": "estimated",
+          "latitude": 44.148173,
+          "longitude": -72.908087,
+          "name": "Mid-mountain estimate",
+          "point_id": "sugarbush-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1236.0,
+          "geometry_source": "estimated",
+          "latitude": 44.148173,
+          "longitude": -72.908087,
+          "name": "Summit estimate",
+          "point_id": "sugarbush-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.148173,
+      "longitude": -72.908087,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1236.0,
+      "min_elevation_m": 459.0,
+      "pilot_name": "Sugarbush",
+      "resort_slug": "sugarbush",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Sunday River",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 250.0,
+          "geometry_source": "estimated",
+          "latitude": 44.466871,
+          "longitude": -70.874407,
+          "name": "Base estimate",
+          "point_id": "sunday-river-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 602.0,
+          "geometry_source": "estimated",
+          "latitude": 44.466871,
+          "longitude": -70.874407,
+          "name": "Mid-mountain estimate",
+          "point_id": "sunday-river-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 954.0,
+          "geometry_source": "estimated",
+          "latitude": 44.466871,
+          "longitude": -70.874407,
+          "name": "Summit estimate",
+          "point_id": "sunday-river-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.466871,
+      "longitude": -70.874407,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Maine).",
+      "max_elevation_m": 954.0,
+      "min_elevation_m": 250.0,
+      "pilot_name": "Sunday River",
+      "resort_slug": "sunday-river",
+      "snotel_station": null,
+      "state": "ME",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Boyne Highlands Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 241.0,
+          "geometry_source": "estimated",
+          "latitude": 45.477782,
+          "longitude": -84.936727,
+          "name": "Base estimate",
+          "point_id": "the-highlands-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 321.5,
+          "geometry_source": "estimated",
+          "latitude": 45.477782,
+          "longitude": -84.936727,
+          "name": "Mid-mountain estimate",
+          "point_id": "the-highlands-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 402.0,
+          "geometry_source": "estimated",
+          "latitude": 45.477782,
+          "longitude": -84.936727,
+          "name": "Summit estimate",
+          "point_id": "the-highlands-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.477782,
+      "longitude": -84.936727,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Michigan).",
+      "max_elevation_m": 402.0,
+      "min_elevation_m": 241.0,
+      "pilot_name": "The Highlands",
+      "resort_slug": "the-highlands",
+      "snotel_station": null,
+      "state": "MI",
+      "timezone": "America/Detroit"
+    },
+    {
+      "catalog_name": "Blue Mountain Ski Resort",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 233.0,
+          "geometry_source": "estimated",
+          "latitude": 44.497783,
+          "longitude": -80.31495,
+          "name": "Base estimate",
+          "point_id": "blue-mountain-on-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 344.0,
+          "geometry_source": "estimated",
+          "latitude": 44.497783,
+          "longitude": -80.31495,
+          "name": "Mid-mountain estimate",
+          "point_id": "blue-mountain-on-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 455.0,
+          "geometry_source": "estimated",
+          "latitude": 44.497783,
+          "longitude": -80.31495,
+          "name": "Summit estimate",
+          "point_id": "blue-mountain-on-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.497783,
+      "longitude": -80.31495,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Ontario).",
+      "max_elevation_m": 455.0,
+      "min_elevation_m": 233.0,
+      "pilot_name": "Blue Mountain (ON)",
+      "resort_slug": "blue-mountain-on",
+      "snotel_station": null,
+      "state": "ON",
+      "timezone": "America/Toronto"
+    },
+    {
+      "catalog_name": "Cypress Mountain",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 824.0,
+          "geometry_source": "estimated",
+          "latitude": 49.389236,
+          "longitude": -123.189247,
+          "name": "Base estimate",
+          "point_id": "cypress-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1123.0,
+          "geometry_source": "estimated",
+          "latitude": 49.389236,
+          "longitude": -123.189247,
+          "name": "Mid-mountain estimate",
+          "point_id": "cypress-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1422.0,
+          "geometry_source": "estimated",
+          "latitude": 49.389236,
+          "longitude": -123.189247,
+          "name": "Summit estimate",
+          "point_id": "cypress-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 49.389236,
+      "longitude": -123.189247,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 1422.0,
+      "min_elevation_m": 824.0,
+      "pilot_name": "Cypress Mountain",
+      "resort_slug": "cypress-mountain",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Le Massif",
+      "climate_regime": "northeast_cold_orographic",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 39.0,
+          "geometry_source": "estimated",
+          "latitude": 47.280515,
+          "longitude": -70.592549,
+          "name": "Base estimate",
+          "point_id": "le-massif-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 415.5,
+          "geometry_source": "estimated",
+          "latitude": 47.280515,
+          "longitude": -70.592549,
+          "name": "Mid-mountain estimate",
+          "point_id": "le-massif-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 792.0,
+          "geometry_source": "estimated",
+          "latitude": 47.280515,
+          "longitude": -70.592549,
+          "name": "Summit estimate",
+          "point_id": "le-massif-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.280515,
+      "longitude": -70.592549,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Quebec).",
+      "max_elevation_m": 792.0,
+      "min_elevation_m": 39.0,
+      "pilot_name": "Le Massif de Charlevoix",
+      "resort_slug": "le-massif",
+      "snotel_station": null,
+      "state": "QC",
+      "timezone": "America/Toronto"
+    },
+    {
+      "catalog_name": "Panorama Mountain Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1155.0,
+          "geometry_source": "estimated",
+          "latitude": 50.445436,
+          "longitude": -116.223563,
+          "name": "Base estimate",
+          "point_id": "panorama-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1761.5,
+          "geometry_source": "estimated",
+          "latitude": 50.445436,
+          "longitude": -116.223563,
+          "name": "Mid-mountain estimate",
+          "point_id": "panorama-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2368.0,
+          "geometry_source": "estimated",
+          "latitude": 50.445436,
+          "longitude": -116.223563,
+          "name": "Summit estimate",
+          "point_id": "panorama-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 50.445436,
+      "longitude": -116.223563,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 2368.0,
+      "min_elevation_m": 1155.0,
+      "pilot_name": "Panorama",
+      "resort_slug": "panorama",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Red Mountain Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1154.0,
+          "geometry_source": "estimated",
+          "latitude": 49.106413,
+          "longitude": -117.840636,
+          "name": "Base estimate",
+          "point_id": "red-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1596.0,
+          "geometry_source": "estimated",
+          "latitude": 49.106413,
+          "longitude": -117.840636,
+          "name": "Mid-mountain estimate",
+          "point_id": "red-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2038.0,
+          "geometry_source": "estimated",
+          "latitude": 49.106413,
+          "longitude": -117.840636,
+          "name": "Summit estimate",
+          "point_id": "red-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 49.106413,
+      "longitude": -117.840636,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 2038.0,
+      "min_elevation_m": 1154.0,
+      "pilot_name": "RED Mountain",
+      "resort_slug": "red-mountain",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Revelstoke Mountain Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 517.0,
+          "geometry_source": "estimated",
+          "latitude": 50.96308,
+          "longitude": -118.118999,
+          "name": "Base estimate",
+          "point_id": "revelstoke-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1370.0,
+          "geometry_source": "estimated",
+          "latitude": 50.96308,
+          "longitude": -118.118999,
+          "name": "Mid-mountain estimate",
+          "point_id": "revelstoke-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2223.0,
+          "geometry_source": "estimated",
+          "latitude": 50.96308,
+          "longitude": -118.118999,
+          "name": "Summit estimate",
+          "point_id": "revelstoke-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 50.96308,
+      "longitude": -118.118999,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 2223.0,
+      "min_elevation_m": 517.0,
+      "pilot_name": "Revelstoke",
+      "resort_slug": "revelstoke",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Silver Star Mountain Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1146.0,
+          "geometry_source": "estimated",
+          "latitude": 50.365733,
+          "longitude": -119.051583,
+          "name": "Base estimate",
+          "point_id": "silverstar-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1516.5,
+          "geometry_source": "estimated",
+          "latitude": 50.365733,
+          "longitude": -119.051583,
+          "name": "Mid-mountain estimate",
+          "point_id": "silverstar-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1887.0,
+          "geometry_source": "estimated",
+          "latitude": 50.365733,
+          "longitude": -119.051583,
+          "name": "Summit estimate",
+          "point_id": "silverstar-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 50.365733,
+      "longitude": -119.051583,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 1887.0,
+      "min_elevation_m": 1146.0,
+      "pilot_name": "SilverStar",
+      "resort_slug": "silverstar",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Banff Sunshine Village",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1665.0,
+          "geometry_source": "estimated",
+          "latitude": 51.08739,
+          "longitude": -115.770014,
+          "name": "Base estimate",
+          "point_id": "banff-sunshine-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2176.0,
+          "geometry_source": "estimated",
+          "latitude": 51.08739,
+          "longitude": -115.770014,
+          "name": "Mid-mountain estimate",
+          "point_id": "banff-sunshine-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2687.0,
+          "geometry_source": "estimated",
+          "latitude": 51.08739,
+          "longitude": -115.770014,
+          "name": "Summit estimate",
+          "point_id": "banff-sunshine-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 51.08739,
+      "longitude": -115.770014,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Alberta).",
+      "max_elevation_m": 2687.0,
+      "min_elevation_m": 1665.0,
+      "pilot_name": "Banff Sunshine",
+      "resort_slug": "banff-sunshine",
+      "snotel_station": null,
+      "state": "AB",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Lake Louise Ski Area",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1648.0,
+          "geometry_source": "estimated",
+          "latitude": 51.452565,
+          "longitude": -116.131218,
+          "name": "Base estimate",
+          "point_id": "lake-louise-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2145.5,
+          "geometry_source": "estimated",
+          "latitude": 51.452565,
+          "longitude": -116.131218,
+          "name": "Mid-mountain estimate",
+          "point_id": "lake-louise-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2643.0,
+          "geometry_source": "estimated",
+          "latitude": 51.452565,
+          "longitude": -116.131218,
+          "name": "Summit estimate",
+          "point_id": "lake-louise-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 51.452565,
+      "longitude": -116.131218,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Alberta).",
+      "max_elevation_m": 2643.0,
+      "min_elevation_m": 1648.0,
+      "pilot_name": "Lake Louise",
+      "resort_slug": "lake-louise",
+      "snotel_station": null,
+      "state": "AB",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Mount Norquay",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1632.0,
+          "geometry_source": "estimated",
+          "latitude": 51.206219,
+          "longitude": -115.605371,
+          "name": "Base estimate",
+          "point_id": "mt-norquay-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1859.5,
+          "geometry_source": "estimated",
+          "latitude": 51.206219,
+          "longitude": -115.605371,
+          "name": "Mid-mountain estimate",
+          "point_id": "mt-norquay-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2087.0,
+          "geometry_source": "estimated",
+          "latitude": 51.206219,
+          "longitude": -115.605371,
+          "name": "Summit estimate",
+          "point_id": "mt-norquay-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 51.206219,
+      "longitude": -115.605371,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Alberta).",
+      "max_elevation_m": 2087.0,
+      "min_elevation_m": 1632.0,
+      "pilot_name": "Mt. Norquay",
+      "resort_slug": "mt-norquay",
+      "snotel_station": null,
+      "state": "AB",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Sun Peaks Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1201.0,
+          "geometry_source": "estimated",
+          "latitude": 50.890152,
+          "longitude": -119.894601,
+          "name": "Base estimate",
+          "point_id": "sun-peaks-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1645.0,
+          "geometry_source": "estimated",
+          "latitude": 50.890152,
+          "longitude": -119.894601,
+          "name": "Mid-mountain estimate",
+          "point_id": "sun-peaks-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2089.0,
+          "geometry_source": "estimated",
+          "latitude": 50.890152,
+          "longitude": -119.894601,
+          "name": "Summit estimate",
+          "point_id": "sun-peaks-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 50.890152,
+      "longitude": -119.894601,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 2089.0,
+      "min_elevation_m": 1201.0,
+      "pilot_name": "Sun Peaks",
+      "resort_slug": "sun-peaks",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Mont Tremblant Resort, Station Mont Tremblant",
+      "climate_regime": "northeast_cold_orographic",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 227.0,
+          "geometry_source": "estimated",
+          "latitude": 46.217422,
+          "longitude": -74.570353,
+          "name": "Base estimate",
+          "point_id": "tremblant-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 550.0,
+          "geometry_source": "estimated",
+          "latitude": 46.217422,
+          "longitude": -74.570353,
+          "name": "Mid-mountain estimate",
+          "point_id": "tremblant-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 873.0,
+          "geometry_source": "estimated",
+          "latitude": 46.217422,
+          "longitude": -74.570353,
+          "name": "Summit estimate",
+          "point_id": "tremblant-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 46.217422,
+      "longitude": -74.570353,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Quebec).",
+      "max_elevation_m": 873.0,
+      "min_elevation_m": 227.0,
+      "pilot_name": "Tremblant",
+      "resort_slug": "tremblant",
+      "snotel_station": null,
+      "state": "QC",
+      "timezone": "America/Toronto"
+    },
+    {
+      "catalog_name": "Tamarack Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1491.0,
+          "geometry_source": "estimated",
+          "latitude": 44.682237,
+          "longitude": -116.142147,
+          "name": "Base estimate",
+          "point_id": "tamarack-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1909.0,
+          "geometry_source": "estimated",
+          "latitude": 44.682237,
+          "longitude": -116.142147,
+          "name": "Mid-mountain estimate",
+          "point_id": "tamarack-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2327.0,
+          "geometry_source": "estimated",
+          "latitude": 44.682237,
+          "longitude": -116.142147,
+          "name": "Summit estimate",
+          "point_id": "tamarack-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.682237,
+      "longitude": -116.142147,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 2327.0,
+      "min_elevation_m": 1491.0,
+      "pilot_name": "Tamarack Resort",
+      "resort_slug": "tamarack",
+      "snotel_station": null,
+      "state": "ID",
+      "timezone": "America/Boise"
+    },
+    {
+      "catalog_name": "Devil's Head Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 287.0,
+          "geometry_source": "estimated",
+          "latitude": 43.42152,
+          "longitude": -89.629764,
+          "name": "Base estimate",
+          "point_id": "devils-head-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 360.0,
+          "geometry_source": "estimated",
+          "latitude": 43.42152,
+          "longitude": -89.629764,
+          "name": "Mid-mountain estimate",
+          "point_id": "devils-head-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 433.0,
+          "geometry_source": "estimated",
+          "latitude": 43.42152,
+          "longitude": -89.629764,
+          "name": "Summit estimate",
+          "point_id": "devils-head-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.42152,
+      "longitude": -89.629764,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 433.0,
+      "min_elevation_m": 287.0,
+      "pilot_name": "Devil's Head",
+      "resort_slug": "devils-head",
+      "snotel_station": null,
+      "state": "WI",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Wild Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 236.0,
+          "geometry_source": "estimated",
+          "latitude": 45.487928,
+          "longitude": -92.707908,
+          "name": "Base estimate",
+          "point_id": "wild-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 276.5,
+          "geometry_source": "estimated",
+          "latitude": 45.487928,
+          "longitude": -92.707908,
+          "name": "Mid-mountain estimate",
+          "point_id": "wild-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 317.0,
+          "geometry_source": "estimated",
+          "latitude": 45.487928,
+          "longitude": -92.707908,
+          "name": "Summit estimate",
+          "point_id": "wild-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.487928,
+      "longitude": -92.707908,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 317.0,
+      "min_elevation_m": 236.0,
+      "pilot_name": "Wild Mountain",
+      "resort_slug": "wild-mountain",
+      "snotel_station": null,
+      "state": "MN",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Buck Hill",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 292.0,
+          "geometry_source": "estimated",
+          "latitude": 44.724001,
+          "longitude": -93.286574,
+          "name": "Base estimate",
+          "point_id": "buck-hill-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 330.0,
+          "geometry_source": "estimated",
+          "latitude": 44.724001,
+          "longitude": -93.286574,
+          "name": "Mid-mountain estimate",
+          "point_id": "buck-hill-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 368.0,
+          "geometry_source": "estimated",
+          "latitude": 44.724001,
+          "longitude": -93.286574,
+          "name": "Summit estimate",
+          "point_id": "buck-hill-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.724001,
+      "longitude": -93.286574,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 368.0,
+      "min_elevation_m": 292.0,
+      "pilot_name": "Buck Hill",
+      "resort_slug": "buck-hill",
+      "snotel_station": null,
+      "state": "MN",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Cranmore Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 168.0,
+          "geometry_source": "estimated",
+          "latitude": 44.059577,
+          "longitude": -71.10247,
+          "name": "Base estimate",
+          "point_id": "cranmore-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 339.0,
+          "geometry_source": "estimated",
+          "latitude": 44.059577,
+          "longitude": -71.10247,
+          "name": "Mid-mountain estimate",
+          "point_id": "cranmore-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 510.0,
+          "geometry_source": "estimated",
+          "latitude": 44.059577,
+          "longitude": -71.10247,
+          "name": "Summit estimate",
+          "point_id": "cranmore-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.059577,
+      "longitude": -71.10247,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 510.0,
+      "min_elevation_m": 168.0,
+      "pilot_name": "Cranmore",
+      "resort_slug": "cranmore",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Jiminy Peak Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 383.0,
+          "geometry_source": "estimated",
+          "latitude": 42.550308,
+          "longitude": -73.286252,
+          "name": "Base estimate",
+          "point_id": "jiminy-peak-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 553.5,
+          "geometry_source": "estimated",
+          "latitude": 42.550308,
+          "longitude": -73.286252,
+          "name": "Mid-mountain estimate",
+          "point_id": "jiminy-peak-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 724.0,
+          "geometry_source": "estimated",
+          "latitude": 42.550308,
+          "longitude": -73.286252,
+          "name": "Summit estimate",
+          "point_id": "jiminy-peak-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 42.550308,
+      "longitude": -73.286252,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 724.0,
+      "min_elevation_m": 383.0,
+      "pilot_name": "Jiminy Peak",
+      "resort_slug": "jiminy-peak",
+      "snotel_station": null,
+      "state": "MA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Ski Butternut",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 253.0,
+          "geometry_source": "estimated",
+          "latitude": 42.178748,
+          "longitude": -73.31804,
+          "name": "Base estimate",
+          "point_id": "ski-butternut-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 395.5,
+          "geometry_source": "estimated",
+          "latitude": 42.178748,
+          "longitude": -73.31804,
+          "name": "Mid-mountain estimate",
+          "point_id": "ski-butternut-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 538.0,
+          "geometry_source": "estimated",
+          "latitude": 42.178748,
+          "longitude": -73.31804,
+          "name": "Summit estimate",
+          "point_id": "ski-butternut-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 42.178748,
+      "longitude": -73.31804,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 538.0,
+      "min_elevation_m": 253.0,
+      "pilot_name": "Ski Butternut",
+      "resort_slug": "ski-butternut",
+      "snotel_station": null,
+      "state": "MA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Grouse Mountain",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 860.0,
+          "geometry_source": "estimated",
+          "latitude": 49.38025,
+          "longitude": -123.075112,
+          "name": "Base estimate",
+          "point_id": "grouse-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1041.5,
+          "geometry_source": "estimated",
+          "latitude": 49.38025,
+          "longitude": -123.075112,
+          "name": "Mid-mountain estimate",
+          "point_id": "grouse-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1223.0,
+          "geometry_source": "estimated",
+          "latitude": 49.38025,
+          "longitude": -123.075112,
+          "name": "Summit estimate",
+          "point_id": "grouse-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 49.38025,
+      "longitude": -123.075112,
+      "match_note": "Ikon Bonus Mountain (2-day access tier, Alterra 2026-27 announcement).",
+      "max_elevation_m": 1223.0,
+      "min_elevation_m": 860.0,
+      "pilot_name": "Grouse Mountain",
+      "resort_slug": "grouse-mountain",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Vail",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2455.0,
+          "geometry_source": "estimated",
+          "latitude": 39.623789,
+          "longitude": -106.365457,
+          "name": "Base estimate",
+          "point_id": "vail-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2989.5,
+          "geometry_source": "estimated",
+          "latitude": 39.623789,
+          "longitude": -106.365457,
+          "name": "Mid-mountain estimate",
+          "point_id": "vail-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3524.0,
+          "geometry_source": "estimated",
+          "latitude": 39.623789,
+          "longitude": -106.365457,
+          "name": "Summit estimate",
+          "point_id": "vail-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.623789,
+      "longitude": -106.365457,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3524.0,
+      "min_elevation_m": 2455.0,
+      "pilot_name": "Vail",
+      "resort_slug": "vail",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Beaver Creek",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2262.0,
+          "geometry_source": "estimated",
+          "latitude": 39.613389,
+          "longitude": -106.535842,
+          "name": "Base estimate",
+          "point_id": "beaver-creek-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2874.5,
+          "geometry_source": "estimated",
+          "latitude": 39.613389,
+          "longitude": -106.535842,
+          "name": "Mid-mountain estimate",
+          "point_id": "beaver-creek-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3487.0,
+          "geometry_source": "estimated",
+          "latitude": 39.613389,
+          "longitude": -106.535842,
+          "name": "Summit estimate",
+          "point_id": "beaver-creek-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.613389,
+      "longitude": -106.535842,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3487.0,
+      "min_elevation_m": 2262.0,
+      "pilot_name": "Beaver Creek",
+      "resort_slug": "beaver-creek",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Breckenridge",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2922.0,
+          "geometry_source": "estimated",
+          "latitude": 39.478449,
+          "longitude": -106.060574,
+          "name": "Base estimate",
+          "point_id": "breckenridge-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3416.0,
+          "geometry_source": "estimated",
+          "latitude": 39.478449,
+          "longitude": -106.060574,
+          "name": "Mid-mountain estimate",
+          "point_id": "breckenridge-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3910.0,
+          "geometry_source": "estimated",
+          "latitude": 39.478449,
+          "longitude": -106.060574,
+          "name": "Summit estimate",
+          "point_id": "breckenridge-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.478449,
+      "longitude": -106.060574,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3910.0,
+      "min_elevation_m": 2922.0,
+      "pilot_name": "Breckenridge",
+      "resort_slug": "breckenridge",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Keystone",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2833.0,
+          "geometry_source": "estimated",
+          "latitude": 39.583344,
+          "longitude": -105.933814,
+          "name": "Base estimate",
+          "point_id": "keystone-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3290.0,
+          "geometry_source": "estimated",
+          "latitude": 39.583344,
+          "longitude": -105.933814,
+          "name": "Mid-mountain estimate",
+          "point_id": "keystone-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3747.0,
+          "geometry_source": "estimated",
+          "latitude": 39.583344,
+          "longitude": -105.933814,
+          "name": "Summit estimate",
+          "point_id": "keystone-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.583344,
+      "longitude": -105.933814,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3747.0,
+      "min_elevation_m": 2833.0,
+      "pilot_name": "Keystone",
+      "resort_slug": "keystone",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Crested Butte Mountain Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2785.0,
+          "geometry_source": "estimated",
+          "latitude": 38.899391,
+          "longitude": -106.949806,
+          "name": "Base estimate",
+          "point_id": "crested-butte-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3143.0,
+          "geometry_source": "estimated",
+          "latitude": 38.899391,
+          "longitude": -106.949806,
+          "name": "Mid-mountain estimate",
+          "point_id": "crested-butte-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3501.0,
+          "geometry_source": "estimated",
+          "latitude": 38.899391,
+          "longitude": -106.949806,
+          "name": "Summit estimate",
+          "point_id": "crested-butte-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.899391,
+      "longitude": -106.949806,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Colorado).",
+      "max_elevation_m": 3501.0,
+      "min_elevation_m": 2785.0,
+      "pilot_name": "Crested Butte",
+      "resort_slug": "crested-butte",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Park City Mountain Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2053.0,
+          "geometry_source": "estimated",
+          "latitude": 40.656901,
+          "longitude": -111.537859,
+          "name": "Base estimate",
+          "point_id": "park-city-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2548.5,
+          "geometry_source": "estimated",
+          "latitude": 40.656901,
+          "longitude": -111.537859,
+          "name": "Mid-mountain estimate",
+          "point_id": "park-city-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3044.0,
+          "geometry_source": "estimated",
+          "latitude": 40.656901,
+          "longitude": -111.537859,
+          "name": "Summit estimate",
+          "point_id": "park-city-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.656901,
+      "longitude": -111.537859,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Utah).",
+      "max_elevation_m": 3044.0,
+      "min_elevation_m": 2053.0,
+      "pilot_name": "Park City",
+      "resort_slug": "park-city",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Whistler Blackcomb",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 656.0,
+          "geometry_source": "estimated",
+          "latitude": 50.089049,
+          "longitude": -122.942134,
+          "name": "Base estimate",
+          "point_id": "whistler-blackcomb-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1458.5,
+          "geometry_source": "estimated",
+          "latitude": 50.089049,
+          "longitude": -122.942134,
+          "name": "Mid-mountain estimate",
+          "point_id": "whistler-blackcomb-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2261.0,
+          "geometry_source": "estimated",
+          "latitude": 50.089049,
+          "longitude": -122.942134,
+          "name": "Summit estimate",
+          "point_id": "whistler-blackcomb-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 50.089049,
+      "longitude": -122.942134,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (British Columbia).",
+      "max_elevation_m": 2261.0,
+      "min_elevation_m": 656.0,
+      "pilot_name": "Whistler Blackcomb",
+      "resort_slug": "whistler-blackcomb",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Vancouver"
+    },
+    {
+      "catalog_name": "Okemo Mountain",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 352.0,
+          "geometry_source": "estimated",
+          "latitude": 43.411539,
+          "longitude": -72.730504,
+          "name": "Base estimate",
+          "point_id": "okemo-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 679.5,
+          "geometry_source": "estimated",
+          "latitude": 43.411539,
+          "longitude": -72.730504,
+          "name": "Mid-mountain estimate",
+          "point_id": "okemo-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1007.0,
+          "geometry_source": "estimated",
+          "latitude": 43.411539,
+          "longitude": -72.730504,
+          "name": "Summit estimate",
+          "point_id": "okemo-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.411539,
+      "longitude": -72.730504,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1007.0,
+      "min_elevation_m": 352.0,
+      "pilot_name": "Okemo",
+      "resort_slug": "okemo",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Mount Snow",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 596.0,
+          "geometry_source": "estimated",
+          "latitude": 42.962532,
+          "longitude": -72.910243,
+          "name": "Base estimate",
+          "point_id": "mount-snow-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 844.5,
+          "geometry_source": "estimated",
+          "latitude": 42.962532,
+          "longitude": -72.910243,
+          "name": "Mid-mountain estimate",
+          "point_id": "mount-snow-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1093.0,
+          "geometry_source": "estimated",
+          "latitude": 42.962532,
+          "longitude": -72.910243,
+          "name": "Summit estimate",
+          "point_id": "mount-snow-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 42.962532,
+      "longitude": -72.910243,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Vermont).",
+      "max_elevation_m": 1093.0,
+      "min_elevation_m": 596.0,
+      "pilot_name": "Mount Snow",
+      "resort_slug": "mount-snow",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Mount Sunapee",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 381.0,
+          "geometry_source": "estimated",
+          "latitude": 43.330834,
+          "longitude": -72.075288,
+          "name": "Base estimate",
+          "point_id": "mount-sunapee-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 603.0,
+          "geometry_source": "estimated",
+          "latitude": 43.330834,
+          "longitude": -72.075288,
+          "name": "Mid-mountain estimate",
+          "point_id": "mount-sunapee-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 825.0,
+          "geometry_source": "estimated",
+          "latitude": 43.330834,
+          "longitude": -72.075288,
+          "name": "Summit estimate",
+          "point_id": "mount-sunapee-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.330834,
+      "longitude": -72.075288,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New Hampshire).",
+      "max_elevation_m": 825.0,
+      "min_elevation_m": 381.0,
+      "pilot_name": "Mount Sunapee",
+      "resort_slug": "mount-sunapee",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Attitash Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 188.0,
+          "geometry_source": "estimated",
+          "latitude": 44.076592,
+          "longitude": -71.235514,
+          "name": "Base estimate",
+          "point_id": "attitash-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 438.5,
+          "geometry_source": "estimated",
+          "latitude": 44.076592,
+          "longitude": -71.235514,
+          "name": "Mid-mountain estimate",
+          "point_id": "attitash-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 689.0,
+          "geometry_source": "estimated",
+          "latitude": 44.076592,
+          "longitude": -71.235514,
+          "name": "Summit estimate",
+          "point_id": "attitash-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.076592,
+      "longitude": -71.235514,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New Hampshire).",
+      "max_elevation_m": 689.0,
+      "min_elevation_m": 188.0,
+      "pilot_name": "Attitash",
+      "resort_slug": "attitash",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Wildcat Mountain",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 594.0,
+          "geometry_source": "estimated",
+          "latitude": 44.259941,
+          "longitude": -71.234148,
+          "name": "Base estimate",
+          "point_id": "wildcat-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 902.5,
+          "geometry_source": "estimated",
+          "latitude": 44.259941,
+          "longitude": -71.234148,
+          "name": "Mid-mountain estimate",
+          "point_id": "wildcat-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1211.0,
+          "geometry_source": "estimated",
+          "latitude": 44.259941,
+          "longitude": -71.234148,
+          "name": "Summit estimate",
+          "point_id": "wildcat-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.259941,
+      "longitude": -71.234148,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New Hampshire).",
+      "max_elevation_m": 1211.0,
+      "min_elevation_m": 594.0,
+      "pilot_name": "Wildcat",
+      "resort_slug": "wildcat",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Crotched Mountain Ski & Ride",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 322.0,
+          "geometry_source": "estimated",
+          "latitude": 43.011777,
+          "longitude": -71.880381,
+          "name": "Base estimate",
+          "point_id": "crotched-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 455.5,
+          "geometry_source": "estimated",
+          "latitude": 43.011777,
+          "longitude": -71.880381,
+          "name": "Mid-mountain estimate",
+          "point_id": "crotched-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 589.0,
+          "geometry_source": "estimated",
+          "latitude": 43.011777,
+          "longitude": -71.880381,
+          "name": "Summit estimate",
+          "point_id": "crotched-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.011777,
+      "longitude": -71.880381,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New Hampshire).",
+      "max_elevation_m": 589.0,
+      "min_elevation_m": 322.0,
+      "pilot_name": "Crotched Mountain",
+      "resort_slug": "crotched-mountain",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Hunter Mountain",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 500.0,
+          "geometry_source": "estimated",
+          "latitude": 42.201891,
+          "longitude": -74.21842,
+          "name": "Base estimate",
+          "point_id": "hunter-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 734.5,
+          "geometry_source": "estimated",
+          "latitude": 42.201891,
+          "longitude": -74.21842,
+          "name": "Mid-mountain estimate",
+          "point_id": "hunter-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 969.0,
+          "geometry_source": "estimated",
+          "latitude": 42.201891,
+          "longitude": -74.21842,
+          "name": "Summit estimate",
+          "point_id": "hunter-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 42.201891,
+      "longitude": -74.21842,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (New York).",
+      "max_elevation_m": 969.0,
+      "min_elevation_m": 500.0,
+      "pilot_name": "Hunter Mountain",
+      "resort_slug": "hunter-mountain",
+      "snotel_station": null,
+      "state": "NY",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Liberty Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 175.0,
+          "geometry_source": "estimated",
+          "latitude": 39.759086,
+          "longitude": -77.36847,
+          "name": "Base estimate",
+          "point_id": "liberty-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 260.0,
+          "geometry_source": "estimated",
+          "latitude": 39.759086,
+          "longitude": -77.36847,
+          "name": "Mid-mountain estimate",
+          "point_id": "liberty-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 345.0,
+          "geometry_source": "estimated",
+          "latitude": 39.759086,
+          "longitude": -77.36847,
+          "name": "Summit estimate",
+          "point_id": "liberty-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.759086,
+      "longitude": -77.36847,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 345.0,
+      "min_elevation_m": 175.0,
+      "pilot_name": "Liberty Mountain",
+      "resort_slug": "liberty-mountain",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Roundtop Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 237.0,
+          "geometry_source": "estimated",
+          "latitude": 40.109716,
+          "longitude": -76.924076,
+          "name": "Base estimate",
+          "point_id": "roundtop-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 322.5,
+          "geometry_source": "estimated",
+          "latitude": 40.109716,
+          "longitude": -76.924076,
+          "name": "Mid-mountain estimate",
+          "point_id": "roundtop-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 408.0,
+          "geometry_source": "estimated",
+          "latitude": 40.109716,
+          "longitude": -76.924076,
+          "name": "Summit estimate",
+          "point_id": "roundtop-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.109716,
+      "longitude": -76.924076,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 408.0,
+      "min_elevation_m": 237.0,
+      "pilot_name": "Roundtop",
+      "resort_slug": "roundtop",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Whitetail Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 258.0,
+          "geometry_source": "estimated",
+          "latitude": 39.74155,
+          "longitude": -77.93556,
+          "name": "Base estimate",
+          "point_id": "whitetail-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 397.5,
+          "geometry_source": "estimated",
+          "latitude": 39.74155,
+          "longitude": -77.93556,
+          "name": "Mid-mountain estimate",
+          "point_id": "whitetail-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 537.0,
+          "geometry_source": "estimated",
+          "latitude": 39.74155,
+          "longitude": -77.93556,
+          "name": "Summit estimate",
+          "point_id": "whitetail-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.74155,
+      "longitude": -77.93556,
+      "match_note": "Catalog name match in src/data/ski-areas.json (Pennsylvania); the first of the dataset's two duplicate entries was used.",
+      "max_elevation_m": 537.0,
+      "min_elevation_m": 258.0,
+      "pilot_name": "Whitetail",
+      "resort_slug": "whitetail",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Jack Frost Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 450.0,
+          "geometry_source": "estimated",
+          "latitude": 41.109052,
+          "longitude": -75.651697,
+          "name": "Base estimate",
+          "point_id": "jack-frost-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 525.5,
+          "geometry_source": "estimated",
+          "latitude": 41.109052,
+          "longitude": -75.651697,
+          "name": "Mid-mountain estimate",
+          "point_id": "jack-frost-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 601.0,
+          "geometry_source": "estimated",
+          "latitude": 41.109052,
+          "longitude": -75.651697,
+          "name": "Summit estimate",
+          "point_id": "jack-frost-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.109052,
+      "longitude": -75.651697,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 601.0,
+      "min_elevation_m": 450.0,
+      "pilot_name": "Jack Frost",
+      "resort_slug": "jack-frost",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Big Boulder Ski Resort Area",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 549.0,
+          "geometry_source": "estimated",
+          "latitude": 41.049652,
+          "longitude": -75.599476,
+          "name": "Base estimate",
+          "point_id": "big-boulder-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 604.5,
+          "geometry_source": "estimated",
+          "latitude": 41.049652,
+          "longitude": -75.599476,
+          "name": "Mid-mountain estimate",
+          "point_id": "big-boulder-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 660.0,
+          "geometry_source": "estimated",
+          "latitude": 41.049652,
+          "longitude": -75.599476,
+          "name": "Summit estimate",
+          "point_id": "big-boulder-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.049652,
+      "longitude": -75.599476,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 660.0,
+      "min_elevation_m": 549.0,
+      "pilot_name": "Big Boulder",
+      "resort_slug": "big-boulder",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Seven Springs Mountain Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 688.0,
+          "geometry_source": "estimated",
+          "latitude": 40.0193,
+          "longitude": -79.297765,
+          "name": "Base estimate",
+          "point_id": "seven-springs-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 800.0,
+          "geometry_source": "estimated",
+          "latitude": 40.0193,
+          "longitude": -79.297765,
+          "name": "Mid-mountain estimate",
+          "point_id": "seven-springs-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 912.0,
+          "geometry_source": "estimated",
+          "latitude": 40.0193,
+          "longitude": -79.297765,
+          "name": "Summit estimate",
+          "point_id": "seven-springs-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.0193,
+      "longitude": -79.297765,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 912.0,
+      "min_elevation_m": 688.0,
+      "pilot_name": "Seven Springs",
+      "resort_slug": "seven-springs",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Hidden Valley Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 735.0,
+          "geometry_source": "estimated",
+          "latitude": 40.058174,
+          "longitude": -79.252796,
+          "name": "Base estimate",
+          "point_id": "hidden-valley-pa-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 808.0,
+          "geometry_source": "estimated",
+          "latitude": 40.058174,
+          "longitude": -79.252796,
+          "name": "Mid-mountain estimate",
+          "point_id": "hidden-valley-pa-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 881.0,
+          "geometry_source": "estimated",
+          "latitude": 40.058174,
+          "longitude": -79.252796,
+          "name": "Summit estimate",
+          "point_id": "hidden-valley-pa-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.058174,
+      "longitude": -79.252796,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 881.0,
+      "min_elevation_m": 735.0,
+      "pilot_name": "Hidden Valley (PA)",
+      "resort_slug": "hidden-valley-pa",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Laurel Mountain Ski Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 619.0,
+          "geometry_source": "estimated",
+          "latitude": 40.166335,
+          "longitude": -79.167945,
+          "name": "Base estimate",
+          "point_id": "laurel-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 731.0,
+          "geometry_source": "estimated",
+          "latitude": 40.166335,
+          "longitude": -79.167945,
+          "name": "Mid-mountain estimate",
+          "point_id": "laurel-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 843.0,
+          "geometry_source": "estimated",
+          "latitude": 40.166335,
+          "longitude": -79.167945,
+          "name": "Summit estimate",
+          "point_id": "laurel-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.166335,
+      "longitude": -79.167945,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Pennsylvania).",
+      "max_elevation_m": 843.0,
+      "min_elevation_m": 619.0,
+      "pilot_name": "Laurel Mountain",
+      "resort_slug": "laurel-mountain",
+      "snotel_station": null,
+      "state": "PA",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Afton Alps",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 211.0,
+          "geometry_source": "estimated",
+          "latitude": 44.853943,
+          "longitude": -92.787086,
+          "name": "Base estimate",
+          "point_id": "afton-alps-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 259.0,
+          "geometry_source": "estimated",
+          "latitude": 44.853943,
+          "longitude": -92.787086,
+          "name": "Mid-mountain estimate",
+          "point_id": "afton-alps-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 307.0,
+          "geometry_source": "estimated",
+          "latitude": 44.853943,
+          "longitude": -92.787086,
+          "name": "Summit estimate",
+          "point_id": "afton-alps-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.853943,
+      "longitude": -92.787086,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Minnesota).",
+      "max_elevation_m": 307.0,
+      "min_elevation_m": 211.0,
+      "pilot_name": "Afton Alps",
+      "resort_slug": "afton-alps",
+      "snotel_station": null,
+      "state": "MN",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Wilmot Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 232.0,
+          "geometry_source": "estimated",
+          "latitude": 42.499604,
+          "longitude": -88.189433,
+          "name": "Base estimate",
+          "point_id": "wilmot-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 261.0,
+          "geometry_source": "estimated",
+          "latitude": 42.499604,
+          "longitude": -88.189433,
+          "name": "Mid-mountain estimate",
+          "point_id": "wilmot-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 290.0,
+          "geometry_source": "estimated",
+          "latitude": 42.499604,
+          "longitude": -88.189433,
+          "name": "Summit estimate",
+          "point_id": "wilmot-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 42.499604,
+      "longitude": -88.189433,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Wisconsin).",
+      "max_elevation_m": 290.0,
+      "min_elevation_m": 232.0,
+      "pilot_name": "Wilmot Mountain",
+      "resort_slug": "wilmot-mountain",
+      "snotel_station": null,
+      "state": "WI",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Mt Brighton",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 287.0,
+          "geometry_source": "estimated",
+          "latitude": 42.539741,
+          "longitude": -83.80943,
+          "name": "Base estimate",
+          "point_id": "mt-brighton-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 314.5,
+          "geometry_source": "estimated",
+          "latitude": 42.539741,
+          "longitude": -83.80943,
+          "name": "Mid-mountain estimate",
+          "point_id": "mt-brighton-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 342.0,
+          "geometry_source": "estimated",
+          "latitude": 42.539741,
+          "longitude": -83.80943,
+          "name": "Summit estimate",
+          "point_id": "mt-brighton-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 42.539741,
+      "longitude": -83.80943,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Michigan).",
+      "max_elevation_m": 342.0,
+      "min_elevation_m": 287.0,
+      "pilot_name": "Mt. Brighton",
+      "resort_slug": "mt-brighton",
+      "snotel_station": null,
+      "state": "MI",
+      "timezone": "America/Detroit"
+    },
+    {
+      "catalog_name": "Alpine Valley",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 342.0,
+          "geometry_source": "estimated",
+          "latitude": 41.528607,
+          "longitude": -81.261304,
+          "name": "Base estimate",
+          "point_id": "alpine-valley-oh-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 377.0,
+          "geometry_source": "estimated",
+          "latitude": 41.528607,
+          "longitude": -81.261304,
+          "name": "Mid-mountain estimate",
+          "point_id": "alpine-valley-oh-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 412.0,
+          "geometry_source": "estimated",
+          "latitude": 41.528607,
+          "longitude": -81.261304,
+          "name": "Summit estimate",
+          "point_id": "alpine-valley-oh-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.528607,
+      "longitude": -81.261304,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Ohio).",
+      "max_elevation_m": 412.0,
+      "min_elevation_m": 342.0,
+      "pilot_name": "Alpine Valley (OH)",
+      "resort_slug": "alpine-valley-oh",
+      "snotel_station": null,
+      "state": "OH",
+      "timezone": "America/Detroit"
+    },
+    {
+      "catalog_name": "Mad River Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 358.0,
+          "geometry_source": "estimated",
+          "latitude": 40.315997,
+          "longitude": -83.675761,
+          "name": "Base estimate",
+          "point_id": "mad-river-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 399.5,
+          "geometry_source": "estimated",
+          "latitude": 40.315997,
+          "longitude": -83.675761,
+          "name": "Mid-mountain estimate",
+          "point_id": "mad-river-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 441.0,
+          "geometry_source": "estimated",
+          "latitude": 40.315997,
+          "longitude": -83.675761,
+          "name": "Summit estimate",
+          "point_id": "mad-river-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 40.315997,
+      "longitude": -83.675761,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Ohio).",
+      "max_elevation_m": 441.0,
+      "min_elevation_m": 358.0,
+      "pilot_name": "Mad River Mountain",
+      "resort_slug": "mad-river-mountain",
+      "snotel_station": null,
+      "state": "OH",
+      "timezone": "America/Detroit"
+    },
+    {
+      "catalog_name": "Boston Mills Ski Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 201.0,
+          "geometry_source": "estimated",
+          "latitude": 41.263854,
+          "longitude": -81.565412,
+          "name": "Base estimate",
+          "point_id": "boston-mills-brandywine-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 232.5,
+          "geometry_source": "estimated",
+          "latitude": 41.263854,
+          "longitude": -81.565412,
+          "name": "Mid-mountain estimate",
+          "point_id": "boston-mills-brandywine-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 264.0,
+          "geometry_source": "estimated",
+          "latitude": 41.263854,
+          "longitude": -81.565412,
+          "name": "Summit estimate",
+          "point_id": "boston-mills-brandywine-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.263854,
+      "longitude": -81.565412,
+      "match_note": "Catalog entry 'Boston Mills Ski Resort' in src/data/ski-areas.json (Ohio): Boston Mills and Brandywine are one jointly branded Epic resort (one line item on the official Epic list); the single point also serves the Brandywine app location 2.3 km away.",
+      "max_elevation_m": 264.0,
+      "min_elevation_m": 201.0,
+      "pilot_name": "Boston Mills Brandywine",
+      "resort_slug": "boston-mills-brandywine",
+      "snotel_station": null,
+      "state": "OH",
+      "timezone": "America/Detroit"
+    },
+    {
+      "catalog_name": "Paoli Peaks",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 168.0,
+          "geometry_source": "estimated",
+          "latitude": 38.557778,
+          "longitude": -86.510278,
+          "name": "Base estimate",
+          "point_id": "paoli-peaks-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 210.5,
+          "geometry_source": "estimated",
+          "latitude": 38.557778,
+          "longitude": -86.510278,
+          "name": "Mid-mountain estimate",
+          "point_id": "paoli-peaks-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 253.0,
+          "geometry_source": "estimated",
+          "latitude": 38.557778,
+          "longitude": -86.510278,
+          "name": "Summit estimate",
+          "point_id": "paoli-peaks-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.557778,
+      "longitude": -86.510278,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (Indiana).",
+      "max_elevation_m": 253.0,
+      "min_elevation_m": 168.0,
+      "pilot_name": "Paoli Peaks",
+      "resort_slug": "paoli-peaks",
+      "snotel_station": null,
+      "state": "IN",
+      "timezone": "America/Indiana/Indianapolis"
+    },
+    {
+      "catalog_name": "Hidden Valley",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 170.0,
+          "geometry_source": "estimated",
+          "latitude": 38.534894,
+          "longitude": -90.654411,
+          "name": "Base estimate",
+          "point_id": "hidden-valley-mo-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 214.0,
+          "geometry_source": "estimated",
+          "latitude": 38.534894,
+          "longitude": -90.654411,
+          "name": "Mid-mountain estimate",
+          "point_id": "hidden-valley-mo-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 258.0,
+          "geometry_source": "estimated",
+          "latitude": 38.534894,
+          "longitude": -90.654411,
+          "name": "Summit estimate",
+          "point_id": "hidden-valley-mo-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.534894,
+      "longitude": -90.654411,
+      "match_note": "Catalog name match in src/data/ski-areas.json (Missouri). REGION great-lakes is the nearest training analogue for this Missouri hill; no plains training region exists.",
+      "max_elevation_m": 258.0,
+      "min_elevation_m": 170.0,
+      "pilot_name": "Hidden Valley (MO)",
+      "resort_slug": "hidden-valley-mo",
+      "snotel_station": null,
+      "state": "MO",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Snow Creek",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 254.0,
+          "geometry_source": "estimated",
+          "latitude": 39.465415,
+          "longitude": -94.96894,
+          "name": "Base estimate",
+          "point_id": "snow-creek-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 293.0,
+          "geometry_source": "estimated",
+          "latitude": 39.465415,
+          "longitude": -94.96894,
+          "name": "Mid-mountain estimate",
+          "point_id": "snow-creek-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 332.0,
+          "geometry_source": "estimated",
+          "latitude": 39.465415,
+          "longitude": -94.96894,
+          "name": "Summit estimate",
+          "point_id": "snow-creek-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.465415,
+      "longitude": -94.96894,
+      "match_note": "Catalog name match in src/data/ski-areas.json (Missouri). REGION great-lakes is the nearest training analogue for this Missouri hill; no plains training region exists.",
+      "max_elevation_m": 332.0,
+      "min_elevation_m": 254.0,
+      "pilot_name": "Snow Creek",
+      "resort_slug": "snow-creek",
+      "snotel_station": null,
+      "state": "MO",
+      "timezone": "America/Chicago"
+    },
+    {
+      "catalog_name": "Telluride Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2666.0,
+          "geometry_source": "estimated",
+          "latitude": 37.919669,
+          "longitude": -107.834827,
+          "name": "Base estimate",
+          "point_id": "telluride-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3239.5,
+          "geometry_source": "estimated",
+          "latitude": 37.919669,
+          "longitude": -107.834827,
+          "name": "Mid-mountain estimate",
+          "point_id": "telluride-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3813.0,
+          "geometry_source": "estimated",
+          "latitude": 37.919669,
+          "longitude": -107.834827,
+          "name": "Summit estimate",
+          "point_id": "telluride-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 37.919669,
+      "longitude": -107.834827,
+      "match_note": "Epic partner resort (7 days on the full Epic Pass).",
+      "max_elevation_m": 3813.0,
+      "min_elevation_m": 2666.0,
+      "pilot_name": "Telluride",
+      "resort_slug": "telluride",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Fernie Alpine Resort",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1062.0,
+          "geometry_source": "estimated",
+          "latitude": 49.456257,
+          "longitude": -115.102212,
+          "name": "Base estimate",
+          "point_id": "fernie-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1579.5,
+          "geometry_source": "estimated",
+          "latitude": 49.456257,
+          "longitude": -115.102212,
+          "name": "Mid-mountain estimate",
+          "point_id": "fernie-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2097.0,
+          "geometry_source": "estimated",
+          "latitude": 49.456257,
+          "longitude": -115.102212,
+          "name": "Summit estimate",
+          "point_id": "fernie-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 49.456257,
+      "longitude": -115.102212,
+      "match_note": "Epic partner resort (Resorts of the Canadian Rockies, 7 days combined).",
+      "max_elevation_m": 2097.0,
+      "min_elevation_m": 1062.0,
+      "pilot_name": "Fernie",
+      "resort_slug": "fernie",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Kicking Horse Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1265.0,
+          "geometry_source": "estimated",
+          "latitude": 51.286903,
+          "longitude": -117.07194,
+          "name": "Base estimate",
+          "point_id": "kicking-horse-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1841.5,
+          "geometry_source": "estimated",
+          "latitude": 51.286903,
+          "longitude": -117.07194,
+          "name": "Mid-mountain estimate",
+          "point_id": "kicking-horse-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2418.0,
+          "geometry_source": "estimated",
+          "latitude": 51.286903,
+          "longitude": -117.07194,
+          "name": "Summit estimate",
+          "point_id": "kicking-horse-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 51.286903,
+      "longitude": -117.07194,
+      "match_note": "Epic partner resort (Resorts of the Canadian Rockies, 7 days combined). Kicking Horse is in the Purcell Mountains (Columbia Mountains wet belt), hence pacific-northwest.",
+      "max_elevation_m": 2418.0,
+      "min_elevation_m": 1265.0,
+      "pilot_name": "Kicking Horse",
+      "resort_slug": "kicking-horse",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Kimberley Alpine Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1237.0,
+          "geometry_source": "estimated",
+          "latitude": 49.68638,
+          "longitude": -116.032671,
+          "name": "Base estimate",
+          "point_id": "kimberley-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1572.5,
+          "geometry_source": "estimated",
+          "latitude": 49.68638,
+          "longitude": -116.032671,
+          "name": "Mid-mountain estimate",
+          "point_id": "kimberley-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1908.0,
+          "geometry_source": "estimated",
+          "latitude": 49.68638,
+          "longitude": -116.032671,
+          "name": "Summit estimate",
+          "point_id": "kimberley-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 49.68638,
+      "longitude": -116.032671,
+      "match_note": "Epic partner resort (Resorts of the Canadian Rockies, 7 days combined). Kimberley is in the Purcell Mountains (Columbia Mountains wet belt), hence pacific-northwest.",
+      "max_elevation_m": 1908.0,
+      "min_elevation_m": 1237.0,
+      "pilot_name": "Kimberley",
+      "resort_slug": "kimberley",
+      "snotel_station": null,
+      "state": "BC",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Nakiska",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1500.0,
+          "geometry_source": "estimated",
+          "latitude": 50.947484,
+          "longitude": -115.168947,
+          "name": "Base estimate",
+          "point_id": "nakiska-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1881.5,
+          "geometry_source": "estimated",
+          "latitude": 50.947484,
+          "longitude": -115.168947,
+          "name": "Mid-mountain estimate",
+          "point_id": "nakiska-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2263.0,
+          "geometry_source": "estimated",
+          "latitude": 50.947484,
+          "longitude": -115.168947,
+          "name": "Summit estimate",
+          "point_id": "nakiska-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 50.947484,
+      "longitude": -115.168947,
+      "match_note": "Epic partner resort (Resorts of the Canadian Rockies, 7 days combined).",
+      "max_elevation_m": 2263.0,
+      "min_elevation_m": 1500.0,
+      "pilot_name": "Nakiska",
+      "resort_slug": "nakiska",
+      "snotel_station": null,
+      "state": "AB",
+      "timezone": "America/Edmonton"
+    },
+    {
+      "catalog_name": "Mont-Sainte-Anne",
+      "climate_regime": "northeast_cold_orographic",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 178.0,
+          "geometry_source": "estimated",
+          "latitude": 47.082151,
+          "longitude": -70.918848,
+          "name": "Base estimate",
+          "point_id": "mont-sainte-anne-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 490.0,
+          "geometry_source": "estimated",
+          "latitude": 47.082151,
+          "longitude": -70.918848,
+          "name": "Mid-mountain estimate",
+          "point_id": "mont-sainte-anne-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 802.0,
+          "geometry_source": "estimated",
+          "latitude": 47.082151,
+          "longitude": -70.918848,
+          "name": "Summit estimate",
+          "point_id": "mont-sainte-anne-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.082151,
+      "longitude": -70.918848,
+      "match_note": "Epic partner resort (Resorts of the Canadian Rockies, 7 days combined).",
+      "max_elevation_m": 802.0,
+      "min_elevation_m": 178.0,
+      "pilot_name": "Mont-Sainte-Anne",
+      "resort_slug": "mont-sainte-anne",
+      "snotel_station": null,
+      "state": "QC",
+      "timezone": "America/Toronto"
+    },
+    {
+      "catalog_name": "Station de ski du Mont Stoneham",
+      "climate_regime": "northeast_cold_orographic",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 247.0,
+          "geometry_source": "estimated",
+          "latitude": 47.030427,
+          "longitude": -71.393153,
+          "name": "Base estimate",
+          "point_id": "stoneham-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 417.5,
+          "geometry_source": "estimated",
+          "latitude": 47.030427,
+          "longitude": -71.393153,
+          "name": "Mid-mountain estimate",
+          "point_id": "stoneham-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 588.0,
+          "geometry_source": "estimated",
+          "latitude": 47.030427,
+          "longitude": -71.393153,
+          "name": "Summit estimate",
+          "point_id": "stoneham-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 47.030427,
+      "longitude": -71.393153,
+      "match_note": "Epic partner resort (Resorts of the Canadian Rockies, 7 days combined).",
+      "max_elevation_m": 588.0,
+      "min_elevation_m": 247.0,
+      "pilot_name": "Stoneham",
+      "resort_slug": "stoneham",
+      "snotel_station": null,
+      "state": "QC",
+      "timezone": "America/Toronto"
+    },
+    {
+      "catalog_name": "Sugar Bowl Resort",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2114.0,
+          "geometry_source": "estimated",
+          "latitude": 39.302981,
+          "longitude": -120.335026,
+          "name": "Base estimate",
+          "point_id": "sugar-bowl-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2333.5,
+          "geometry_source": "estimated",
+          "latitude": 39.302981,
+          "longitude": -120.335026,
+          "name": "Mid-mountain estimate",
+          "point_id": "sugar-bowl-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2553.0,
+          "geometry_source": "estimated",
+          "latitude": 39.302981,
+          "longitude": -120.335026,
+          "name": "Summit estimate",
+          "point_id": "sugar-bowl-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.302981,
+      "longitude": -120.335026,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2553.0,
+      "min_elevation_m": 2114.0,
+      "pilot_name": "Sugar Bowl",
+      "resort_slug": "sugar-bowl",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Powder Mountain Ski Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2023.0,
+          "geometry_source": "estimated",
+          "latitude": 41.375487,
+          "longitude": -111.762111,
+          "name": "Base estimate",
+          "point_id": "powder-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2382.0,
+          "geometry_source": "estimated",
+          "latitude": 41.375487,
+          "longitude": -111.762111,
+          "name": "Mid-mountain estimate",
+          "point_id": "powder-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2741.0,
+          "geometry_source": "estimated",
+          "latitude": 41.375487,
+          "longitude": -111.762111,
+          "name": "Summit estimate",
+          "point_id": "powder-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 41.375487,
+      "longitude": -111.762111,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2741.0,
+      "min_elevation_m": 2023.0,
+      "pilot_name": "Powder Mountain",
+      "resort_slug": "powder-mountain",
+      "snotel_station": null,
+      "state": "UT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Grand Targhee Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2321.0,
+          "geometry_source": "estimated",
+          "latitude": 43.786422,
+          "longitude": -110.947754,
+          "name": "Base estimate",
+          "point_id": "grand-targhee-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2662.0,
+          "geometry_source": "estimated",
+          "latitude": 43.786422,
+          "longitude": -110.947754,
+          "name": "Mid-mountain estimate",
+          "point_id": "grand-targhee-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3003.0,
+          "geometry_source": "estimated",
+          "latitude": 43.786422,
+          "longitude": -110.947754,
+          "name": "Summit estimate",
+          "point_id": "grand-targhee-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 43.786422,
+      "longitude": -110.947754,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 3003.0,
+      "min_elevation_m": 2321.0,
+      "pilot_name": "Grand Targhee",
+      "resort_slug": "grand-targhee",
+      "snotel_station": null,
+      "state": "WY",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Whitefish Mountain Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1365.0,
+          "geometry_source": "estimated",
+          "latitude": 48.494633,
+          "longitude": -114.344921,
+          "name": "Base estimate",
+          "point_id": "whitefish-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1714.5,
+          "geometry_source": "estimated",
+          "latitude": 48.494633,
+          "longitude": -114.344921,
+          "name": "Mid-mountain estimate",
+          "point_id": "whitefish-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2064.0,
+          "geometry_source": "estimated",
+          "latitude": 48.494633,
+          "longitude": -114.344921,
+          "name": "Summit estimate",
+          "point_id": "whitefish-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 48.494633,
+      "longitude": -114.344921,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2064.0,
+      "min_elevation_m": 1365.0,
+      "pilot_name": "Whitefish",
+      "resort_slug": "whitefish",
+      "snotel_station": null,
+      "state": "MT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Bridger Bowl",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1866.0,
+          "geometry_source": "estimated",
+          "latitude": 45.817984,
+          "longitude": -110.91226,
+          "name": "Base estimate",
+          "point_id": "bridger-bowl-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2160.0,
+          "geometry_source": "estimated",
+          "latitude": 45.817984,
+          "longitude": -110.91226,
+          "name": "Mid-mountain estimate",
+          "point_id": "bridger-bowl-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2454.0,
+          "geometry_source": "estimated",
+          "latitude": 45.817984,
+          "longitude": -110.91226,
+          "name": "Summit estimate",
+          "point_id": "bridger-bowl-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.817984,
+      "longitude": -110.91226,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2454.0,
+      "min_elevation_m": 1866.0,
+      "pilot_name": "Bridger Bowl",
+      "resort_slug": "bridger-bowl",
+      "snotel_station": null,
+      "state": "MT",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Loveland Basin Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 3322.0,
+          "geometry_source": "estimated",
+          "latitude": 39.677792,
+          "longitude": -105.909188,
+          "name": "Base estimate",
+          "point_id": "loveland-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3594.5,
+          "geometry_source": "estimated",
+          "latitude": 39.677792,
+          "longitude": -105.909188,
+          "name": "Mid-mountain estimate",
+          "point_id": "loveland-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3867.0,
+          "geometry_source": "estimated",
+          "latitude": 39.677792,
+          "longitude": -105.909188,
+          "name": "Summit estimate",
+          "point_id": "loveland-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.677792,
+      "longitude": -105.909188,
+      "match_note": "Catalog entry 'Loveland Basin Ski Area' in src/data/ski-areas.json (Colorado): Loveland Ski Area's main mountain; the Loveland Valley beginner area 2.7 km east is served by the same point. Notable independent (on neither pass).",
+      "max_elevation_m": 3867.0,
+      "min_elevation_m": 3322.0,
+      "pilot_name": "Loveland",
+      "resort_slug": "loveland",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Wolf Creek Ski Area",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 3135.0,
+          "geometry_source": "estimated",
+          "latitude": 37.46321,
+          "longitude": -106.79045,
+          "name": "Base estimate",
+          "point_id": "wolf-creek-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3360.5,
+          "geometry_source": "estimated",
+          "latitude": 37.46321,
+          "longitude": -106.79045,
+          "name": "Mid-mountain estimate",
+          "point_id": "wolf-creek-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3586.0,
+          "geometry_source": "estimated",
+          "latitude": 37.46321,
+          "longitude": -106.79045,
+          "name": "Summit estimate",
+          "point_id": "wolf-creek-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 37.46321,
+      "longitude": -106.79045,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 3586.0,
+      "min_elevation_m": 3135.0,
+      "pilot_name": "Wolf Creek",
+      "resort_slug": "wolf-creek",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Monarch Mountain",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 3251.0,
+          "geometry_source": "estimated",
+          "latitude": 38.51687,
+          "longitude": -106.344275,
+          "name": "Base estimate",
+          "point_id": "monarch-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3424.5,
+          "geometry_source": "estimated",
+          "latitude": 38.51687,
+          "longitude": -106.344275,
+          "name": "Mid-mountain estimate",
+          "point_id": "monarch-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3598.0,
+          "geometry_source": "estimated",
+          "latitude": 38.51687,
+          "longitude": -106.344275,
+          "name": "Summit estimate",
+          "point_id": "monarch-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.51687,
+      "longitude": -106.344275,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 3598.0,
+      "min_elevation_m": 3251.0,
+      "pilot_name": "Monarch Mountain",
+      "resort_slug": "monarch",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Purgatory Resort",
+      "climate_regime": "continental_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2702.0,
+          "geometry_source": "estimated",
+          "latitude": 37.626135,
+          "longitude": -107.826472,
+          "name": "Base estimate",
+          "point_id": "purgatory-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 3001.0,
+          "geometry_source": "estimated",
+          "latitude": 37.626135,
+          "longitude": -107.826472,
+          "name": "Mid-mountain estimate",
+          "point_id": "purgatory-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3300.0,
+          "geometry_source": "estimated",
+          "latitude": 37.626135,
+          "longitude": -107.826472,
+          "name": "Summit estimate",
+          "point_id": "purgatory-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 37.626135,
+      "longitude": -107.826472,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 3300.0,
+      "min_elevation_m": 2702.0,
+      "pilot_name": "Purgatory",
+      "resort_slug": "purgatory",
+      "snotel_station": null,
+      "state": "CO",
+      "timezone": "America/Denver"
+    },
+    {
+      "catalog_name": "Jay Peak Resort",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 559.0,
+          "geometry_source": "estimated",
+          "latitude": 44.928193,
+          "longitude": -72.515401,
+          "name": "Base estimate",
+          "point_id": "jay-peak-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 859.5,
+          "geometry_source": "estimated",
+          "latitude": 44.928193,
+          "longitude": -72.515401,
+          "name": "Mid-mountain estimate",
+          "point_id": "jay-peak-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1160.0,
+          "geometry_source": "estimated",
+          "latitude": 44.928193,
+          "longitude": -72.515401,
+          "name": "Summit estimate",
+          "point_id": "jay-peak-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.928193,
+      "longitude": -72.515401,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 1160.0,
+      "min_elevation_m": 559.0,
+      "pilot_name": "Jay Peak",
+      "resort_slug": "jay-peak",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Mad River Glen",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 503.0,
+          "geometry_source": "estimated",
+          "latitude": 44.1985,
+          "longitude": -72.922758,
+          "name": "Base estimate",
+          "point_id": "mad-river-glen-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 802.5,
+          "geometry_source": "estimated",
+          "latitude": 44.1985,
+          "longitude": -72.922758,
+          "name": "Mid-mountain estimate",
+          "point_id": "mad-river-glen-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1102.0,
+          "geometry_source": "estimated",
+          "latitude": 44.1985,
+          "longitude": -72.922758,
+          "name": "Summit estimate",
+          "point_id": "mad-river-glen-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.1985,
+      "longitude": -72.922758,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 1102.0,
+      "min_elevation_m": 503.0,
+      "pilot_name": "Mad River Glen",
+      "resort_slug": "mad-river-glen",
+      "snotel_station": null,
+      "state": "VT",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Cannon Mountain",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 574.0,
+          "geometry_source": "estimated",
+          "latitude": 44.172751,
+          "longitude": -71.703119,
+          "name": "Base estimate",
+          "point_id": "cannon-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 903.5,
+          "geometry_source": "estimated",
+          "latitude": 44.172751,
+          "longitude": -71.703119,
+          "name": "Mid-mountain estimate",
+          "point_id": "cannon-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1233.0,
+          "geometry_source": "estimated",
+          "latitude": 44.172751,
+          "longitude": -71.703119,
+          "name": "Summit estimate",
+          "point_id": "cannon-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.172751,
+      "longitude": -71.703119,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 1233.0,
+      "min_elevation_m": 574.0,
+      "pilot_name": "Cannon Mountain",
+      "resort_slug": "cannon-mountain",
+      "snotel_station": null,
+      "state": "NH",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Saddleback Mountain",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 656.0,
+          "geometry_source": "estimated",
+          "latitude": 44.942495,
+          "longitude": -70.524375,
+          "name": "Base estimate",
+          "point_id": "saddleback-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 938.5,
+          "geometry_source": "estimated",
+          "latitude": 44.942495,
+          "longitude": -70.524375,
+          "name": "Mid-mountain estimate",
+          "point_id": "saddleback-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1221.0,
+          "geometry_source": "estimated",
+          "latitude": 44.942495,
+          "longitude": -70.524375,
+          "name": "Summit estimate",
+          "point_id": "saddleback-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.942495,
+      "longitude": -70.524375,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 1221.0,
+      "min_elevation_m": 656.0,
+      "pilot_name": "Saddleback",
+      "resort_slug": "saddleback",
+      "snotel_station": null,
+      "state": "ME",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Whiteface Mountain Ski Center",
+      "climate_regime": "northeast_cold_orographic",
+      "forecast_points": [
+        {
+          "elevation_m": 374.0,
+          "geometry_source": "estimated",
+          "latitude": 44.37386,
+          "longitude": -73.87793,
+          "name": "Base estimate",
+          "point_id": "whiteface-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 851.5,
+          "geometry_source": "estimated",
+          "latitude": 44.37386,
+          "longitude": -73.87793,
+          "name": "Mid-mountain estimate",
+          "point_id": "whiteface-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 1329.0,
+          "geometry_source": "estimated",
+          "latitude": 44.37386,
+          "longitude": -73.87793,
+          "name": "Summit estimate",
+          "point_id": "whiteface-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 44.37386,
+      "longitude": -73.87793,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 1329.0,
+      "min_elevation_m": 374.0,
+      "pilot_name": "Whiteface",
+      "resort_slug": "whiteface",
+      "snotel_station": null,
+      "state": "NY",
+      "timezone": "America/New_York"
+    },
+    {
+      "catalog_name": "Mt. Hood Meadows Ski Resort",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1380.0,
+          "geometry_source": "estimated",
+          "latitude": 45.335225,
+          "longitude": -121.661789,
+          "name": "Base estimate",
+          "point_id": "mt-hood-meadows-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1800.0,
+          "geometry_source": "estimated",
+          "latitude": 45.335225,
+          "longitude": -121.661789,
+          "name": "Mid-mountain estimate",
+          "point_id": "mt-hood-meadows-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2220.0,
+          "geometry_source": "estimated",
+          "latitude": 45.335225,
+          "longitude": -121.661789,
+          "name": "Summit estimate",
+          "point_id": "mt-hood-meadows-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.335225,
+      "longitude": -121.661789,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2220.0,
+      "min_elevation_m": 1380.0,
+      "pilot_name": "Mt. Hood Meadows",
+      "resort_slug": "mt-hood-meadows",
+      "snotel_station": null,
+      "state": "OR",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Timberline Lodge Ski Area",
+      "climate_regime": "pnw_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1213.0,
+          "geometry_source": "estimated",
+          "latitude": 45.323395,
+          "longitude": -121.716432,
+          "name": "Base estimate",
+          "point_id": "timberline-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 1898.0,
+          "geometry_source": "estimated",
+          "latitude": 45.323395,
+          "longitude": -121.716432,
+          "name": "Mid-mountain estimate",
+          "point_id": "timberline-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2583.0,
+          "geometry_source": "estimated",
+          "latitude": 45.323395,
+          "longitude": -121.716432,
+          "name": "Summit estimate",
+          "point_id": "timberline-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 45.323395,
+      "longitude": -121.716432,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2583.0,
+      "min_elevation_m": 1213.0,
+      "pilot_name": "Timberline",
+      "resort_slug": "timberline",
+      "snotel_station": null,
+      "state": "OR",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Marmot Basin",
+      "climate_regime": "continental_mountain",
+      "country": "Canada",
+      "forecast_points": [
+        {
+          "elevation_m": 1720.0,
+          "geometry_source": "estimated",
+          "latitude": 52.796962,
+          "longitude": -118.10407,
+          "name": "Base estimate",
+          "point_id": "marmot-basin-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2098.5,
+          "geometry_source": "estimated",
+          "latitude": 52.796962,
+          "longitude": -118.10407,
+          "name": "Mid-mountain estimate",
+          "point_id": "marmot-basin-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2477.0,
+          "geometry_source": "estimated",
+          "latitude": 52.796962,
+          "longitude": -118.10407,
+          "name": "Summit estimate",
+          "point_id": "marmot-basin-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 52.796962,
+      "longitude": -118.10407,
+      "match_note": "Notable independent (on neither pass).",
+      "max_elevation_m": 2477.0,
+      "min_elevation_m": 1720.0,
+      "pilot_name": "Marmot Basin",
+      "resort_slug": "marmot-basin",
+      "snotel_station": null,
+      "state": "AB",
+      "timezone": "America/Edmonton"
     }
   ],
   "schema_version": 1,

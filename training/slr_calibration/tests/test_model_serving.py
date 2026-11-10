@@ -104,5 +104,38 @@ class LoadCatalogueTest(unittest.TestCase):
         self.assertEqual(points[0]["point_id"], "alta-base")
 
 
+class LoadCatalogueCountryTest(unittest.TestCase):
+    """The HRRR domain guard keys off the catalogue country: it defaults
+    to the United States and passes an explicit registry value through."""
+
+    def _points(self, resorts):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "registry.json"
+            path.write_text(json.dumps({"resorts": resorts}))
+            return load_catalogue(path)
+
+    def _resort(self, slug, name, **extra):
+        return {
+            "resort_slug": slug, "pilot_name": name,
+            "timezone": "America/New_York", "state": "VT",
+            "climate_regime": "northeast_cold_orographic",
+            "forecast_points": [{
+                "point_id": f"{slug}-base", "name": "Base estimate",
+                "role": "base", "latitude": 44.0, "longitude": -73.0,
+                "elevation_m": 500.0, "geometry_source": "estimated",
+            }],
+            **extra,
+        }
+
+    def test_country_defaults_to_united_states(self):
+        points = self._points([self._resort("alta", "Alta")])
+        self.assertEqual(points[0]["country"], "United States")
+
+    def test_country_passes_through(self):
+        points = self._points([
+            self._resort("tremblant", "Tremblant", country="Canada")])
+        self.assertEqual(points[0]["country"], "Canada")
+
+
 if __name__ == "__main__":
     unittest.main()
