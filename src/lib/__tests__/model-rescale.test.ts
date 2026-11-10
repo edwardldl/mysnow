@@ -179,8 +179,10 @@ describe('applyModelMethodToDays hourly rescaling', () => {
     const w1 = windowHours(out, '2026-11-01');
     expect(w1).toHaveLength(24);
     expect(Math.abs(w1.reduce((s, h) => s + h.snowfall, 0) - r1)).toBeLessThan(EPS);
-    // day total and window hours tell the same story
-    expect(out[1].totalSnowfall).toBe(r1);
+    // The day total follows the calendar day: it is the sum of the day's
+    // own rescaled hours (morning from this window, afternoon from the
+    // next), NOT the window record -- see model-day-sum.test.ts.
+    expect(Math.abs(out[1].totalSnowfall - out[1].hourly.reduce((sum, h) => sum + h.snowfall, 0))).toBeLessThan(EPS);
 
     // The 2026-11-01 calendar day straddles two windows: its 08:00-23:00
     // hours are scaled by the 2026-11-02 window's factor, not the day-1 one.
@@ -209,7 +211,8 @@ describe('applyModelMethodToDays hourly rescaling', () => {
     const w = windowHours(out, '2026-11-02');
     expect(w).toHaveLength(24);
     expect(Math.abs(w.reduce((s, h) => s + h.snowfall, 0) - r)).toBeLessThan(EPS);
-    expect(out[1].totalSnowfall).toBe(r);
+    // Day total = the calendar-day sum of the rescaled hours, not r.
+    expect(Math.abs(out[1].totalSnowfall - out[1].hourly.reduce((sum, h) => sum + h.snowfall, 0))).toBeLessThan(EPS);
   });
 
   it('Open-Meteo tail: reduced-feature window hours sum exactly to the OM record', () => {
@@ -225,7 +228,8 @@ describe('applyModelMethodToDays hourly rescaling', () => {
     const w = windowHours(out, '2026-11-12');
     expect(w).toHaveLength(24);
     expect(Math.abs(w.reduce((s, h) => s + h.snowfall, 0) - (result?.forecast.modelSnowfallCm as number))).toBeLessThan(EPS);
-    expect(out[1].totalSnowfall).toBe(result?.forecast.modelSnowfallCm);
+    // Day total = the calendar-day sum of the rescaled hours.
+    expect(Math.abs(out[1].totalSnowfall - out[1].hourly.reduce((sum, h) => sum + h.snowfall, 0))).toBeLessThan(EPS);
   });
 
   it('a record of exactly 0 zeroes the window hours', () => {
@@ -238,7 +242,12 @@ describe('applyModelMethodToDays hourly rescaling', () => {
     const w = windowHours(out, '2026-11-03');
     expect(w).toHaveLength(24);
     expect(w.every((h) => h.snowfall === 0)).toBe(true);
-    expect(out[1].totalSnowfall).toBe(0);
+    // The window's own hours are zeroed, but the day total follows the
+    // calendar day: the 08:00-23:00 hours belong to the NEXT window,
+    // which has no record in this fixture, so they keep their 1 cm/h
+    // Kuchera values and the calendar-day total is 16, not 0.
+    expect(out[1].totalSnowfall).toBe(16);
+    expect(Math.abs(out[1].totalSnowfall - out[1].hourly.reduce((sum, h) => sum + h.snowfall, 0))).toBeLessThan(EPS);
   });
 
   it('zero denominator: record snowfall is distributed in proportion to UI liquid', () => {

@@ -598,3 +598,16 @@ Scope: remove the dedicated `ModelForecastPanel` card so ENS-EB is presented lik
 - **Round 2 (8,791 tokens): ACCEPT.** "The Open-Meteo test requires both `anchored to` and `Open-Meteo cycle unverified` in the returned inline label, preserving the distinction independently of `reduced-feature variant`. … No new defect is evident." (Noted reliance on the reported passing tests for the composed label output.)
 
 Verification on the final tree: typecheck clean, vitest 134/134, production build succeeded, lint 0 errors.
+
+
+---
+
+## Addendum (2026-11-10) — ENS-EB day-total / hourly-bars mismatch fix (Codex, fresh thread)
+
+User report: "the hourly snow bar does not add up to the predicted snowfall number for the day." Diagnosis (scripted reproduction through the production functions, Palisades base, stored serving records): for physics methods `groupData` derives `totalSnowfall` as the sum of the calendar day's hourly snowfall (measured diff 0.0000), but under the ENS-EB method `applyModelMethodToDays` replaced the total with the serving record of the 24 h window ending 07:00 local — a span straddling two calendar days. The 584b62b rescale made each *window's* hours sum exactly to its record, yet the UI compares on the calendar-day axis: blend 2026-11-01 displayed 10.72 cm vs a 2.44 cm bar sum; literal ECMWF 2026-11-02 0.44 vs 4.95; even a Kuchera-fallback day was off (+0.58) because its afternoon hours were rescaled into the next window while its total stayed the raw sum. Not rounding (window sums exact to 1e-9). The defect predates the UI rework; its tests only ever pinned the window invariant.
+
+Fix: the per-window rescale is untouched (each window's hours still sum exactly to its record), and the displayed day total now follows the calendar day — re-derived in `applyModelMethodToDays` as the sum of the day's final hourly series (positive part), exactly `groupData`'s derivation for the other methods; days carrying no hourly series keep the record total. New regression suite `model-day-sum.test.ts` pins the invariant for blend / literal ECMWF / literal HRRR (model and fallback days), a closed-form straddle value, the physics path, a DST fall-back day (both 01:00 instants), and the array-boundary allocation behaviour.
+
+- **Codex review (16,672 tokens): ACCEPT-WITH-FIXES.** The arithmetic change was upheld on every specific question (re-derivation coverage, zero records, downstream `avgSlr`/threshold coherence, preserved arm preference and gating). One MAJOR: the day-level provenance label (`modelWindowTrendLabel`) named only the morning window's arm — or claimed an unqualified Kuchera fallback — while the total now aggregates both windows. Fixed as prescribed: the caption now leads with "Calendar-day snowfall · ENS-EB windows where available, Kuchera elsewhere" and scopes the arm / reduced-feature / cycle segments explicitly to "the 24 h window ending 07:00 local"; the CurrentWeatherCard source note gained the "calendar-day total" qualifier. One MINOR: DST-duplicate and boundary-allocation test pins — added (above).
+
+Verification on the final tree: typecheck clean, vitest 140/140, lint 0 errors in changed files. Production build skipped: the user's own `next dev` server is live on port 3000 and shares `.next`.

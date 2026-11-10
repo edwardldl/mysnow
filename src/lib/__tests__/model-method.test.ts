@@ -359,7 +359,7 @@ describe('inline labelling under the ENS-EB menu method', () => {
 
   it('names the Kuchera fallback for a window with no model record', () => {
     expect(labelFor(day2Date, 'hrrr')).toBe(
-      'Kuchera fallback · no ENS-EB record for this window',
+      'Calendar-day snowfall · ENS-EB windows where available, Kuchera elsewhere · the 24 h window ending 07:00 local fell back to Kuchera (no ENS-EB record)',
     );
   });
 

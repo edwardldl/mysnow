@@ -390,10 +390,9 @@ function rebuildSnowfallAggregates(day: DayData, hourly: BlendedHour[]): Partial
 
 /**
  * Rescale the hourly snowfall inside each model window so the window's
- * hours sum EXACTLY to the serving record's snowfall -- the same record
- * value the day total shows -- so the hourly chart, the rolling 24/48 h
- * statistics and every other consumer of the hourly series agree with the
- * headline total (one forecast, one series). Hours live on the real
+ * hours sum EXACTLY to the serving record's snowfall, so every consumer
+ * of the hourly series (the hourly chart, the rolling 24/48 h statistics)
+ * sees the model's own window accounting. Hours live on the real
  * timeline: an hour belongs to exactly one window, so a calendar day's
  * 00:00-24:00 display straddles two windows and each part is scaled by its
  * own window's factor; the "24 h window ending 07:00 local" caption covers
@@ -513,22 +512,31 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
 }
 
 /**
- * Apply the ENS-EB menu method to grouped forecast days: for each calendar
- * day, the 24 h model window ending 07:00 local on that date -- when a
- * serving record exists -- replaces the day total with the record's model
- * snowfall. The record snowfall is used,
- * not model SLR x UI liquid: the model SLR was predicted conditioned on the
- * serving window's own liquid (fcst_liquid_mm is an input feature) over the
- * exact window, while the UI day liquid covers a different period from a
- * different, live cycle -- recombining them would break the prediction's
- * conditioning. Days
- * without a record keep their Kuchera totals and are marked as fallback.
- * Returns the days unchanged when the method is unavailable in context.
+ * Apply the ENS-EB menu method to grouped forecast days. Each calendar
+ * day is marked by the 24 h model window ending 07:00 local on that date:
+ * when a serving record exists the day is a model day, otherwise it is a
+ * Kuchera fallback day. The record snowfall is used as the window total,
+ * not model SLR x UI liquid: the model SLR was predicted conditioned on
+ * the serving window's own liquid (fcst_liquid_mm is an input feature)
+ * over the exact window, while the UI day liquid covers a different
+ * period from a different, live cycle -- recombining them would break
+ * the prediction's conditioning.
  * The hourly snowfall series is rescaled per model window (see
- * rescaleModelWindowHours) so the displayed hours sum to the same record
- * total the day shows; the model still serves window aggregates only --
- * the rescale distributes the record total over the UI's own hourly
- * shape, it does not invent a model hourly forecast.
+ * rescaleModelWindowHours); the model still serves window aggregates
+ * only -- the rescale distributes each record total over the UI's own
+ * hourly shape, it does not invent a model hourly forecast.
+ *
+ * The DISPLAYED day total then follows the calendar day, derived exactly
+ * as groupData derives it for every other method: the sum of the day's
+ * own hourly snowfall (positive part) over the final, rescaled series.
+ * A model window straddles two calendar days, so a model day's morning
+ * hours carry the record of the window ending that morning while its
+ * afternoon hours carry the next window's record -- the record value
+ * itself is NOT the calendar-day sum, and showing it as the day total
+ * made the headline number disagree with the day's hourly bars. Days
+ * carrying no hourly series keep the record total set by the marking
+ * step (there is no series to derive a total from).
+ * Returns the days unchanged when the method is unavailable in context.
  */
 export function applyModelMethodToDays(
   days: DayData[],
@@ -568,8 +576,15 @@ export function applyModelMethodToDays(
     };
   });
   const point = cataloguePointForLocation(location, elevationMode);
-  if (!point) return marked;
-  return rescaleModelWindowHours(marked, point);
+  const withHours = point ? rescaleModelWindowHours(marked, point) : marked;
+  return withHours.map((day) => {
+    if (!Array.isArray(day.hourly) || day.hourly.length === 0) return day;
+    const totalSnowfall = day.hourly.reduce(
+      (sum, h) => sum + (h.snowfall > 0 ? h.snowfall : 0),
+      0,
+    );
+    return totalSnowfall === day.totalSnowfall ? day : { ...day, totalSnowfall };
+  });
 }
 
 /** Inline display labels for the serving arms, as carried by the standard forecast display. */
@@ -584,23 +599,32 @@ function formatCycleUtc(cycleUtc: string): string {
 }
 
 /**
- * The inline provenance caption for a day under the ENS-EB menu method --
- * the small trend line the standard forecast display carries under the
- * Reference Fresh Snow total (ForecastDashboard), the same way every
- * other method's days are presented: there is no dedicated model
- * surface. It keeps the serving design's per-window labelling duties:
- * the ENS-EB model label, the arm that actually served the window, the
- * Open-Meteo arm's reduced-feature disclosure, and the serving cycle
- * (for the Open-Meteo arm, the anchor cycle its windows are tied to --
- * that arm's forecast instance is not cycle-verified, and the label
- * says so). Fallback windows name the Kuchera fallback.
+ * The inline caption for a day under the ENS-EB menu method -- the small
+ * trend line the standard forecast display carries under the Reference
+ * Fresh Snow total (ForecastDashboard), the same way every other
+ * method's days are presented: there is no dedicated model surface.
+ *
+ * The number it captions is a CALENDAR-DAY total (the sum of the day's
+ * hourly bars), so the caption describes the day first: its hours are
+ * allocated from ENS-EB windows where records exist and are Kuchera
+ * elsewhere. The remaining segments keep the serving design's
+ * per-window labelling duties -- the arm that served the window ending
+ * 07:00 local that morning, its reduced-feature disclosure, and its
+ * serving cycle (for the Open-Meteo arm, the anchor cycle its windows
+ * are tied to -- that arm's forecast instance is not cycle-verified,
+ * and the label says so) -- explicitly scoped to that one window: a
+ * day's afternoon hours belong to the NEXT window, which may have been
+ * served by a different arm or fallen back, and the label must not
+ * present the morning window's provenance as the whole day's.
  */
 export function modelWindowTrendLabel(mark: DayModelWindowMark): string {
+  const dayPrefix =
+    'Calendar-day snowfall · ENS-EB windows where available, Kuchera elsewhere';
   if (mark.kind === 'kuchera_fallback') {
-    return 'Kuchera fallback · no ENS-EB record for this window';
+    return `${dayPrefix} · the 24 h window ending 07:00 local fell back to Kuchera (no ENS-EB record)`;
   }
   const arm = mark.arm ? MODEL_ARM_LABEL[mark.arm] : MODEL_ARM_LABEL.ecmwf;
-  let label = `ENS-EB model · 24 h window ending 07:00 local · ${arm} arm`;
+  let label = `${dayPrefix} · the 24 h window ending 07:00 local: ENS-EB model · ${arm} arm`;
   if (mark.reducedFeatureVariant) label += ' · reduced-feature variant';
   if (mark.cycleUtc) {
     label += mark.arm === 'ecmwf_openmeteo'

@@ -307,10 +307,10 @@ export default function Home() {
     return found;
   }, [forecastDays, currentTimeMs, todayStr]);
 
-  // When the ENS-EB model Physics option is selected, forecast day totals
-  // are replaced by the precomputed model window values (each day marked
-  // model vs Kuchera fallback by applyModelMethodToDays). Every other
-  // method sees the grouped days untouched.
+  // When the ENS-EB model Physics option is selected, each day is marked
+  // model vs Kuchera fallback and its hourly series and day total are
+  // derived from the precomputed model windows by applyModelMethodToDays.
+  // Every other method sees the grouped days untouched.
   const displayForecastDays = React.useMemo(() => {
     if (algoId !== ENS_EB_METHOD_ID) return forecastDays;
     return applyModelMethodToDays(forecastDays, locations[currentLocationId], modelId, elevationMode);
@@ -382,9 +382,9 @@ export default function Home() {
   const activeSelectedDay = activeDays.find(d => d.dateStr === activeSelectedDate) || null;
   const freshSnowSourceNote = mode === "forecast"
     ? activeSelectedDay?.modelWindow?.kind === "model"
-      ? "ENS-EB model"
+      ? "ENS-EB model · calendar-day total"
       : activeSelectedDay?.modelWindow?.kind === "kuchera_fallback"
-        ? "Kuchera fallback"
+        ? "Kuchera fallback · calendar-day total"
         : null
     : null;
 
