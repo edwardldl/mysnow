@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils_tailwind";
 import { DayData, WeatherDataStatus } from "@/lib/types";
 import { formatCalendarDate, getSlrColor } from "@/lib/utils";
 import { formatDataAge, isCurrentForecastHour } from "@/lib/time";
+import { modelWindowTrendLabel } from "@/lib/model-forecast";
 
 const getTimeColor = (hour: number) => {
   if (hour === 9 || hour === 16) return `hsl(45, 100%, 65%)`; // Yellow
@@ -136,11 +137,9 @@ export default function ForecastDashboard({ days, isLoading, selectedDate, timez
   if (days.length === 0) return null;
 
   const selectedDay = days.find((d) => d.dateStr === selectedDate) || days[0];
-  const freshSnowTrend = selectedDay.modelWindow?.kind === 'model'
-    ? `ENS-EB model · 24 h window ending 07:00 local · ${selectedDay.modelWindow.arm === 'hrrr' ? 'NOAA HRRR' : selectedDay.modelWindow.arm === 'ecmwf_openmeteo' ? 'ECMWF (Open-Meteo)' : 'ECMWF IFS'} arm`
-    : selectedDay.modelWindow?.kind === 'kuchera_fallback'
-      ? 'Kuchera fallback · no ENS-EB record for this window'
-      : 'Selected sheltered reference site';
+  const freshSnowTrend = selectedDay.modelWindow
+    ? modelWindowTrendLabel(selectedDay.modelWindow)
+    : 'Selected sheltered reference site';
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 md:px-8 flex flex-col gap-8 md:gap-10 pb-20 mt-4 md:mt-4">

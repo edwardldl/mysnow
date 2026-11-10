@@ -585,3 +585,16 @@ Second, retain a complete clause table showing support counts, binding/report-on
 Third, replace the blanket positive-clause claim and “Rockies fix” wording, and resolve the selection-table and LORO-equality details above.
 
 Finally, record two separate decisions: **the registered study is closed without adoption; C2 is selected for a future, independently registered confirmation.** The original study’s verdicts remain unchanged by subsequent work.
+
+
+---
+
+## Addendum (2026-11-10) — ENS-EB UI rework review (Codex, fresh threads)
+
+Scope: remove the dedicated `ModelForecastPanel` card so ENS-EB is presented like every other snow-physics method — only through the Physics-menu method selection and the standard day displays (DateRibbon marks, ForecastDashboard Reference Fresh Snow trend caption, CurrentWeatherCard note). Labelling duties moved inline via a new pure helper `modelWindowTrendLabel(mark)`; `modelWindowStatuses` (panel-only) removed; `DayModelWindowMark` gains `reducedFeatureVariant`.
+
+- **Round 1 (20,823 tokens): REJECT — one MAJOR.** The new caption appended the same unqualified "<timestamp>Z cycle" to every arm; for the Open-Meteo arm that timestamp is an *anchor* cycle and the panel had explicitly stated the arm's forecast instance is not cycle-verified. "Reduced-feature variant" does not carry that distinction, and the helper comment ("the cycle the value was computed from") overstated the provenance. All other aspects explicitly cleared: gating, arm preference, hourly rescale, statuses removal, flag propagation, dead code.
+- **Fix:** for the Open-Meteo arm the caption now reads "… · anchored to <timestamp>Z cycle · Open-Meteo cycle unverified"; comment corrected; tests assert the distinction (and that GRIB labels carry no "anchored to").
+- **Round 2 (8,791 tokens): ACCEPT.** "The Open-Meteo test requires both `anchored to` and `Open-Meteo cycle unverified` in the returned inline label, preserving the distinction independently of `reduced-feature variant`. … No new defect is evident." (Noted reliance on the reported passing tests for the composed label output.)
+
+Verification on the final tree: typecheck clean, vitest 134/134, production build succeeded, lint 0 errors.

@@ -6,7 +6,7 @@
  * ECMWF and HRRR forecast-source modes -- including the default
  * `hrrr_ecmwf` blend of the two: its features are derived wholly from
  * those sources, so no other mode can show it. In the literal
- * `ecmwf` / `hrrr` modes the panel shows that source's arm. In blend
+ * `ecmwf` / `hrrr` modes the resolved arm is that source's. In blend
  * mode it mirrors the app's own blend (blendForecasts in lib/data.ts,
  * fed by the hrrr_ecmwf branch of fetchWeatherData in lib/api.ts):
  * ECMWF is the spine and HRRR overrides inside its 0-48 h horizon, so
@@ -35,7 +35,7 @@
  * app has no database; the JSON is the serving layer in the workspace.
  */
 import rawData from '../data/model-forecasts.json';
-import type { BlendedHour, DayData, Location } from './types';
+import type { BlendedHour, DayData, DayModelWindowMark, Location } from './types';
 import { referencePointForMode } from './snow/resort/geometry';
 import { addCalendarDays } from './time';
 
@@ -127,7 +127,7 @@ export function modelArmForMode(modelId: string): ModelSourceArm | null {
  *
  * Blend mode (`hrrr_ecmwf`) mirrors blendForecasts: HRRR overrides
  * ECMWF hour-by-hour wherever HRRR data exists inside its 0-48 h
- * horizon, and ECMWF supplies everything beyond it. At the panel's
+ * horizon, and ECMWF supplies everything beyond it. At
  * window granularity that is HRRR for lead days 1-2 and ECMWF for
  * lead day 3 and beyond; the non-privileged arms remain as fallbacks
  * for windows the privileged arm has no scored record for (e.g. HRRR
@@ -135,7 +135,7 @@ export function modelArmForMode(modelId: string): ModelSourceArm | null {
  * Open-Meteo arm last inside the horizon and ahead of HRRR beyond it
  * (HRRR holds no records there anyway).
  *
- * Any other mode: no arms -- the panel does not exist there.
+ * Any other mode: no arms -- the model does not resolve there.
  */
 export function modelArmPreference(modelId: string, leadDay: number): ModelSourceArm[] {
   const single = modelArmForMode(modelId);
@@ -195,11 +195,11 @@ export interface ModelForecastResult {
 }
 
 /**
- * Resolve the model forecast to display, or null when the panel must not
- * appear: wrong mode, non-catalogue location, or no prediction stored
- * for that window (missing predictions are never carried forward). In
- * blend mode the resolved arm is the one actually shown for the window,
- * so the panel's source label is per-window truthful.
+ * Resolve the model forecast for a window, or null when the model does
+ * not serve it: wrong mode, non-catalogue location, or no prediction
+ * stored for that window (missing predictions are never carried
+ * forward). In blend mode the resolved arm is the one actually used
+ * for the window, so the per-window source label is truthful.
  */
 export function modelForecastFor(
   location: Location | undefined,
@@ -286,57 +286,6 @@ export function modelMethodAvailability(
     return { available: false, reason: 'non-catalogue-location', point: null };
   }
   return { available: true, reason: null, point };
-}
-
-export interface ModelWindowStatus {
-  windowEndLocalDate: string;
-  leadDay: number;
-  /** 'model' when a serving record resolved for this window, else the Kuchera fallback applies. */
-  status: 'model' | 'fallback';
-  /** Serving arm when status is 'model'. */
-  arm: ModelSourceArm | null;
-  result: ModelForecastResult | null;
-}
-
-export interface ModelWindowStatuses {
-  point: ModelForecastPoint;
-  windows: ModelWindowStatus[];
-}
-
-/**
- * Per-window model/fallback status for every window stored for the matched
- * catalogue point, resolved through modelForecastFor so the menu-driven
- * display and the panel can never disagree. Returns null when the model
- * method is unavailable in this context (unsupported mode / non-catalogue).
- */
-export function modelWindowStatuses(
-  location: Location | null | undefined,
-  modelId: string,
-  elevationMode: string,
-): ModelWindowStatuses | null {
-  const availability = modelMethodAvailability(modelId, location, elevationMode);
-  if (!availability.available || availability.point === null || !location) return null;
-  const point = availability.point;
-  const byDate = new Map<string, ModelWindowForecast>();
-  for (const arm of ['ecmwf', 'hrrr', 'ecmwf_openmeteo'] as const) {
-    for (const row of point.forecasts[arm] ?? []) {
-      const existing = byDate.get(row.windowEndLocalDate);
-      if (!existing || row.leadDay < existing.leadDay) byDate.set(row.windowEndLocalDate, row);
-    }
-  }
-  const windows = [...byDate.values()]
-    .sort((a, b) => a.leadDay - b.leadDay)
-    .map((row) => {
-      const result = modelForecastFor(location, modelId, elevationMode, row.windowEndLocalDate);
-      return {
-        windowEndLocalDate: row.windowEndLocalDate,
-        leadDay: row.leadDay,
-        status: result !== null ? ('model' as const) : ('fallback' as const),
-        arm: result?.arm ?? null,
-        result,
-      };
-    });
-  return { point, windows };
 }
 
 const MODEL_WINDOW_END_HOUR_LOCAL = 7;
@@ -567,12 +516,12 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
  * Apply the ENS-EB menu method to grouped forecast days: for each calendar
  * day, the 24 h model window ending 07:00 local on that date -- when a
  * serving record exists -- replaces the day total with the record's model
- * snowfall, the same value the panel shows. The record snowfall is used,
+ * snowfall. The record snowfall is used,
  * not model SLR x UI liquid: the model SLR was predicted conditioned on the
  * serving window's own liquid (fcst_liquid_mm is an input feature) over the
  * exact window, while the UI day liquid covers a different period from a
  * different, live cycle -- recombining them would break the prediction's
- * conditioning and make the menu display disagree with the panel. Days
+ * conditioning. Days
  * without a record keep their Kuchera totals and are marked as fallback.
  * Returns the days unchanged when the method is unavailable in context.
  * The hourly snowfall series is rescaled per model window (see
@@ -602,6 +551,7 @@ export function applyModelMethodToDays(
           arm: result.arm,
           blended: result.blended,
           cycleUtc: result.cycleUtc,
+          reducedFeatureVariant: result.forecast.reducedFeatureVariant ?? false,
         },
       };
     }
@@ -613,10 +563,49 @@ export function applyModelMethodToDays(
         arm: null,
         blended: modelId === BLEND_MODEL_ID,
         cycleUtc: null,
+        reducedFeatureVariant: false,
       },
     };
   });
   const point = cataloguePointForLocation(location, elevationMode);
   if (!point) return marked;
   return rescaleModelWindowHours(marked, point);
+}
+
+/** Inline display labels for the serving arms, as carried by the standard forecast display. */
+export const MODEL_ARM_LABEL: Record<ModelSourceArm, string> = {
+  ecmwf: 'ECMWF IFS',
+  hrrr: 'NOAA HRRR',
+  ecmwf_openmeteo: 'ECMWF (Open-Meteo)',
+};
+
+function formatCycleUtc(cycleUtc: string): string {
+  return `${cycleUtc.slice(0, 13).replace('T', ' ')}Z cycle`;
+}
+
+/**
+ * The inline provenance caption for a day under the ENS-EB menu method --
+ * the small trend line the standard forecast display carries under the
+ * Reference Fresh Snow total (ForecastDashboard), the same way every
+ * other method's days are presented: there is no dedicated model
+ * surface. It keeps the serving design's per-window labelling duties:
+ * the ENS-EB model label, the arm that actually served the window, the
+ * Open-Meteo arm's reduced-feature disclosure, and the serving cycle
+ * (for the Open-Meteo arm, the anchor cycle its windows are tied to --
+ * that arm's forecast instance is not cycle-verified, and the label
+ * says so). Fallback windows name the Kuchera fallback.
+ */
+export function modelWindowTrendLabel(mark: DayModelWindowMark): string {
+  if (mark.kind === 'kuchera_fallback') {
+    return 'Kuchera fallback · no ENS-EB record for this window';
+  }
+  const arm = mark.arm ? MODEL_ARM_LABEL[mark.arm] : MODEL_ARM_LABEL.ecmwf;
+  let label = `ENS-EB model · 24 h window ending 07:00 local · ${arm} arm`;
+  if (mark.reducedFeatureVariant) label += ' · reduced-feature variant';
+  if (mark.cycleUtc) {
+    label += mark.arm === 'ecmwf_openmeteo'
+      ? ` · anchored to ${formatCycleUtc(mark.cycleUtc)} · Open-Meteo cycle unverified`
+      : ` · ${formatCycleUtc(mark.cycleUtc)}`;
+  }
+  return label;
 }

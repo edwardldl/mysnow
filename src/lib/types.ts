@@ -194,6 +194,8 @@ export interface DayModelWindowMark {
     blended: boolean;
     /** Cycle the model value was computed from, when kind is 'model'. */
     cycleUtc: string | null;
+    /** True when the serving record was scored as a reduced-feature variant (the Open-Meteo arm). */
+    reducedFeatureVariant: boolean;
 }
 
 export interface DayData {

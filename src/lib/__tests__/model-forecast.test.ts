@@ -1,7 +1,4 @@
-import { createElement } from 'react';
-import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import ModelForecastPanel from '../../components/ModelForecastPanel';
 import {
   BLEND_MODEL_ID,
   cataloguePointForLocation,
@@ -152,17 +149,17 @@ describe('model forecast resolution', () => {
     expect(modelForecastFor(palisades, 'ecmwf', 'min', day2Date)?.arm).toBe('ecmwf');
   });
 
-  it('shows no panel in a non-ecmwf/hrrr mode for the same point and date', () => {
+  it('resolves no model forecast in a non-ecmwf/hrrr mode for the same point and date', () => {
     expect(modelForecastFor(palisades, 'gfs', 'min', firstDate)).toBeNull();
     expect(modelForecastFor(palisades, 'best_match', 'min', firstDate)).toBeNull();
     expect(modelForecastFor(palisades, 'icon_global', 'min', firstDate)).toBeNull();
   });
 
-  it('shows no panel for a non-catalogue location in ecmwf mode', () => {
+  it('resolves no model forecast for a non-catalogue location in ecmwf mode', () => {
     expect(modelForecastFor(farAway, 'ecmwf', 'avg', firstDate)).toBeNull();
   });
 
-  it('shows no panel for a date with no stored window', () => {
+  it('resolves no model forecast for a date with no stored window', () => {
     expect(modelForecastFor(palisades, 'ecmwf', 'min', '2030-01-01')).toBeNull();
   });
 });
@@ -226,53 +223,15 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
     );
   });
 
-  it('shows no panel at a non-catalogue location in blend mode', () => {
+  it('resolves no model forecast at a non-catalogue location in blend mode', () => {
     expect(modelForecastFor(farAway, BLEND_MODEL_ID, 'avg', day1Date)).toBeNull();
   });
 
-  it('shows no panel for a date with no stored window in blend mode', () => {
+  it('resolves no model forecast for a date with no stored window in blend mode', () => {
     expect(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', '2030-01-01')).toBeNull();
   });
 });
 
-describe('panel rendering and per-window source labelling', () => {
-  const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
-  const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
-  const day1Date = ecmwfRows[0]?.windowEndLocalDate;
-  const day2Date = ecmwfRows[1]?.windowEndLocalDate;
-
-  const render = (result: ReturnType<typeof modelForecastFor>): string =>
-    renderToString(createElement(ModelForecastPanel, { result }));
-
-  it('labels the day-1 blend window as NOAA HRRR with the model label intact', () => {
-    const html = render(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day1Date));
-    expect(html).toContain('MODEL FORECAST');
-    expect(html).toContain('Produced by the MySnow ENS-EB model');
-    expect(html).toContain('NOAA HRRR');
-    expect(html).toContain('Blended (HRRR+ECMWF) mode');
-  });
-
-  it('labels the day-2 fallback window as ECMWF IFS, not HRRR', () => {
-    const html = render(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day2Date));
-    expect(html).toContain('MODEL FORECAST');
-    expect(html).toContain('ECMWF IFS');
-    expect(html).not.toContain('served by the NOAA HRRR model arm');
-  });
-
-  it('labels the day-5 blend window as ECMWF IFS with the model label intact', () => {
-    const day5Date = ecmwfRows[4]?.windowEndLocalDate;
-    const html = render(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day5Date));
-    expect(html).toContain('MODEL FORECAST');
-    expect(html).toContain('Produced by the MySnow ENS-EB model');
-    expect(html).toContain('ECMWF IFS');
-    expect(html).not.toContain('NOAA HRRR');
-  });
-
-  it('renders nothing without a resolved result', () => {
-    expect(render(null)).toBe('');
-    expect(render(modelForecastFor(palisades, 'gfs', 'min', day1Date))).toBe('');
-  });
-});
 
 describe('Open-Meteo long-range arm (third source, beyond the GRIB ceiling)', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
@@ -353,20 +312,6 @@ describe('Open-Meteo long-range arm (third source, beyond the GRIB ceiling)', ()
     expect(modelForecastFor(palisades, 'hrrr', 'min', day15Date)).toBeNull();
   });
 
-  it('labels the day-12 panel as ECMWF IFS via Open-Meteo with the reduced-feature note', () => {
-    const html = renderToString(
-      createElement(ModelForecastPanel, {
-        result: modelForecastFor(palisades, 'ecmwf', 'min', day12Date),
-      }),
-    );
-    expect(html).toContain('MODEL FORECAST');
-    expect(html).toContain('ECMWF IFS via Open-Meteo');
-    expect(html).toContain('anchored to the 2026-10-31 12Z cycle');
-    expect(html).toContain('Reduced-feature variant');
-    expect(html).toContain('not cycle-verified');
-    // The OM arm's values are the stored record's.
-    expect(html).toContain(day12Row?.modelSnowfallCm?.toFixed(1));
-  });
 });
 
 describe('Mount Rose (catalogue addition, estimated geometry)', () => {
@@ -405,23 +350,4 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
     expect(modelForecastFor(mountRose, 'hrrr', 'min', day12Row.windowEndLocalDate)).toBeNull();
   });
 
-  it('labels the day-2 panel ECMWF IFS and the day-12 panel as the Open-Meteo arm', () => {
-    const grib = renderToString(
-      createElement(ModelForecastPanel, {
-        result: modelForecastFor(mountRose, 'ecmwf', 'min', day2Row.windowEndLocalDate),
-      }),
-    );
-    expect(grib).toContain('MODEL FORECAST');
-    expect(grib).toContain('ECMWF IFS');
-    expect(grib).not.toContain('via Open-Meteo');
-    const om = renderToString(
-      createElement(ModelForecastPanel, {
-        result: modelForecastFor(mountRose, 'ecmwf', 'min', day12Row.windowEndLocalDate),
-      }),
-    );
-    expect(om).toContain('ECMWF IFS via Open-Meteo');
-    expect(om).toContain('anchored to the 2026-10-31 12Z cycle');
-    expect(om).toContain('Reduced-feature variant');
-    expect(om).toContain(day12Row.modelSnowfallCm?.toFixed(1));
-  });
 });

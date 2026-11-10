@@ -8,8 +8,7 @@ import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
-import ModelForecastPanel from "@/components/ModelForecastPanel";
-import { applyModelMethodToDays, ENS_EB_METHOD_ID, modelForecastFor, modelMethodAvailability, modelWindowStatuses } from "@/lib/model-forecast";
+import { applyModelMethodToDays, ENS_EB_METHOD_ID, modelMethodAvailability } from "@/lib/model-forecast";
 import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
 import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
@@ -380,19 +379,6 @@ export default function Home() {
     return calculateRollingStats(allHourly, referenceInstantMs);
   }, [activeDays, displayData, currentHourData, activeSelectedDate, todayStr, mode, locations, currentLocationId]);
 
-  // ENS-EB model panel: catalogue resort points only, ECMWF/HRRR modes
-  // only (including the default hrrr_ecmwf blend) -- modelForecastFor
-  // enforces the gate and returns null otherwise.
-  const modelResult = mode === "forecast"
-    ? modelForecastFor(locations[currentLocationId], modelId, elevationMode, activeSelectedDate)
-    : null;
-
-  // When the ENS-EB Physics option is selected, the panel also renders for
-  // fallback windows and shows the per-window coverage strip.
-  const modelMethodContext = mode === "forecast" && algoId === ENS_EB_METHOD_ID
-    ? modelWindowStatuses(locations[currentLocationId], modelId, elevationMode)
-    : null;
-
   const activeSelectedDay = activeDays.find(d => d.dateStr === activeSelectedDate) || null;
   const freshSnowSourceNote = mode === "forecast"
     ? activeSelectedDay?.modelWindow?.kind === "model"
@@ -489,7 +475,6 @@ export default function Home() {
                 )}
               />
 
-              <ModelForecastPanel result={modelResult} methodContext={modelMethodContext} selectedDate={activeSelectedDate} />
 
               {error && activeDays.length === 0 ? (
                 <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pb-20">
