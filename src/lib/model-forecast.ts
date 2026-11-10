@@ -98,6 +98,18 @@ export interface ModelForecastData {
 
 export const modelForecastData = rawData as unknown as ModelForecastData;
 
+/**
+ * Internal lookups read through this binding so tests can inject a
+ * frozen serving batch (model-forecast-frozen.test.ts). Production code
+ * never calls the setter; Vitest cannot intercept the JSON import in
+ * this setup, hence the seam.
+ */
+let activeModelForecastData: ModelForecastData = modelForecastData;
+
+export function setModelForecastDataForTests(data: ModelForecastData | null): void {
+  activeModelForecastData = data ?? modelForecastData;
+}
+
 /** The app's default forecast-source mode: the HRRR+ECMWF blend. */
 export const BLEND_MODEL_ID = 'hrrr_ecmwf';
 
@@ -162,7 +174,7 @@ export function cataloguePointForLocation(
   const reference = referencePointForMode(location, elevationMode);
   let best: ModelForecastPoint | null = null;
   let bestDistance = Infinity;
-  for (const point of modelForecastData.points) {
+  for (const point of activeModelForecastData.points) {
     if (point.role !== reference.role) continue;
     const distance = Math.hypot(
       point.latitude - reference.latitude,
@@ -235,9 +247,9 @@ export function modelForecastFor(
         point,
         arm,
         blended,
-        cycleUtc: modelForecastData.cycles[arm] ?? null,
+        cycleUtc: activeModelForecastData.cycles[arm] ?? null,
         retrievedAtUtc:
-          arm === 'ecmwf_openmeteo' ? (modelForecastData.openMeteoArm?.retrievedAtUtc ?? null) : null,
+          arm === 'ecmwf_openmeteo' ? (activeModelForecastData.openMeteoArm?.retrievedAtUtc ?? null) : null,
         forecast,
       };
     }

@@ -13,7 +13,7 @@ import type { BlendedHour, DayData, Location, WindowData } from '../types';
  * window (07:00 -> 07:00 local) must sum EXACTLY to the serving record's
  * snowfall -- the value the day total shows. Fixtures are built against
  * the Palisades Tahoe base catalogue point and the stored serving records
- * of the 2026-10-31 12Z batch; expected totals are read back through the
+ * of the 2026-11-09 12Z batch; expected totals are read back through the
  * production resolver rather than hard-coded.
  */
 
@@ -156,27 +156,30 @@ describe('modelWindowEndDateForHour', () => {
 });
 
 describe('applyModelMethodToDays hourly rescaling', () => {
-  it('blend mode: HRRR day-1 window hours sum exactly to the record, straddling two calendar days', () => {
+  it('blend mode: window hours sum exactly to the record, straddling two calendar days', () => {
+    // Anchored to the 2026-11-09 12Z batch: in blend mode the window
+    // ending 2026-11-14 resolves to the GRIB ECMWF arm (lead 5,
+    // 33.95 cm; HRRR holds only the day-1 window ending 2026-11-10).
     const days = [
-      day('2026-10-31', [
-        ...labels('2026-10-31', 0, 7).map((l) => hour(l, 9)), // previous window, no record
-        ...labels('2026-10-31', 8, 23).map((l) => hour(l, 0.5)), // window ending 2026-11-01
+      day('2026-11-13', [
+        ...labels('2026-11-13', 0, 7).map((l) => hour(l, 9)), // window ending 2026-11-13
+        ...labels('2026-11-13', 8, 23).map((l) => hour(l, 0.5)), // window ending 2026-11-14
       ]),
-      day('2026-11-01', [
-        ...labels('2026-11-01', 0, 7).map((l) => hour(l, 0.25)), // window ending 2026-11-01
-        ...labels('2026-11-01', 8, 23).map((l) => hour(l, 0.1)), // window ending 2026-11-02
+      day('2026-11-14', [
+        ...labels('2026-11-14', 0, 7).map((l) => hour(l, 0.25)), // window ending 2026-11-14
+        ...labels('2026-11-14', 8, 23).map((l) => hour(l, 0.1)), // window ending 2026-11-15
       ]),
-      day('2026-11-02', [
-        ...labels('2026-11-02', 0, 7).map((l) => hour(l, 0.1)), // window ending 2026-11-02
-        ...labels('2026-11-02', 8, 23).map((l) => hour(l, 9)), // window ending 2026-11-03
+      day('2026-11-15', [
+        ...labels('2026-11-15', 0, 7).map((l) => hour(l, 0.1)), // window ending 2026-11-15
+        ...labels('2026-11-15', 8, 23).map((l) => hour(l, 9)), // window ending 2026-11-16
       ]),
     ];
     const before = days.map((d) => d.hourly.map((h) => h.snowfall));
 
     const out = applyModelMethodToDays(days, palisades, 'hrrr_ecmwf', 'min');
 
-    const r1 = recordSnowfall('hrrr_ecmwf', '2026-11-01');
-    const w1 = windowHours(out, '2026-11-01');
+    const r1 = recordSnowfall('hrrr_ecmwf', '2026-11-14');
+    const w1 = windowHours(out, '2026-11-14');
     expect(w1).toHaveLength(24);
     expect(Math.abs(w1.reduce((s, h) => s + h.snowfall, 0) - r1)).toBeLessThan(EPS);
     // The day total follows the calendar day: it is the sum of the day's
@@ -184,31 +187,35 @@ describe('applyModelMethodToDays hourly rescaling', () => {
     // next), NOT the window record -- see model-day-sum.test.ts.
     expect(Math.abs(out[1].totalSnowfall - out[1].hourly.reduce((sum, h) => sum + h.snowfall, 0))).toBeLessThan(EPS);
 
-    // The 2026-11-01 calendar day straddles two windows: its 08:00-23:00
-    // hours are scaled by the 2026-11-02 window's factor, not the day-1 one.
-    const r2 = recordSnowfall('hrrr_ecmwf', '2026-11-02');
-    const w2 = windowHours(out, '2026-11-02');
+    // The 2026-11-14 calendar day straddles two windows: its 08:00-23:00
+    // hours are scaled by the 2026-11-15 window's factor, not the day-1 one.
+    const r2 = recordSnowfall('hrrr_ecmwf', '2026-11-15');
+    const w2 = windowHours(out, '2026-11-15');
     expect(Math.abs(w2.reduce((s, h) => s + h.snowfall, 0) - r2)).toBeLessThan(EPS);
-    const nov1Afternoon = out[1].hourly.filter((h) => Number(h.time.slice(11, 13)) >= 8);
-    expect(nov1Afternoon.every((h) => Math.abs(h.snowfall - 0.1 * (r2 / 2.4)) < 1e-6)).toBe(true);
+    const day14Afternoon = out[1].hourly.filter((h) => Number(h.time.slice(11, 13)) >= 8);
+    expect(day14Afternoon.every((h) => Math.abs(h.snowfall - 0.1 * (r2 / 2.4)) < 1e-6)).toBe(true);
 
-    // Hours in windows without a record are the identical objects, untouched.
-    const prevWindow = out[0].hourly.slice(0, 8);
-    prevWindow.forEach((h, i) => expect(h).toBe(days[0].hourly[i]));
-    expect(prevWindow.every((h) => h.snowfall === 9)).toBe(true);
+    // The first window is truncated by the array boundary (its
+    // 2026-11-12 afternoon is absent): the 8 present hours absorb its
+    // full record (see also the array-boundary pin in
+    // model-day-sum.test.ts).
+    const r0 = recordSnowfall('hrrr_ecmwf', '2026-11-13');
+    const w0 = windowHours(out, '2026-11-13');
+    expect(w0).toHaveLength(8);
+    expect(Math.abs(w0.reduce((s, h) => s + h.snowfall, 0) - r0)).toBeLessThan(EPS);
 
     // Inputs were not mutated.
     days.forEach((d, di) => d.hourly.forEach((h, hi) => expect(h.snowfall).toBe(before[di][hi])));
   });
 
-  it('literal ecmwf mode: day-2 window hours sum exactly to the GRIB record', () => {
+  it('literal ecmwf mode: window hours sum exactly to the GRIB record', () => {
     const days = [
-      day('2026-11-01', fullDay('2026-11-01', 0.3)),
-      day('2026-11-02', fullDay('2026-11-02', 0.3)),
+      day('2026-11-13', fullDay('2026-11-13', 0.3)),
+      day('2026-11-14', fullDay('2026-11-14', 0.3)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    const r = recordSnowfall('ecmwf', '2026-11-02');
-    const w = windowHours(out, '2026-11-02');
+    const r = recordSnowfall('ecmwf', '2026-11-14');
+    const w = windowHours(out, '2026-11-14');
     expect(w).toHaveLength(24);
     expect(Math.abs(w.reduce((s, h) => s + h.snowfall, 0) - r)).toBeLessThan(EPS);
     // Day total = the calendar-day sum of the rescaled hours, not r.
@@ -216,16 +223,16 @@ describe('applyModelMethodToDays hourly rescaling', () => {
   });
 
   it('Open-Meteo tail: reduced-feature window hours sum exactly to the OM record', () => {
-    const result = modelForecastFor(palisades, 'ecmwf', 'min', '2026-11-12');
+    const result = modelForecastFor(palisades, 'ecmwf', 'min', '2026-11-20');
     expect(result?.arm).toBe('ecmwf_openmeteo');
     expect(result?.forecast.reducedFeatureVariant).toBe(true);
     const days = [
-      day('2026-11-11', fullDay('2026-11-11', 1)),
-      day('2026-11-12', fullDay('2026-11-12', 1)),
-      day('2026-11-13', fullDay('2026-11-13', 1)),
+      day('2026-11-19', fullDay('2026-11-19', 1)),
+      day('2026-11-20', fullDay('2026-11-20', 1)),
+      day('2026-11-21', fullDay('2026-11-21', 1)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    const w = windowHours(out, '2026-11-12');
+    const w = windowHours(out, '2026-11-20');
     expect(w).toHaveLength(24);
     expect(Math.abs(w.reduce((s, h) => s + h.snowfall, 0) - (result?.forecast.modelSnowfallCm as number))).toBeLessThan(EPS);
     // Day total = the calendar-day sum of the rescaled hours.
@@ -233,13 +240,13 @@ describe('applyModelMethodToDays hourly rescaling', () => {
   });
 
   it('a record of exactly 0 zeroes the window hours', () => {
-    expect(recordSnowfall('ecmwf', '2026-11-03')).toBe(0);
+    expect(recordSnowfall('ecmwf', '2026-11-11')).toBe(0);
     const days = [
-      day('2026-11-02', fullDay('2026-11-02', 1)),
-      day('2026-11-03', fullDay('2026-11-03', 1)),
+      day('2026-11-10', fullDay('2026-11-10', 1)),
+      day('2026-11-11', fullDay('2026-11-11', 1)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    const w = windowHours(out, '2026-11-03');
+    const w = windowHours(out, '2026-11-11');
     expect(w).toHaveLength(24);
     expect(w.every((h) => h.snowfall === 0)).toBe(true);
     // The window's own hours are zeroed, but the day total follows the
@@ -251,23 +258,23 @@ describe('applyModelMethodToDays hourly rescaling', () => {
   });
 
   it('zero denominator: record snowfall is distributed in proportion to UI liquid', () => {
-    const r = recordSnowfall('ecmwf', '2026-11-02');
+    const r = recordSnowfall('ecmwf', '2026-11-14');
     expect(r).toBeGreaterThan(0);
-    const prev = addCalendarDays('2026-11-02', -1);
-    const hoursNov1 = labels('2026-11-01', 0, 23).map((l) => {
+    const prev = addCalendarDays('2026-11-14', -1);
+    const hoursPrev = labels('2026-11-13', 0, 23).map((l) => {
       if (l === `${prev}T08:00`) return hour(l, 0, 2);
       if (l === `${prev}T09:00`) return hour(l, 0, 1);
       if (l === `${prev}T10:00`) return hour(l, 0, 1);
       return hour(l, 0, 0);
     });
-    const hoursNov2 = labels('2026-11-02', 0, 23).map((l) => hour(l, 0, 0));
+    const hoursDay = labels('2026-11-14', 0, 23).map((l) => hour(l, 0, 0));
     const out = applyModelMethodToDays(
-      [day('2026-11-01', hoursNov1), day('2026-11-02', hoursNov2)],
+      [day('2026-11-13', hoursPrev), day('2026-11-14', hoursDay)],
       palisades,
       'ecmwf',
       'min',
     );
-    const w = windowHours(out, '2026-11-02');
+    const w = windowHours(out, '2026-11-14');
     expect(Math.abs(w.reduce((s, h) => s + h.snowfall, 0) - r)).toBeLessThan(EPS);
     const at = (label: string) => w.find((h) => h.time === label)?.snowfall as number;
     expect(Math.abs(at(`${prev}T08:00`) - r * 0.5)).toBeLessThan(EPS);
@@ -277,30 +284,30 @@ describe('applyModelMethodToDays hourly rescaling', () => {
   });
 
   it('zero denominator with no liquid either: record snowfall is split evenly', () => {
-    const r = recordSnowfall('ecmwf', '2026-11-02');
+    const r = recordSnowfall('ecmwf', '2026-11-14');
     const days = [
-      day('2026-11-01', fullDay('2026-11-01', 0, 0)),
-      day('2026-11-02', fullDay('2026-11-02', 0, 0)),
+      day('2026-11-13', fullDay('2026-11-13', 0, 0)),
+      day('2026-11-14', fullDay('2026-11-14', 0, 0)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    const w = windowHours(out, '2026-11-02');
+    const w = windowHours(out, '2026-11-14');
     expect(w).toHaveLength(24);
     expect(Math.abs(w.reduce((s, h) => s + h.snowfall, 0) - r)).toBeLessThan(EPS);
     for (const h of w) expect(Math.abs(h.snowfall - r / 24)).toBeLessThan(EPS);
   });
 
   it('fallback windows keep Kuchera hours, identical objects (literal hrrr day 2)', () => {
-    expect(modelForecastFor(palisades, 'hrrr', 'min', '2026-11-02')).toBeNull();
+    expect(modelForecastFor(palisades, 'hrrr', 'min', '2026-11-11')).toBeNull();
     const days = [
-      day('2026-11-01', fullDay('2026-11-01', 0.4)),
-      day('2026-11-02', fullDay('2026-11-02', 0.4)),
+      day('2026-11-10', fullDay('2026-11-10', 0.4)),
+      day('2026-11-11', fullDay('2026-11-11', 0.4)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'hrrr', 'min');
     expect(out[1].modelWindow?.kind).toBe('kuchera_fallback');
-    const w = windowHours(out, '2026-11-02');
+    const w = windowHours(out, '2026-11-11');
     expect(w).toHaveLength(24);
     for (const h of w) {
-      const original = days.flatMap((d) => d.hourly).find((o) => o.time === h.time && modelWindowEndDateForHour(o, TZ) === '2026-11-02' && o.instantMs === h.instantMs);
+      const original = days.flatMap((d) => d.hourly).find((o) => o.time === h.time && modelWindowEndDateForHour(o, TZ) === '2026-11-11' && o.instantMs === h.instantMs);
       expect(h).toBe(original);
       expect(h.snowfall).toBe(0.4);
     }

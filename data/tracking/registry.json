@@ -572,6 +572,358 @@
       "snotel_station": null,
       "state": "NV",
       "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "June Mountain",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2314.0,
+          "geometry_source": "estimated",
+          "latitude": 37.753661,
+          "longitude": -119.075663,
+          "name": "Base estimate",
+          "point_id": "june-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2702.0,
+          "geometry_source": "estimated",
+          "latitude": 37.753661,
+          "longitude": -119.075663,
+          "name": "Mid-mountain estimate",
+          "point_id": "june-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3090.0,
+          "geometry_source": "estimated",
+          "latitude": 37.753661,
+          "longitude": -119.075663,
+          "name": "Summit estimate",
+          "point_id": "june-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 37.753661,
+      "longitude": -119.075663,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California).",
+      "max_elevation_m": 3090.0,
+      "min_elevation_m": 2314.0,
+      "pilot_name": "June Mountain",
+      "resort_slug": "june-mountain",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Bear Mountain",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2182.0,
+          "geometry_source": "estimated",
+          "latitude": 34.21962,
+          "longitude": -116.860485,
+          "name": "Base estimate",
+          "point_id": "bear-mountain-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2430.0,
+          "geometry_source": "estimated",
+          "latitude": 34.21962,
+          "longitude": -116.860485,
+          "name": "Mid-mountain estimate",
+          "point_id": "bear-mountain-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2678.0,
+          "geometry_source": "estimated",
+          "latitude": 34.21962,
+          "longitude": -116.860485,
+          "name": "Summit estimate",
+          "point_id": "bear-mountain-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 34.21962,
+      "longitude": -116.860485,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California). San Bernardino Mountains (Transverse Ranges) -- served under the sierra-nevada region / sierra_maritime_mountain regime, the catalogue's California calibration proxy; no separate Southern California region exists in the gold pool.",
+      "max_elevation_m": 2678.0,
+      "min_elevation_m": 2182.0,
+      "pilot_name": "Bear Mountain",
+      "resort_slug": "bear-mountain",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Snow Summit",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2128.0,
+          "geometry_source": "estimated",
+          "latitude": 34.22775,
+          "longitude": -116.890393,
+          "name": "Base estimate",
+          "point_id": "snow-summit-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2313.0,
+          "geometry_source": "estimated",
+          "latitude": 34.22775,
+          "longitude": -116.890393,
+          "name": "Mid-mountain estimate",
+          "point_id": "snow-summit-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2498.0,
+          "geometry_source": "estimated",
+          "latitude": 34.22775,
+          "longitude": -116.890393,
+          "name": "Summit estimate",
+          "point_id": "snow-summit-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 34.22775,
+      "longitude": -116.890393,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California). San Bernardino Mountains (Transverse Ranges) -- served under the sierra-nevada region / sierra_maritime_mountain regime, the catalogue's California calibration proxy; no separate Southern California region exists in the gold pool.",
+      "max_elevation_m": 2498.0,
+      "min_elevation_m": 2128.0,
+      "pilot_name": "Snow Summit",
+      "resort_slug": "snow-summit",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Snow Valley Mountain Resort",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2052.0,
+          "geometry_source": "estimated",
+          "latitude": 34.214481,
+          "longitude": -117.036296,
+          "name": "Base estimate",
+          "point_id": "snow-valley-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2220.0,
+          "geometry_source": "estimated",
+          "latitude": 34.214481,
+          "longitude": -117.036296,
+          "name": "Mid-mountain estimate",
+          "point_id": "snow-valley-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2388.0,
+          "geometry_source": "estimated",
+          "latitude": 34.214481,
+          "longitude": -117.036296,
+          "name": "Summit estimate",
+          "point_id": "snow-valley-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 34.214481,
+      "longitude": -117.036296,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California). San Bernardino Mountains (Transverse Ranges) -- served under the sierra-nevada region / sierra_maritime_mountain regime, the catalogue's California calibration proxy; no separate Southern California region exists in the gold pool.",
+      "max_elevation_m": 2388.0,
+      "min_elevation_m": 2052.0,
+      "pilot_name": "Snow Valley",
+      "resort_slug": "snow-valley",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Sierra-at-Tahoe Ski Resort",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2040.0,
+          "geometry_source": "estimated",
+          "latitude": 38.797438,
+          "longitude": -120.076847,
+          "name": "Base estimate",
+          "point_id": "sierra-at-tahoe-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2371.0,
+          "geometry_source": "estimated",
+          "latitude": 38.797438,
+          "longitude": -120.076847,
+          "name": "Mid-mountain estimate",
+          "point_id": "sierra-at-tahoe-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2702.0,
+          "geometry_source": "estimated",
+          "latitude": 38.797438,
+          "longitude": -120.076847,
+          "name": "Summit estimate",
+          "point_id": "sierra-at-tahoe-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.797438,
+      "longitude": -120.076847,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California).",
+      "max_elevation_m": 2702.0,
+      "min_elevation_m": 2040.0,
+      "pilot_name": "Sierra-at-Tahoe",
+      "resort_slug": "sierra-at-tahoe",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Heavenly Mountain Resort",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2027.0,
+          "geometry_source": "estimated",
+          "latitude": 38.937462,
+          "longitude": -119.910798,
+          "name": "Base estimate",
+          "point_id": "heavenly-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2532.0,
+          "geometry_source": "estimated",
+          "latitude": 38.937462,
+          "longitude": -119.910798,
+          "name": "Mid-mountain estimate",
+          "point_id": "heavenly-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 3037.0,
+          "geometry_source": "estimated",
+          "latitude": 38.937462,
+          "longitude": -119.910798,
+          "name": "Summit estimate",
+          "point_id": "heavenly-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.937462,
+      "longitude": -119.910798,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California;Nevada).",
+      "max_elevation_m": 3037.0,
+      "min_elevation_m": 2027.0,
+      "pilot_name": "Heavenly",
+      "resort_slug": "heavenly",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Northstar at Tahoe Resort",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 1927.0,
+          "geometry_source": "estimated",
+          "latitude": 39.263035,
+          "longitude": -120.13324,
+          "name": "Base estimate",
+          "point_id": "northstar-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2278.5,
+          "geometry_source": "estimated",
+          "latitude": 39.263035,
+          "longitude": -120.13324,
+          "name": "Mid-mountain estimate",
+          "point_id": "northstar-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2630.0,
+          "geometry_source": "estimated",
+          "latitude": 39.263035,
+          "longitude": -120.13324,
+          "name": "Summit estimate",
+          "point_id": "northstar-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 39.263035,
+      "longitude": -120.13324,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California).",
+      "max_elevation_m": 2630.0,
+      "min_elevation_m": 1927.0,
+      "pilot_name": "Northstar California",
+      "resort_slug": "northstar",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "catalog_name": "Kirkwood Mountain Resort",
+      "climate_regime": "sierra_maritime_mountain",
+      "forecast_points": [
+        {
+          "elevation_m": 2388.0,
+          "geometry_source": "estimated",
+          "latitude": 38.678978,
+          "longitude": -120.067434,
+          "name": "Base estimate",
+          "point_id": "kirkwood-base",
+          "role": "base"
+        },
+        {
+          "elevation_m": 2640.0,
+          "geometry_source": "estimated",
+          "latitude": 38.678978,
+          "longitude": -120.067434,
+          "name": "Mid-mountain estimate",
+          "point_id": "kirkwood-mid_mountain",
+          "role": "mid_mountain"
+        },
+        {
+          "elevation_m": 2892.0,
+          "geometry_source": "estimated",
+          "latitude": 38.678978,
+          "longitude": -120.067434,
+          "name": "Summit estimate",
+          "point_id": "kirkwood-summit",
+          "role": "summit"
+        }
+      ],
+      "ghcn_stations": [],
+      "latitude": 38.678978,
+      "longitude": -120.067434,
+      "match_note": "Exact catalog name match in src/data/ski-areas.json (California).",
+      "max_elevation_m": 2892.0,
+      "min_elevation_m": 2388.0,
+      "pilot_name": "Kirkwood",
+      "resort_slug": "kirkwood",
+      "snotel_station": null,
+      "state": "CA",
+      "timezone": "America/Los_Angeles"
     }
   ],
   "schema_version": 1,

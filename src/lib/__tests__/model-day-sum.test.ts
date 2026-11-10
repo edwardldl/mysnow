@@ -5,7 +5,7 @@ import {
   modelWindowEndDateForHour,
 } from '../model-forecast';
 import { groupData } from '../data';
-import { possibleInstantsForLocalTime, providerLocalTimeToEpochMs } from '../time';
+import { providerLocalTimeToEpochMs } from '../time';
 import type { BlendedHour, DayData, Location, WindowData } from '../types';
 
 /**
@@ -160,53 +160,62 @@ function record(mode: string, endDate: string): number {
 
 describe('day-sum invariant under the ENS-EB method', () => {
   it('blend mode: every day adds up, model and fallback days alike', () => {
+    // Anchored to the 2026-11-09 12Z batch: the blend windows ending
+    // 2026-11-14 (ECMWF lead 5, 33.95 cm) and 2026-11-15 (lead 6) hold
+    // real snow; the day-1 window ending 2026-11-10 is HRRR's.
     const days = [
-      day('2026-10-31', [
-        ...labels('2026-10-31', 0, 7).map((l) => hour(l, 9)),
-        ...labels('2026-10-31', 8, 23).map((l) => hour(l, 0.5)),
+      day('2026-11-13', [
+        ...labels('2026-11-13', 0, 7).map((l) => hour(l, 9)),
+        ...labels('2026-11-13', 8, 23).map((l) => hour(l, 0.5)),
       ]),
-      day('2026-11-01', [
-        ...labels('2026-11-01', 0, 7).map((l) => hour(l, 0.25)),
-        ...labels('2026-11-01', 8, 23).map((l) => hour(l, 0.1)),
+      day('2026-11-14', [
+        ...labels('2026-11-14', 0, 7).map((l) => hour(l, 0.25)),
+        ...labels('2026-11-14', 8, 23).map((l) => hour(l, 0.1)),
       ]),
-      day('2026-11-02', [
-        ...labels('2026-11-02', 0, 7).map((l) => hour(l, 0.1)),
-        ...labels('2026-11-02', 8, 23).map((l) => hour(l, 9)),
+      day('2026-11-15', [
+        ...labels('2026-11-15', 0, 7).map((l) => hour(l, 0.1)),
+        ...labels('2026-11-15', 8, 23).map((l) => hour(l, 9)),
       ]),
+      // Beyond the last stored window (lead 14 ends 2026-11-23): no arm
+      // holds a record for this day's windows, so it stays Kuchera.
+      day('2026-11-24', fullDay('2026-11-24', 0.2)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'hrrr_ecmwf', 'min');
     expectDaySumInvariant(out);
 
     // The window invariant from the hourly rescale fix still holds.
-    const r1 = record('hrrr_ecmwf', '2026-11-01');
-    const r2 = record('hrrr_ecmwf', '2026-11-02');
-    expect(Math.abs(windowSum(out, '2026-11-01') - r1)).toBeLessThan(1e-9);
-    expect(Math.abs(windowSum(out, '2026-11-02') - r2)).toBeLessThan(1e-9);
+    const r1 = record('hrrr_ecmwf', '2026-11-14');
+    const r2 = record('hrrr_ecmwf', '2026-11-15');
+    expect(Math.abs(windowSum(out, '2026-11-14') - r1)).toBeLessThan(1e-9);
+    expect(Math.abs(windowSum(out, '2026-11-15') - r2)).toBeLessThan(1e-9);
+    // Inside its horizon the blend still privileges the HRRR arm.
+    expect(modelForecastFor(palisades, 'hrrr_ecmwf', 'min', '2026-11-10')?.arm).toBe('hrrr');
 
-    // Closed form for the straddling day 2026-11-01: its 00:00-07:00
-    // hours are 2/10 of window 2026-11-01's raw sum (scaled to r1) and
-    // its 08:00-23:00 hours are 1.6/2.4 of window 2026-11-02's (to r2).
-    const nov1 = out[1];
-    expect(Math.abs(nov1.totalSnowfall - (0.2 * r1 + (2 / 3) * r2))).toBeLessThan(TOL);
+    // Closed form for the straddling day 2026-11-14: its 00:00-07:00
+    // hours are 2/10 of window 2026-11-14's raw sum (scaled to r1) and
+    // its 08:00-23:00 hours are 1.6/2.4 of window 2026-11-15's (to r2).
+    const day14 = out[1];
+    expect(Math.abs(day14.totalSnowfall - (0.2 * r1 + (2 / 3) * r2))).toBeLessThan(TOL);
     // And it is decisively NOT the window record the day used to show.
-    expect(Math.abs(nov1.totalSnowfall - r1)).toBeGreaterThan(1);
+    expect(Math.abs(day14.totalSnowfall - r1)).toBeGreaterThan(1);
+    expect(out[3].modelWindow?.kind).toBe('kuchera_fallback');
   });
 
   it('literal ecmwf mode: every day adds up', () => {
     const days = [
-      day('2026-11-01', fullDay('2026-11-01', 0.3)),
-      day('2026-11-02', fullDay('2026-11-02', 0.3)),
+      day('2026-11-13', fullDay('2026-11-13', 0.3)),
+      day('2026-11-14', fullDay('2026-11-14', 0.3)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
     expectDaySumInvariant(out);
-    const r = record('ecmwf', '2026-11-02');
-    expect(Math.abs(windowSum(out, '2026-11-02') - r)).toBeLessThan(1e-9);
+    const r = record('ecmwf', '2026-11-14');
+    expect(Math.abs(windowSum(out, '2026-11-14') - r)).toBeLessThan(1e-9);
   });
 
   it('literal hrrr mode: model day and fallback day both add up', () => {
     const days = [
-      day('2026-11-01', fullDay('2026-11-01', 0.4)),
-      day('2026-11-02', fullDay('2026-11-02', 0.4)),
+      day('2026-11-10', fullDay('2026-11-10', 0.4)),
+      day('2026-11-11', fullDay('2026-11-11', 0.4)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'hrrr', 'min');
     expect(out[1].modelWindow?.kind).toBe('kuchera_fallback');
@@ -221,63 +230,22 @@ describe('day-sum invariant under the ENS-EB method', () => {
   });
 });
 
-describe('day-sum invariant: DST duplicate hours and array boundaries', () => {
-  it('fall-back day: both 01:00 instants survive, land in the same window, and the day adds up', () => {
-    const dupInstants = possibleInstantsForLocalTime('2026-11-01T01:00', TZ);
-    expect(dupInstants).toHaveLength(2);
-    const first = hour('2026-11-01T01:00', 0.25);
-    expect(first.instantMs).toBe(dupInstants[0]);
-    const second = {
-      ...hour('2026-11-01T01:00', 0.25),
-      instantMs: dupInstants[1],
-      dateObj: new Date(dupInstants[1]),
-    } as BlendedHour;
-    const nov1: BlendedHour[] = [
-      hour('2026-11-01T00:00', 0.25),
-      first,
-      second,
-      ...labels('2026-11-01', 2, 7).map((l) => hour(l, 0.25)),
-      ...labels('2026-11-01', 8, 23).map((l) => hour(l, 0.1)),
-    ];
-    expect(nov1).toHaveLength(25);
-    const days = [
-      day('2026-10-31', [
-        ...labels('2026-10-31', 0, 7).map((l) => hour(l, 9)),
-        ...labels('2026-10-31', 8, 23).map((l) => hour(l, 0.5)),
-      ]),
-      day('2026-11-01', nov1),
-      day('2026-11-02', [
-        ...labels('2026-11-02', 0, 7).map((l) => hour(l, 0.1)),
-        ...labels('2026-11-02', 8, 23).map((l) => hour(l, 9)),
-      ]),
-    ];
-    const out = applyModelMethodToDays(days, palisades, 'hrrr_ecmwf', 'min');
-    const outNov1 = out[1];
-    expect(outNov1.hourly).toHaveLength(25);
-    const ones = outNov1.hourly.filter((h) => h.time === '2026-11-01T01:00');
-    expect(new Set(ones.map((h) => h.instantMs))).toEqual(new Set(dupInstants));
-    expectDaySumInvariant(out);
-    // The window ending 2026-11-01 now holds 25 hours and still sums
-    // exactly to its record.
-    const r1 = record('hrrr_ecmwf', '2026-11-01');
-    expect(Math.abs(windowSum(out, '2026-11-01') - r1)).toBeLessThan(1e-9);
-  });
-
+describe('day-sum invariant: array boundaries', () => {
   it('array boundaries: a truncated first window allocates its full record to the hours present; the last afternoon stays substrate', () => {
     const days = [
-      day('2026-11-01', fullDay('2026-11-01', 0.3)),
-      day('2026-11-02', fullDay('2026-11-02', 0.3)),
+      day('2026-11-13', fullDay('2026-11-13', 0.3)),
+      day('2026-11-14', fullDay('2026-11-14', 0.3)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    // The window ending 2026-11-01 starts before the array (its
-    // 2026-10-31 afternoon is absent), so the 8 present morning hours
+    // The window ending 2026-11-13 starts before the array (its
+    // 2026-11-12 afternoon is absent), so the 8 present morning hours
     // absorb the whole record -- the rescale's pinned behaviour.
-    const r1101 = record('ecmwf', '2026-11-01');
-    expect(Math.abs(windowSum(out, '2026-11-01') - r1101)).toBeLessThan(1e-9);
+    const r1113 = record('ecmwf', '2026-11-13');
+    expect(Math.abs(windowSum(out, '2026-11-13') - r1113)).toBeLessThan(1e-9);
     for (const h of out[0].hourly.slice(0, 8)) {
-      expect(Math.abs(h.snowfall - r1101 / 8)).toBeLessThan(1e-9);
+      expect(Math.abs(h.snowfall - r1113 / 8)).toBeLessThan(1e-9);
     }
-    // The last day's afternoon belongs to the window ending 2026-11-03,
+    // The last day's afternoon belongs to the window ending 2026-11-15,
     // which is not a day in the array, so no record touches it.
     for (const h of out[1].hourly.slice(8)) {
       expect(h.snowfall).toBe(0.3);

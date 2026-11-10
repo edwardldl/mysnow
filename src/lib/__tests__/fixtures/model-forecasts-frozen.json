@@ -1,0 +1,328 @@
+{
+ "generatedAtUtc": "2026-11-01T01:15:02.308471+00:00",
+ "modelVersion": "ENS-EB v3 champion (model-v3, 64 features)",
+ "modelLabel": "Model forecast",
+ "featureBuilderVersion": "model-serving-test-1 (adapters) + gold_profiles/v3_features (training builders, unmodified)",
+ "nanPolicy": "pass-through (design S5; validated 2026-10-31, nan_validation.json)",
+ "cycles": {
+  "ecmwf": "2026-10-31T12:00:00Z",
+  "hrrr": "2026-10-31T12:00:00Z",
+  "ecmwf_openmeteo": "2026-10-31T12:00:00Z"
+ },
+ "openMeteoArm": {
+  "sourceId": "open-meteo-ecmwf-ifs025",
+  "displayName": "ECMWF IFS via Open-Meteo",
+  "anchorCycleUtc": "2026-10-31T12:00:00Z",
+  "retrievedAtUtc": "2026-11-01T07:48:09.809701Z",
+  "reducedFeatureVariant": true,
+  "note": "Third serving source (user decision 2026-11-01): Open-Meteo ecmwf_ifs025, covering only the windows beyond the GRIB step-240 ceiling. Open-Meteo publishes no cycle metadata and the E1 parity check could not cycle-verify its forecast instance against the GRIB arm, so this arm is labelled distinctly and keeps its own evidence clock. Reduced-feature variant: total column liquid water is unavailable from Open-Meteo, so tclw_pwt / tclw_max are NaN under the validated pass-through."
+ },
+ "points": [
+  {
+   "pointId": "palisades-tahoe-base",
+   "resortSlug": "palisades-tahoe",
+   "resortName": "Palisades Tahoe",
+   "pointName": "Village base",
+   "role": "base",
+   "latitude": 39.196999,
+   "longitude": -120.24313,
+   "elevationM": 1889.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "ecmwf": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.504258676251219,
+      "modelSnowfallCm": 4.81579160318754,
+      "kucheraSlr": 3.246072,
+      "kucheraSnowfallCm": 1.83818565216,
+      "liquidMm": 5.6628
+     },
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 10.154220411170856,
+      "modelSnowfallCm": 0.4393731171913629,
+      "kucheraSlr": 3.019125,
+      "kucheraSnowfallCm": 0.13063753875,
+      "liquidMm": 0.4327
+     },
+     {
+      "leadDay": 3,
+      "windowStartUtc": "2026-11-02T15:00:00Z",
+      "windowEndUtc": "2026-11-03T15:00:00Z",
+      "windowEndLocalDate": "2026-11-03",
+      "modelSlr": 10.79611310820882,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 4,
+      "windowStartUtc": "2026-11-03T15:00:00Z",
+      "windowEndUtc": "2026-11-04T15:00:00Z",
+      "windowEndLocalDate": "2026-11-04",
+      "modelSlr": 8.913383483421192,
+      "modelSnowfallCm": 3.2526719007700615,
+      "kucheraSlr": 3.513242,
+      "kucheraSnowfallCm": 1.28205227064,
+      "liquidMm": 3.6492
+     },
+     {
+      "leadDay": 5,
+      "windowStartUtc": "2026-11-04T15:00:00Z",
+      "windowEndUtc": "2026-11-05T15:00:00Z",
+      "windowEndLocalDate": "2026-11-05",
+      "modelSlr": 10.755026235821841,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 6,
+      "windowStartUtc": "2026-11-05T15:00:00Z",
+      "windowEndUtc": "2026-11-06T15:00:00Z",
+      "windowEndLocalDate": "2026-11-06",
+      "modelSlr": 10.942501342171681,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": 3.0,
+      "kucheraSnowfallCm": 0.0,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 7,
+      "windowStartUtc": "2026-11-06T15:00:00Z",
+      "windowEndUtc": "2026-11-07T15:00:00Z",
+      "windowEndLocalDate": "2026-11-07",
+      "modelSlr": 10.958237545281214,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 8,
+      "windowStartUtc": "2026-11-07T15:00:00Z",
+      "windowEndUtc": "2026-11-08T15:00:00Z",
+      "windowEndLocalDate": "2026-11-08",
+      "modelSlr": 11.098181060321085,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     },
+     {
+      "leadDay": 9,
+      "windowStartUtc": "2026-11-08T15:00:00Z",
+      "windowEndUtc": "2026-11-09T15:00:00Z",
+      "windowEndLocalDate": "2026-11-09",
+      "modelSlr": 10.739848295805572,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0
+     }
+    ],
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 8.589790279602028,
+      "modelSnowfallCm": 10.72005826894333,
+      "kucheraSlr": 3.768256,
+      "kucheraSnowfallCm": 4.702783488,
+      "liquidMm": 12.48
+     }
+    ],
+    "ecmwf_openmeteo": [
+     {
+      "leadDay": 10,
+      "windowStartUtc": "2026-11-09T15:00:00Z",
+      "windowEndUtc": "2026-11-10T15:00:00Z",
+      "windowEndLocalDate": "2026-11-10",
+      "modelSlr": 10.722684120047173,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 11,
+      "windowStartUtc": "2026-11-10T15:00:00Z",
+      "windowEndUtc": "2026-11-11T15:00:00Z",
+      "windowEndLocalDate": "2026-11-11",
+      "modelSlr": 10.149165992660304,
+      "modelSnowfallCm": 0.0,
+      "kucheraSlr": null,
+      "kucheraSnowfallCm": null,
+      "liquidMm": 0.0,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 12,
+      "windowStartUtc": "2026-11-11T15:00:00Z",
+      "windowEndUtc": "2026-11-12T15:00:00Z",
+      "windowEndLocalDate": "2026-11-12",
+      "modelSlr": 8.955346196072725,
+      "modelSnowfallCm": 33.851208621154896,
+      "kucheraSlr": 3.806897,
+      "kucheraSnowfallCm": 14.390070660000001,
+      "liquidMm": 37.8,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 13,
+      "windowStartUtc": "2026-11-12T15:00:00Z",
+      "windowEndUtc": "2026-11-13T15:00:00Z",
+      "windowEndLocalDate": "2026-11-13",
+      "modelSlr": 9.484082003628496,
+      "modelSnowfallCm": 3.4142695213062586,
+      "kucheraSlr": 7.083333,
+      "kucheraSnowfallCm": 2.54999988,
+      "liquidMm": 3.6,
+      "reducedFeatureVariant": true
+     },
+     {
+      "leadDay": 14,
+      "windowStartUtc": "2026-11-13T15:00:00Z",
+      "windowEndUtc": "2026-11-14T15:00:00Z",
+      "windowEndLocalDate": "2026-11-14",
+      "modelSlr": 8.90385388284838,
+      "modelSnowfallCm": 72.92256330052825,
+      "kucheraSlr": 3.825885,
+      "kucheraSnowfallCm": 31.333998150000003,
+      "liquidMm": 81.9,
+      "reducedFeatureVariant": true
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "synthetic-base",
+   "resortSlug": "synthetic-fixture",
+   "resortName": "Synthetic Fixture",
+   "pointName": "Synthetic base",
+   "role": "base",
+   "latitude": 39.5,
+   "longitude": -120.5,
+   "elevationM": 2000.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.0,
+      "modelSnowfallCm": 12.0,
+      "kucheraSlr": 5.0,
+      "kucheraSnowfallCm": 6.0,
+      "liquidMm": 12.0
+     }
+    ],
+    "ecmwf": [
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 8.0,
+      "modelSnowfallCm": 6.0,
+      "kucheraSlr": 5.0,
+      "kucheraSnowfallCm": 3.0,
+      "liquidMm": 7.5
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "synthetic-mid_mountain",
+   "resortSlug": "synthetic-fixture",
+   "resortName": "Synthetic Fixture",
+   "pointName": "Synthetic mid_mountain",
+   "role": "mid_mountain",
+   "latitude": 39.5,
+   "longitude": -120.5,
+   "elevationM": 2500.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.0,
+      "modelSnowfallCm": 12.0,
+      "kucheraSlr": 5.0,
+      "kucheraSnowfallCm": 6.0,
+      "liquidMm": 12.0
+     }
+    ],
+    "ecmwf": [
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 8.0,
+      "modelSnowfallCm": 6.0,
+      "kucheraSlr": 5.0,
+      "kucheraSnowfallCm": 3.0,
+      "liquidMm": 7.5
+     }
+    ]
+   }
+  },
+  {
+   "pointId": "synthetic-summit",
+   "resortSlug": "synthetic-fixture",
+   "resortName": "Synthetic Fixture",
+   "pointName": "Synthetic summit",
+   "role": "summit",
+   "latitude": 39.5,
+   "longitude": -120.5,
+   "elevationM": 3000.0,
+   "timezone": "America/Los_Angeles",
+   "forecasts": {
+    "hrrr": [
+     {
+      "leadDay": 1,
+      "windowStartUtc": "2026-10-31T15:00:00Z",
+      "windowEndUtc": "2026-11-01T15:00:00Z",
+      "windowEndLocalDate": "2026-11-01",
+      "modelSlr": 10.0,
+      "modelSnowfallCm": 12.0,
+      "kucheraSlr": 5.0,
+      "kucheraSnowfallCm": 6.0,
+      "liquidMm": 12.0
+     }
+    ],
+    "ecmwf": [
+     {
+      "leadDay": 2,
+      "windowStartUtc": "2026-11-01T15:00:00Z",
+      "windowEndUtc": "2026-11-02T15:00:00Z",
+      "windowEndLocalDate": "2026-11-02",
+      "modelSlr": 8.0,
+      "modelSnowfallCm": 6.0,
+      "kucheraSlr": 5.0,
+      "kucheraSnowfallCm": 3.0,
+      "liquidMm": 7.5
+     }
+    ]
+   }
+  }
+ ]
+}

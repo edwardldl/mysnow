@@ -126,6 +126,40 @@ describe('model method availability matrix', () => {
     }
   });
 
+  it('is available at every California Ikon/Epic expansion resort', () => {
+    // Estimated-geometry locations (no explicit referencePoints: the
+    // geometry layer derives base/mid/summit from min/max elevation).
+    const caNew: Array<{ slug: string; latitude: number; longitude: number; minElevationM: number; maxElevationM: number }> = [
+      { slug: 'june-mountain', latitude: 37.753661, longitude: -119.075663, minElevationM: 2314, maxElevationM: 3090 },
+      { slug: 'bear-mountain', latitude: 34.219620, longitude: -116.860485, minElevationM: 2182, maxElevationM: 2678 },
+      { slug: 'snow-summit', latitude: 34.227750, longitude: -116.890393, minElevationM: 2128, maxElevationM: 2498 },
+      { slug: 'snow-valley', latitude: 34.214481, longitude: -117.036296, minElevationM: 2052, maxElevationM: 2388 },
+      { slug: 'sierra-at-tahoe', latitude: 38.797438, longitude: -120.076847, minElevationM: 2040, maxElevationM: 2702 },
+      { slug: 'heavenly', latitude: 38.937462, longitude: -119.910798, minElevationM: 2027, maxElevationM: 3037 },
+      { slug: 'northstar', latitude: 39.263035, longitude: -120.133240, minElevationM: 1927, maxElevationM: 2630 },
+      { slug: 'kirkwood', latitude: 38.678978, longitude: -120.067434, minElevationM: 2388, maxElevationM: 2892 },
+    ];
+    for (const r of caNew) {
+      const loc = {
+        id: r.slug,
+        name: r.slug,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        elevationFt: Math.round(((r.minElevationM + r.maxElevationM) / 2) * 3.28084),
+        elevationM: (r.minElevationM + r.maxElevationM) / 2,
+        minElevationM: r.minElevationM,
+        maxElevationM: r.maxElevationM,
+        timezone: 'America/Los_Angeles',
+        isCustom: false,
+      } as Location;
+      for (const mode of ['ecmwf', 'hrrr', BLEND_MODEL_ID]) {
+        const availability = modelMethodAvailability(mode, loc, 'min');
+        expect(availability.available, `${r.slug} ${mode}`).toBe(true);
+        expect(availability.point?.pointId).toBe(`${r.slug}-base`);
+      }
+    }
+  });
+
   it('is unavailable in other forecast-source modes, with the mode reason', () => {
     for (const mode of ['gfs', 'nam', 'nbm', 'icon_global', 'best_match', 'ecmwf_aifs', 'gem_regional', 'gem_hrdps_west']) {
       const availability = modelMethodAvailability(mode, palisades, 'min');
@@ -265,10 +299,10 @@ describe('extended ECMWF horizon (step-240 open-data ceiling)', () => {
   });
 
   it('stays Kuchera beyond day 14, where no arm holds a record', () => {
-    const out = applyModelMethodToDays([mkDay('2026-11-15', 7.5)], palisades, 'ecmwf', 'min');
+    const out = applyModelMethodToDays([mkDay('2026-11-24', 7.5)], palisades, 'ecmwf', 'min');
     expect(out[0].totalSnowfall).toBe(7.5);
     expect(out[0].modelWindow?.kind).toBe('kuchera_fallback');
-    const outBlend = applyModelMethodToDays([mkDay('2026-11-15', 7.5)], palisades, BLEND_MODEL_ID, 'min');
+    const outBlend = applyModelMethodToDays([mkDay('2026-11-24', 7.5)], palisades, BLEND_MODEL_ID, 'min');
     expect(outBlend[0].modelWindow?.kind).toBe('kuchera_fallback');
   });
 

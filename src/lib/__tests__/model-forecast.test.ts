@@ -129,7 +129,7 @@ describe('model forecast resolution', () => {
   const firstDate = ecmwfRows[0]?.windowEndLocalDate;
 
   it('serving data covers the catalogue', () => {
-    expect(modelForecastData.points.length).toBe(33);
+    expect(modelForecastData.points.length).toBe(57);
     expect(ecmwfRows.length).toBeGreaterThan(0);
   });
 
@@ -240,8 +240,8 @@ describe('Open-Meteo long-range arm (third source, beyond the GRIB ceiling)', ()
   const day12Row = omRows.find((r) => r.leadDay === 12) as (typeof omRows)[number];
   const day10Date = day10Row.windowEndLocalDate;
   const day12Date = day12Row.windowEndLocalDate;
-  // Lead day 15 would end 2026-11-15 at Palisades; no arm stores it.
-  const day15Date = '2026-11-15';
+  // Lead day 15 would end 2026-11-24 at Palisades; no arm stores it.
+  const day15Date = '2026-11-24';
 
   it('stores only the tail windows: leads 10-14 at Palisades, 11-14 at Stowe', () => {
     expect(omRows.map((r) => r.leadDay)).toEqual([10, 11, 12, 13, 14]);
@@ -350,4 +350,91 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
     expect(modelForecastFor(mountRose, 'hrrr', 'min', day12Row.windowEndLocalDate)).toBeNull();
   });
 
+});
+
+describe('California Ikon/Epic expansion (catalogue addition, estimated geometry)', () => {
+  // Geometry from the app catalogue entries in src/data/ski-areas.json,
+  // following the estimated convention (base = min, mid = (min+max)/2,
+  // summit = max, all at the resort coordinates). Ikon California per
+  // ikonpass.com destinations (2026-27): June Mountain, Bear Mountain +
+  // Snow Summit (listed separately under Big Bear Mountain Resort),
+  // Snow Valley, Sierra-at-Tahoe. Epic California per epicpass.com:
+  // Heavenly, Northstar, Kirkwood.
+  const CA_NEW: Array<{
+    slug: string; name: string; latitude: number; longitude: number;
+    minElevationM: number; maxElevationM: number;
+  }> = [
+    { slug: 'june-mountain', name: 'June Mountain', latitude: 37.753661, longitude: -119.075663, minElevationM: 2314, maxElevationM: 3090 },
+    { slug: 'bear-mountain', name: 'Bear Mountain', latitude: 34.219620, longitude: -116.860485, minElevationM: 2182, maxElevationM: 2678 },
+    { slug: 'snow-summit', name: 'Snow Summit', latitude: 34.227750, longitude: -116.890393, minElevationM: 2128, maxElevationM: 2498 },
+    { slug: 'snow-valley', name: 'Snow Valley', latitude: 34.214481, longitude: -117.036296, minElevationM: 2052, maxElevationM: 2388 },
+    { slug: 'sierra-at-tahoe', name: 'Sierra-at-Tahoe', latitude: 38.797438, longitude: -120.076847, minElevationM: 2040, maxElevationM: 2702 },
+    { slug: 'heavenly', name: 'Heavenly', latitude: 38.937462, longitude: -119.910798, minElevationM: 2027, maxElevationM: 3037 },
+    { slug: 'northstar', name: 'Northstar California', latitude: 39.263035, longitude: -120.133240, minElevationM: 1927, maxElevationM: 2630 },
+    { slug: 'kirkwood', name: 'Kirkwood', latitude: 38.678978, longitude: -120.067434, minElevationM: 2388, maxElevationM: 2892 },
+  ];
+
+  const locationFor = (r: (typeof CA_NEW)[number]): Location => {
+    const mid = (r.minElevationM + r.maxElevationM) / 2;
+    return {
+      id: r.slug,
+      name: r.name,
+      latitude: r.latitude,
+      longitude: r.longitude,
+      elevationFt: Math.round(mid * 3.28084),
+      elevationM: mid,
+      minElevationM: r.minElevationM,
+      maxElevationM: r.maxElevationM,
+      referencePoints: [
+        { id: `${r.slug}-base`, name: 'Base estimate', role: 'base', latitude: r.latitude, longitude: r.longitude, elevationM: r.minElevationM, geometrySource: 'estimated' },
+        { id: `${r.slug}-mid`, name: 'Mid-mountain estimate', role: 'mid_mountain', latitude: r.latitude, longitude: r.longitude, elevationM: mid, geometrySource: 'estimated' },
+        { id: `${r.slug}-summit`, name: 'Summit estimate', role: 'summit', latitude: r.latitude, longitude: r.longitude, elevationM: r.maxElevationM, geometrySource: 'estimated' },
+      ],
+      timezone: 'America/Los_Angeles',
+      isCustom: false,
+    } as Location;
+  };
+
+  it('matches every new resort point by elevation mode', () => {
+    for (const r of CA_NEW) {
+      const loc = locationFor(r);
+      expect(cataloguePointForLocation(loc, 'min')?.pointId).toBe(`${r.slug}-base`);
+      expect(cataloguePointForLocation(loc, 'avg')?.pointId).toBe(`${r.slug}-mid_mountain`);
+      expect(cataloguePointForLocation(loc, 'max')?.pointId).toBe(`${r.slug}-summit`);
+    }
+  });
+
+  it('disambiguates Bear Mountain and Snow Summit (0.031 deg apart)', () => {
+    const bear = locationFor(CA_NEW[1]);
+    const summit = locationFor(CA_NEW[2]);
+    for (const mode of ['min', 'avg', 'max']) {
+      expect(cataloguePointForLocation(bear, mode)?.resortSlug).toBe('bear-mountain');
+      expect(cataloguePointForLocation(summit, mode)?.resortSlug).toBe('snow-summit');
+    }
+  });
+
+  it('stores GRIB leads 1-9, the HRRR day-1 row, and Open-Meteo leads 10-14 at every new base point', () => {
+    for (const r of CA_NEW) {
+      const point = modelForecastData.points.find((p) => p.pointId === `${r.slug}-base`);
+      expect(point, r.slug).toBeDefined();
+      expect((point?.forecasts.ecmwf ?? []).map((x) => x.leadDay)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      expect((point?.forecasts.hrrr ?? []).map((x) => x.leadDay)).toEqual([1]);
+      const om = point?.forecasts.ecmwf_openmeteo ?? [];
+      expect(om.map((x) => x.leadDay)).toEqual([10, 11, 12, 13, 14]);
+      expect(om.every((x) => x.reducedFeatureVariant === true)).toBe(true);
+    }
+  });
+
+  it('resolves a day-2 GRIB window and a day-12 Open-Meteo window at a new resort', () => {
+    const kirkwood = locationFor(CA_NEW[7]);
+    const point = modelForecastData.points.find((p) => p.pointId === 'kirkwood-base');
+    const day2 = (point?.forecasts.ecmwf ?? []).find((x) => x.leadDay === 2);
+    const day12 = (point?.forecasts.ecmwf_openmeteo ?? []).find((x) => x.leadDay === 12);
+    const literal = modelForecastFor(kirkwood, 'ecmwf', 'min', day2!.windowEndLocalDate);
+    expect(literal?.arm).toBe('ecmwf');
+    expect(literal?.forecast.modelSlr).toBe(day2!.modelSlr);
+    const omResult = modelForecastFor(kirkwood, 'ecmwf', 'min', day12!.windowEndLocalDate);
+    expect(omResult?.arm).toBe('ecmwf_openmeteo');
+    expect(modelForecastFor(kirkwood, 'hrrr', 'min', day12!.windowEndLocalDate)).toBeNull();
+  });
 });
