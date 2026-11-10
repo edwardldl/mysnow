@@ -39,6 +39,33 @@ the ceiling read from the serving JSON being extended. Existing arms'
 records are never rewritten: the tracking store gains a new append-only
 file, and the frontend JSON merge is verified to leave every
 pre-existing row deep-equal.
+
+RETIRED from the serving batch path (2026-11-10): the user capped all
+forecasts at 10 days on all surfaces ("only do 10 days for all forecast
+across all surfaces"), and this arm existed solely to serve the
+windows beyond the GRIB step-240 ceiling (per point, ceiling+1
+through 14) -- extension windows the cap removes (with one within-cap
+exception, the 12Z western lead-10 case detailed in the precision
+note below). The scoring code below is retained for the record and
+can still be run for analysis (its CSVs and tracking records are
+evidence, not serving), but it is out of the batch path:
+
+* tail leads are capped at MAX_SERVED_LEAD_DAY (model_serving), so
+  nothing beyond the cap is even scored;
+* the frontend being extended is validated against the cap BEFORE any
+  scoring or output write (assert_frontend_within_lead_cap on the
+  freshly loaded document), and the merge no longer writes this arm's
+  records -- nor its cycle or metadata -- into the served JSON, so no
+  future batch can reintroduce beyond-cap records through this path;
+* run_model_serving.py applies the same assertion to its own writes.
+
+Precision note (Codex review 2026-11-10): this arm's windows were
+"GRIB ceiling + 1" through 14, and under a 12Z cycle the western
+ceiling is lead 9 -- so the arm also used to fill the WITHIN-cap
+lead-10 window at western points on 12Z batches. Retiring it means
+those windows stay Kuchera on future 12Z batches; the current 00Z
+batch serves lead 10 from GRIB at every point, so nothing is lost in
+the install this retirement shipped with.
 """
 
 from __future__ import annotations
@@ -62,6 +89,8 @@ from slr_calibration.champion import ChampionModel  # noqa: E402
 from slr_calibration.gold_profiles import PRESSURE_LEVELS_HPA  # noqa: E402
 from slr_calibration.model_serving import (  # noqa: E402
     FEATURE_BUILDER_VERSION,
+    MAX_SERVED_LEAD_DAY,
+    assert_frontend_within_lead_cap,
     interp_level_series,
     load_catalogue,
 )
@@ -70,6 +99,9 @@ from run_model_serving import NAN_POLICY, score_arm  # noqa: E402
 ARM = "ecmwf_openmeteo"
 SOURCE_ID_OPENMETEO = "open-meteo-ecmwf-ifs025"
 SOURCE_DISPLAY_NAME = "ECMWF IFS via Open-Meteo"
+# The arm's native tail reach before retirement. Since 2026-11-10 the
+# effective ceiling is MAX_SERVED_LEAD_DAY (the 10-day cap): tail leads
+# are computed against min(MAX_LEAD, MAX_SERVED_LEAD_DAY).
 MAX_LEAD = 14
 OM_LEVELS = [1000, 925, 850, 700, 600, 500]
 RD = 287.05
@@ -178,6 +210,10 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     frontend_path = Path(args.frontend_json)
     frontend_before = json.loads(frontend_path.read_text())
+    # Cap guard FIRST (Codex review 2026-11-10): refuse a beyond-cap
+    # frontend before any scoring happens and before any output --
+    # CSVs, tracking records, manifest -- is written.
+    assert_frontend_within_lead_cap(frontend_before)
 
     points = load_catalogue(Path(args.registry))
     champion_dir = Path(args.champion_dir)
@@ -191,14 +227,16 @@ def main() -> int:
     retrieved_at = pull_meta["retrieved_at_utc"]
 
     # Per-point GRIB ceiling from the serving JSON being extended; the OM
-    # arm produces only the windows beyond it, through MAX_LEAD.
+    # arm produces only the windows beyond it -- and, since the
+    # 2026-11-10 retirement, never beyond the served-lead cap.
+    served_ceiling = min(MAX_LEAD, MAX_SERVED_LEAD_DAY)
     ceilings: dict[str, int] = {}
     for entry in frontend_before["points"]:
         rows = entry["forecasts"].get("ecmwf") or []
         ceilings[entry["pointId"]] = max((r["leadDay"] for r in rows), default=0)
     groups: dict[tuple[int, ...], list[dict]] = {}
     for point in points:
-        leads = tuple(range(ceilings[point["point_id"]] + 1, MAX_LEAD + 1))
+        leads = tuple(range(ceilings[point["point_id"]] + 1, served_ceiling + 1))
         if leads:
             groups.setdefault(leads, []).append(point)
     print("tail-lead groups:", {k: len(v) for k, v in groups.items()}, flush=True)
@@ -241,47 +279,17 @@ def main() -> int:
         for rec in all_records:
             fh.write(json.dumps(rec) + "\n")
 
-    # Frontend serving JSON: merge the new arm alongside the existing
-    # ones. Nothing pre-existing is rewritten (verified below).
+    # Frontend serving JSON: RETIRED merge (2026-11-10 10-day cap).
+    # This arm's records are NOT merged into the served frontend any
+    # more -- the served file carries no Open-Meteo records, and the
+    # frontend is not rewritten at all. (The frontend was already
+    # validated against the cap up front, before any output was
+    # written.) The verification below confirms the frontend on disk
+    # is exactly the one that was read.
     frontend = json.loads(frontend_path.read_text())
-    frontend["cycles"][ARM] = anchor_iso
-    frontend["openMeteoArm"] = {
-        "sourceId": SOURCE_ID_OPENMETEO,
-        "displayName": SOURCE_DISPLAY_NAME,
-        "anchorCycleUtc": anchor_iso,
-        "retrievedAtUtc": retrieved_at,
-        "reducedFeatureVariant": True,
-        "note": (
-            "Third serving source (user decision 2026-11-01): Open-Meteo "
-            "ecmwf_ifs025, covering only the windows beyond the GRIB "
-            "step-240 ceiling. Open-Meteo publishes no cycle metadata and "
-            "the E1 parity check could not cycle-verify its forecast "
-            "instance against the GRIB arm, so this arm is labelled "
-            "distinctly and keeps its own evidence clock. Reduced-feature "
-            "variant: total column liquid water is unavailable from "
-            "Open-Meteo, so tclw_pwt / tclw_max are NaN under the "
-            "validated pass-through."
-        ),
-    }
-    for entry in frontend["points"]:
-        rows = [r for r in all_records
-                if r["point_id"] == entry["pointId"] and not r["missing"]]
-        if rows:
-            entry["forecasts"][ARM] = [{
-                "leadDay": r["lead_day"],
-                "windowStartUtc": r["window_start_utc"],
-                "windowEndUtc": r["window_end_utc"],
-                "windowEndLocalDate": r["window_end_local_date"],
-                "modelSlr": r.get("model_slr"),
-                "modelSnowfallCm": r.get("model_snowfall_cm"),
-                "kucheraSlr": r.get("kuchera_slr"),
-                "kucheraSnowfallCm": r.get("kuchera_snowfall_cm"),
-                "liquidMm": r.get("liquid_mm"),
-                "reducedFeatureVariant": True,
-            } for r in rows]
-    frontend_path.write_text(json.dumps(frontend, indent=1))
 
-    # Verification: every pre-existing row and field is unchanged.
+    # Verification: every pre-existing row and field is unchanged (the
+    # merge writes nothing, so this also proves no accidental write).
     after = json.loads(frontend_path.read_text())
     unchanged = True
     for before_entry, after_entry in zip(frontend_before["points"], after["points"]):
@@ -322,6 +330,12 @@ def main() -> int:
         "nan_policy": NAN_POLICY,
         "feature_builder_version": FEATURE_BUILDER_VERSION,
         "reduced_feature_variant": True,
+        "served_lead_cap": MAX_SERVED_LEAD_DAY,
+        "frontend_merge": (
+            "retired 2026-11-10: the 10-day cap removed this arm from "
+            "the served frontend; scored records are evidence only "
+            "(CSVs + tracking store), nothing was merged or written"
+        ),
         "grib_ceilings": ceilings,
         "records_total": len(all_records),
         "records_scored": sum(1 for r in all_records if not r["missing"]),

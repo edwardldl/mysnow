@@ -160,23 +160,24 @@ function record(mode: string, endDate: string): number {
 
 describe('day-sum invariant under the ENS-EB method', () => {
   it('blend mode: every day adds up, model and fallback days alike', () => {
-    // Anchored to the 2026-11-09 12Z batch: the blend windows ending
-    // 2026-11-14 (ECMWF lead 5, 33.95 cm) and 2026-11-15 (lead 6) hold
-    // real snow; the day-1 window ending 2026-11-10 is HRRR's.
+    // Anchored to the 2026-11-10 00Z batch: the blend windows ending
+    // 2026-11-18 (ECMWF lead 9, 5.48 cm) and 2026-11-19 (lead 10,
+    // 24.65 cm) hold real snow; the batch's only HRRR window ends
+    // 2026-11-11 (lead 2).
     const days = [
-      day('2026-11-13', [
-        ...labels('2026-11-13', 0, 7).map((l) => hour(l, 9)),
-        ...labels('2026-11-13', 8, 23).map((l) => hour(l, 0.5)),
+      day('2026-11-17', [
+        ...labels('2026-11-17', 0, 7).map((l) => hour(l, 9)),
+        ...labels('2026-11-17', 8, 23).map((l) => hour(l, 0.5)),
       ]),
-      day('2026-11-14', [
-        ...labels('2026-11-14', 0, 7).map((l) => hour(l, 0.25)),
-        ...labels('2026-11-14', 8, 23).map((l) => hour(l, 0.1)),
+      day('2026-11-18', [
+        ...labels('2026-11-18', 0, 7).map((l) => hour(l, 0.25)),
+        ...labels('2026-11-18', 8, 23).map((l) => hour(l, 0.1)),
       ]),
-      day('2026-11-15', [
-        ...labels('2026-11-15', 0, 7).map((l) => hour(l, 0.1)),
-        ...labels('2026-11-15', 8, 23).map((l) => hour(l, 9)),
+      day('2026-11-19', [
+        ...labels('2026-11-19', 0, 7).map((l) => hour(l, 0.1)),
+        ...labels('2026-11-19', 8, 23).map((l) => hour(l, 9)),
       ]),
-      // Beyond the last stored window (lead 14 ends 2026-11-23): no arm
+      // Beyond the last stored window (lead 10 ends 2026-11-19): no arm
       // holds a record for this day's windows, so it stays Kuchera.
       day('2026-11-24', fullDay('2026-11-24', 0.2)),
     ];
@@ -184,20 +185,20 @@ describe('day-sum invariant under the ENS-EB method', () => {
     expectDaySumInvariant(out);
 
     // The window invariant from the hourly rescale fix still holds.
-    const r1 = record('hrrr_ecmwf', '2026-11-14');
-    const r2 = record('hrrr_ecmwf', '2026-11-15');
-    expect(Math.abs(windowSum(out, '2026-11-14') - r1)).toBeLessThan(1e-9);
-    expect(Math.abs(windowSum(out, '2026-11-15') - r2)).toBeLessThan(1e-9);
+    const r1 = record('hrrr_ecmwf', '2026-11-18');
+    const r2 = record('hrrr_ecmwf', '2026-11-19');
+    expect(Math.abs(windowSum(out, '2026-11-18') - r1)).toBeLessThan(1e-9);
+    expect(Math.abs(windowSum(out, '2026-11-19') - r2)).toBeLessThan(1e-9);
     // Inside its horizon the blend still privileges the HRRR arm.
-    expect(modelForecastFor(palisades, 'hrrr_ecmwf', 'min', '2026-11-10')?.arm).toBe('hrrr');
+    expect(modelForecastFor(palisades, 'hrrr_ecmwf', 'min', '2026-11-11')?.arm).toBe('hrrr');
 
-    // Closed form for the straddling day 2026-11-14: its 00:00-07:00
-    // hours are 2/10 of window 2026-11-14's raw sum (scaled to r1) and
-    // its 08:00-23:00 hours are 1.6/2.4 of window 2026-11-15's (to r2).
-    const day14 = out[1];
-    expect(Math.abs(day14.totalSnowfall - (0.2 * r1 + (2 / 3) * r2))).toBeLessThan(TOL);
+    // Closed form for the straddling day 2026-11-18: its 00:00-07:00
+    // hours are 2/10 of window 2026-11-18's raw sum (scaled to r1) and
+    // its 08:00-23:00 hours are 1.6/2.4 of window 2026-11-19's (to r2).
+    const day18 = out[1];
+    expect(Math.abs(day18.totalSnowfall - (0.2 * r1 + (2 / 3) * r2))).toBeLessThan(TOL);
     // And it is decisively NOT the window record the day used to show.
-    expect(Math.abs(day14.totalSnowfall - r1)).toBeGreaterThan(1);
+    expect(Math.abs(day18.totalSnowfall - r1)).toBeGreaterThan(1);
     expect(out[3].modelWindow?.kind).toBe('kuchera_fallback');
   });
 
@@ -212,12 +213,36 @@ describe('day-sum invariant under the ENS-EB method', () => {
     expect(Math.abs(windowSum(out, '2026-11-14') - r)).toBeLessThan(1e-9);
   });
 
-  it('literal hrrr mode: model day and fallback day both add up', () => {
+  it('the shipped negative record (window ending 2026-11-15, ≈ -0.027 cm) zeroes its window and keeps the invariant', () => {
+    // Regression pin (Codex review 2026-11-10): the 00Z batch ships a
+    // genuinely negative ENS-EB record at Palisades -- window ending
+    // 2026-11-15 (ECMWF lead 6), -0.0266 cm. Snowfall cannot be
+    // negative, so the rescale clamps its target at 0 (the established
+    // record-of-0 behaviour): the day stays a MODEL day, its window
+    // hours are zeroed, and the displayed total remains exactly the
+    // sum of the day's bars.
+    const negative = record('ecmwf', '2026-11-15');
+    expect(negative).toBeLessThan(0);
+    expect(negative).toBeGreaterThan(-0.03);
     const days = [
-      day('2026-11-10', fullDay('2026-11-10', 0.4)),
+      day('2026-11-14', fullDay('2026-11-14', 0.3)),
+      day('2026-11-15', fullDay('2026-11-15', 0.3)),
+    ];
+    const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
+    expect(out[1].modelWindow?.kind).toBe('model');
+    expect(windowSum(out, '2026-11-15')).toBe(0);
+    expectDaySumInvariant(out);
+  });
+
+  it('literal hrrr mode: model day and fallback day both add up', () => {
+    // The 00Z batch's only HRRR window ends 2026-11-11 (lead 2): that
+    // calendar day is the model day, the next is Kuchera fallback.
+    const days = [
       day('2026-11-11', fullDay('2026-11-11', 0.4)),
+      day('2026-11-12', fullDay('2026-11-12', 0.4)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'hrrr', 'min');
+    expect(out[0].modelWindow?.kind).toBe('model');
     expect(out[1].modelWindow?.kind).toBe('kuchera_fallback');
     expectDaySumInvariant(out);
   });

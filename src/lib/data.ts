@@ -6,7 +6,7 @@ import { advanceSnowpack } from './snow/snowpack';
 import { summarizeEnsembleSnowfall } from './snow/ensemble';
 import { toSlrMethod } from './snow/slr';
 import { DEFAULT_SLR_METHOD, type ForecastProvenance, type SnowLayer } from './snow/types';
-import { providerLocalTimeToEpochMs, providerLocalTimesToEpochMs } from './time';
+import { addCalendarDays, providerLocalTimeToEpochMs, providerLocalTimesToEpochMs } from './time';
 
 const SEVERITY_WEIGHTS: Record<number, number> = {
     // Thunderstorm
@@ -378,6 +378,20 @@ export function blendForecasts(
         },
         lastRunAvailabilityTime: ecmwf.lastRunAvailabilityTime || hrrr?.lastRunAvailabilityTime
     };
+}
+
+/**
+ * The display-side half of the 10-day forecast cap (MAX_FORECAST_DAYS
+ * in lib/api.ts, user decision 2026-11-10): keep at most `maxDays`
+ * forecast days counting today as day 1 -- i.e. drop every day after
+ * today + (maxDays - 1). Past days are history, not forecast, and are
+ * kept. Fetches are already capped at the source; this filter is the
+ * backstop that keeps a pre-cap cache entry or an over-long response
+ * from surfacing days beyond the horizon in the ribbon or dashboard.
+ */
+export function capForecastDays<T extends { dateStr: string }>(days: T[], todayStr: string, maxDays: number): T[] {
+    const horizonDate = addCalendarDays(todayStr, maxDays - 1);
+    return days.filter(day => day.dateStr <= horizonDate);
 }
 
 export function groupData(blendedData: { hourly: BlendedHour[], daily: OpenMeteoDaily, lastRunAvailabilityTime?: number }): DayData[] {

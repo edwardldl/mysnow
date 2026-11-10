@@ -44,6 +44,7 @@ from slr_calibration.model_serving import (
     FEATURE_BUILDER_VERSION,
     SOURCE_ID_ECMWF,
     SOURCE_ID_HRRR,
+    assert_frontend_within_lead_cap,
     build_point_window_features,
     core_inputs_finite,
     expand_hourly,
@@ -555,6 +556,9 @@ def main() -> int:
                     "liquidMm": r.get("liquid_mm"),
                 } for r in rows]
         frontend["points"].append(entry)
+    # 10-day cap on all surfaces (user decision 2026-11-10): a serving
+    # frontend never carries a record beyond MAX_SERVED_LEAD_DAY.
+    assert_frontend_within_lead_cap(frontend)
     Path(args.frontend_json).write_text(json.dumps(frontend, indent=1))
 
     manifest["records_total"] = len(all_records)

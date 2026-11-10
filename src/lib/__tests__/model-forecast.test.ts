@@ -89,21 +89,22 @@ describe('model mode gate', () => {
   it('confines literal modes to their own source family', () => {
     // Literal HRRR: that arm only, no fallback of any kind.
     expect(modelArmPreference('hrrr', 3)).toEqual(['hrrr']);
-    // Literal ECMWF: the GRIB arm, then the Open-Meteo tail arm (same
-    // ECMWF family; it holds only beyond-ceiling windows) -- never HRRR.
-    expect(modelArmPreference('ecmwf', 1)).toEqual(['ecmwf', 'ecmwf_openmeteo']);
-    expect(modelArmPreference('ecmwf', 12)).toEqual(['ecmwf', 'ecmwf_openmeteo']);
+    // Literal ECMWF: the GRIB arm only -- never HRRR. (The Open-Meteo
+    // tail arm is retired since the 2026-11-10 10-day cap and no
+    // longer appears in any preference order.)
+    expect(modelArmPreference('ecmwf', 1)).toEqual(['ecmwf']);
+    expect(modelArmPreference('ecmwf', 12)).toEqual(['ecmwf']);
     expect(modelArmPreference('gfs', 1)).toEqual([]);
     expect(modelArmPreference('best_match', 2)).toEqual([]);
   });
 
   it('mirrors the app blend: HRRR privileged inside 48 h, ECMWF beyond', () => {
-    expect(modelArmPreference(BLEND_MODEL_ID, 1)).toEqual(['hrrr', 'ecmwf', 'ecmwf_openmeteo']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 2)).toEqual(['hrrr', 'ecmwf', 'ecmwf_openmeteo']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 3)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 4)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 9)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
-    expect(modelArmPreference(BLEND_MODEL_ID, 12)).toEqual(['ecmwf', 'ecmwf_openmeteo', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 1)).toEqual(['hrrr', 'ecmwf']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 2)).toEqual(['hrrr', 'ecmwf']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 3)).toEqual(['ecmwf', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 4)).toEqual(['ecmwf', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 9)).toEqual(['ecmwf', 'hrrr']);
+    expect(modelArmPreference(BLEND_MODEL_ID, 12)).toEqual(['ecmwf', 'hrrr']);
   });
 });
 
@@ -129,7 +130,7 @@ describe('model forecast resolution', () => {
   const firstDate = ecmwfRows[0]?.windowEndLocalDate;
 
   it('serving data covers the catalogue', () => {
-    expect(modelForecastData.points.length).toBe(57);
+    expect(modelForecastData.points.length).toBe(387);
     expect(ecmwfRows.length).toBeGreaterThan(0);
   });
 
@@ -141,12 +142,13 @@ describe('model forecast resolution', () => {
   });
 
   it('does not fall back across sources in a literal mode', () => {
-    // Palisades base has no HRRR row for the day-2 window (beyond the
-    // 48 h horizon from the 12Z cycle): literal HRRR mode shows nothing
-    // rather than borrowing the ECMWF record.
-    const day2Date = ecmwfRows[1]?.windowEndLocalDate;
-    expect(modelForecastFor(palisades, 'hrrr', 'min', day2Date)).toBeNull();
-    expect(modelForecastFor(palisades, 'ecmwf', 'min', day2Date)?.arm).toBe('ecmwf');
+    // Palisades base's only HRRR window in the 00Z batch ends
+    // 2026-11-11 (lead 2); the lead-3 window ending 2026-11-12 has no
+    // HRRR row: literal HRRR mode shows nothing rather than borrowing
+    // the ECMWF record.
+    const lead3Date = ecmwfRows[1]?.windowEndLocalDate;
+    expect(modelForecastFor(palisades, 'hrrr', 'min', lead3Date)).toBeNull();
+    expect(modelForecastFor(palisades, 'ecmwf', 'min', lead3Date)?.arm).toBe('ecmwf');
   });
 
   it('resolves no model forecast in a non-ecmwf/hrrr mode for the same point and date', () => {
@@ -168,12 +170,14 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
   const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
   const hrrrRows = palisadesPoint?.forecasts.hrrr ?? [];
-  const day1Date = ecmwfRows[0]?.windowEndLocalDate;
-  const day2Date = ecmwfRows[1]?.windowEndLocalDate;
-  const day3Date = ecmwfRows[2]?.windowEndLocalDate;
+  // The 00Z batch starts at lead 2: ecmwfRows[0] is the lead-2 window
+  // (ending 2026-11-11 at Palisades), the only window HRRR also holds.
+  const lead2Date = ecmwfRows[0]?.windowEndLocalDate;
+  const lead3Date = ecmwfRows[1]?.windowEndLocalDate;
+  const lead4Date = ecmwfRows[2]?.windowEndLocalDate;
 
-  it('serves the HRRR arm for the day-1 window (inside the 48 h horizon)', () => {
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day1Date);
+  it('serves the HRRR arm for the lead-2 window (inside the 48 h horizon)', () => {
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead2Date);
     expect(result?.blended).toBe(true);
     expect(result?.arm).toBe('hrrr');
     expect(result?.forecast.modelSlr).toBe(hrrrRows[0]?.modelSlr);
@@ -181,50 +185,50 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
     expect(result?.cycleUtc).toBe(modelForecastData.cycles.hrrr);
   });
 
-  it('falls back to the ECMWF arm, labelled ECMWF, when HRRR has no day-2 record', () => {
-    // Fixture premise: Palisades base has no HRRR row for day 2 in the
-    // serving data (window end beyond the 48 h horizon from 12Z).
-    expect(hrrrRows.find((row) => row.windowEndLocalDate === day2Date)).toBeUndefined();
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day2Date);
+  it('falls back to the ECMWF arm, labelled ECMWF, when HRRR has no lead-3 record', () => {
+    // Fixture premise: Palisades base has no HRRR row for the lead-3
+    // window in the serving data (its only HRRR window is lead 2).
+    expect(hrrrRows.find((row) => row.windowEndLocalDate === lead3Date)).toBeUndefined();
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead3Date);
     expect(result?.arm).toBe('ecmwf');
     expect(result?.forecast.modelSlr).toBe(ecmwfRows[1]?.modelSlr);
     expect(result?.cycleUtc).toBe(modelForecastData.cycles.ecmwf);
     // Same values the literal ECMWF mode shows for this window.
     expect(result?.forecast).toEqual(
-      modelForecastFor(palisades, 'ecmwf', 'min', day2Date)?.forecast,
+      modelForecastFor(palisades, 'ecmwf', 'min', lead3Date)?.forecast,
     );
   });
 
-  it('keeps the HRRR arm on day 2 where HRRR does have a record (Stowe)', () => {
-    const result = modelForecastFor(stowe, BLEND_MODEL_ID, 'min', day2Date);
+  it('keeps the HRRR arm on the lead-2 window where HRRR has a record (Stowe)', () => {
+    const result = modelForecastFor(stowe, BLEND_MODEL_ID, 'min', lead2Date);
     expect(result?.arm).toBe('hrrr');
     expect(result?.point.pointId).toBe('stowe-base');
-    const stoweHrrrDay2 = modelForecastData.points
+    const stoweHrrrLead2 = modelForecastData.points
       .find((p) => p.pointId === 'stowe-base')
-      ?.forecasts.hrrr?.find((row) => row.windowEndLocalDate === day2Date);
-    expect(result?.forecast.modelSlr).toBe(stoweHrrrDay2?.modelSlr);
+      ?.forecasts.hrrr?.find((row) => row.windowEndLocalDate === lead2Date);
+    expect(result?.forecast.modelSlr).toBe(stoweHrrrLead2?.modelSlr);
   });
 
-  it('serves the ECMWF arm for the day-3 window (beyond the HRRR horizon)', () => {
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day3Date);
+  it('serves the ECMWF arm for the lead-4 window (beyond the HRRR horizon)', () => {
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead4Date);
     expect(result?.arm).toBe('ecmwf');
     expect(result?.forecast.modelSlr).toBe(ecmwfRows[2]?.modelSlr);
   });
 
-  it('serves the ECMWF arm for the extended-horizon day-5 window', () => {
-    const day5Date = ecmwfRows[4]?.windowEndLocalDate;
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day5Date);
+  it('serves the ECMWF arm for the extended-horizon lead-5 window', () => {
+    const lead5Row = ecmwfRows.find((r) => r.leadDay === 5);
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead5Row?.windowEndLocalDate ?? null);
     expect(result?.arm).toBe('ecmwf');
     expect(result?.forecast.leadDay).toBe(5);
-    expect(result?.forecast.modelSlr).toBe(ecmwfRows[4]?.modelSlr);
+    expect(result?.forecast.modelSlr).toBe(lead5Row?.modelSlr);
     // Same values the literal ECMWF mode shows for this window.
     expect(result?.forecast).toEqual(
-      modelForecastFor(palisades, 'ecmwf', 'min', day5Date)?.forecast,
+      modelForecastFor(palisades, 'ecmwf', 'min', lead5Row?.windowEndLocalDate ?? null)?.forecast,
     );
   });
 
   it('resolves no model forecast at a non-catalogue location in blend mode', () => {
-    expect(modelForecastFor(farAway, BLEND_MODEL_ID, 'avg', day1Date)).toBeNull();
+    expect(modelForecastFor(farAway, BLEND_MODEL_ID, 'avg', lead2Date)).toBeNull();
   });
 
   it('resolves no model forecast for a date with no stored window in blend mode', () => {
@@ -233,93 +237,101 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
 });
 
 
-describe('Open-Meteo long-range arm (third source, beyond the GRIB ceiling)', () => {
+describe('10-day cap and the retired Open-Meteo arm', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
-  const omRows = palisadesPoint?.forecasts.ecmwf_openmeteo ?? [];
-  const day10Row = omRows.find((r) => r.leadDay === 10) as (typeof omRows)[number];
-  const day12Row = omRows.find((r) => r.leadDay === 12) as (typeof omRows)[number];
-  const day10Date = day10Row.windowEndLocalDate;
-  const day12Date = day12Row.windowEndLocalDate;
-  // Lead day 15 would end 2026-11-24 at Palisades; no arm stores it.
-  const day15Date = '2026-11-24';
 
-  it('stores only the tail windows: leads 10-14 at Palisades, 11-14 at Stowe', () => {
-    expect(omRows.map((r) => r.leadDay)).toEqual([10, 11, 12, 13, 14]);
-    expect(omRows.every((r) => r.reducedFeatureVariant === true)).toBe(true);
-    const stoweOmRows =
-      modelForecastData.points.find((p) => p.pointId === 'stowe-base')?.forecasts.ecmwf_openmeteo ?? [];
-    expect(stoweOmRows.map((r) => r.leadDay)).toEqual([11, 12, 13, 14]);
-    expect(modelForecastData.openMeteoArm?.displayName).toBe('ECMWF IFS via Open-Meteo');
-    expect(modelForecastData.openMeteoArm?.reducedFeatureVariant).toBe(true);
-    expect(modelForecastData.cycles.ecmwf_openmeteo).toBe(modelForecastData.cycles.ecmwf);
+  it('serves no Open-Meteo records and no record beyond lead 10, anywhere', () => {
+    expect(modelForecastData.openMeteoArm).toBeUndefined();
+    expect(Object.keys(modelForecastData.cycles).sort()).toEqual(['ecmwf', 'hrrr']);
+    for (const point of modelForecastData.points) {
+      expect(point.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
+      for (const rows of Object.values(point.forecasts)) {
+        for (const row of rows ?? []) {
+          expect(row.leadDay).toBeLessThanOrEqual(10);
+        }
+      }
+    }
   });
 
-  it('resolves the day-12 window to the Open-Meteo arm in literal ecmwf mode', () => {
-    const result = modelForecastFor(palisades, 'ecmwf', 'min', day12Date);
-    expect(result?.arm).toBe('ecmwf_openmeteo');
-    expect(result?.blended).toBe(false);
-    expect(result?.forecast.leadDay).toBe(12);
-    expect(result?.forecast.modelSlr).toBe(day12Row?.modelSlr);
-    expect(result?.forecast.modelSnowfallCm).toBe(day12Row?.modelSnowfallCm);
-    expect(result?.forecast.reducedFeatureVariant).toBe(true);
-    expect(result?.cycleUtc).toBe(modelForecastData.cycles.ecmwf_openmeteo);
-    expect(result?.retrievedAtUtc).toBe(modelForecastData.openMeteoArm?.retrievedAtUtc);
-  });
-
-  it('resolves the day-12 window to the Open-Meteo arm in blend mode too', () => {
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day12Date);
-    expect(result?.blended).toBe(true);
-    expect(result?.arm).toBe('ecmwf_openmeteo');
-    expect(result?.forecast.modelSlr).toBe(day12Row?.modelSlr);
-    // Same values the literal ECMWF mode shows for this window.
-    expect(result?.forecast).toEqual(
-      modelForecastFor(palisades, 'ecmwf', 'min', day12Date)?.forecast,
+  it('serves the full capped horizon at Palisades: ECMWF leads 2-10, HRRR lead 2', () => {
+    expect((palisadesPoint?.forecasts.ecmwf ?? []).map((r) => r.leadDay)).toEqual(
+      [2, 3, 4, 5, 6, 7, 8, 9, 10],
     );
+    expect((palisadesPoint?.forecasts.hrrr ?? []).map((r) => r.leadDay)).toEqual([2]);
   });
 
-  it('serves the first tail window (day 10 at Palisades) from Open-Meteo, not GRIB', () => {
-    expect(
-      palisadesPoint?.forecasts.ecmwf?.find((r) => r.windowEndLocalDate === day10Date),
-    ).toBeUndefined();
-    const result = modelForecastFor(palisades, 'ecmwf', 'min', day10Date);
-    expect(result?.arm).toBe('ecmwf_openmeteo');
-    expect(result?.forecast.leadDay).toBe(10);
+  it('has no model record beyond the cap in any mode', () => {
+    // Lead 11 would end 2026-11-20 at Palisades; lead 13 on 2026-11-22
+    // (the old Open-Meteo tail's territory). No arm stores them.
+    for (const date of ['2026-11-20', '2026-11-22']) {
+      expect(modelForecastFor(palisades, 'ecmwf', 'min', date)).toBeNull();
+      expect(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', date)).toBeNull();
+      expect(modelForecastFor(palisades, 'hrrr', 'min', date)).toBeNull();
+    }
+  });
+});
+
+describe('North America catalogue (129 resorts, 387 points)', () => {
+  const EXPECTED_SLUGS = [
+    'afton-alps', 'alpental', 'alpine-valley-oh', 'alta', 'alyeska', 'arapahoe-basin',
+    'aspen', 'aspen-highlands', 'attitash', 'banff-sunshine', 'bear-mountain', 'beaver-creek',
+    'big-boulder', 'big-sky', 'blue-mountain-on', 'blue-mountain-pa', 'boston-mills-brandywine',
+    'boyne-mountain', 'breckenridge', 'bridger-bowl', 'brighton', 'buck-hill', 'buttermilk',
+    'camelback', 'cannon-mountain', 'copper-mountain', 'cranmore', 'crested-butte',
+    'crotched-mountain', 'crystal-mountain', 'cypress-mountain', 'deer-valley', 'devils-head',
+    'eldora', 'fernie', 'grand-targhee', 'granite-peak', 'grouse-mountain', 'heavenly',
+    'hidden-valley-mo', 'hidden-valley-pa', 'hunter-mountain', 'jack-frost', 'jackson-hole',
+    'jay-peak', 'jiminy-peak', 'june-mountain', 'keystone', 'kicking-horse', 'killington',
+    'kimberley', 'kirkwood', 'lake-louise', 'laurel-mountain', 'le-massif', 'liberty-mountain',
+    'loon-mountain', 'loveland', 'lutsen-mountains', 'mad-river-glen', 'mad-river-mountain',
+    'mammoth-mountain', 'marmot-basin', 'monarch', 'mont-sainte-anne', 'mount-rose',
+    'mount-snow', 'mount-sunapee', 'mt-bachelor', 'mt-baker', 'mt-brighton', 'mt-hood-meadows',
+    'mt-norquay', 'nakiska', 'northstar', 'okemo', 'palisades-tahoe', 'panorama', 'paoli-peaks',
+    'park-city', 'pico-mountain', 'powder-mountain', 'purgatory', 'red-mountain', 'revelstoke',
+    'roundtop', 'saddleback', 'schweitzer', 'seven-springs', 'sierra-at-tahoe', 'silverstar',
+    'ski-butternut', 'snow-creek', 'snow-summit', 'snow-valley', 'snowbasin', 'snowbird',
+    'snowmass', 'snowriver', 'snowshoe', 'solitude', 'steamboat', 'stevens-pass', 'stoneham',
+    'stowe', 'stratton', 'sugar-bowl', 'sugarbush', 'sugarloaf', 'sun-peaks', 'sun-valley',
+    'sunday-river', 'tamarack', 'taos', 'telluride', 'the-highlands', 'the-summit-at-snoqualmie',
+    'timberline', 'tremblant', 'vail', 'whistler-blackcomb', 'whiteface', 'whitefish',
+    'whitetail', 'wild-mountain', 'wildcat', 'wilmot-mountain', 'winter-park', 'wolf-creek',
+  ];
+
+  it('registers exactly the 129-resort roster, three points per resort', () => {
+    const slugs = [...new Set(modelForecastData.points.map((p) => p.resortSlug))].sort();
+    expect(slugs).toEqual(EXPECTED_SLUGS);
+    expect(modelForecastData.points.length).toBe(387);
+    for (const slug of EXPECTED_SLUGS) {
+      const roles = modelForecastData.points
+        .filter((p) => p.resortSlug === slug)
+        .map((p) => p.role)
+        .sort();
+      expect(roles, slug).toEqual(['base', 'mid_mountain', 'summit']);
+    }
   });
 
-  it('keeps Stowe day 10 on the GRIB arm and day 11 on Open-Meteo', () => {
-    const stowePoint = modelForecastData.points.find((p) => p.pointId === 'stowe-base');
-    const gribDay10 = stowePoint?.forecasts.ecmwf?.find((r) => r.leadDay === 10) as
-      | (typeof omRows)[number]
-      | undefined;
-    const omDay11 = stowePoint?.forecasts.ecmwf_openmeteo?.find((r) => r.leadDay === 11) as
-      | (typeof omRows)[number]
-      | undefined;
-    const day10 = modelForecastFor(stowe, 'ecmwf', 'min', gribDay10?.windowEndLocalDate ?? null);
-    expect(day10?.arm).toBe('ecmwf');
-    const day11 = modelForecastFor(stowe, BLEND_MODEL_ID, 'min', omDay11?.windowEndLocalDate ?? null);
-    expect(day11?.arm).toBe('ecmwf_openmeteo');
-    expect(day11?.forecast.modelSlr).toBe(omDay11?.modelSlr);
+  it('serves ECMWF leads 2-10 at every point; HRRR lead 2 at exactly the 321 in-domain points', () => {
+    let hrrrPoints = 0;
+    for (const point of modelForecastData.points) {
+      expect((point.forecasts.ecmwf ?? []).map((r) => r.leadDay), point.pointId).toEqual(
+        [2, 3, 4, 5, 6, 7, 8, 9, 10],
+      );
+      const hrrrLeads = (point.forecasts.hrrr ?? []).map((r) => r.leadDay);
+      if (hrrrLeads.length > 0) {
+        expect(hrrrLeads, point.pointId).toEqual([2]);
+        hrrrPoints += 1;
+      }
+    }
+    // 66 points are HRRR-excluded: 63 Canadian (policy) + 3 Alyeska
+    // (geometric); every US in-domain point serves lead 2.
+    expect(hrrrPoints).toBe(321);
   });
-
-  it('never resolves the Open-Meteo arm in literal hrrr mode', () => {
-    expect(modelForecastFor(palisades, 'hrrr', 'min', day12Date)).toBeNull();
-    expect(modelForecastFor(palisades, 'hrrr', 'min', day10Date)).toBeNull();
-  });
-
-  it('has no model record beyond day 14 in any mode', () => {
-    expect(modelForecastFor(palisades, 'ecmwf', 'min', day15Date)).toBeNull();
-    expect(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day15Date)).toBeNull();
-    expect(modelForecastFor(palisades, 'hrrr', 'min', day15Date)).toBeNull();
-  });
-
 });
 
 describe('Mount Rose (catalogue addition, estimated geometry)', () => {
   const mrPoint = modelForecastData.points.find((p) => p.pointId === 'mount-rose-base');
   const mrEcmwf = mrPoint?.forecasts.ecmwf ?? [];
-  const mrOm = mrPoint?.forecasts.ecmwf_openmeteo ?? [];
   const day2Row = mrEcmwf.find((r) => r.leadDay === 2) as (typeof mrEcmwf)[number];
-  const day12Row = mrOm.find((r) => r.leadDay === 12) as (typeof mrOm)[number];
 
   it('matches the Mount Rose points by elevation mode', () => {
     expect(cataloguePointForLocation(mountRose, 'min')?.pointId).toBe('mount-rose-base');
@@ -327,11 +339,10 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
     expect(cataloguePointForLocation(mountRose, 'max')?.pointId).toBe('mount-rose-summit');
   });
 
-  it('stores GRIB leads 1-9, the HRRR day-1 row, and Open-Meteo leads 10-14', () => {
-    expect(mrEcmwf.map((r) => r.leadDay)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect((mrPoint?.forecasts.hrrr ?? []).map((r) => r.leadDay)).toEqual([1]);
-    expect(mrOm.map((r) => r.leadDay)).toEqual([10, 11, 12, 13, 14]);
-    expect(mrOm.every((r) => r.reducedFeatureVariant === true)).toBe(true);
+  it('stores GRIB leads 2-10 and the HRRR lead-2 row; no Open-Meteo records', () => {
+    expect(mrEcmwf.map((r) => r.leadDay)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect((mrPoint?.forecasts.hrrr ?? []).map((r) => r.leadDay)).toEqual([2]);
+    expect(mrPoint?.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
   });
 
   it('resolves the day-2 window to the GRIB ECMWF arm', () => {
@@ -341,13 +352,12 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
     expect(result?.forecast.modelSnowfallCm).toBe(day2Row.modelSnowfallCm);
   });
 
-  it('resolves the day-12 window to the Open-Meteo arm in ecmwf and blend modes, never hrrr', () => {
-    const literal = modelForecastFor(mountRose, 'ecmwf', 'min', day12Row.windowEndLocalDate);
-    expect(literal?.arm).toBe('ecmwf_openmeteo');
-    expect(literal?.forecast.modelSlr).toBe(day12Row.modelSlr);
-    const blend = modelForecastFor(mountRose, BLEND_MODEL_ID, 'min', day12Row.windowEndLocalDate);
-    expect(blend?.arm).toBe('ecmwf_openmeteo');
-    expect(modelForecastFor(mountRose, 'hrrr', 'min', day12Row.windowEndLocalDate)).toBeNull();
+  it('has no model record beyond the 10-day cap in any mode', () => {
+    // Lead 10 ends 2026-11-19 at Mount Rose; lead 11 would end
+    // 2026-11-20. The retired Open-Meteo tail used to serve it.
+    for (const mode of ['ecmwf', BLEND_MODEL_ID, 'hrrr']) {
+      expect(modelForecastFor(mountRose, mode, 'min', '2026-11-20')).toBeNull();
+    }
   });
 
 });
@@ -413,28 +423,26 @@ describe('California Ikon/Epic expansion (catalogue addition, estimated geometry
     }
   });
 
-  it('stores GRIB leads 1-9, the HRRR day-1 row, and Open-Meteo leads 10-14 at every new base point', () => {
+  it('stores GRIB leads 2-10 and the HRRR lead-2 row at every new base point; no Open-Meteo records', () => {
     for (const r of CA_NEW) {
       const point = modelForecastData.points.find((p) => p.pointId === `${r.slug}-base`);
       expect(point, r.slug).toBeDefined();
-      expect((point?.forecasts.ecmwf ?? []).map((x) => x.leadDay)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-      expect((point?.forecasts.hrrr ?? []).map((x) => x.leadDay)).toEqual([1]);
-      const om = point?.forecasts.ecmwf_openmeteo ?? [];
-      expect(om.map((x) => x.leadDay)).toEqual([10, 11, 12, 13, 14]);
-      expect(om.every((x) => x.reducedFeatureVariant === true)).toBe(true);
+      expect((point?.forecasts.ecmwf ?? []).map((x) => x.leadDay)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect((point?.forecasts.hrrr ?? []).map((x) => x.leadDay)).toEqual([2]);
+      expect(point?.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
     }
   });
 
-  it('resolves a day-2 GRIB window and a day-12 Open-Meteo window at a new resort', () => {
+  it('resolves a day-2 GRIB window at a new resort; nothing beyond the cap', () => {
     const kirkwood = locationFor(CA_NEW[7]);
     const point = modelForecastData.points.find((p) => p.pointId === 'kirkwood-base');
     const day2 = (point?.forecasts.ecmwf ?? []).find((x) => x.leadDay === 2);
-    const day12 = (point?.forecasts.ecmwf_openmeteo ?? []).find((x) => x.leadDay === 12);
     const literal = modelForecastFor(kirkwood, 'ecmwf', 'min', day2!.windowEndLocalDate);
     expect(literal?.arm).toBe('ecmwf');
     expect(literal?.forecast.modelSlr).toBe(day2!.modelSlr);
-    const omResult = modelForecastFor(kirkwood, 'ecmwf', 'min', day12!.windowEndLocalDate);
-    expect(omResult?.arm).toBe('ecmwf_openmeteo');
-    expect(modelForecastFor(kirkwood, 'hrrr', 'min', day12!.windowEndLocalDate)).toBeNull();
+    // Lead 11 would end 2026-11-20 at Kirkwood; the retired
+    // Open-Meteo tail used to serve it.
+    expect(modelForecastFor(kirkwood, 'ecmwf', 'min', '2026-11-20')).toBeNull();
+    expect(modelForecastFor(kirkwood, 'hrrr', 'min', '2026-11-20')).toBeNull();
   });
 });

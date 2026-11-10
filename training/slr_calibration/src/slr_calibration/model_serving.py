@@ -446,6 +446,57 @@ def hrrr_domain_exclusion(country: str, distance_km: float) -> str | None:
 
 
 # ---------------------------------------------------------------------------
+# Served-lead cap (all surfaces)
+# ---------------------------------------------------------------------------
+
+#: The forecast horizon cap for SERVED model records, in lead days
+#: (user decision 2026-11-10: "only do 10 days for all forecast across
+#: all surfaces"). The GRIB ECMWF arm's step-240 ceiling already bounds
+#: it at 9-10 depending on the point's timezone; the cap's teeth are
+#: for the merge step that used to extend the frontend beyond the
+#: ceiling (the Open-Meteo tail arm -- per point, ceiling+1 through
+#: lead 14 -- retired by the same decision): no serving write path
+#: may publish a record beyond this lead. The app enforces the
+#: identical bound at resolution time
+#: (MAX_MODEL_LEAD_DAY in src/lib/model-forecast.ts).
+MAX_SERVED_LEAD_DAY = 10
+
+
+def frontend_lead_violations(frontend: dict,
+                             max_lead_day: int = MAX_SERVED_LEAD_DAY) -> list[tuple[str, str, int]]:
+    """(point_id, arm, lead_day) for every served record beyond the cap.
+
+    Scans a frontend serving document of the shape the batch writes
+    (points[].forecasts[arm][] rows carrying ``leadDay``). An empty
+    list means the document satisfies the cap.
+    """
+    violations: list[tuple[str, str, int]] = []
+    for point in frontend.get("points", []):
+        for arm, rows in (point.get("forecasts") or {}).items():
+            for row in rows or []:
+                lead = row.get("leadDay")
+                if lead is not None and lead > max_lead_day:
+                    violations.append((point.get("pointId", "?"), arm, lead))
+    return violations
+
+
+def assert_frontend_within_lead_cap(frontend: dict,
+                                    max_lead_day: int = MAX_SERVED_LEAD_DAY) -> None:
+    """Raise ValueError if a frontend document breaches the lead cap.
+
+    Called by every serving write path before it publishes a frontend
+    JSON, so a future batch cannot reintroduce beyond-cap records
+    (e.g. the retired Open-Meteo tail) by construction or by accident.
+    """
+    violations = frontend_lead_violations(frontend, max_lead_day)
+    if violations:
+        preview = ", ".join(f"{pid}/{arm}/lead {lead}" for pid, arm, lead in violations[:5])
+        raise ValueError(
+            f"frontend breaches the {max_lead_day}-day served-lead cap: "
+            f"{len(violations)} record(s) beyond it (first: {preview})")
+
+
+# ---------------------------------------------------------------------------
 # Vertical / temporal normalisation helpers
 # ---------------------------------------------------------------------------
 

@@ -10,8 +10,8 @@ import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
 import { applyModelMethodToDays, ENS_EB_METHOD_ID, modelMethodAvailability } from "@/lib/model-forecast";
 import ErrorBanner from "@/components/ErrorBanner";
-import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId } from "@/lib/api";
-import { blendForecasts, groupData, calculateRollingStats } from "@/lib/data";
+import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId, MAX_FORECAST_DAYS } from "@/lib/api";
+import { blendForecasts, capForecastDays, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, WeatherDataStatus } from "@/lib/types";
 import { DEFAULT_SLR_METHOD } from "@/lib/snow/types";
 import { DEFAULT_FORECAST_MODE } from "@/lib/snow/openmeteo/capabilities";
@@ -174,11 +174,19 @@ export default function Home() {
         selectedPointForecast.data.location,
         pointForecasts.map(point => ({ point: point.point, days: point.grouped })),
       );
-      const grouped = selectedPointForecast.grouped.map(day => ({
+      const withResortForecasts = selectedPointForecast.grouped.map(day => ({
         ...day,
         resortForecast: resortForecasts[day.dateStr],
       }));
       const data = selectedPointForecast.data;
+
+      // 10-day forecast cap on every surface (user decision 2026-11-10):
+      // fetches already ask for at most MAX_FORECAST_DAYS, and this
+      // display-side filter keeps a pre-cap cache entry or over-long
+      // response from surfacing days beyond the horizon.
+      const timezone = data.location.timezone || 'America/Los_Angeles';
+      const todayStrLocal = new Date().toLocaleDateString('en-CA', { timeZone: timezone });
+      const grouped = capForecastDays(withResortForecasts, todayStrLocal, MAX_FORECAST_DAYS);
 
       // A later selection or refresh started another request while this one was in flight.
       if (requestId !== latestDataRequestRef.current) return;
@@ -192,8 +200,7 @@ export default function Home() {
       // Ensure the initial selection preserves the previous date if available,
       // otherwise fallback to "today", and if that's not available, the first day.
       if (grouped.length > 0) {
-        const timezone = data.location.timezone || 'America/Los_Angeles';
-        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: timezone });
+        const todayStr = todayStrLocal;
         const prevDate = selectedDateRef.current;
         const prevDateExists = grouped.find(d => d.dateStr === prevDate);
 

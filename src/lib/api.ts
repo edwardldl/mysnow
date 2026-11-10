@@ -313,6 +313,17 @@ type WeatherCacheItem = WeatherCachePayload & { timestamp: number };
 
 export const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
 export const STALE_IF_ERROR_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+/**
+ * The user-visible forecast horizon, in days, on EVERY surface (user
+ * decision 2026-11-10: "only do 10 days for all forecast across all
+ * surfaces"). Every forecast fetch asks Open-Meteo for at most this
+ * many forecast days, and page.tsx caps the grouped days it displays
+ * at the same horizon (capForecastDays in lib/data.ts), so a response
+ * or cache entry produced before the cap cannot leak a longer range
+ * into the UI. Models with shorter native horizons keep theirs.
+ */
+export const MAX_FORECAST_DAYS = 10;
 const WEATHER_CACHE_NAMESPACE = 'mysnow_weather_cache_';
 const WEATHER_CACHE_PREFIX = `${WEATHER_CACHE_NAMESPACE}v3_`;
 
@@ -798,7 +809,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&hourly=${weatherHourlyParams(loc, 'best_match', elevationMode)}` +
             `&daily=sunrise,sunset` +
             `&models=best_match` +
-            `&forecast_days=15` +
+            `&forecast_days=${MAX_FORECAST_DAYS}` +
             `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
@@ -837,12 +848,12 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
 
-        // 2. Fetch ECMWF IFS (Up to 16 days, we'll fetch 15)
+        // 2. Fetch ECMWF IFS (10-day cap: MAX_FORECAST_DAYS, like every surface)
         const ecmwfUrl = `https://api.open-meteo.com/v1/ecmwf?latitude=${getApiLatitude(loc, elevationMode)}&longitude=${getApiLongitude(loc, elevationMode)}` +
             `&elevation=${getApiElevation(loc, elevationMode)}` +
             `&hourly=${weatherHourlyParams(loc, 'ecmwf', elevationMode)}` +
             `&daily=sunrise,sunset` +
-            `&forecast_days=15` +
+            `&forecast_days=${MAX_FORECAST_DAYS}` +
             `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
@@ -901,7 +912,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 `&elevation=${getApiElevation(loc, elevationMode)}` +
                 `&hourly=${weatherHourlyParams(loc, 'ecmwf', elevationMode)}` +
                 `&daily=sunrise,sunset` +
-                `&forecast_days=15` +
+                `&forecast_days=${MAX_FORECAST_DAYS}` +
                 `&past_days=7` +
                 `&wind_speed_unit=ms` +
                 `&timezone=${timezone}`;
@@ -931,7 +942,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
                 `&daily=sunrise,sunset` +
                 `&models=${omModel}` +
-                `&forecast_days=15` +
+                `&forecast_days=${MAX_FORECAST_DAYS}` +
                 `&past_days=7` +
                 `&wind_speed_unit=ms` +
                 `&timezone=${timezone}`;
@@ -955,7 +966,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
         }
 
         // Models like HRRR, NAM, and GEM have shorter leads.
-        let days = 15;
+        let days = MAX_FORECAST_DAYS;
         if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
         else if (omModel === 'ncep_nam_conus') days = 4;
         else if (omModel === 'ncep_nbm_conus') days = 7;
@@ -1081,7 +1092,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             `&hourly=${weatherHourlyParamsForLocations(toFetch, 'best_match', elevationMode)}` +
             `&daily=sunrise,sunset` +
             `&models=best_match` +
-            `&forecast_days=15` +
+            `&forecast_days=${MAX_FORECAST_DAYS}` +
             `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
@@ -1121,7 +1132,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             `&elevation=${elevations}` +
             `&hourly=${weatherHourlyParamsForLocations(toFetch, 'ecmwf', elevationMode)}` +
             `&daily=sunrise,sunset` +
-            `&forecast_days=15` +
+            `&forecast_days=${MAX_FORECAST_DAYS}` +
             `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
@@ -1173,7 +1184,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
                 `&elevation=${elevations}` +
                 `&hourly=${weatherHourlyParamsForLocations(toFetch, 'ecmwf', elevationMode)}` +
                 `&daily=sunrise,sunset` +
-                `&forecast_days=15` +
+                `&forecast_days=${MAX_FORECAST_DAYS}` +
                 `&past_days=7` +
                 `&wind_speed_unit=ms` +
                 `&timezone=${timezone}`;
@@ -1206,7 +1217,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
                 `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
                 `&daily=sunrise,sunset` +
                 `&models=${omModel}` +
-                `&forecast_days=15` +
+                `&forecast_days=${MAX_FORECAST_DAYS}` +
                 `&past_days=7` +
                 `&wind_speed_unit=ms` +
                 `&timezone=${timezone}`;
@@ -1237,7 +1248,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
             }
         }
 
-        let days = 15;
+        let days = MAX_FORECAST_DAYS;
         if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
         else if (omModel === 'ncep_nam_conus') days = 4;
         else if (omModel === 'ncep_nbm_conus') days = 7;
@@ -1305,7 +1316,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
             `&hourly=${weatherHourlyParams(loc, 'best_match', 'max')}` +
             `&daily=sunrise,sunset` +
             `&models=best_match` +
-            `&forecast_days=15` +
+            `&forecast_days=${MAX_FORECAST_DAYS}` +
             `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
@@ -1341,7 +1352,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
             `&elevation=${elevations}` +
             `&hourly=${weatherHourlyParams(loc, 'ecmwf', 'max')}` +
             `&daily=sunrise,sunset` +
-            `&forecast_days=15` +
+            `&forecast_days=${MAX_FORECAST_DAYS}` +
             `&past_days=7` +
             `&wind_speed_unit=ms` +
             `&timezone=${timezone}`;
@@ -1388,7 +1399,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                 `&hourly=${ENSEMBLE_HOURLY_PARAMS}` +
                 `&daily=sunrise,sunset` +
                 `&models=${omModel}` +
-                `&forecast_days=15` +
+                `&forecast_days=${MAX_FORECAST_DAYS}` +
                 `&past_days=7` +
                 `&wind_speed_unit=ms` +
                 `&timezone=${timezone}`;
@@ -1411,7 +1422,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                 console.error("Triad ensemble prefetch failed:", e);
             }
         } else {
-            let days = 15;
+            let days = MAX_FORECAST_DAYS;
             if (omModel === 'gfs_hrrr' || omModel === 'gem_hrdps_west') days = 2;
             else if (omModel === 'ncep_nam_conus') days = 4;
             else if (omModel === 'ncep_nbm_conus') days = 7;

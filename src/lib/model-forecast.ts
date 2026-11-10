@@ -16,23 +16,33 @@
  * point's timezone), with fallback to the other arm when the
  * privileged arm has no scored record for that window.
  *
- * Beyond the GRIB ceiling, a THIRD arm serves the tail windows (lead
- * days ceiling+1 through 14): `ecmwf_openmeteo` -- ECMWF IFS via
- * Open-Meteo, added 2026-11-01 under the third-source treatment from
- * the E1 parity report. It is NOT the GRIB ECMWF arm continued:
- * Open-Meteo publishes no cycle metadata and its forecast instance
- * could not be cycle-verified against the GRIB arm, and it is scored
- * as a reduced-feature variant (total column liquid water is
- * unavailable from Open-Meteo, so the tclw feature pair is NaN under
- * the validated pass-through). It resolves only where the GRIB ECMWF
- * arm has no record, in the literal `ecmwf` mode and in the blend --
- * never in literal `hrrr` mode -- and is always labelled distinctly.
- * Windows beyond lead day 14 have no model record from any arm.
+ * Forecasts are capped at lead day 10 on every surface (user decision
+ * 2026-11-10: "only do 10 days for all forecast across all surfaces").
+ * The third arm that used to serve the tail windows beyond the GRIB
+ * ceiling -- `ecmwf_openmeteo`, ECMWF IFS via Open-Meteo, added
+ * 2026-11-01 under the third-source treatment from the E1 parity
+ * report -- is RETIRED by that decision: the serving JSON carries no
+ * Open-Meteo records, the serving merge enforces the same cap so a
+ * future batch cannot reintroduce the tail, and this access layer
+ * never resolves the arm or any record beyond lead day 10 (see
+ * MAX_MODEL_LEAD_DAY), whatever a stale or hand-edited serving file
+ * might contain. The arm remains in the data types and labels only so
+ * historical batches stay describable. Windows beyond lead day 10
+ * have no model record from any arm.
+ * Precision note: the retired arm's windows were "GRIB ceiling + 1"
+ * through 14, and under a 12Z cycle the western ceiling is lead 9 --
+ * so the arm also used to fill the WITHIN-cap lead-10 window at
+ * western points on 12Z batches. The current 00Z batch's GRIB arm
+ * serves lead 10 at every point, so this install loses nothing; on a
+ * future 12Z batch those western lead-10 windows will stay Kuchera
+ * rather than borrowing the Open-Meteo arm. That is the accepted
+ * consequence of the uniform cap (Codex review, 2026-11-10).
  * Every other location keeps Kuchera only, exactly as before. Data is
- * produced by the offline serving batches
- * (training/slr_calibration/scripts/run_model_serving.py and
- * run_model_serving_openmeteo.py) and imported as static JSON -- this
- * app has no database; the JSON is the serving layer in the workspace.
+ * produced by the offline serving batch
+ * (training/slr_calibration/scripts/run_model_serving.py; the
+ * Open-Meteo companion script is retired and out of the batch path)
+ * and imported as static JSON -- this app has no database; the JSON
+ * is the serving layer in the workspace.
  */
 import rawData from '../data/model-forecasts.json';
 import type { BlendedHour, DayData, DayModelWindowMark, Location } from './types';
@@ -121,6 +131,15 @@ export const BLEND_MODEL_ID = 'hrrr_ecmwf';
  */
 const BLEND_HRRR_MAX_LEAD_DAY = 2;
 
+/**
+ * The forecast horizon cap for the model, in lead days (user decision
+ * 2026-11-10: 10 days on all surfaces). Resolution ignores any serving
+ * record beyond this lead, so no surface can show an ENS-EB value for
+ * a day the cap excludes -- the serving merge enforces the same bound
+ * on the data side (MAX_SERVED_LEAD_DAY in the serving batch).
+ */
+export const MAX_MODEL_LEAD_DAY = 10;
+
 /** The single arm a literal source mode maps to, or null. */
 export function modelArmForMode(modelId: string): ModelSourceArm | null {
   if (modelId === 'ecmwf') return 'ecmwf';
@@ -132,31 +151,28 @@ export function modelArmForMode(modelId: string): ModelSourceArm | null {
  * Arm preference order for one window, most preferred first.
  *
  * Literal `hrrr` mode: that arm only -- no cross-source fallback.
- * Literal `ecmwf` mode: the GRIB ECMWF arm, then the Open-Meteo arm --
- * the tail extension of the same ECMWF family (it holds only windows
- * beyond the GRIB ceiling, so the two never compete for a window);
- * never HRRR.
+ * Literal `ecmwf` mode: the GRIB ECMWF arm only -- never HRRR. (The
+ * Open-Meteo arm is retired as of the 2026-11-10 10-day cap and is
+ * never resolved; see the file header.)
  *
  * Blend mode (`hrrr_ecmwf`) mirrors blendForecasts: HRRR overrides
  * ECMWF hour-by-hour wherever HRRR data exists inside its 0-48 h
  * horizon, and ECMWF supplies everything beyond it. At
  * window granularity that is HRRR for lead days 1-2 and ECMWF for
- * lead day 3 and beyond; the non-privileged arms remain as fallbacks
+ * lead day 3 and beyond; the non-privileged arm remains as a fallback
  * for windows the privileged arm has no scored record for (e.g. HRRR
- * day-2 windows beyond the 48 h horizon from the 12Z cycle), with the
- * Open-Meteo arm last inside the horizon and ahead of HRRR beyond it
- * (HRRR holds no records there anyway).
+ * day-2 windows beyond the 48 h horizon from the 12Z cycle).
  *
  * Any other mode: no arms -- the model does not resolve there.
  */
 export function modelArmPreference(modelId: string, leadDay: number): ModelSourceArm[] {
   const single = modelArmForMode(modelId);
-  if (single === 'ecmwf') return ['ecmwf', 'ecmwf_openmeteo'];
+  if (single === 'ecmwf') return ['ecmwf'];
   if (single === 'hrrr') return ['hrrr'];
   if (modelId !== BLEND_MODEL_ID) return [];
   return leadDay <= BLEND_HRRR_MAX_LEAD_DAY
-    ? ['hrrr', 'ecmwf', 'ecmwf_openmeteo']
-    : ['ecmwf', 'ecmwf_openmeteo', 'hrrr'];
+    ? ['hrrr', 'ecmwf']
+    : ['ecmwf', 'hrrr'];
 }
 
 const MAX_POINT_DISTANCE_DEG = 0.05;
@@ -198,9 +214,9 @@ export interface ModelForecastResult {
   blended: boolean;
   cycleUtc: string | null;
   /**
-   * Open-Meteo arm only: when its data was retrieved. Open-Meteo
-   * publishes no cycle, so for that arm cycleUtc is the anchor cycle
-   * the windows are defined on, and this is the retrieval time.
+   * Legacy field from the retired Open-Meteo arm (its records carried
+   * a retrieval time because Open-Meteo publishes no cycle). Always
+   * null since the 2026-11-10 10-day cap retired that arm.
    */
   retrievedAtUtc?: string | null;
   forecast: ModelWindowForecast;
@@ -225,20 +241,25 @@ export function modelForecastFor(
   const point = cataloguePointForLocation(location, elevationMode);
   if (!point) return null;
 
-  const rowFor = (arm: ModelSourceArm): ModelWindowForecast | null =>
-    point.forecasts[arm]?.find((row) => row.windowEndLocalDate === windowEndLocalDate) ?? null;
+  // Records beyond the 10-day cap never resolve (MAX_MODEL_LEAD_DAY),
+  // and neither does the retired Open-Meteo arm: only the ECMWF and
+  // HRRR rows are gathered here, whatever else a serving file carries.
+  const rowFor = (arm: ModelSourceArm): ModelWindowForecast | null => {
+    const row = point.forecasts[arm]?.find((r) => r.windowEndLocalDate === windowEndLocalDate) ?? null;
+    return row !== null && row.leadDay <= MAX_MODEL_LEAD_DAY ? row : null;
+  };
 
-  // Find the window in any arm to learn its lead day, then walk the
-  // mode's preference order (modelArmPreference). The preference order
-  // is what confines each mode to its own arms: literal HRRR can never
-  // resolve the ECMWF or Open-Meteo rows gathered here, and literal
-  // ECMWF can never resolve HRRR.
+  // Find the window in either serving arm to learn its lead day, then
+  // walk the mode's preference order (modelArmPreference). The
+  // preference order is what confines each mode to its own arms:
+  // literal HRRR can never resolve ECMWF rows gathered here, and
+  // literal ECMWF can never resolve HRRR.
   const rows: Partial<Record<ModelSourceArm, ModelWindowForecast>> = {};
-  for (const arm of ['ecmwf', 'hrrr', 'ecmwf_openmeteo'] as ModelSourceArm[]) {
+  for (const arm of ['ecmwf', 'hrrr'] as ModelSourceArm[]) {
     const row = rowFor(arm);
     if (row) rows[arm] = row;
   }
-  const anyRow = rows.ecmwf ?? rows.ecmwf_openmeteo ?? rows.hrrr;
+  const anyRow = rows.ecmwf ?? rows.hrrr;
   if (!anyRow) return null;
   for (const arm of modelArmPreference(modelId, anyRow.leadDay)) {
     const forecast = rows[arm];
@@ -248,8 +269,9 @@ export function modelForecastFor(
         arm,
         blended,
         cycleUtc: activeModelForecastData.cycles[arm] ?? null,
-        retrievedAtUtc:
-          arm === 'ecmwf_openmeteo' ? (activeModelForecastData.openMeteoArm?.retrievedAtUtc ?? null) : null,
+        // The Open-Meteo arm is retired (2026-11-10 cap): no resolved
+        // window carries a retrieval timestamp any more.
+        retrievedAtUtc: null,
         forecast,
       };
     }
@@ -433,7 +455,16 @@ function rebuildSnowfallAggregates(day: DayData, hourly: BlendedHour[]): Partial
 function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): DayData[] {
   const recordByWindowEnd = new Map<string, number>();
   for (const day of days) {
-    if (day.modelWindow?.kind === 'model') recordByWindowEnd.set(day.dateStr, day.totalSnowfall);
+    if (day.modelWindow?.kind === 'model') {
+      // The rescale target is clamped at 0: snowfall cannot be
+      // negative, and a (rare, tiny) negative model record -- e.g. the
+      // 2026-11-10 batch's ≈ -0.027 cm window ending 2026-11-15 at
+      // Palisades -- would otherwise scale the window's hours below
+      // zero and break the day-sum invariant (the displayed total is
+      // the sum of the day's bars). A clamped target behaves exactly
+      // like the established record-of-0 case: the hours are zeroed.
+      recordByWindowEnd.set(day.dateStr, Math.max(0, day.totalSnowfall));
+    }
   }
   if (recordByWindowEnd.size === 0) return days;
 
