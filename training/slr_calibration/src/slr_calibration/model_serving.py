@@ -30,6 +30,7 @@ recorded miss instead of a prediction.
 """
 
 from __future__ import annotations
+import copy
 
 import io
 import json
@@ -663,3 +664,246 @@ def predict_with_passthrough(model: Any, frame: Any) -> Any:
         return model.predict(frame)
     finally:
         champion_mod.validate_event_frame = original
+
+
+# ---------------------------------------------------------------------------
+# Isotonic SLR elevation-ordering layer (serving consistency repair)
+# ---------------------------------------------------------------------------
+
+#: Provenance identity of the isotonic serving layer (model-v3-isotonic-
+#: serving study, DESIGN.md + REGISTRATION.md incl. Amendment A1). The
+#: layer enforces the physical ordering SLR base <= mid <= summit on
+#: served three-point resort windows by construction (unweighted PAVA
+#: on modelSlr), after the monotone-constrained refit (queue item 7)
+#: showed coordinate-wise model constraints cannot guarantee ordering
+#: along the joint elevation path. It is a consistency repair, not an
+#: accuracy change: liquid is preserved bit-exactly, snowfall is
+#: recomputed from the adjusted SLR, and every changed record carries
+#: its raw values in ``preIsotonicSlr`` / ``preIsotonicSnowfallCm``.
+#: Raw tracking records never pass through it.
+ISOTONIC_SLR_LAYER = "isotonic-slr-elevation"
+ISOTONIC_SLR_LAYER_VERSION = 1
+#: Violation tolerance for the ordering property — the monotone study's
+#: INV_TOL, so before/after violation counts are commensurable. The
+#: layer's guarantee is non-decreasing ordering within this tolerance.
+ISOTONIC_VIOLATION_TOL = 1e-6
+_ISOTONIC_CHANGE_EPS = 1e-9
+_TRIPLE_ROLES = ("base", "mid_mountain", "summit")
+
+
+def pava_non_decreasing(values: list[float]) -> list[float]:
+    """Unweighted pool-adjacent-violators isotonic regression.
+
+    Returns the minimal-L2 non-decreasing sequence approximating
+    ``values``: adjacent runs that decrease are pooled and replaced by
+    their mean. An already non-decreasing input is returned unchanged
+    (value-for-value).
+    """
+    blocks: list[list[float]] = []  # [block_sum, block_count]
+    for value in values:
+        blocks.append([float(value), 1])
+        while (len(blocks) >= 2
+               and blocks[-2][0] / blocks[-2][1] > blocks[-1][0] / blocks[-1][1]):
+            block_sum, block_count = blocks.pop()
+            blocks[-1][0] += block_sum
+            blocks[-1][1] += block_count
+    out: list[float] = []
+    for block_sum, block_count in blocks:
+        out.extend([block_sum / block_count] * int(block_count))
+    return out
+
+
+def _frontend_groups(frontend: dict) -> list[tuple[tuple, dict]]:
+    """Group frontend records by (resortSlug, arm, windowEndUtc).
+
+    Returns [(key, {role: [(point, row), ...]})] in document order.
+    The window-end instant is the group key; windowEndLocalDate is a
+    display field, never a key.
+    """
+    groups: dict[tuple, dict] = {}
+    order: list[tuple] = []
+    for point in frontend.get("points", []):
+        for arm, rows in (point.get("forecasts") or {}).items():
+            for row in rows or []:
+                key = (point.get("resortSlug"), arm, row.get("windowEndUtc"))
+                if key not in groups:
+                    groups[key] = {}
+                    order.append(key)
+                groups[key].setdefault(point.get("role"), []).append((point, row))
+    return [(key, groups[key]) for key in order]
+
+
+def _eligible_triple(by_role: dict) -> tuple[list[tuple[dict, dict]] | None, str | None]:
+    """(triple, None) if eligible, else (None, reason).
+
+    Eligibility (isotonic study DESIGN section 2 + Amendment A1):
+    exactly one record for each of base / mid_mountain / summit from
+    three distinct points sharing one timezone; elevations strictly
+    increasing in role order; leadDay, windowStartUtc,
+    windowEndLocalDate and the window length in agreement; modelSlr
+    and liquidMm present and finite. Anything else is left untouched
+    and enumerated by reason.
+    """
+    if set(by_role) != set(_TRIPLE_ROLES) or any(
+            len(entries) != 1 for entries in by_role.values()):
+        return None, "incomplete_or_duplicate_roles"
+    triple = [by_role[role][0] for role in _TRIPLE_ROLES]
+    if len({point.get("pointId") for point, _row in triple}) != 3:
+        return None, "distinct_points"
+    if len({point.get("timezone") for point, _row in triple}) != 1:
+        return None, "timezone_disagreement"
+    elevations = [point.get("elevationM") for point, _row in triple]
+    if any(e is None for e in elevations) or not (
+            elevations[0] < elevations[1] < elevations[2]):
+        return None, "elevation_order"
+    first = triple[0][1]
+    for _point, row in triple[1:]:
+        if (row.get("leadDay") != first.get("leadDay")
+                or row.get("windowStartUtc") != first.get("windowStartUtc")
+                or row.get("windowEndUtc") != first.get("windowEndUtc")
+                or row.get("windowEndLocalDate") != first.get("windowEndLocalDate")):
+            return None, "field_disagreement"
+    for _point, row in triple:
+        for field in ("modelSlr", "liquidMm"):
+            value = row.get(field)
+            if value is None or not math.isfinite(value):
+                return None, "nonfinite_values"
+    return triple, None
+
+
+def triple_inversion_magnitude(values: list[float]) -> float:
+    """max(base-mid, 0) + max(mid-summit, 0) for an ordered triple —
+    the monotone study's window inversion definition."""
+    return (max(values[0] - values[1], 0.0)
+            + max(values[1] - values[2], 0.0))
+
+
+def isotonic_frontend_stats(frontend: dict) -> dict:
+    """Population/ordering summary of a frontend document under the
+    isotonic study's definitions (eligible triples only)."""
+    windows = 0
+    violating = 0
+    total_magnitude = 0.0
+    max_window_magnitude = 0.0
+    records = 0
+    for _key, by_role in _frontend_groups(frontend):
+        triple, _reason = _eligible_triple(by_role)
+        if triple is None:
+            continue
+        windows += 1
+        records += 3
+        values = [row["modelSlr"] for _point, row in triple]
+        magnitude = triple_inversion_magnitude(values)
+        if (values[0] > values[1] + ISOTONIC_VIOLATION_TOL
+                or values[1] > values[2] + ISOTONIC_VIOLATION_TOL):
+            violating += 1
+            total_magnitude += magnitude
+            max_window_magnitude = max(max_window_magnitude, magnitude)
+    return {
+        "windows": windows,
+        "records": records,
+        "violating": violating,
+        "total_magnitude": total_magnitude,
+        "max_window_magnitude": max_window_magnitude,
+    }
+
+
+def frontend_arm_uniformity(frontend: dict) -> list[dict]:
+    """Resort windows whose three points do not all carry the same set
+    of serving arms — the windows where the app resolver's per-point
+    arm selection could be non-uniform across a triple (isotonic study
+    Amendment A1). Returns one entry per non-uniform window."""
+    arms_by_window: dict[tuple, dict[str, set]] = {}
+    for point in frontend.get("points", []):
+        for arm, rows in (point.get("forecasts") or {}).items():
+            for row in rows or []:
+                key = (point.get("resortSlug"), row.get("windowEndUtc"))
+                arms_by_window.setdefault(key, {}).setdefault(
+                    point.get("pointId"), set()).add(arm)
+    non_uniform = []
+    for (slug, window_end), by_point in arms_by_window.items():
+        if len(by_point) != 3:
+            continue
+        if len({tuple(sorted(arms)) for arms in by_point.values()}) != 1:
+            non_uniform.append({
+                "resort": slug,
+                "windowEndUtc": window_end,
+                "armsByPoint": {pid: sorted(arms) for pid, arms in by_point.items()},
+            })
+    return non_uniform
+
+
+def apply_isotonic_slr_layer(frontend: dict) -> tuple[dict, dict]:
+    """Apply the isotonic SLR elevation-ordering layer to a frontend
+    document. Returns (adjusted_frontend, report); the input is not
+    mutated.
+
+    Only eligible triples (see ``_eligible_triple``) that violate
+    base <= mid <= summit at ISOTONIC_VIOLATION_TOL are adjusted, via
+    unweighted PAVA on modelSlr. Liquid is never written; snowfall is
+    recomputed on records whose SLR is actually written; each written
+    record gains ``preIsotonicSlr`` / ``preIsotonicSnowfallCm`` with
+    its raw values. The adjusted document gains a top-level
+    ``consistencyAdjustment`` provenance block. Ordered and ineligible
+    records are bit-identical.
+
+    Replay policy (Amendment A1): an already-adjusted input — one
+    carrying a ``consistencyAdjustment`` block or any
+    ``preIsotonicSlr`` field — is rejected with ValueError, so a
+    second run can never reset the counts or stack provenance.
+    """
+    if "consistencyAdjustment" in frontend:
+        raise ValueError(
+            "frontend already carries a consistencyAdjustment block; "
+            "the isotonic layer does not re-adjust an adjusted document")
+    for point in frontend.get("points", []):
+        for rows in (point.get("forecasts") or {}).values():
+            for row in rows or []:
+                if "preIsotonicSlr" in row:
+                    raise ValueError(
+                        "frontend record already carries preIsotonicSlr; "
+                        "the isotonic layer does not re-adjust an adjusted document")
+    adjusted = copy.deepcopy(frontend)
+    report = {
+        "groups": 0,
+        "eligible_windows": 0,
+        "ineligible_groups": 0,
+        "ineligible_reasons": {},
+        "violating_windows_before": 0,
+        "adjusted_windows": 0,
+        "records_in_population": 0,
+        "records_changed": 0,
+    }
+    for _key, by_role in _frontend_groups(adjusted):
+        report["groups"] += 1
+        triple, reason = _eligible_triple(by_role)
+        if triple is None:
+            report["ineligible_groups"] += 1
+            reasons = report["ineligible_reasons"]
+            reasons[reason] = reasons.get(reason, 0) + 1
+            continue
+        report["eligible_windows"] += 1
+        report["records_in_population"] += 3
+        values = [row["modelSlr"] for _point, row in triple]
+        if not (values[0] > values[1] + ISOTONIC_VIOLATION_TOL
+                or values[1] > values[2] + ISOTONIC_VIOLATION_TOL):
+            continue
+        report["violating_windows_before"] += 1
+        report["adjusted_windows"] += 1
+        new_values = pava_non_decreasing(values)
+        for (_point, row), raw, new in zip(triple, values, new_values):
+            if abs(new - raw) > _ISOTONIC_CHANGE_EPS:
+                row["preIsotonicSlr"] = raw
+                row["preIsotonicSnowfallCm"] = row["modelSnowfallCm"]
+                row["modelSlr"] = new
+                row["modelSnowfallCm"] = new * row["liquidMm"] / 10.0
+                report["records_changed"] += 1
+    adjusted["consistencyAdjustment"] = {
+        "layer": ISOTONIC_SLR_LAYER,
+        "version": ISOTONIC_SLR_LAYER_VERSION,
+        "weighting": "unweighted",
+        "populationWindows": report["eligible_windows"],
+        "adjustedWindows": report["adjusted_windows"],
+        "adjustedRecords": report["records_changed"],
+    }
+    return adjusted, report

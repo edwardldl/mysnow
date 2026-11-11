@@ -45,6 +45,7 @@ from slr_calibration.model_serving import (
     SOURCE_ID_ECMWF,
     SOURCE_ID_HRRR,
     assert_frontend_within_lead_cap,
+    apply_isotonic_slr_layer,
     build_point_window_features,
     core_inputs_finite,
     expand_hourly,
@@ -559,9 +560,11 @@ def main() -> int:
     # 10-day cap on all surfaces (user decision 2026-11-10): a serving
     # frontend never carries a record beyond MAX_SERVED_LEAD_DAY.
     assert_frontend_within_lead_cap(frontend)
+    frontend, isotonic_report = apply_isotonic_slr_layer(frontend)
     Path(args.frontend_json).write_text(json.dumps(frontend, indent=1))
 
     manifest["records_total"] = len(all_records)
+    manifest["isotonic_layer"] = isotonic_report
     manifest["run_finished_utc"] = datetime.now(timezone.utc).isoformat()
     (out_dir / "run_manifest.json").write_text(json.dumps(manifest, indent=1, default=str))
     print(json.dumps(manifest, indent=1, default=str))
