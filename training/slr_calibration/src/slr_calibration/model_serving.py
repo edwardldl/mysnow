@@ -913,9 +913,10 @@ def apply_isotonic_slr_layer_gated(
         frontend: dict, enabled: bool) -> tuple[dict, dict]:
     """Gate for the isotonic layer in the serving batch runner.
 
-    The layer is OPT-IN and DORMANT BY DEFAULT (user decision
-    2026-11-10): the v1 shadow evaluation was judged NOT READY, so a
-    batch run applies the layer only when it is explicitly enabled.
+    The gate itself is neutral: the caller decides. The serving
+    runner enables it BY DEFAULT since Registration v2 judged the
+    layer READY TO APPLY / ENABLE and the user directed applying it
+    (2026-11-10); its --no-isotonic-layer flag is the opt-out.
     Disabled: the frontend is returned unmodified — no adjusted
     values, no ``preIsotonicSlr`` provenance fields, no
     ``consistencyAdjustment`` block — so the merged output is

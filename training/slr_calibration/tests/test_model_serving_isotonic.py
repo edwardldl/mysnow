@@ -259,12 +259,14 @@ class IsotonicLayerTest(unittest.TestCase):
 
 
 class IsotonicGateTest(unittest.TestCase):
-    """Dormancy gate (user decision 2026-11-10): the layer is opt-in.
+    """Gate contract for apply_isotonic_slr_layer_gated.
 
-    A default serving run must be dormant and bit-identical to the
-    pre-layer behaviour; an explicitly enabled run must reproduce the
-    direct layer exactly. The run manifest records the layer state
-    either way via the returned report.
+    Disabled: the frontend passes through bit-identical to the
+    pre-layer behaviour. Enabled: exactly the direct layer. The run
+    manifest records the layer state either way via the returned
+    report. (The runner's default flipped to enabled on 2026-11-10
+    after Registration v2 judged the layer READY and the user
+    directed applying it; the gate itself is unchanged.)
     """
 
     def _violating_frontend(self) -> dict:
@@ -312,7 +314,7 @@ class IsotonicGateTest(unittest.TestCase):
 
 
 class RunnerIsotonicFlagTest(unittest.TestCase):
-    """The serving runner's --isotonic-layer flag defaults to OFF."""
+    """The serving runner applies the layer by default; --no-isotonic-layer opts out."""
 
     def _parser(self):
         import importlib.util
@@ -332,13 +334,13 @@ class RunnerIsotonicFlagTest(unittest.TestCase):
                  "--out-dir", "o", "--tracking-records", "t.jsonl",
                  "--frontend-json", "f.json"]
 
-    def test_flag_defaults_off(self):
+    def test_flag_defaults_on(self):
         args = self._parser().parse_args(self._REQUIRED)
-        self.assertIs(args.isotonic_layer, False)
-
-    def test_flag_opts_in(self):
-        args = self._parser().parse_args(self._REQUIRED + ["--isotonic-layer"])
         self.assertIs(args.isotonic_layer, True)
+
+    def test_flag_opts_out(self):
+        args = self._parser().parse_args(self._REQUIRED + ["--no-isotonic-layer"])
+        self.assertIs(args.isotonic_layer, False)
 
 
 class RunnerPersistenceTest(unittest.TestCase):
@@ -428,7 +430,7 @@ class RunnerPersistenceTest(unittest.TestCase):
             return records, []
 
         results = {}
-        for mode, extra in (("disabled", []), ("enabled", ["--isotonic-layer"])):
+        for mode, extra in (("enabled", []), ("disabled", ["--no-isotonic-layer"])):
             with tempfile.TemporaryDirectory() as td:
                 tmp = _Path(td)
                 (tmp / "champion").mkdir()

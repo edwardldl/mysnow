@@ -438,10 +438,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     ap.add_argument("--tracking-records", required=True)
     ap.add_argument("--frontend-json", required=True)
     ap.add_argument(
-        "--isotonic-layer", action="store_true",
-        help="apply the isotonic SLR elevation-ordering serving layer "
-             "(opt-in; dormant by default — the v1 shadow evaluation "
-             "was judged NOT READY, user decision 2026-11-10)")
+        "--no-isotonic-layer", action="store_false", dest="isotonic_layer",
+        default=True,
+        help="skip the isotonic SLR elevation-ordering serving layer "
+             "(applied by default since Registration v2 judged it READY "
+             "TO APPLY / ENABLE and the user directed applying it, "
+             "2026-11-10; pass this flag to emit the raw frontend)")
     return ap
 
 
@@ -569,9 +571,10 @@ def main() -> int:
     # 10-day cap on all surfaces (user decision 2026-11-10): a serving
     # frontend never carries a record beyond MAX_SERVED_LEAD_DAY.
     assert_frontend_within_lead_cap(frontend)
-    # Isotonic SLR layer: opt-in, dormant unless --isotonic-layer is
-    # passed (see apply_isotonic_slr_layer_gated). The manifest records
-    # the layer state either way.
+    # Isotonic SLR layer: applied by default (Registration v2 READY;
+    # user decision 2026-11-10); --no-isotonic-layer opts out (see
+    # apply_isotonic_slr_layer_gated). The manifest records the layer
+    # state either way.
     frontend, isotonic_report = apply_isotonic_slr_layer_gated(
         frontend, enabled=args.isotonic_layer)
     Path(args.frontend_json).write_text(json.dumps(frontend, indent=1))
