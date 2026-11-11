@@ -188,6 +188,8 @@ export interface DayModelWindowMark {
     kind: 'model' | 'kuchera_fallback';
     /** Model SLR for the window when kind is 'model', else null. */
     slr: number | null;
+    /** Model snowfall (cm) for the window when kind is 'model', else null. */
+    snowfallCm: number | null;
     /** Serving arm that produced the model value, when kind is 'model'. */
     arm: 'ecmwf' | 'hrrr' | 'ecmwf_openmeteo' | null;
     /** True when the value was resolved in the blended HRRR+ECMWF mode. */

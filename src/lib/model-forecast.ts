@@ -599,6 +599,7 @@ export function applyModelMethodToDays(
         modelWindow: {
           kind: 'model' as const,
           slr: result.forecast.modelSlr,
+          snowfallCm: result.forecast.modelSnowfallCm,
           arm: result.arm,
           blended: result.blended,
           cycleUtc: result.cycleUtc,
@@ -611,6 +612,7 @@ export function applyModelMethodToDays(
       modelWindow: {
         kind: 'kuchera_fallback' as const,
         slr: null,
+        snowfallCm: null,
         arm: null,
         blended: modelId === BLEND_MODEL_ID,
         cycleUtc: null,
@@ -628,6 +630,64 @@ export function applyModelMethodToDays(
     );
     return totalSnowfall === day.totalSnowfall ? day : { ...day, totalSnowfall };
   });
+}
+
+/**
+ * The SLR a day card / ribbon cell should present for one day.
+ *
+ * On a model day this is the model's OWN SLR -- the serving record's
+ * SLR for the 24 h window ending 07:00 local on the day's date, carried
+ * on the day's modelWindow mark. It must never be recomputed as
+ * (model snowfall) / (live-feed frozen SWE): the record SLR was
+ * predicted conditioned on the serving window's own liquid, while the
+ * hourly frozen SWE is the live substrate's value for the calendar
+ * day at the selected elevation -- dividing one by the other mixes two
+ * forecasts and can invert the physical ordering across a resort's
+ * base / mid / summit points (Heavenly, window ending 2026-11-18: the
+ * records are ordered 13.2 / 13.5 / 14.9, but the hybrid ratio was
+ * not, because the substrate's frozen SWE shrinks towards the base).
+ * This is the same no-recombination rule applyModelMethodToDays
+ * documents for the day total.
+ *
+ * On every other day (Kuchera fallback days under the ENS-EB method,
+ * and all days under every other method) the snowfall and the frozen
+ * SWE come from the same substrate calculation, so the ratio is the
+ * substrate's own SLR and is unchanged.
+ */
+export function displayDaySlr(day: DayData): number {
+  if (day.modelWindow?.kind === 'model') {
+    // applyModelMethodToDays creates a model mark only from a record
+    // carrying BOTH its SLR and its snowfall, so a model mark with a
+    // null SLR should be unreachable; if one ever appears, present no
+    // SLR rather than recomputing the forbidden hybrid ratio from
+    // possibly model-derived snowfall.
+    return day.modelWindow.slr ?? 0;
+  }
+  const frozenSweMm = (day.hourly ?? []).reduce(
+    (sum, hour) => sum + (hour.frozenSweMm ?? 0),
+    0,
+  );
+  return frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
+}
+
+/**
+ * Whether a day earns the "powder" presentation. The SLR and the
+ * snowfall threshold must describe the SAME accumulation: on a model
+ * day both come from the serving record's window (the mark's SLR and
+ * snowfall), never the window SLR paired with the calendar-day total
+ * (a small fluffy window snowfall plus dense snow later in the day
+ * would badge a powder day neither interval supports on its own). On
+ * every other day both come from the substrate day, as before.
+ */
+export function displayDayIsPowder(day: DayData): boolean {
+  if (
+    day.modelWindow?.kind === 'model' &&
+    day.modelWindow.slr !== null &&
+    day.modelWindow.snowfallCm !== null
+  ) {
+    return day.modelWindow.slr >= 15 && day.modelWindow.snowfallCm > 2;
+  }
+  return displayDaySlr(day) >= 15 && day.totalSnowfall > 2;
 }
 
 /** Inline display labels for the serving arms, as carried by the standard forecast display. */

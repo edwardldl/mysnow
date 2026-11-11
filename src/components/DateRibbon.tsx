@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { displayDaySlr } from "@/lib/model-forecast";
 import { cn } from "@/lib/utils_tailwind";
 import { DayData } from "@/lib/types";
 import { Snowflake } from "lucide-react";
@@ -52,8 +53,7 @@ export default function DateRibbon({ days, selectedDate, onSelect, timezone = 'A
 
           // NEW: Storm & SLR Logic
           const isStorm = day.totalSnowfall >= 15;
-          const frozenSweMm = day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
-          const avgSlr = frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
+          const avgSlr = displayDaySlr(day);
           const isModelDay = day.modelWindow?.kind === 'model';
           const slrColor = getSlrColor(avgSlr);
 

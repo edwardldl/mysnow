@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { displayDayIsPowder, displayDaySlr } from "@/lib/model-forecast";
 import { DayData } from "@/lib/types";
 import { cn } from "@/lib/utils_tailwind";
 import { formatCalendarDate, getSlrColor, getWeatherDescription } from "@/lib/utils";
@@ -13,9 +14,8 @@ interface DayCardProps {
 
 export default function DayCard({ day, isSelected, onClick }: DayCardProps) {
   const isStorm = day.totalSnowfall >= 15;
-  const frozenSweMm = day.hourly.reduce((sum, hour) => sum + (hour.frozenSweMm ?? 0), 0);
-  const avgSlr = frozenSweMm > 0 ? (day.totalSnowfall * 10) / frozenSweMm : 0;
-  const isPowder = avgSlr >= 15 && day.totalSnowfall > 2;
+  const avgSlr = displayDaySlr(day);
+  const isPowder = displayDayIsPowder(day);
 
   const dynamicColor = getSlrColor(avgSlr);
   
