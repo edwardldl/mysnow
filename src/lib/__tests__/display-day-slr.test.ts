@@ -3,18 +3,25 @@ import { displayDayIsPowder, displayDaySlr } from '../model-forecast';
 import type { DayData, DayModelWindowMark } from '../types';
 
 /**
- * Regression suite for the Heavenly 2026-11-18 inversion the user
- * spotted: the served ENS-EB records for the window ending 2026-11-18
- * are physically ordered (base 13.218, mid 13.500, summit 14.892), but
- * the day cards divided the MODEL snowfall by the LIVE SUBSTRATE's
- * frozen SWE, whose amount shrinks towards the warmer base -- a hybrid
- * ratio that inverted the displayed SLR across elevations. Model days
- * must present the model's own SLR (the mark); every other day keeps
- * the substrate ratio, where snowfall and frozen SWE share one source.
- * The powder badge follows the same rule: SLR and snowfall threshold
- * always describe the same accumulation (Codex review, 2026-11-10).
+ * Day-card / ribbon SLR presentation.
+ *
+ * History: the Heavenly 2026-11-18 inversion (fix f18d03b) was a hybrid
+ * ratio -- the RECORD's snowfall divided by the LIVE SUBSTRATE's frozen
+ * SWE -- and the fix presented the record's SLR on model days. The
+ * 2026-11-11 pure-SLR change supersedes the presentation rule again:
+ * the day's snowfall is now BUILT from the day's own frozen SWE series
+ * (record SLRs inside model windows, substrate SLRs elsewhere), so the
+ * day's effective ratio 10 x totalSnowfall / sum(frozenSweMm) is a
+ * same-source weighted mean, not a hybrid, and it is the only day
+ * ratio that satisfies the user's identity snowfall / SLR =
+ * precipitation for the calendar day (a day straddles two windows, so
+ * no single window's record SLR can describe its total -- Codex gate,
+ * 2026-11-11). The record SLR remains a window value, carried on the
+ * mark and named in the trend label. The powder badge follows its own
+ * same-window rule: SLR and snowfall threshold always describe the
+ * same accumulation.
  */
-const modelMark = (slr: number, snowfallCm: number): DayModelWindowMark => ({
+const modelMark = (slr: number, snowfallCm: number | null): DayModelWindowMark => ({
   kind: 'model',
   slr,
   snowfallCm,
@@ -22,6 +29,8 @@ const modelMark = (slr: number, snowfallCm: number): DayModelWindowMark => ({
   blended: true,
   cycleUtc: '2026-11-10T00:00:00Z',
   reducedFeatureVariant: false,
+  isotonicAdjusted: false,
+  preIsotonicSlr: null,
 });
 
 const fallbackMark: DayModelWindowMark = {
@@ -32,36 +41,48 @@ const fallbackMark: DayModelWindowMark = {
   blended: true,
   cycleUtc: null,
   reducedFeatureVariant: false,
+  isotonicAdjusted: false,
+  preIsotonicSlr: null,
 };
 
 const mkDay = (partial: Partial<DayData>): DayData => partial as DayData;
 const hoursWithFrozenSwe = (mm: number) => [{ frozenSweMm: mm }] as DayData['hourly'];
 
 describe('displayDaySlr', () => {
-  it('presents the model SLR on model days, never the hybrid substrate ratio', () => {
-    // Substrate frozen SWE chosen so the OLD formula (totalSnowfall x 10
-    // / frozenSwe) inverts: 21.1 (base) > 15.4 (mid) > 13.8 (summit).
-    const base = mkDay({
-      totalSnowfall: 1.9,
-      hourly: hoursWithFrozenSwe(0.9),
-      modelWindow: modelMark(13.21793298656373, 1.856),
-    });
-    const mid = mkDay({
-      totalSnowfall: 2.0,
-      hourly: hoursWithFrozenSwe(1.3),
-      modelWindow: modelMark(13.5, 1.896),
-    });
-    const summit = mkDay({
-      totalSnowfall: 2.2,
-      hourly: hoursWithFrozenSwe(1.6),
-      modelWindow: modelMark(14.89227518709731, 2.091),
-    });
-    expect(displayDaySlr(base)).toBe(13.21793298656373);
-    expect(displayDaySlr(mid)).toBe(13.5);
-    expect(displayDaySlr(summit)).toBe(14.89227518709731);
-    // The physical ordering of the records survives to the display.
+  it('on a day lying in a single model window, the day ratio is the record SLR (Heavenly values)', () => {
+    // The served records for the window ending 2026-11-18 are physically
+    // ordered (13.218 / 13.500 / 14.892 on 1.4043 mm at all three
+    // points); applied hours built as frozen x SLR / 10 keep that
+    // ordering in the day ratio.
+    const mk = (slr: number, snowfallCm: number) =>
+      mkDay({
+        totalSnowfall: snowfallCm,
+        hourly: hoursWithFrozenSwe(1.4043),
+        modelWindow: modelMark(slr, snowfallCm),
+      });
+    const base = mk(13.21793298656373, 1.8561943293031447);
+    const mid = mk(13.499933670704241, 1.8957956853769968);
+    const summit = mk(14.89227518709731, 2.0913222045240754);
+    expect(displayDaySlr(base)).toBeCloseTo(13.21793298656373, 6);
+    expect(displayDaySlr(mid)).toBeCloseTo(13.499933670704241, 6);
+    expect(displayDaySlr(summit)).toBeCloseTo(14.89227518709731, 6);
     expect(displayDaySlr(base)).toBeLessThan(displayDaySlr(mid));
     expect(displayDaySlr(mid)).toBeLessThan(displayDaySlr(summit));
+  });
+
+  it('on a model day spanning two windows, presents the effective ratio, not either window SLR', () => {
+    // Morning window at SLR 10 over 10 mm frozen, afternoon window at
+    // SLR 20 over 10 mm frozen: day snowfall 30 cm on 20 mm. The
+    // morning window's record SLR (10, on the mark) would imply 30 mm
+    // of precipitation; the effective ratio 15 satisfies the identity
+    // for the day: 30 / 15 = 2.0 cm = 20 mm of frozen precipitation.
+    const day = mkDay({
+      totalSnowfall: 30,
+      hourly: [{ frozenSweMm: 10 }, { frozenSweMm: 10 }] as DayData['hourly'],
+      modelWindow: modelMark(10, 10),
+    });
+    expect(displayDaySlr(day)).toBe(15);
+    expect(day.totalSnowfall / displayDaySlr(day)).toBeCloseTo(2.0, 9);
   });
 
   it('keeps the substrate ratio on Kuchera fallback days under the model method', () => {
@@ -78,6 +99,13 @@ describe('displayDaySlr', () => {
     expect(displayDaySlr(day)).toBe(12.5);
   });
 
+  it('a model mark alone does not change the ratio: same hours, same SLR, with or without the mark', () => {
+    const hours = hoursWithFrozenSwe(2.0);
+    const marked = mkDay({ totalSnowfall: 3.0, hourly: hours, modelWindow: modelMark(11, 3.0) });
+    const unmarked = mkDay({ totalSnowfall: 3.0, hourly: hours });
+    expect(displayDaySlr(marked)).toBe(displayDaySlr(unmarked));
+  });
+
   it('returns 0 when there is no frozen SWE and no model mark', () => {
     expect(displayDaySlr(mkDay({ totalSnowfall: 0, hourly: [] }))).toBe(0);
     expect(
@@ -85,15 +113,11 @@ describe('displayDaySlr', () => {
     ).toBe(0);
   });
 
-  it('never recomputes the hybrid ratio for a model mark with no SLR', () => {
-    // Unreachable via applyModelMethodToDays (a model mark is created
-    // only from a record carrying both SLR and snowfall), but if one
-    // ever appears the display must show no SLR instead of dividing
-    // possibly model-derived snowfall by substrate frozen SWE.
+  it('returns 0 for a model day with no hourly series in view (record exists, nothing applied)', () => {
     const day = mkDay({
-      totalSnowfall: 3.0,
-      hourly: hoursWithFrozenSwe(2.0),
-      modelWindow: { ...modelMark(0, 0), slr: null },
+      totalSnowfall: 999,
+      hourly: [],
+      modelWindow: modelMark(12, null),
     });
     expect(displayDaySlr(day)).toBe(0);
   });

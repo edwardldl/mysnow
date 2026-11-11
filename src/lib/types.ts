@@ -188,8 +188,19 @@ export interface DayModelWindowMark {
     kind: 'model' | 'kuchera_fallback';
     /** Model SLR for the window when kind is 'model', else null. */
     slr: number | null;
-    /** Model snowfall (cm) for the window when kind is 'model', else null. */
+    /**
+     * Applied snowfall (cm) for the window when kind is 'model': the
+     * record SLR applied to the live substrate's frozen SWE over the
+     * window's hours present in the day array (2026-11-11 semantics --
+     * ENS-EB supplies the ratio, never the precipitation). Null when
+     * kind is 'kuchera_fallback' or when no hour of the window is
+     * present in the array. NOT the serving record's stored snowfall.
+     */
     snowfallCm: number | null;
+    /** True when the serving record's SLR was isotonic-adjusted for elevation ordering. */
+    isotonicAdjusted: boolean;
+    /** The record's SLR before isotonic adjustment, when isotonicAdjusted, else null. */
+    preIsotonicSlr: number | null;
     /** Serving arm that produced the model value, when kind is 'model'. */
     arm: 'ecmwf' | 'hrrr' | 'ecmwf_openmeteo' | null;
     /** True when the value was resolved in the blended HRRR+ECMWF mode. */
@@ -226,9 +237,10 @@ export interface DayData {
     resortForecast?: ResortSnowForecast;
     /**
      * Set only when the ENS-EB model snow-physics method is selected: marks
-     * whether this day's totalSnowfall is the precomputed model value for the
-     * 24 h window ending 07:00 local on this date, or the Kuchera fallback
-     * shown because no model record exists for the window.
+     * whether the 24 h window ending 07:00 local on this date is served by
+     * a precomputed model record (its SLR applied to the live substrate's
+     * precipitation) or is the Kuchera fallback shown because no model
+     * record exists for the window.
      */
     modelWindow?: DayModelWindowMark;
 }

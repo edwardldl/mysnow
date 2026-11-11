@@ -194,14 +194,21 @@ describe('applyModelMethodToDays', () => {
   const mkDay = (dateStr: string, totalSnowfall: number): DayData =>
     ({ dateStr, totalSnowfall }) as DayData;
 
-  it('replaces day totals with the record snowfall in ecmwf mode and marks them model', () => {
+  it('marks days model with the record SLR and provenance in ecmwf mode (pure-SLR semantics)', () => {
+    // 2026-11-11 semantics: the method consumes ONLY the record's SLR.
+    // These fixture days carry no hourly series, so there is nothing to
+    // convert and the substrate totals stand; the record's stored
+    // snowfall is never substituted for them.
     const days = [mkDay(day1Date, 999), mkDay(day2Date, 999), mkDay(day3Date, 999)];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
     out.forEach((day, i) => {
-      expect(day.totalSnowfall).toBe(ecmwfRows[i].modelSnowfallCm);
+      expect(day.totalSnowfall).toBe(999);
       expect(day.modelWindow?.kind).toBe('model');
       expect(day.modelWindow?.arm).toBe('ecmwf');
       expect(day.modelWindow?.slr).toBe(ecmwfRows[i].modelSlr);
+      expect(day.modelWindow?.snowfallCm).toBeNull();
+      expect(day.modelWindow?.isotonicAdjusted).toBe(ecmwfRows[i].preIsotonicSlr != null);
+      expect(day.modelWindow?.preIsotonicSlr).toBe(ecmwfRows[i].preIsotonicSlr ?? null);
       expect(day.modelWindow?.reducedFeatureVariant).toBe(false);
     });
     // Input days are not mutated.
@@ -209,11 +216,11 @@ describe('applyModelMethodToDays', () => {
     expect(days[0].modelWindow).toBeUndefined();
   });
 
-  it('agrees exactly with modelForecastFor in blend mode (same numbers, same arm)', () => {
+  it('agrees exactly with modelForecastFor in blend mode (same SLR, same arm)', () => {
     const out = applyModelMethodToDays([mkDay(day2Date, 0)], palisades, BLEND_MODEL_ID, 'min');
     const resolved = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', day2Date);
     expect(resolved).not.toBeNull();
-    expect(out[0].totalSnowfall).toBe(resolved?.forecast.modelSnowfallCm);
+    expect(out[0].modelWindow?.slr).toBe(resolved?.forecast.modelSlr);
     expect(out[0].modelWindow?.arm).toBe('ecmwf');
     expect(out[0].modelWindow?.blended).toBe(true);
   });
@@ -302,11 +309,11 @@ describe('ECMWF horizon under the 10-day cap', () => {
     expect(outBlend[0].modelWindow?.kind).toBe('kuchera_fallback');
   });
 
-  it('replaces the lead-5 total with the record snowfall under the menu method', () => {
+  it('marks the lead-5 window model with the record SLR under the menu method', () => {
     const lead5 = rowForLead(5);
     const out = applyModelMethodToDays([mkDay(lead5!.windowEndLocalDate, 999)], palisades, BLEND_MODEL_ID, 'min');
-    expect(out[0].totalSnowfall).toBe(lead5?.modelSnowfallCm);
     expect(out[0].modelWindow?.kind).toBe('model');
+    expect(out[0].modelWindow?.slr).toBe(lead5?.modelSlr);
     expect(out[0].modelWindow?.arm).toBe('ecmwf');
   });
 });
@@ -410,6 +417,17 @@ describe('inline labelling under the ENS-EB menu method', () => {
     expect(labelFor('2026-11-22', 'ecmwf')).toBe(
       'Calendar-day snowfall · ENS-EB windows where available, Kuchera elsewhere · the 24 h window ending 07:00 local fell back to Kuchera (no ENS-EB record)',
     );
+  });
+
+  it('names the window SLR as a window value, and discloses when no hours of the window are in view', () => {
+    // labelFor builds hourless days, so the record exists but nothing
+    // of its window is in view: the label must carry both the
+    // window-scoped SLR and the window-scoped not-applied disclosure
+    // (Codex gate, 2026-11-11).
+    const label = labelFor(day2Date, 'ecmwf');
+    const slr = rowForLead(3)?.modelSlr as number;
+    expect(label).toContain(`window SLR ${slr.toFixed(1)}:1`);
+    expect(label).toContain("no hours from this window are in view -- this window's SLR was not applied");
   });
 
   it('never labels any stored window as Open-Meteo (the arm is retired)', () => {

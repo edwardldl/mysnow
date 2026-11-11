@@ -45,6 +45,7 @@
  * is the serving layer in the workspace.
  */
 import rawData from '../data/model-forecasts.json';
+import { getSLRCategory } from './data';
 import type { BlendedHour, DayData, DayModelWindowMark, Location } from './types';
 import { referencePointForMode } from './snow/resort/geometry';
 import { addCalendarDays } from './time';
@@ -61,6 +62,15 @@ export interface ModelWindowForecast {
   kucheraSlr: number | null;
   kucheraSnowfallCm: number | null;
   liquidMm: number | null;
+  /**
+   * Present only on records the isotonic serving layer adjusted for
+   * elevation ordering (2026-11-10): the record's SLR and snowfall
+   * before adjustment. modelSlr/modelSnowfallCm carry the adjusted
+   * (served) values. Provenance only -- the display path consumes
+   * modelSlr and never recomputes snowfall from these fields.
+   */
+  preIsotonicSlr?: number | null;
+  preIsotonicSnowfallCm?: number | null;
   /**
    * True on Open-Meteo arm rows: the window was scored as a
    * reduced-feature variant (tclw pair NaN -- total column liquid
@@ -263,7 +273,18 @@ export function modelForecastFor(
   if (!anyRow) return null;
   for (const arm of modelArmPreference(modelId, anyRow.leadDay)) {
     const forecast = rows[arm];
-    if (forecast && forecast.modelSlr !== null) {
+    // A record resolves only with a usable SLR: under the pure-SLR
+    // semantics (2026-11-11) the SLR is the ONLY quantity the display
+    // path consumes from a record, so a record whose SLR is missing or
+    // not finite and positive serves nothing and the window falls back
+    // to Kuchera. (The serving batch clamps scored SLRs to [3, 30];
+    // this is a corrupt-data guard.)
+    if (
+      forecast &&
+      forecast.modelSlr !== null &&
+      Number.isFinite(forecast.modelSlr) &&
+      forecast.modelSlr > 0
+    ) {
       return {
         point,
         arm,
@@ -407,11 +428,11 @@ function rebuildSnowfallAggregates(day: DayData, hourly: BlendedHour[]): Partial
       );
       if (bucket.length === 0) return window;
       const snowfall = bucket.reduce((sum, h) => sum + (h.snowfall > 0 ? h.snowfall : 0), 0);
-      const liquid = bucket.reduce((sum, h) => sum + (h.liquidMM ?? 0), 0);
+      const frozenSweMm = bucket.reduce((sum, h) => sum + (h.frozenSweMm ?? 0), 0);
       return {
         ...window,
         snowfall,
-        avgSlr: snowfall > 0 && liquid > 0 ? (snowfall * 10) / liquid : window.avgSlr,
+        avgSlr: snowfall > 0 && frozenSweMm > 0 ? (snowfall * 10) / frozenSweMm : window.avgSlr,
       };
     });
     out.windows = windows;
@@ -423,175 +444,92 @@ function rebuildSnowfallAggregates(day: DayData, hourly: BlendedHour[]): Partial
 }
 
 /**
- * Rescale the hourly snowfall inside each model window so the window's
- * hours sum EXACTLY to the serving record's snowfall, so every consumer
- * of the hourly series (the hourly chart, the rolling 24/48 h statistics)
- * sees the model's own window accounting. Hours live on the real
- * timeline: an hour belongs to exactly one window, so a calendar day's
- * 00:00-24:00 display straddles two windows and each part is scaled by its
- * own window's factor; the "24 h window ending 07:00 local" caption covers
- * that accounting. Windows without a record are not touched.
+ * Apply each model window's record SLR to the live substrate's hourly
+ * frozen SWE, replacing the hourly snowfall inside the window with
+ * frozenSweMm x recordSlr / 10 -- the exact conversion every other SLR
+ * method performs per hour (snow/snowfall.ts: freshSnowCm =
+ * frozenSweMm x freshSlr / 10). ENS-EB supplies the ratio, never the
+ * precipitation (user directive, 2026-11-11: "the precipitation total
+ * should be the same regardless of the SLR model", stated as the
+ * identity snowfall / SLR = precipitation). Two distinct statements,
+ * kept distinct (Codex gate, 2026-11-11): (a) TOTAL precipitation --
+ * the hour's liquidMM, precipitation and the day's totalPrecipitation
+ * -- is not modified by any method, so it is identical across methods;
+ * (b) the identity snowfall / SLR = precipitation holds against the
+ * FROZEN precipitation (frozenSweMm), the only part an SLR can act on:
+ * when part of an hour's precipitation is rain, snowfall / SLR
+ * recovers the frozen part, not the total, under ENS-EB exactly as
+ * under Kuchera. The hour's frozenSweMm is NOT modified either, so
+ * every ratio consumer -- the hourly chart's labels and colours, the
+ * rolling 24/48 h statistics, the day cards -- sees snowfall, SLR and
+ * frozen precipitation from one consistent triple: the window's
+ * applied snowfall divided by the record SLR is exactly the
+ * substrate's frozen SWE over the window.
  *
- * Rule per window, with R = record snowfall and S = sum of the UI hourly
- * snowfall over the window's hours:
- * - R = 0: every hour in the window becomes 0.
- * - S > 0: every hour's snowfall is scaled by R / S; the floating point
- *   residue is absorbed into the largest scaled hour so the sum is exact.
- * - S = 0 with R > 0 (zero denominator): R is distributed in proportion
- *   to the UI's hourly liquid amounts (liquidMM, falling back to the raw
- *   precipitation field); if those are also all zero, R is split evenly
- *   across the window's displayed hours. (The record carries no hourly
- *   shape of its own, so that branch of the distribution rule cannot
- *   apply.)
- * In both non-zero branches, every hour that carries model snowfall also
- * carries the RECORD's SLR and the record-implied frozen SWE
- * (snowfall x 10 / record SLR): inside a model window the SLR presented
- * anywhere -- the hourly chart's per-bar labels and colours, and the
- * rolling 24/48 h statistics, which divide the hourly snowfall by the
- * hourly frozen SWE -- must be the model's own, never a hybrid of model
- * snowfall over the live substrate's frozen SWE. That hybrid is the
- * hour-granularity form of the ratio displayDaySlr forbids at day
- * granularity: when the live cycle and the serving cycle disagree about
- * an event's size, it collapses towards the ratio of the two forecasts
- * (Mammoth summit, window ending 2026-11-14: live substrate 78.0 cm at
- * SLR ~20 vs the record's 6.39 cm at SLR 11.9 -- the rescaled hours
- * presented ~2:1, a number neither forecast holds). Hours whose model
- * snowfall is zero carry zero frozen SWE inside a model window, so a
- * rolling interval spanning a zero-record window and a snowy one cannot
- * dilute the snowy window's SLR with substrate SWE the model zeroed.
- * A record SLR that is missing or not finite and positive (the serving
- * batch clamps scored SLRs to [3, 30], so this is a corrupt-data guard)
- * presents NO hour SLR and no frozen SWE on the window's snowy hours
- * rather than the substrate's. The UI's liquid and
- * precipitation stay the live feed's own values, the snowpack/depth
- * outputs are the layer model's sequential state and cannot be re-run
- * post hoc, and `snowfallResult` remains the substrate calculation's
- * audit trail. Input days and hours are never mutated.
+ * Each transformed hour also carries the record SLR itself (the
+ * 2026-11-10 invariants from commit 3ea7016 hold unchanged: model
+ * hours present the model's own SLR, and no hybrid of model snowfall
+ * over a foreign denominator can arise, because the denominator is
+ * never touched). Hours live on the real timeline: an hour belongs to
+ * exactly one window, so a calendar day's display straddles two
+ * windows and each part is converted by its own window's SLR; the
+ * "24 h window ending 07:00 local" caption covers that accounting.
+ * Only windows whose end-date day is present in the input are applied
+ * (the marks drive application, as before); windows without a record
+ * are not touched, and hours outside every served window keep the
+ * substrate values object-for-object. The snowpack/depth outputs are
+ * the layer model's sequential state and cannot be re-run post hoc,
+ * and `snowfallResult` remains the substrate calculation's audit
+ * trail. Input days and hours are never mutated.
+ *
+ * Returns the transformed days and, per model window end date, the
+ * applied window snowfall (the sum over the window's hours present in
+ * the array) for the day marks.
  */
-function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): DayData[] {
-  const recordByWindowEnd = new Map<string, { snowfall: number; slr: number | null }>();
+function applyModelSlrToWindowHours(
+  days: DayData[],
+  point: ModelForecastPoint,
+): { days: DayData[]; appliedSnowfallByWindowEnd: Map<string, number> } {
+  const appliedSnowfallByWindowEnd = new Map<string, number>();
+  const slrByWindowEnd = new Map<string, number>();
   for (const day of days) {
-    if (day.modelWindow?.kind === 'model') {
-      // The rescale target is clamped at 0: snowfall cannot be
-      // negative, and a (rare, tiny) negative model record -- e.g. the
-      // 2026-11-10 batch's ≈ -0.027 cm window ending 2026-11-15 at
-      // Palisades -- would otherwise scale the window's hours below
-      // zero and break the day-sum invariant (the displayed total is
-      // the sum of the day's bars). A clamped target behaves exactly
-      // like the established record-of-0 case: the hours are zeroed.
-      recordByWindowEnd.set(day.dateStr, {
-        snowfall: Math.max(0, day.totalSnowfall),
-        slr: day.modelWindow.slr,
-      });
+    if (day.modelWindow?.kind === 'model' && day.modelWindow.slr !== null) {
+      slrByWindowEnd.set(day.dateStr, day.modelWindow.slr);
     }
   }
-  if (recordByWindowEnd.size === 0) return days;
+  if (slrByWindowEnd.size === 0) return { days, appliedSnowfallByWindowEnd };
 
   const slotsByWindow = new Map<string, ModelHourSlot[]>();
   days.forEach((day, dayIndex) => {
     (day.hourly ?? []).forEach((hour, hourIndex) => {
       const end = modelWindowEndDateForHour(hour, point.timezone);
-      if (end === null || !recordByWindowEnd.has(end)) return;
+      if (end === null || !slrByWindowEnd.has(end)) return;
       const slots = slotsByWindow.get(end) ?? [];
       slots.push({ dayIndex, hourIndex, hour });
       slotsByWindow.set(end, slots);
     });
   });
-  if (slotsByWindow.size === 0) return days;
+  if (slotsByWindow.size === 0) return { days, appliedSnowfallByWindowEnd };
 
   const key = (slot: ModelHourSlot) => `${slot.dayIndex}:${slot.hourIndex}`;
-  const newValues = new Map<
-    string,
-    { snowfall: number; slr: number | null; frozenSweMm?: number }
-  >();
+  const newValues = new Map<string, { snowfall: number; slr: number }>();
 
   for (const [end, slots] of slotsByWindow) {
-    const { snowfall: record, slr: recordSlr } = recordByWindowEnd.get(end) as {
-      snowfall: number;
-      slr: number | null;
-    };
-    const validSlr = recordSlr !== null && Number.isFinite(recordSlr) && recordSlr > 0;
-    if (slots.length === 0) continue;
-    if (record === 0) {
-      for (const slot of slots) {
-        newValues.set(key(slot), { snowfall: 0, slr: slot.hour.slr, frozenSweMm: 0 });
-      }
-      continue;
+    const recordSlr = slrByWindowEnd.get(end) as number;
+    let applied = 0;
+    for (const slot of slots) {
+      const frozenSweMm = slot.hour.frozenSweMm ?? 0;
+      const snowfall = (frozenSweMm * recordSlr) / 10;
+      applied += snowfall;
+      newValues.set(key(slot), { snowfall, slr: recordSlr });
     }
-    const uiTotal = slots.reduce(
-      (sum, s) => sum + (s.hour.snowfall > 0 ? s.hour.snowfall : 0),
-      0,
-    );
-    if (uiTotal > 0) {
-      const factor = record / uiTotal;
-      let scaledTotal = 0;
-      let largest: ModelHourSlot | null = null;
-      let largestValue = -1;
-      for (const slot of slots) {
-        const base = slot.hour.snowfall > 0 ? slot.hour.snowfall : 0;
-        const value = base * factor;
-        scaledTotal += value;
-        if (value > largestValue) {
-          largestValue = value;
-          largest = slot;
-        }
-        newValues.set(
-          key(slot),
-          base > 0
-            ? validSlr
-              ? { snowfall: value, slr: recordSlr, frozenSweMm: (value * 10) / (recordSlr as number) }
-              : { snowfall: value, slr: null, frozenSweMm: 0 }
-            : { snowfall: value, slr: slot.hour.slr, frozenSweMm: 0 },
-        );
-      }
-      if (largest) {
-        const current = newValues.get(key(largest));
-        if (current) {
-          current.snowfall += record - scaledTotal;
-          if (current.frozenSweMm !== undefined && validSlr) {
-            current.frozenSweMm = (current.snowfall * 10) / (recordSlr as number);
-          }
-        }
-      }
-      continue;
-    }
-    const weights = slots.map((s) => {
-      const w = Number.isFinite(s.hour.liquidMM) ? s.hour.liquidMM : s.hour.precipitation;
-      return w > 0 ? w : 0;
-    });
-    const weightTotal = weights.reduce((a, b) => a + b, 0);
-    let assigned = 0;
-    let largestIndex = 0;
-    let largestShare = -1;
-    slots.forEach((slot, i) => {
-      const value = weightTotal > 0 ? (record * weights[i]) / weightTotal : record / slots.length;
-      assigned += value;
-      if (value > largestShare) {
-        largestShare = value;
-        largestIndex = i;
-      }
-      newValues.set(
-        key(slot),
-        value > 0
-          ? validSlr
-            ? { snowfall: value, slr: recordSlr, frozenSweMm: (value * 10) / (recordSlr as number) }
-            : { snowfall: value, slr: null, frozenSweMm: 0 }
-          : { snowfall: value, slr: slot.hour.slr, frozenSweMm: 0 },
-      );
-    });
-    const anchor = newValues.get(key(slots[largestIndex]));
-    if (anchor) {
-      anchor.snowfall += record - assigned;
-      if (anchor.frozenSweMm !== undefined && validSlr) {
-        anchor.frozenSweMm = (anchor.snowfall * 10) / (recordSlr as number);
-      }
-    }
+    appliedSnowfallByWindowEnd.set(end, applied);
   }
 
   const changedDays = new Set<number>();
   for (const k of newValues.keys()) changedDays.add(Number(k.split(':')[0]));
-  if (changedDays.size === 0) return days;
-  return days.map((day, dayIndex) => {
+  if (changedDays.size === 0) return { days, appliedSnowfallByWindowEnd };
+  const out = days.map((day, dayIndex) => {
     if (!changedDays.has(dayIndex)) return day;
     const hourly = (day.hourly ?? []).map((hour, hourIndex) => {
       const value = newValues.get(`${dayIndex}:${hourIndex}`);
@@ -600,39 +538,43 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
             ...hour,
             snowfall: value.snowfall,
             slr: value.slr,
-            ...(value.frozenSweMm !== undefined ? { frozenSweMm: value.frozenSweMm } : {}),
+            slrCategory: getSLRCategory(value.slr, hour.liquidMM),
           }
         : hour;
     });
     return { ...day, hourly, ...rebuildSnowfallAggregates(day, hourly) };
   });
+  return { days: out, appliedSnowfallByWindowEnd };
 }
 
 /**
  * Apply the ENS-EB menu method to grouped forecast days. Each calendar
- * day is marked by the 24 h model window ending 07:00 local on that date:
- * when a serving record exists the day is a model day, otherwise it is a
- * Kuchera fallback day. The record snowfall is used as the window total,
- * not model SLR x UI liquid: the model SLR was predicted conditioned on
- * the serving window's own liquid (fcst_liquid_mm is an input feature)
- * over the exact window, while the UI day liquid covers a different
- * period from a different, live cycle -- recombining them would break
- * the prediction's conditioning.
- * The hourly snowfall series is rescaled per model window (see
- * rescaleModelWindowHours); the model still serves window aggregates
- * only -- the rescale distributes each record total over the UI's own
- * hourly shape, it does not invent a model hourly forecast.
+ * day is marked by the 24 h model window ending 07:00 local on that
+ * date: when a serving record with a usable SLR exists the day is a
+ * model day, otherwise it is a Kuchera fallback day.
  *
- * The DISPLAYED day total then follows the calendar day, derived exactly
- * as groupData derives it for every other method: the sum of the day's
- * own hourly snowfall (positive part) over the final, rescaled series.
- * A model window straddles two calendar days, so a model day's morning
- * hours carry the record of the window ending that morning while its
- * afternoon hours carry the next window's record -- the record value
- * itself is NOT the calendar-day sum, and showing it as the day total
- * made the headline number disagree with the day's hourly bars. Days
- * carrying no hourly series keep the record total set by the marking
- * step (there is no series to derive a total from).
+ * ENS-EB is applied as a pure SLR method (user directive, 2026-11-11,
+ * superseding the 2026-10-31 "liquid decision" that substituted the
+ * record's own snowfall): the record's SLR -- the isotonic-adjusted
+ * value where the serving layer adjusted it -- converts the LIVE
+ * substrate's frozen SWE over the same window, hour by hour, exactly
+ * as Kuchera converts it with its own per-hour SLRs. The precipitation
+ * is therefore the substrate's under every method; switching methods
+ * changes only the ratio. The trade-off is stated plainly: the stored
+ * SLR was predicted on its own serving cycle's profile and liquid, and
+ * it is now applied to the live cycle's liquid, like every other SLR
+ * method in the menu. The record's stored snowfall and liquid remain
+ * batch provenance in the serving file; they are never presented as
+ * the forecast's precipitation or snowfall.
+ *
+ * The DISPLAYED day total follows the calendar day, derived exactly
+ * as groupData derives it for every other method: the sum of the
+ * day's own hourly snowfall (positive part) over the final series
+ * (the day/hour consistency requirement of commit a49de33). A model
+ * window straddles two calendar days, so a model day's morning hours
+ * carry the SLR of the window ending that morning while its afternoon
+ * hours carry the next window's. Days carrying no hourly series keep
+ * their substrate total (there is no series to convert).
  * Returns the days unchanged when the method is unavailable in context.
  */
 export function applyModelMethodToDays(
@@ -646,18 +588,19 @@ export function applyModelMethodToDays(
   if (!availability.available) return days;
   const marked = days.map((day) => {
     const result = modelForecastFor(location, modelId, elevationMode, day.dateStr);
-    if (result !== null && result.forecast.modelSnowfallCm !== null) {
+    if (result !== null) {
       return {
         ...day,
-        totalSnowfall: result.forecast.modelSnowfallCm,
         modelWindow: {
           kind: 'model' as const,
           slr: result.forecast.modelSlr,
-          snowfallCm: result.forecast.modelSnowfallCm,
+          snowfallCm: null,
           arm: result.arm,
           blended: result.blended,
           cycleUtc: result.cycleUtc,
           reducedFeatureVariant: result.forecast.reducedFeatureVariant ?? false,
+          isotonicAdjusted: result.forecast.preIsotonicSlr != null,
+          preIsotonicSlr: result.forecast.preIsotonicSlr ?? null,
         },
       };
     }
@@ -671,52 +614,52 @@ export function applyModelMethodToDays(
         blended: modelId === BLEND_MODEL_ID,
         cycleUtc: null,
         reducedFeatureVariant: false,
+        isotonicAdjusted: false,
+        preIsotonicSlr: null,
       },
     };
   });
-  const point = cataloguePointForLocation(location, elevationMode);
-  const withHours = point ? rescaleModelWindowHours(marked, point) : marked;
+  const point = availability.point;
+  const { days: withHours, appliedSnowfallByWindowEnd } = point
+    ? applyModelSlrToWindowHours(marked, point)
+    : { days: marked, appliedSnowfallByWindowEnd: new Map<string, number>() };
   return withHours.map((day) => {
-    if (!Array.isArray(day.hourly) || day.hourly.length === 0) return day;
-    const totalSnowfall = day.hourly.reduce(
+    let out = day;
+    const applied = appliedSnowfallByWindowEnd.get(day.dateStr);
+    if (out.modelWindow?.kind === 'model' && applied !== undefined) {
+      out = { ...out, modelWindow: { ...out.modelWindow, snowfallCm: applied } };
+    }
+    if (!Array.isArray(out.hourly) || out.hourly.length === 0) return out;
+    const totalSnowfall = out.hourly.reduce(
       (sum, h) => sum + (h.snowfall > 0 ? h.snowfall : 0),
       0,
     );
-    return totalSnowfall === day.totalSnowfall ? day : { ...day, totalSnowfall };
+    return totalSnowfall === out.totalSnowfall ? out : { ...out, totalSnowfall };
   });
 }
 
 /**
- * The SLR a day card / ribbon cell should present for one day.
+ * The SLR a day card / ribbon cell should present for one day: the
+ * day's OWN effective ratio, 10 x totalSnowfall / sum of the day's
+ * frozen SWE, so the presented pair (snowfall, SLR) always satisfies
+ * the user's identity snowfall / SLR = frozen precipitation for the
+ * day itself (directive, 2026-11-11; Codex gate on the pure-SLR
+ * change). A calendar day straddles two model windows, so no single
+ * window's record SLR can describe the day's total; the record SLR is
+ * a WINDOW value and is presented as such (the day mark and the trend
+ * label), never as the day's ratio.
  *
- * On a model day this is the model's OWN SLR -- the serving record's
- * SLR for the 24 h window ending 07:00 local on the day's date, carried
- * on the day's modelWindow mark. It must never be recomputed as
- * (model snowfall) / (live-feed frozen SWE): the record SLR was
- * predicted conditioned on the serving window's own liquid, while the
- * hourly frozen SWE is the live substrate's value for the calendar
- * day at the selected elevation -- dividing one by the other mixes two
- * forecasts and can invert the physical ordering across a resort's
- * base / mid / summit points (Heavenly, window ending 2026-11-18: the
- * records are ordered 13.2 / 13.5 / 14.9, but the hybrid ratio was
- * not, because the substrate's frozen SWE shrinks towards the base).
- * This is the same no-recombination rule applyModelMethodToDays
- * documents for the day total.
- *
- * On every other day (Kuchera fallback days under the ENS-EB method,
- * and all days under every other method) the snowfall and the frozen
- * SWE come from the same substrate calculation, so the ratio is the
- * substrate's own SLR and is unchanged.
+ * This recomputation is not the hybrid the 2026-11-10 Heavenly fix
+ * (f18d03b) forbade: that ratio divided the RECORD's snowfall by the
+ * live substrate's frozen SWE -- two different forecasts. Under the
+ * pure-SLR semantics the numerator here is the applied snowfall built
+ * from this very frozen SWE series, hour by hour, so the ratio is the
+ * frozen-weighted mean of the day's own hour SLRs (record SLRs inside
+ * model windows, substrate SLRs elsewhere). On Kuchera fallback days
+ * and under every other method the formula is the substrate's own
+ * ratio, exactly as before.
  */
 export function displayDaySlr(day: DayData): number {
-  if (day.modelWindow?.kind === 'model') {
-    // applyModelMethodToDays creates a model mark only from a record
-    // carrying BOTH its SLR and its snowfall, so a model mark with a
-    // null SLR should be unreachable; if one ever appears, present no
-    // SLR rather than recomputing the forbidden hybrid ratio from
-    // possibly model-derived snowfall.
-    return day.modelWindow.slr ?? 0;
-  }
   const frozenSweMm = (day.hourly ?? []).reduce(
     (sum, hour) => sum + (hour.frozenSweMm ?? 0),
     0,
@@ -727,11 +670,12 @@ export function displayDaySlr(day: DayData): number {
 /**
  * Whether a day earns the "powder" presentation. The SLR and the
  * snowfall threshold must describe the SAME accumulation: on a model
- * day both come from the serving record's window (the mark's SLR and
- * snowfall), never the window SLR paired with the calendar-day total
- * (a small fluffy window snowfall plus dense snow later in the day
- * would badge a powder day neither interval supports on its own). On
- * every other day both come from the substrate day, as before.
+ * day both come from the same model window (the record's SLR and the
+ * applied window snowfall -- that SLR x the substrate's frozen SWE
+ * over the window), never the window SLR paired with the calendar-day
+ * total (a small fluffy window snowfall plus dense snow later in the
+ * day would badge a powder day neither interval supports on its own).
+ * On every other day both come from the substrate day, as before.
  */
 export function displayDayIsPowder(day: DayData): boolean {
   if (
@@ -782,11 +726,26 @@ export function modelWindowTrendLabel(mark: DayModelWindowMark): string {
   }
   const arm = mark.arm ? MODEL_ARM_LABEL[mark.arm] : MODEL_ARM_LABEL.ecmwf;
   let label = `${dayPrefix} · the 24 h window ending 07:00 local: ENS-EB model · ${arm} arm`;
+  if (mark.slr !== null) label += ` · window SLR ${mark.slr.toFixed(1)}:1`;
   if (mark.reducedFeatureVariant) label += ' · reduced-feature variant';
+  if (mark.isotonicAdjusted) {
+    label += mark.preIsotonicSlr !== null
+      ? ` · SLR isotonic-adjusted from ${mark.preIsotonicSlr.toFixed(1)}:1 for elevation ordering`
+      : ' · SLR isotonic-adjusted for elevation ordering';
+  }
   if (mark.cycleUtc) {
     label += mark.arm === 'ecmwf_openmeteo'
       ? ` · anchored to ${formatCycleUtc(mark.cycleUtc)} · Open-Meteo cycle unverified`
       : ` · ${formatCycleUtc(mark.cycleUtc)}`;
+  }
+  if (mark.snowfallCm === null) {
+    // A record exists for this window but no hour OF THIS WINDOW is in
+    // view, so this window's SLR was not applied. The disclaimer is
+    // scoped to the window, not the day: the day's afternoon hours may
+    // still have been converted by the NEXT window's record (a partial
+    // first day in the array), and claiming the day "shows substrate
+    // values" would then be false (Codex gate, 2026-11-11).
+    label += " · no hours from this window are in view -- this window's SLR was not applied";
   }
   return label;
 }

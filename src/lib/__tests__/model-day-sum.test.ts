@@ -16,17 +16,15 @@ import type { BlendedHour, DayData, Location, WindowData } from '../types';
  * The invariant a user sees: for the day as displayed, the hourly bars
  * sum to the displayed daily snowfall. groupData guarantees it for every
  * physics method by deriving totalSnowfall as the sum of the calendar
- * day's hourly snowfall. The ENS-EB method path broke it: the day total
- * was the serving record of the 24 h window ending 07:00 local -- a span
- * straddling two calendar days -- while the bars are the calendar day's
- * hours. Measured before the fix (Palisades base, blend mode): day
- * 2026-11-01 displayed 10.72 cm while its bars summed to 2.44 cm.
- *
- * The fix keeps the per-window rescale (each window's hours still sum
- * exactly to its record -- model-rescale.test.ts) and re-derives the
- * day total from the final hourly series, the same derivation groupData
- * uses. These tests pin BOTH invariants, for every serving mode, plus
- * the physics path they must agree with.
+ * day's hourly snowfall. Under the ENS-EB method the day total is
+ * derived the same way from the final series: each model window's hours
+ * are converted in place (frozenSweMm x record SLR / 10, the 2026-11-11
+ * pure-SLR semantics) and the day total is the sum of its own converted
+ * hours -- morning hours under the window ending that morning, afternoon
+ * hours under the next window. These tests pin the day invariant for
+ * every serving mode, the window conversion it composes from, and the
+ * physics path they must agree with. Fixture hours carry frozen SWE at
+ * a uniform substrate SLR of 20 (frozen = snowfall / 2).
  */
 
 const TZ = 'America/Los_Angeles';
@@ -74,6 +72,7 @@ function hour(label: string, snowfall: number, liquidMM = 0): BlendedHour {
     weatherCode: 71,
     slr: null,
     snowfall,
+    frozenSweMm: snowfall / 2,
     method: 'kuchera',
     slrCategory: null,
     uvIndex: null,
@@ -145,25 +144,30 @@ function expectDaySumInvariant(days: DayData[]) {
   }
 }
 
-function windowSum(days: DayData[], endDate: string): number {
+function windowHours(days: DayData[], endDate: string): BlendedHour[] {
   return days
     .flatMap((d) => d.hourly)
-    .filter((h) => modelWindowEndDateForHour(h, TZ) === endDate)
-    .reduce((s, h) => s + h.snowfall, 0);
+    .filter((h) => modelWindowEndDateForHour(h, TZ) === endDate);
 }
 
-function record(mode: string, endDate: string): number {
+function windowSum(days: DayData[], endDate: string): number {
+  return windowHours(days, endDate).reduce((s, h) => s + h.snowfall, 0);
+}
+
+function recordSlr(mode: string, endDate: string): number {
   const result = modelForecastFor(palisades, mode, 'min', endDate);
   expect(result, `record for ${mode} window ${endDate}`).not.toBeNull();
-  return result?.forecast.modelSnowfallCm as number;
+  return result?.forecast.modelSlr as number;
+}
+
+/** Expected applied window snowfall: record SLR x the window's substrate frozen SWE / 10. */
+function expectedWindowSnow(days: DayData[], mode: string, endDate: string): number {
+  const frozen = windowHours(days, endDate).reduce((s, h) => s + (h.frozenSweMm ?? 0), 0);
+  return (frozen * recordSlr(mode, endDate)) / 10;
 }
 
 describe('day-sum invariant under the ENS-EB method', () => {
   it('blend mode: every day adds up, model and fallback days alike', () => {
-    // Anchored to the 2026-11-10 00Z batch: the blend windows ending
-    // 2026-11-18 (ECMWF lead 9, 5.48 cm) and 2026-11-19 (lead 10,
-    // 24.65 cm) hold real snow; the batch's only HRRR window ends
-    // 2026-11-11 (lead 2).
     const days = [
       day('2026-11-17', [
         ...labels('2026-11-17', 0, 7).map((l) => hour(l, 9)),
@@ -184,21 +188,19 @@ describe('day-sum invariant under the ENS-EB method', () => {
     const out = applyModelMethodToDays(days, palisades, 'hrrr_ecmwf', 'min');
     expectDaySumInvariant(out);
 
-    // The window invariant from the hourly rescale fix still holds.
-    const r1 = record('hrrr_ecmwf', '2026-11-18');
-    const r2 = record('hrrr_ecmwf', '2026-11-19');
-    expect(Math.abs(windowSum(out, '2026-11-18') - r1)).toBeLessThan(1e-9);
-    expect(Math.abs(windowSum(out, '2026-11-19') - r2)).toBeLessThan(1e-9);
+    // Each model window's hours sum to its SLR applied to the SAME
+    // substrate frozen SWE (not to the record's stored snowfall).
+    expect(Math.abs(windowSum(out, '2026-11-18') - expectedWindowSnow(days, 'hrrr_ecmwf', '2026-11-18'))).toBeLessThan(1e-9);
+    expect(Math.abs(windowSum(out, '2026-11-19') - expectedWindowSnow(days, 'hrrr_ecmwf', '2026-11-19'))).toBeLessThan(1e-9);
     // Inside its horizon the blend still privileges the HRRR arm.
     expect(modelForecastFor(palisades, 'hrrr_ecmwf', 'min', '2026-11-11')?.arm).toBe('hrrr');
 
-    // Closed form for the straddling day 2026-11-18: its 00:00-07:00
-    // hours are 2/10 of window 2026-11-18's raw sum (scaled to r1) and
-    // its 08:00-23:00 hours are 1.6/2.4 of window 2026-11-19's (to r2).
+    // Closed form for the straddling day 2026-11-18: morning frozen
+    // 8 x 0.125 = 1 mm under the 11-18 SLR, afternoon frozen
+    // 16 x 0.05 = 0.8 mm under the 11-19 SLR.
     const day18 = out[1];
-    expect(Math.abs(day18.totalSnowfall - (0.2 * r1 + (2 / 3) * r2))).toBeLessThan(TOL);
-    // And it is decisively NOT the window record the day used to show.
-    expect(Math.abs(day18.totalSnowfall - r1)).toBeGreaterThan(1);
+    const closed = (1 * recordSlr('hrrr_ecmwf', '2026-11-18') + 0.8 * recordSlr('hrrr_ecmwf', '2026-11-19')) / 10;
+    expect(Math.abs(day18.totalSnowfall - closed)).toBeLessThan(TOL);
     expect(out[3].modelWindow?.kind).toBe('kuchera_fallback');
   });
 
@@ -209,28 +211,28 @@ describe('day-sum invariant under the ENS-EB method', () => {
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
     expectDaySumInvariant(out);
-    const r = record('ecmwf', '2026-11-14');
-    expect(Math.abs(windowSum(out, '2026-11-14') - r)).toBeLessThan(1e-9);
+    expect(Math.abs(windowSum(out, '2026-11-14') - expectedWindowSnow(days, 'ecmwf', '2026-11-14'))).toBeLessThan(1e-9);
   });
 
-  it('the shipped negative record (window ending 2026-11-15, ≈ -0.027 cm) zeroes its window and keeps the invariant', () => {
-    // Regression pin (Codex review 2026-11-10): the 00Z batch ships a
-    // genuinely negative ENS-EB record at Palisades -- window ending
-    // 2026-11-15 (ECMWF lead 6), -0.0266 cm. Snowfall cannot be
-    // negative, so the rescale clamps its target at 0 (the established
-    // record-of-0 behaviour): the day stays a MODEL day, its window
-    // hours are zeroed, and the displayed total remains exactly the
-    // sum of the day's bars.
-    const negative = record('ecmwf', '2026-11-15');
-    expect(negative).toBeLessThan(0);
-    expect(negative).toBeGreaterThan(-0.03);
+  it('the shipped negative-snowfall record (window ending 2026-11-15) still serves its SLR', () => {
+    // The 00Z batch ships a genuinely negative stored snowfall at
+    // Palisades for the window ending 2026-11-15 (ECMWF lead 6,
+    // -0.0266 cm) -- an accumulation-differencing artefact of the
+    // batch. Under the pure-SLR semantics the stored snowfall is never
+    // consumed: the record's (positive) SLR converts the substrate's
+    // frozen SWE, the day stays a MODEL day, and the displayed total
+    // remains exactly the sum of the day's bars.
+    const result = modelForecastFor(palisades, 'ecmwf', 'min', '2026-11-15');
+    expect(result?.forecast.modelSnowfallCm as number).toBeLessThan(0);
+    expect(result?.forecast.modelSnowfallCm as number).toBeGreaterThan(-0.03);
     const days = [
       day('2026-11-14', fullDay('2026-11-14', 0.3)),
       day('2026-11-15', fullDay('2026-11-15', 0.3)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
     expect(out[1].modelWindow?.kind).toBe('model');
-    expect(windowSum(out, '2026-11-15')).toBe(0);
+    expect(Math.abs(windowSum(out, '2026-11-15') - expectedWindowSnow(days, 'ecmwf', '2026-11-15'))).toBeLessThan(1e-9);
+    expect(windowSum(out, '2026-11-15')).toBeGreaterThan(0);
     expectDaySumInvariant(out);
   });
 
@@ -256,19 +258,18 @@ describe('day-sum invariant under the ENS-EB method', () => {
 });
 
 describe('day-sum invariant: array boundaries', () => {
-  it('array boundaries: a truncated first window allocates its full record to the hours present; the last afternoon stays substrate', () => {
+  it('array boundaries: a truncated first window converts only the hours present; the last afternoon stays substrate', () => {
     const days = [
       day('2026-11-13', fullDay('2026-11-13', 0.3)),
       day('2026-11-14', fullDay('2026-11-14', 0.3)),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
     // The window ending 2026-11-13 starts before the array (its
-    // 2026-11-12 afternoon is absent), so the 8 present morning hours
-    // absorb the whole record -- the rescale's pinned behaviour.
-    const r1113 = record('ecmwf', '2026-11-13');
-    expect(Math.abs(windowSum(out, '2026-11-13') - r1113)).toBeLessThan(1e-9);
+    // 2026-11-12 afternoon is absent): the 8 present morning hours are
+    // converted by that window's SLR (frozen 0.15 mm each), nothing more.
+    const slr13 = recordSlr('ecmwf', '2026-11-13');
     for (const h of out[0].hourly.slice(0, 8)) {
-      expect(Math.abs(h.snowfall - r1113 / 8)).toBeLessThan(1e-9);
+      expect(Math.abs(h.snowfall - (0.15 * slr13) / 10)).toBeLessThan(1e-9);
     }
     // The last day's afternoon belongs to the window ending 2026-11-15,
     // which is not a day in the array, so no record touches it.

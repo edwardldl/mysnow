@@ -90,6 +90,7 @@ function hour(label: string, snowfall: number, liquidMM = 0): BlendedHour {
     weatherCode: 71,
     slr: null,
     snowfall,
+    frozenSweMm: snowfall / 2,
     method: 'kuchera',
     slrCategory: null,
     uvIndex: null,
@@ -157,11 +158,21 @@ function expectDaySumInvariant(days: DayData[]) {
   }
 }
 
-function windowSum(days: DayData[], endDate: string): number {
+function windowHours(days: DayData[], endDate: string): BlendedHour[] {
   return days
     .flatMap((d) => d.hourly)
-    .filter((h) => modelWindowEndDateForHour(h, TZ) === endDate)
-    .reduce((s, h) => s + h.snowfall, 0);
+    .filter((h) => modelWindowEndDateForHour(h, TZ) === endDate);
+}
+
+function windowSum(days: DayData[], endDate: string): number {
+  return windowHours(days, endDate).reduce((s, h) => s + h.snowfall, 0);
+}
+
+/** Expected applied window snowfall under the pure-SLR semantics: record SLR x the window's substrate frozen SWE (fixture hours carry frozen = snowfall / 2) / 10. */
+function expectedWindowSnow(inputDays: DayData[], loc: Location, endDate: string): number {
+  const slr = modelForecastFor(loc, 'hrrr_ecmwf', 'min', endDate)?.forecast.modelSlr as number;
+  const frozen = windowHours(inputDays, endDate).reduce((s, h) => s + (h.frozenSweMm ?? 0), 0);
+  return (frozen * slr) / 10;
 }
 
 describe('frozen serving fixture (2026-10-31 batch + synthetic point)', () => {
@@ -179,7 +190,7 @@ describe('frozen serving fixture (2026-10-31 batch + synthetic point)', () => {
     expect(rec?.forecast.modelSnowfallCm).toBeCloseTo(10.72005826894333, 9);
   });
 
-  it('blend mode: distinct positive HRRR day-1 and ECMWF day-2 records are selected and allocated together', () => {
+  it('blend mode: distinct HRRR day-1 and ECMWF day-2 records are selected and each converts its own window', () => {
     expect(modelForecastFor(synthetic, 'hrrr_ecmwf', 'min', '2026-11-01')?.arm).toBe('hrrr');
     expect(modelForecastFor(synthetic, 'hrrr_ecmwf', 'min', '2026-11-02')?.arm).toBe('ecmwf');
     const days = [
@@ -197,18 +208,21 @@ describe('frozen serving fixture (2026-10-31 batch + synthetic point)', () => {
       ]),
     ];
     const out = applyModelMethodToDays(days, synthetic, 'hrrr_ecmwf', 'min');
-    // HRRR window ending Nov 1: raw 16*0.5 + 8*0.25 = 10 -> record 12.0.
-    expect(Math.abs(windowSum(out, '2026-11-01') - 12)).toBeLessThan(1e-9);
-    // ECMWF window ending Nov 2: raw 16*0.1 + 8*0.1 = 2.4 -> record 6.0,
-    // so Nov 1's afternoon hours scale to 0.1 * (6 / 2.4) = 0.25.
-    expect(Math.abs(windowSum(out, '2026-11-02') - 6)).toBeLessThan(1e-9);
+    // Pure-SLR semantics (2026-11-11): each window's hours are converted
+    // by that window's record SLR (HRRR 10, ECMWF 8 in this fixture) on
+    // the SAME substrate frozen SWE -- the records' stored snowfalls
+    // (12.0 / 6.0 cm) are not used.
+    expect(Math.abs(windowSum(out, '2026-11-01') - expectedWindowSnow(days, synthetic, '2026-11-01'))).toBeLessThan(1e-9);
+    expect(Math.abs(windowSum(out, '2026-11-02') - expectedWindowSnow(days, synthetic, '2026-11-02'))).toBeLessThan(1e-9);
+    // Nov 1's afternoon hours belong to the Nov 2 window: frozen 0.05 mm
+    // each, converted at the ECMWF SLR 8 -> 0.04 cm each.
     for (const h of out[1].hourly.slice(8)) {
-      expect(Math.abs(h.snowfall - 0.25)).toBeLessThan(1e-9);
+      expect(Math.abs(h.snowfall - 0.04)).toBeLessThan(1e-9);
     }
     expectDaySumInvariant(out);
   });
 
-  it('fall-back day 2026-11-01: both real 01:00 instants survive, share one window, and the window sums to its record', () => {
+  it('fall-back day 2026-11-01: both real 01:00 instants survive, share one window, and the window converts by its record SLR', () => {
     const dupInstants = possibleInstantsForLocalTime('2026-11-01T01:00', TZ);
     expect(dupInstants).toHaveLength(2);
     expect(dupInstants[1] - dupInstants[0]).toBe(3_600_000);
@@ -245,9 +259,7 @@ describe('frozen serving fixture (2026-10-31 batch + synthetic point)', () => {
     expect(new Set(outDay1.hourly.map((h) => h.instantMs)).size).toBe(25);
     const onesOut = outDay1.hourly.filter((h) => h.time === '2026-11-01T01:00');
     expect(new Set(onesOut.map((h) => h.instantMs))).toEqual(new Set(dupInstants));
-    const r1 = modelForecastFor(palisades, 'hrrr_ecmwf', 'min', '2026-11-01')?.forecast
-      .modelSnowfallCm as number;
-    expect(Math.abs(windowSum(out, '2026-11-01') - r1)).toBeLessThan(1e-9);
+    expect(Math.abs(windowSum(out, '2026-11-01') - expectedWindowSnow(days, palisades, '2026-11-01'))).toBeLessThan(1e-9);
     expectDaySumInvariant(out);
   });
 });

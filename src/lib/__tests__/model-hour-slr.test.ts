@@ -11,18 +11,21 @@ import { providerLocalTimeToEpochMs } from '../time';
 import type { BlendedHour, DayData, Location, WindowData } from '../types';
 
 /**
- * Regression (2026-11-10, Mammoth summit): inside a model window the
- * rescaled hours used to keep a hybrid SLR -- the substrate's per-hour
- * SLR scaled by the model/substrate snowfall factor, equivalently model
- * snowfall divided by the substrate's frozen SWE. When the live cycle
- * and the serving cycle disagree about an event's size the hybrid
- * collapses towards the ratio of the two forecasts (live 78.0 cm at
- * SLR ~20 vs record 6.39 cm at SLR 11.9 presented ~2:1). Hours carrying
- * model snowfall must carry the record's own SLR and the record-implied
- * frozen SWE, so every ratio consumer (hourly labels/colours, rolling
- * 24/48 h statistics) presents the model's SLR. Fixtures use the
- * Palisades base point and the stored 2026-11-10 00Z serving records,
- * read back through the production resolver.
+ * Regression (2026-11-10, Mammoth summit; semantics replaced 2026-11-11):
+ * inside a model window the rescaled hours used to present a hybrid SLR
+ * -- model snowfall divided by the substrate's frozen SWE -- which
+ * collapsed towards the ratio of the two forecasts when the live cycle
+ * and the serving cycle disagreed about an event's size (live 78.0 cm
+ * at SLR ~20 vs record 6.39 cm at SLR 11.9 presented ~2:1).
+ *
+ * Under the pure-SLR semantics (user directive, 2026-11-11) the hybrid
+ * cannot arise: each model-window hour's snowfall is the record SLR x
+ * the hour's OWN frozen SWE (untouched), and the hour carries the
+ * record SLR, so every ratio consumer (hourly labels/colours, rolling
+ * 24/48 h statistics) presents the model's SLR and the identity
+ * snowfall / SLR = precipitation holds per hour and in aggregate.
+ * Fixtures use the Palisades base point and the stored 2026-11-10 00Z
+ * serving records, read back through the production resolver.
  */
 
 const TZ = 'America/Los_Angeles';
@@ -136,76 +139,57 @@ function windowHours(days: DayData[], endDate: string): BlendedHour[] {
 const END = '2026-11-14';
 const record = modelForecastFor(palisades, 'ecmwf', 'min', END);
 if (!record) throw new Error('serving record missing for fixture window');
-const R = record.forecast.modelSnowfallCm as number;
 const RECORD_SLR = record.forecast.modelSlr as number;
 
-describe('model-window hour SLR (Mammoth 2:1 regression)', () => {
-  it('scaling branch: rescaled hours carry the record SLR, not the hybrid ratio', () => {
+describe('model-window hour SLR (Mammoth 2:1 regression, pure-SLR semantics)', () => {
+  it('model-window hours carry the record SLR and snowfall = frozen SWE x record SLR / 10, frozen SWE untouched', () => {
     const days = [
       day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 3))),
       day('2026-11-14', labels('2026-11-14', 0, 23).map((l) => hour(l, 3))),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    const hours = windowHours(out, END).filter((h) => h.snowfall > 0);
+    const hours = windowHours(out, END);
     expect(hours.length).toBe(24);
-    expect(hours.reduce((s, h) => s + h.snowfall, 0)).toBeCloseTo(R, 6);
+    // Substrate hours: snowfall 3 cm at SLR 20 -> frozen SWE 1.5 mm each.
+    const applied = (1.5 * RECORD_SLR) / 10;
+    expect(hours.reduce((s, h) => s + h.snowfall, 0)).toBeCloseTo(24 * applied, 6);
     for (const h of hours) {
-      expect(h.slr).toBeCloseTo(RECORD_SLR, 6);
-      expect(h.frozenSweMm ?? 0).toBeCloseTo((h.snowfall * 10) / RECORD_SLR, 6);
+      expect(h.slr).toBe(RECORD_SLR);
+      expect(h.frozenSweMm).toBeCloseTo(1.5, 9);
+      expect(h.snowfall).toBeCloseTo(applied, 9);
+      // The identity, per hour: snowfall / SLR = frozen precipitation.
+      expect(h.snowfall / RECORD_SLR).toBeCloseTo((h.frozenSweMm ?? 0) / 10, 9);
     }
-    // The rolling statistics divide rescaled snowfall by frozen SWE:
-    // over exactly this window they must return the record SLR.
+    // The rolling statistics divide snowfall by frozen SWE: over exactly
+    // this window they return the record SLR and the applied snowfall.
     const ref = providerLocalTimeToEpochMs('2026-11-14T07:00', TZ);
     const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
-    expect(stats.snow24h).toBeCloseTo(R, 6);
+    expect(stats.snow24h).toBeCloseTo(24 * applied, 6);
     expect(stats.slr24h).not.toBeNull();
     expect(stats.slr24h as number).toBeCloseTo(RECORD_SLR, 4);
   });
 
-  it('distribution branch: distributed hours carry the record SLR', () => {
-    const inWindow = new Set([...labels('2026-11-13', 8, 23), ...labels('2026-11-14', 0, 7)]);
-    const mk = (dateStr: string) =>
-      day(dateStr, labels(dateStr, 0, 23).map((l) =>
-        inWindow.has(l)
-          ? hour(l, 0, { liquidMM: 2, slr: null, frozenSweMm: 0 })
-          : hour(l, 0, { liquidMM: 0, slr: null, frozenSweMm: 0 }),
-      ));
-    const out = applyModelMethodToDays([mk('2026-11-13'), mk('2026-11-14')], palisades, 'ecmwf', 'min');
-    const hours = windowHours(out, END).filter((h) => h.snowfall > 0);
-    expect(hours.length).toBe(24);
-    expect(hours.reduce((s, h) => s + h.snowfall, 0)).toBeCloseTo(R, 6);
-    for (const h of hours) {
-      expect(h.slr).toBeCloseTo(RECORD_SLR, 6);
-      expect(h.frozenSweMm ?? 0).toBeCloseTo((h.snowfall * 10) / RECORD_SLR, 6);
-    }
-    const ref = providerLocalTimeToEpochMs('2026-11-14T07:00', TZ);
-    const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
-    expect(stats.slr24h).not.toBeNull();
-    expect(stats.slr24h as number).toBeCloseTo(RECORD_SLR, 4);
-  });
-
-  it('a zero-record window cannot dilute a neighbouring snowy window in rolling stats', () => {
-    const rec12 = modelForecastFor(palisades, 'ecmwf', 'min', '2026-11-12');
-    const rec13 = modelForecastFor(palisades, 'ecmwf', 'min', '2026-11-13');
-    expect(rec12?.forecast.modelSnowfallCm).toBe(0);
-    expect(rec13?.forecast.modelSnowfallCm as number).toBeGreaterThan(0);
-    const slr13 = rec13?.forecast.modelSlr as number;
-    const days = ['2026-11-11', '2026-11-12', '2026-11-13'].map((d) =>
+  it('rolling SLR across a model window and a fallback window is the frozen-weighted mean of the two -- each hour keeps its own ratio', () => {
+    // Literal hrrr: the window ending 2026-11-11 is a model window, the
+    // window ending 2026-11-12 is Kuchera fallback (substrate SLR 20).
+    const hrrrSlr = modelForecastFor(palisades, 'hrrr', 'min', '2026-11-11')?.forecast.modelSlr as number;
+    const days = ['2026-11-10', '2026-11-11', '2026-11-12'].map((d) =>
       day(d, labels(d, 0, 23).map((l) => hour(l, 3))),
     );
-    const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    for (const h of windowHours(out, '2026-11-12')) {
-      expect(h.snowfall).toBe(0);
-      expect(h.frozenSweMm ?? 0).toBe(0);
-    }
-    const ref = providerLocalTimeToEpochMs('2026-11-13T07:00', TZ);
+    const out = applyModelMethodToDays(days, palisades, 'hrrr', 'min');
+    const ref = providerLocalTimeToEpochMs('2026-11-12T07:00', TZ);
     const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
-    expect(stats.snow48h).toBeCloseTo(rec13?.forecast.modelSnowfallCm as number, 6);
+    // 48 h = both windows, 36 mm frozen SWE each: the aggregate SLR is
+    // the frozen-weighted mean, and snowfall / SLR = precipitation holds
+    // for the aggregate exactly.
+    const expectedSnow = (36 * hrrrSlr) / 10 + (36 * 20) / 10;
+    expect(stats.snow48h).toBeCloseTo(expectedSnow, 6);
     expect(stats.slr48h).not.toBeNull();
-    expect(stats.slr48h as number).toBeCloseTo(slr13, 4);
+    expect(stats.slr48h as number).toBeCloseTo((hrrrSlr + 20) / 2, 4);
+    expect(((stats.snow48h / (stats.slr48h as number)) * 10)).toBeCloseTo(72, 4);
   });
 
-  it('an invalid record SLR presents no hour SLR and no frozen SWE, never the substrate hybrid', () => {
+  it('an invalid record SLR no longer resolves: the window falls back to Kuchera, hours untouched', () => {
     for (const bad of [Number.NaN, Number.POSITIVE_INFINITY]) {
       const doctored = JSON.parse(JSON.stringify(modelForecastData)) as typeof modelForecastData;
       const point = doctored.points.find((p) => p.pointId === 'palisades-tahoe-base');
@@ -214,62 +198,33 @@ describe('model-window hour SLR (Mammoth 2:1 regression)', () => {
       row.modelSlr = bad;
       setModelForecastDataForTests(doctored);
       try {
+        expect(modelForecastFor(palisades, 'ecmwf', 'min', END)).toBeNull();
         const days = [
           day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 3))),
           day('2026-11-14', labels('2026-11-14', 0, 23).map((l) => hour(l, 3))),
         ];
         const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-        const hours = windowHours(out, END).filter((h) => h.snowfall > 0);
-        expect(hours.length).toBe(24);
-        expect(hours.reduce((s, h) => s + h.snowfall, 0)).toBeCloseTo(R, 6);
-        for (const h of hours) {
-          expect(h.slr).toBeNull();
-          expect(h.frozenSweMm ?? 0).toBe(0);
-        }
+        expect(out[1].modelWindow?.kind).toBe('kuchera_fallback');
+        const hours = windowHours(out, END);
+        const originals = days.flatMap((d) => d.hourly);
+        for (const h of hours) expect(originals).toContain(h);
       } finally {
         setModelForecastDataForTests(null);
       }
     }
   });
 
-  it('rolling SLR is unavailable when an invalid-SLR window adjoins a valid one', () => {
-    const doctored = JSON.parse(JSON.stringify(modelForecastData)) as typeof modelForecastData;
-    const point = doctored.points.find((p) => p.pointId === 'palisades-tahoe-base');
-    const row = point?.forecasts.ecmwf?.find((r) => r.windowEndLocalDate === END);
-    if (!row) throw new Error('fixture record missing');
-    row.modelSlr = Number.NaN;
-    setModelForecastDataForTests(doctored);
-    try {
-      const rec13 = modelForecastFor(palisades, 'ecmwf', 'min', '2026-11-13');
-      const snow13 = rec13?.forecast.modelSnowfallCm as number;
-      const days = [
-        day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 3))),
-        day('2026-11-14', labels('2026-11-14', 0, 23).map((l) => hour(l, 3))),
-      ];
-      const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-      const ref = providerLocalTimeToEpochMs('2026-11-14T07:00', TZ);
-      const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
-      // Snowfall totals are preserved; the SLR is unavailable rather than
-      // borrowed from the valid window's SWE (which would inflate it).
-      expect(stats.snow24h).toBeCloseTo(R, 6);
-      expect(stats.slr24h).toBeNull();
-      expect(stats.snow48h).toBeCloseTo(R + snow13, 6);
-      expect(stats.slr48h).toBeNull();
-    } finally {
-      setModelForecastDataForTests(null);
-    }
-  });
-
-  it('serving-file invariant: every positive-snowfall record carries a finite SLR in [3, 30]', () => {
+  it('serving-file invariant: every record carries a finite SLR in [3, 30]', () => {
+    // Under the pure-SLR semantics the SLR is the only quantity consumed
+    // from a record, so the invariant now covers every row, not only
+    // positive-snowfall ones.
     for (const point of modelForecastData.points) {
       for (const rows of Object.values(point.forecasts)) {
         for (const row of rows ?? []) {
-          if ((row.modelSnowfallCm ?? 0) > 0) {
-            expect(row.modelSlr).not.toBeNull();
-            expect(Number.isFinite(row.modelSlr as number)).toBe(true);
-            expect(row.modelSlr as number).toBeGreaterThanOrEqual(3);
-            expect(row.modelSlr as number).toBeLessThanOrEqual(30);
-          }
+          expect(row.modelSlr).not.toBeNull();
+          expect(Number.isFinite(row.modelSlr as number)).toBe(true);
+          expect(row.modelSlr as number).toBeGreaterThanOrEqual(3);
+          expect(row.modelSlr as number).toBeLessThanOrEqual(30);
         }
       }
     }

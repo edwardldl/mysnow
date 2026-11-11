@@ -315,8 +315,9 @@ export default function Home() {
   }, [forecastDays, currentTimeMs, todayStr]);
 
   // When the ENS-EB model Physics option is selected, each day is marked
-  // model vs Kuchera fallback and its hourly series and day total are
-  // derived from the precomputed model windows by applyModelMethodToDays.
+  // model vs Kuchera fallback and the precomputed model windows' SLRs are
+  // applied to the hourly series by applyModelMethodToDays (the
+  // precipitation itself is the substrate's under every method).
   // Every other method sees the grouped days untouched.
   const displayForecastDays = React.useMemo(() => {
     if (algoId !== ENS_EB_METHOD_ID) return forecastDays;
