@@ -45,7 +45,7 @@ from slr_calibration.model_serving import (
     SOURCE_ID_ECMWF,
     SOURCE_ID_HRRR,
     assert_frontend_within_lead_cap,
-    apply_isotonic_slr_layer,
+    apply_isotonic_slr_layer_gated,
     build_point_window_features,
     core_inputs_finite,
     expand_hourly,
@@ -427,7 +427,7 @@ def score_arm(arm: str, source_id: str, leads: list[int], cycle_dt: datetime,
     return records, feature_rows
 
 
-def main() -> int:
+def build_arg_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--registry", required=True)
     ap.add_argument("--champion-dir", required=True)
@@ -437,7 +437,16 @@ def main() -> int:
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--tracking-records", required=True)
     ap.add_argument("--frontend-json", required=True)
-    args = ap.parse_args()
+    ap.add_argument(
+        "--isotonic-layer", action="store_true",
+        help="apply the isotonic SLR elevation-ordering serving layer "
+             "(opt-in; dormant by default — the v1 shadow evaluation "
+             "was judged NOT READY, user decision 2026-11-10)")
+    return ap
+
+
+def main() -> int:
+    args = build_arg_parser().parse_args()
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -560,7 +569,11 @@ def main() -> int:
     # 10-day cap on all surfaces (user decision 2026-11-10): a serving
     # frontend never carries a record beyond MAX_SERVED_LEAD_DAY.
     assert_frontend_within_lead_cap(frontend)
-    frontend, isotonic_report = apply_isotonic_slr_layer(frontend)
+    # Isotonic SLR layer: opt-in, dormant unless --isotonic-layer is
+    # passed (see apply_isotonic_slr_layer_gated). The manifest records
+    # the layer state either way.
+    frontend, isotonic_report = apply_isotonic_slr_layer_gated(
+        frontend, enabled=args.isotonic_layer)
     Path(args.frontend_json).write_text(json.dumps(frontend, indent=1))
 
     manifest["records_total"] = len(all_records)

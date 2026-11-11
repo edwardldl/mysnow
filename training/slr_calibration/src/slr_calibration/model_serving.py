@@ -907,3 +907,30 @@ def apply_isotonic_slr_layer(frontend: dict) -> tuple[dict, dict]:
         "adjustedRecords": report["records_changed"],
     }
     return adjusted, report
+
+
+def apply_isotonic_slr_layer_gated(
+        frontend: dict, enabled: bool) -> tuple[dict, dict]:
+    """Gate for the isotonic layer in the serving batch runner.
+
+    The layer is OPT-IN and DORMANT BY DEFAULT (user decision
+    2026-11-10): the v1 shadow evaluation was judged NOT READY, so a
+    batch run applies the layer only when it is explicitly enabled.
+    Disabled: the frontend is returned unmodified — no adjusted
+    values, no ``preIsotonicSlr`` provenance fields, no
+    ``consistencyAdjustment`` block — so the merged output is
+    bit-identical to the pre-layer behaviour. Enabled: exactly
+    ``apply_isotonic_slr_layer``. Either way the returned report
+    records the layer identity, version and state for the run
+    manifest.
+    """
+    state = {
+        "layer": ISOTONIC_SLR_LAYER,
+        "version": ISOTONIC_SLR_LAYER_VERSION,
+        "enabled": bool(enabled),
+    }
+    if not enabled:
+        return frontend, {**state, "adjusted_windows": 0,
+                          "records_changed": 0}
+    adjusted, report = apply_isotonic_slr_layer(frontend)
+    return adjusted, {**state, **report}

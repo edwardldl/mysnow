@@ -15,7 +15,10 @@ import copy
 import unittest
 
 from slr_calibration.model_serving import (
+    ISOTONIC_SLR_LAYER,
+    ISOTONIC_SLR_LAYER_VERSION,
     apply_isotonic_slr_layer,
+    apply_isotonic_slr_layer_gated,
     assert_frontend_within_lead_cap,
     frontend_arm_uniformity,
     isotonic_frontend_stats,
@@ -253,6 +256,89 @@ class IsotonicLayerTest(unittest.TestCase):
         self.assertEqual(stats["records"], 6)
         self.assertEqual(stats["violating"], 1)
         self.assertEqual(stats["total_magnitude"], 8.0)
+
+
+class IsotonicGateTest(unittest.TestCase):
+    """Dormancy gate (user decision 2026-11-10): the layer is opt-in.
+
+    A default serving run must be dormant and bit-identical to the
+    pre-layer behaviour; an explicitly enabled run must reproduce the
+    direct layer exactly. The run manifest records the layer state
+    either way via the returned report.
+    """
+
+    def _violating_frontend(self) -> dict:
+        return _frontend([
+            ("resort-a", "ecmwf", [14.0, 10.0, 6.0], 10.0),
+            ("resort-a", "hrrr", [6.0, 10.0, 14.0], 10.0),
+        ])
+
+    def test_disabled_is_dormant_and_bit_identical(self):
+        frontend = self._violating_frontend()
+        snapshot = copy.deepcopy(frontend)
+        out, report = apply_isotonic_slr_layer_gated(frontend, enabled=False)
+        # Output is the pre-layer document, value-for-value: no adjusted
+        # values, no provenance fields, no consistency block.
+        self.assertEqual(out, snapshot)
+        self.assertNotIn("consistencyAdjustment", out)
+        for point in out["points"]:
+            for rows in point["forecasts"].values():
+                for row in rows:
+                    self.assertNotIn("preIsotonicSlr", row)
+                    self.assertNotIn("preIsotonicSnowfallCm", row)
+        # Input not mutated either.
+        self.assertEqual(frontend, snapshot)
+        # Manifest state: disabled, with identity and version.
+        self.assertEqual(report["layer"], ISOTONIC_SLR_LAYER)
+        self.assertEqual(report["version"], ISOTONIC_SLR_LAYER_VERSION)
+        self.assertIs(report["enabled"], False)
+        self.assertEqual(report["adjusted_windows"], 0)
+        self.assertEqual(report["records_changed"], 0)
+
+    def test_enabled_matches_direct_layer_exactly(self):
+        frontend = self._violating_frontend()
+        out_gated, report = apply_isotonic_slr_layer_gated(frontend, enabled=True)
+        out_direct, direct_report = apply_isotonic_slr_layer(frontend)
+        self.assertEqual(out_gated, out_direct)
+        self.assertIn("consistencyAdjustment", out_gated)
+        self.assertIs(report["enabled"], True)
+        self.assertEqual(report["layer"], ISOTONIC_SLR_LAYER)
+        self.assertEqual(report["version"], ISOTONIC_SLR_LAYER_VERSION)
+        self.assertEqual(report["adjusted_windows"],
+                         direct_report["adjusted_windows"])
+        self.assertEqual(report["records_changed"],
+                         direct_report["records_changed"])
+        self.assertGreater(report["records_changed"], 0)
+
+
+class RunnerIsotonicFlagTest(unittest.TestCase):
+    """The serving runner's --isotonic-layer flag defaults to OFF."""
+
+    def _parser(self):
+        import importlib.util
+        import sys
+        from pathlib import Path as _Path
+        root = _Path(__file__).resolve().parents[1]
+        for sub in ("src", "scripts"):
+            if str(root / sub) not in sys.path:
+                sys.path.insert(0, str(root / sub))
+        spec = importlib.util.spec_from_file_location(
+            "run_model_serving", root / "scripts" / "run_model_serving.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.build_arg_parser()
+
+    _REQUIRED = ["--registry", "r.json", "--champion-dir", "c",
+                 "--out-dir", "o", "--tracking-records", "t.jsonl",
+                 "--frontend-json", "f.json"]
+
+    def test_flag_defaults_off(self):
+        args = self._parser().parse_args(self._REQUIRED)
+        self.assertIs(args.isotonic_layer, False)
+
+    def test_flag_opts_in(self):
+        args = self._parser().parse_args(self._REQUIRED + ["--isotonic-layer"])
+        self.assertIs(args.isotonic_layer, True)
 
 
 if __name__ == "__main__":
