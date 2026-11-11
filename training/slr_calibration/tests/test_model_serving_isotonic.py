@@ -341,5 +341,146 @@ class RunnerIsotonicFlagTest(unittest.TestCase):
         self.assertIs(args.isotonic_layer, True)
 
 
+class RunnerPersistenceTest(unittest.TestCase):
+    """Deterministic end-to-end runner test (Codex gate fix, 2026-11-10).
+
+    Executes run_model_serving.main() with the network/arm builders
+    stubbed and a frozen clock, in both CLI modes, and asserts on the
+    PERSISTED artefacts: the written frontend bytes and the written
+    run manifest. Disabled: the frontend is the pre-layer document and
+    the manifest records the layer disabled. Enabled: the written
+    frontend bytes equal the serialisation of the direct layer applied
+    to the disabled document, and the manifest report equals the
+    direct-layer report plus the gate state fields.
+    """
+
+    FIXED_NOW = "2026-11-11T00:00:00+00:00"
+
+    def _load_runner(self):
+        import importlib.util
+        import sys
+        from pathlib import Path as _Path
+        root = _Path(__file__).resolve().parents[1]
+        for sub in ("src", "scripts"):
+            if str(root / sub) not in sys.path:
+                sys.path.insert(0, str(root / sub))
+        spec = importlib.util.spec_from_file_location(
+            "run_model_serving", root / "scripts" / "run_model_serving.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def _run_main(self, module, tmp: Path, extra_args: list[str]) -> int:
+        import sys
+        from unittest import mock
+        argv = ["run_model_serving",
+                "--registry", str(tmp / "registry.json"),
+                "--champion-dir", str(tmp / "champion"),
+                "--date", "20261110", "--cycle", "0",
+                "--sources", "ecmwf",
+                "--out-dir", str(tmp / "out"),
+                "--tracking-records", str(tmp / "tracking.jsonl"),
+                "--frontend-json", str(tmp / "frontend.json")] + extra_args
+        with mock.patch.object(sys, "argv", argv):
+            return module.main()
+
+    def test_runner_persists_dormant_and_enabled_modes(self):
+        import json
+        import tempfile
+        from datetime import datetime, timezone
+        from pathlib import Path as _Path
+        from unittest import mock
+
+        module = self._load_runner()
+
+        class _FixedDatetime(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(2026, 11, 11, 0, 0, tzinfo=timezone.utc)
+
+        points = []
+        for role, elev in (("base", 2000.0), ("mid_mountain", 2500.0),
+                           ("summit", 3000.0)):
+            points.append({
+                "point_id": f"resort-a-{role}", "resort_slug": "resort-a",
+                "resort_name": "Resort A", "point_name": role, "role": role,
+                "latitude": 39.0, "longitude": -120.0, "elevation_m": elev,
+                "timezone": "America/Los_Angeles",
+                "geometry_source": "estimated", "region": "sierra-nevada",
+            })
+
+        def fake_score_arm(arm, source_id, leads, cycle_dt, pts, series,
+                           model, features):
+            records = []
+            for point, slr in zip(pts, (14.0, 10.0, 6.0)):
+                records.append({
+                    "source": arm, "point_id": point["point_id"],
+                    "resort_name": "Resort A", "point_name": point["role"],
+                    "role": point["role"], "lead_day": 5,
+                    "window_end_local_date": "2026-11-16",
+                    "window_start_utc": "2026-11-15T15:00:00Z",
+                    "window_end_utc": "2026-11-16T15:00:00Z",
+                    "model_slr": slr, "model_snowfall_cm": slr * 10.0 / 10.0,
+                    "kuchera_slr": None, "kuchera_snowfall_cm": None,
+                    "liquid_mm": 10.0, "missing": False,
+                    "missing_reason": None,
+                })
+            return records, []
+
+        results = {}
+        for mode, extra in (("disabled", []), ("enabled", ["--isotonic-layer"])):
+            with tempfile.TemporaryDirectory() as td:
+                tmp = _Path(td)
+                (tmp / "champion").mkdir()
+                (tmp / "champion" / "champion_sidecar.json").write_text(
+                    json.dumps({"features": []}))
+                with mock.patch.object(module, "load_catalogue",
+                                       lambda path: points), \
+                     mock.patch.object(module, "build_ecmwf_series",
+                                       lambda pts, date, cycle: ({}, {})), \
+                     mock.patch.object(module, "score_arm", fake_score_arm), \
+                     mock.patch.object(module.ChampionModel, "load",
+                                       classmethod(lambda cls, d: object())), \
+                     mock.patch.object(module, "datetime", _FixedDatetime):
+                    rc = self._run_main(module, tmp, extra)
+                self.assertEqual(rc, 0)
+                frontend_bytes = (tmp / "frontend.json").read_bytes()
+                manifest = json.loads((tmp / "out" / "run_manifest.json")
+                                      .read_text())
+                results[mode] = (frontend_bytes, manifest)
+
+        disabled_bytes, disabled_manifest = results["disabled"]
+        enabled_bytes, enabled_manifest = results["enabled"]
+        disabled_doc = json.loads(disabled_bytes)
+
+        # Disabled: persisted frontend is the pre-layer document.
+        self.assertNotIn(b"preIsotonicSlr", disabled_bytes)
+        self.assertNotIn(b"consistencyAdjustment", disabled_bytes)
+        slrs = [row["modelSlr"] for point in disabled_doc["points"]
+                for rows in point["forecasts"].values() for row in rows]
+        self.assertEqual(sorted(slrs), [6.0, 10.0, 14.0])
+        # Disabled: manifest records layer identity/version/state.
+        state = disabled_manifest["isotonic_layer"]
+        self.assertEqual(state["layer"], ISOTONIC_SLR_LAYER)
+        self.assertEqual(state["version"], ISOTONIC_SLR_LAYER_VERSION)
+        self.assertIs(state["enabled"], False)
+        self.assertEqual(state["records_changed"], 0)
+
+        # Enabled: persisted bytes are exactly the serialised direct
+        # layer applied to the disabled document (same frozen clock, so
+        # the documents differ only by the layer).
+        expected_doc, direct_report = apply_isotonic_slr_layer(disabled_doc)
+        self.assertEqual(enabled_bytes,
+                         json.dumps(expected_doc, indent=1).encode())
+        # Enabled: manifest report = direct report + gate state fields.
+        estate = enabled_manifest["isotonic_layer"]
+        self.assertIs(estate["enabled"], True)
+        self.assertEqual(estate["layer"], ISOTONIC_SLR_LAYER)
+        self.assertEqual(estate["version"], ISOTONIC_SLR_LAYER_VERSION)
+        for key, value in direct_report.items():
+            self.assertEqual(estate[key], value)
+        self.assertGreater(estate["records_changed"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()
