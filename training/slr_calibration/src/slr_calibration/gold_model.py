@@ -280,9 +280,29 @@ class RFEBModel:
 class GBMEBModel:
     """GBM plus the same EB residual layer treatment as RFEBModel."""
 
-    def __init__(self, seed: int, columns: Any | None = None) -> None:
+    def __init__(
+        self,
+        seed: int,
+        columns: Any | None = None,
+        monotonic_cst: Any | None = None,
+    ) -> None:
         self.seed = seed
         self.columns = _feature_columns(columns)
+        # Queue item 7 (monotone-constrained refit): optional per-column
+        # monotonicity constraints, aligned to self.columns, passed to
+        # every HistGradientBoostingRegressor construction (the five
+        # station-grouped OOF fits and the full fit).  Default None ->
+        # the incumbent estimator, bit-identical behaviour.
+        if monotonic_cst is not None:
+            monotonic_cst = [int(v) for v in monotonic_cst]
+            if len(monotonic_cst) != len(self.columns):
+                raise ValueError(
+                    "monotonic_cst must align to columns "
+                    f"({len(monotonic_cst)} != {len(self.columns)})"
+                )
+            if any(v not in (-1, 0, 1) for v in monotonic_cst):
+                raise ValueError("monotonic_cst entries must be in {-1, 0, 1}")
+        self.monotonic_cst = monotonic_cst
 
     def fit(
         self, train: pd.DataFrame, sample_weight: np.ndarray | None = None
@@ -297,7 +317,9 @@ class GBMEBModel:
             mask = folds == fold
             if mask.sum() == 0 or (~mask).sum() == 0:
                 continue
-            model = HistGradientBoostingRegressor(random_state=self.seed)
+            model = HistGradientBoostingRegressor(
+                random_state=self.seed, monotonic_cst=self.monotonic_cst
+            )
             model.fit(
                 X[~mask],
                 y[~mask],
@@ -306,7 +328,9 @@ class GBMEBModel:
             oof[mask] = model.predict(X[mask])
         if np.isnan(oof).any():
             oof[np.isnan(oof)] = train["baseline_slr"].to_numpy()[np.isnan(oof)]
-        self.gbm = HistGradientBoostingRegressor(random_state=self.seed)
+        self.gbm = HistGradientBoostingRegressor(
+            random_state=self.seed, monotonic_cst=self.monotonic_cst
+        )
         self.gbm.fit(X, y, sample_weight=sample_weight)
         residual_frame = train.copy()
         residual_frame["gbm_oof"] = np.clip(oof, MIN_SLR, MAX_SLR)

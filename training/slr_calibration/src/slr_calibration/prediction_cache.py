@@ -64,6 +64,12 @@ EB_HIERARCHICAL_MEDIAN: dict[str, Any] = {
 
 _GBM_AE_SPEC = "HistGradientBoostingRegressor(loss='absolute_error',sklearn_defaults)"
 
+# Queue item 7 (monotone-constrained refit): the GBM seat refit with the
+# registered six-feature monotonic_cst vector (monotone_experiment.
+# GBM_MONO_SPEC).  The constraint vector is part of the estimator string
+# so constrained predictions can never collide with incumbent keys.
+from slr_calibration.monotone_experiment import GBM_MONO_SPEC as _GBM_MONO_SPEC
+
 MODEL_SPECS: dict[str, dict[str, Any]] = {
     "rf": {"kind": "fitted", "estimator": _RF_SPEC, "eb": None},
     "gbm": {"kind": "fitted", "estimator": _GBM_SPEC, "eb": None},
@@ -71,6 +77,8 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
     "gbm_eb": {"kind": "fitted", "estimator": _GBM_SPEC, "eb": EB_HIERARCHICAL},
     "kuchera": {"kind": "fitted", "estimator": "baseline_slr(column)", "eb": None},
     "ens_eb": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_eb")},
+    "gbm_eb_mono": {"kind": "fitted", "estimator": _GBM_MONO_SPEC, "eb": EB_HIERARCHICAL},
+    "ens_eb_mono": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm_eb_mono")},
     "ens_rg": {"kind": "derived", "rule": "mean", "derived_from": ("rf_eb", "gbm")},
     "tail_rf_eb": {"kind": "derived", "rule": "tail_shrink", "derived_from": ("rf", "rf_eb")},
     # Queue item 3 (median experiment M): absolute-error GBM component.
