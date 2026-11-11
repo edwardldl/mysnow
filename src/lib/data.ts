@@ -584,7 +584,18 @@ export function calculateRollingStats(allHourly: BlendedHour[], referenceInstant
     const aggregate = (hours: BlendedHour[]) => {
         const snow = hours.reduce((sum, h) => sum + h.snowfall, 0);
         const frozenSwe = hours.reduce((sum, h) => sum + (h.frozenSweMm ?? 0), 0);
-        const slr = frozenSwe > 0 ? (snow * 10) / frozenSwe : null;
+        // Snowfall with no SLR basis of its own (no usable per-hour SLR --
+        // e.g. a model window whose serving record carried an invalid SLR,
+        // whose hours present snowfall with slr null and frozen SWE 0)
+        // must not borrow the interval's other hours' SWE: the aggregate
+        // SLR is unavailable, while the snowfall total is preserved. In
+        // the substrate, snowfall > 0 always carries a positive finite
+        // per-hour SLR (fresh snow is derived as frozen SWE x SLR / 10),
+        // so this guard changes nothing outside that corrupt-data path.
+        const hasUnknownSlrSnow = hours.some(
+            h => h.snowfall > 0 && (h.slr == null || !Number.isFinite(h.slr) || h.slr <= 0),
+        );
+        const slr = hasUnknownSlrSnow ? null : frozenSwe > 0 ? (snow * 10) / frozenSwe : null;
         return { snow, slr };
     };
 

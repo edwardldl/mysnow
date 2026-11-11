@@ -435,25 +435,41 @@ function rebuildSnowfallAggregates(day: DayData, hourly: BlendedHour[]): Partial
  * Rule per window, with R = record snowfall and S = sum of the UI hourly
  * snowfall over the window's hours:
  * - R = 0: every hour in the window becomes 0.
- * - S > 0: every hour is scaled by R / S (and its per-hour SLR by the same
- *   factor, keeping the chart's SLR colouring coherent); the floating
- *   point residue is absorbed into the largest scaled hour so the sum is
- *   exact.
+ * - S > 0: every hour's snowfall is scaled by R / S; the floating point
+ *   residue is absorbed into the largest scaled hour so the sum is exact.
  * - S = 0 with R > 0 (zero denominator): R is distributed in proportion
  *   to the UI's hourly liquid amounts (liquidMM, falling back to the raw
  *   precipitation field); if those are also all zero, R is split evenly
  *   across the window's displayed hours. (The record carries no hourly
  *   shape of its own, so that branch of the distribution rule cannot
- *   apply.) Per-hour SLR is left unchanged in the distribution cases --
- *   there is no UI snowfall shape to scale it with.
- * Only `snowfall` (and, in the scaling case, `slr`) change: the UI's
- * liquid, frozen SWE and precipitation are the live feed's own values,
- * the snowpack/depth outputs are the layer model's sequential state and
- * cannot be re-run post hoc, and `snowfallResult` remains the substrate
- * calculation's audit trail. Input days and hours are never mutated.
+ *   apply.)
+ * In both non-zero branches, every hour that carries model snowfall also
+ * carries the RECORD's SLR and the record-implied frozen SWE
+ * (snowfall x 10 / record SLR): inside a model window the SLR presented
+ * anywhere -- the hourly chart's per-bar labels and colours, and the
+ * rolling 24/48 h statistics, which divide the hourly snowfall by the
+ * hourly frozen SWE -- must be the model's own, never a hybrid of model
+ * snowfall over the live substrate's frozen SWE. That hybrid is the
+ * hour-granularity form of the ratio displayDaySlr forbids at day
+ * granularity: when the live cycle and the serving cycle disagree about
+ * an event's size, it collapses towards the ratio of the two forecasts
+ * (Mammoth summit, window ending 2026-11-14: live substrate 78.0 cm at
+ * SLR ~20 vs the record's 6.39 cm at SLR 11.9 -- the rescaled hours
+ * presented ~2:1, a number neither forecast holds). Hours whose model
+ * snowfall is zero carry zero frozen SWE inside a model window, so a
+ * rolling interval spanning a zero-record window and a snowy one cannot
+ * dilute the snowy window's SLR with substrate SWE the model zeroed.
+ * A record SLR that is missing or not finite and positive (the serving
+ * batch clamps scored SLRs to [3, 30], so this is a corrupt-data guard)
+ * presents NO hour SLR and no frozen SWE on the window's snowy hours
+ * rather than the substrate's. The UI's liquid and
+ * precipitation stay the live feed's own values, the snowpack/depth
+ * outputs are the layer model's sequential state and cannot be re-run
+ * post hoc, and `snowfallResult` remains the substrate calculation's
+ * audit trail. Input days and hours are never mutated.
  */
 function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): DayData[] {
-  const recordByWindowEnd = new Map<string, number>();
+  const recordByWindowEnd = new Map<string, { snowfall: number; slr: number | null }>();
   for (const day of days) {
     if (day.modelWindow?.kind === 'model') {
       // The rescale target is clamped at 0: snowfall cannot be
@@ -463,7 +479,10 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
       // zero and break the day-sum invariant (the displayed total is
       // the sum of the day's bars). A clamped target behaves exactly
       // like the established record-of-0 case: the hours are zeroed.
-      recordByWindowEnd.set(day.dateStr, Math.max(0, day.totalSnowfall));
+      recordByWindowEnd.set(day.dateStr, {
+        snowfall: Math.max(0, day.totalSnowfall),
+        slr: day.modelWindow.slr,
+      });
     }
   }
   if (recordByWindowEnd.size === 0) return days;
@@ -481,14 +500,21 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
   if (slotsByWindow.size === 0) return days;
 
   const key = (slot: ModelHourSlot) => `${slot.dayIndex}:${slot.hourIndex}`;
-  const newValues = new Map<string, { snowfall: number; slr: number | null }>();
+  const newValues = new Map<
+    string,
+    { snowfall: number; slr: number | null; frozenSweMm?: number }
+  >();
 
   for (const [end, slots] of slotsByWindow) {
-    const record = recordByWindowEnd.get(end) as number;
+    const { snowfall: record, slr: recordSlr } = recordByWindowEnd.get(end) as {
+      snowfall: number;
+      slr: number | null;
+    };
+    const validSlr = recordSlr !== null && Number.isFinite(recordSlr) && recordSlr > 0;
     if (slots.length === 0) continue;
     if (record === 0) {
       for (const slot of slots) {
-        newValues.set(key(slot), { snowfall: 0, slr: slot.hour.slr });
+        newValues.set(key(slot), { snowfall: 0, slr: slot.hour.slr, frozenSweMm: 0 });
       }
       continue;
     }
@@ -509,14 +535,23 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
           largestValue = value;
           largest = slot;
         }
-        newValues.set(key(slot), {
-          snowfall: value,
-          slr: slot.hour.slr !== null && slot.hour.slr !== undefined ? slot.hour.slr * factor : slot.hour.slr,
-        });
+        newValues.set(
+          key(slot),
+          base > 0
+            ? validSlr
+              ? { snowfall: value, slr: recordSlr, frozenSweMm: (value * 10) / (recordSlr as number) }
+              : { snowfall: value, slr: null, frozenSweMm: 0 }
+            : { snowfall: value, slr: slot.hour.slr, frozenSweMm: 0 },
+        );
       }
       if (largest) {
         const current = newValues.get(key(largest));
-        if (current) current.snowfall += record - scaledTotal;
+        if (current) {
+          current.snowfall += record - scaledTotal;
+          if (current.frozenSweMm !== undefined && validSlr) {
+            current.frozenSweMm = (current.snowfall * 10) / (recordSlr as number);
+          }
+        }
       }
       continue;
     }
@@ -535,10 +570,22 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
         largestShare = value;
         largestIndex = i;
       }
-      newValues.set(key(slot), { snowfall: value, slr: slot.hour.slr });
+      newValues.set(
+        key(slot),
+        value > 0
+          ? validSlr
+            ? { snowfall: value, slr: recordSlr, frozenSweMm: (value * 10) / (recordSlr as number) }
+            : { snowfall: value, slr: null, frozenSweMm: 0 }
+          : { snowfall: value, slr: slot.hour.slr, frozenSweMm: 0 },
+      );
     });
     const anchor = newValues.get(key(slots[largestIndex]));
-    if (anchor) anchor.snowfall += record - assigned;
+    if (anchor) {
+      anchor.snowfall += record - assigned;
+      if (anchor.frozenSweMm !== undefined && validSlr) {
+        anchor.frozenSweMm = (anchor.snowfall * 10) / (recordSlr as number);
+      }
+    }
   }
 
   const changedDays = new Set<number>();
@@ -548,7 +595,14 @@ function rescaleModelWindowHours(days: DayData[], point: ModelForecastPoint): Da
     if (!changedDays.has(dayIndex)) return day;
     const hourly = (day.hourly ?? []).map((hour, hourIndex) => {
       const value = newValues.get(`${dayIndex}:${hourIndex}`);
-      return value ? { ...hour, snowfall: value.snowfall, slr: value.slr } : hour;
+      return value
+        ? {
+            ...hour,
+            snowfall: value.snowfall,
+            slr: value.slr,
+            ...(value.frozenSweMm !== undefined ? { frozenSweMm: value.frozenSweMm } : {}),
+          }
+        : hour;
     });
     return { ...day, hourly, ...rebuildSnowfallAggregates(day, hourly) };
   });
