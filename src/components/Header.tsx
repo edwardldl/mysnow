@@ -8,6 +8,7 @@ import LocationDropdown from "./LocationDropdown";
 import CompactSelector from "./CompactSelector";
 import { MODELS, ALGORITHMS, ELEVATION_MODES } from "@/lib/constants";
 import { ENS_EB_METHOD_ID, modelMethodAvailability } from "@/lib/model-forecast";
+import { resolveEffectivePhysicsMethod } from "@/lib/physics-preference";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -42,13 +43,26 @@ export default function Header({
   setElevationMode,
   isOffline,
 }: HeaderProps) {
-  // The ENS-EB model option is only selectable where the model can serve:
-  // ECMWF / HRRR / blended source modes at catalogue resort points. Elsewhere
-  // it stays visible in the menu but disabled, with the reason as its
-  // description, so users can see the model exists and why it is unavailable.
+  // The ENS-EB model option can only serve in ECMWF / HRRR / blended source
+  // modes at catalogue resort points. The Physics selection is a persisted
+  // preference, though (see lib/physics-preference.ts): when ENS-EB is the
+  // user's selected preference but cannot serve here, the option stays
+  // SELECTED -- not disabled, and never silently replaced by Kuchera in
+  // this menu -- with a description stating that Kuchera is in effect
+  // until the context can serve the model again. Only a user who has NOT
+  // selected ENS-EB sees it disabled with the reason, as before.
   const modelAvailability = modelMethodAvailability(modelId, locations[currentLocationId], elevationMode);
+  const effectivePhysics = resolveEffectivePhysicsMethod(algoId, modelAvailability);
   const physicsOptions = ALGORITHMS.map((opt) => {
     if (opt.id !== ENS_EB_METHOD_ID || modelAvailability.available) return opt;
+    if (effectivePhysics.degraded) {
+      return {
+        ...opt,
+        desc: modelAvailability.reason === 'unsupported-mode'
+          ? "Your selected Physics method -- not applicable in this forecast source mode, which is not derived from ECMWF/HRRR cycles. Kuchera is in effect; ENS-EB applies again automatically once both the forecast source mode (ECMWF, HRRR, or Blended) and the location (a catalogue resort point) support it."
+          : "Your selected Physics method -- not applicable here, as the model is precomputed only for MySnow catalogue resort points (base / mid / summit). Kuchera is in effect; ENS-EB applies again automatically once both the location (a catalogue resort point) and the forecast source mode (ECMWF, HRRR, or Blended) support it.",
+      };
+    }
     return {
       ...opt,
       disabled: true,

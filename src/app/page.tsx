@@ -8,12 +8,12 @@ import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
-import { applyModelMethodToDays, ENS_EB_METHOD_ID, modelMethodAvailability } from "@/lib/model-forecast";
+import { applyModelMethodToDays, ENS_EB_METHOD_ID } from "@/lib/model-forecast";
+import { usePhysicsPreference } from "@/lib/physics-preference";
 import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId, MAX_FORECAST_DAYS } from "@/lib/api";
 import { blendForecasts, capForecastDays, groupData, calculateRollingStats } from "@/lib/data";
 import { Location, DayData, WeatherDataStatus } from "@/lib/types";
-import { DEFAULT_SLR_METHOD } from "@/lib/snow/types";
 import { DEFAULT_FORECAST_MODE } from "@/lib/snow/openmeteo/capabilities";
 import { referencePointForMode } from "@/lib/snow/resort/geometry";
 import { buildResortSnowForecasts } from "@/lib/snow/resort/forecast";
@@ -25,7 +25,12 @@ export default function Home() {
   const [locations, setLocations] = useState<Record<string, Location>>({});
   const [currentLocationId, setCurrentLocationId] = useState("palisades");
   const [modelId, setModelId] = useState(DEFAULT_FORECAST_MODE);
-  const [algoId, setAlgoId] = useState<string>(DEFAULT_SLR_METHOD);
+  // The Physics selection is a persisted user preference (see
+  // lib/physics-preference.ts): ENS-EB by default, restored from
+  // localStorage on mount, and never rewritten by location or mode
+  // changes -- where ENS-EB cannot serve, Kuchera computes in its place
+  // while this preference stays selected.
+  const { preferenceId: algoId, setPreferenceId: setAlgoId, restored: physicsRestored } = usePhysicsPreference();
   const [elevationMode, setElevationMode] = useState<string>("avg");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
@@ -56,18 +61,16 @@ export default function Home() {
     setHistorySelectedDate(null);
   }, [currentLocationId]);
 
-  // The ENS-EB model Physics option is only valid where the model can serve
-  // (ECMWF/HRRR/blend source modes at catalogue resort points). If the user
-  // changes the source mode or location out from under the selection, fall
-  // back to the default physics method instead of leaving a selection active
-  // that cannot produce model numbers.
-  useEffect(() => {
-    if (algoId !== ENS_EB_METHOD_ID) return;
-    if (Object.keys(locations).length === 0) return;
-    if (!modelMethodAvailability(modelId, locations[currentLocationId], elevationMode).available) {
-      setAlgoId(DEFAULT_SLR_METHOD);
-    }
-  }, [algoId, modelId, locations, currentLocationId, elevationMode]);
+  // NOTE: there is deliberately no effect here rewriting algoId when the
+  // ENS-EB model cannot serve at the current location or in the current
+  // forecast mode. The selection is the user's preference and persists
+  // across location switches (directive, 2026-11-11); effectiveness is
+  // resolved separately (lib/physics-preference.ts): applyModelMethodToDays
+  // returns the days unchanged -- pure Kuchera -- while the model is
+  // unavailable, and the Header presents ENS-EB as selected-but-not-
+  // applicable instead of silently showing Kuchera as if chosen. The
+  // previous auto-revert effect destroyed the user's selection on any
+  // trip to a non-catalogue location.
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -225,11 +228,14 @@ export default function Home() {
 
   useEffect(() => {
     const fetchKey = `${currentLocationId}-${modelId}-${algoId}-${elevationMode}`;
-    if (Object.keys(locations).length > 0 && lastFetchKeyRef.current !== fetchKey) {
+    // Gate on physicsRestored so the first fetch already carries the
+    // restored Physics preference (and, from the same mount commit, the
+    // restored elevation mode), never the pre-restoration defaults.
+    if (physicsRestored && Object.keys(locations).length > 0 && lastFetchKeyRef.current !== fetchKey) {
       lastFetchKeyRef.current = fetchKey;
       loadData(currentLocationId, modelId, algoId, elevationMode);
     }
-  }, [currentLocationId, modelId, algoId, elevationMode, locations, loadData]);
+  }, [currentLocationId, modelId, algoId, elevationMode, locations, loadData, physicsRestored]);
 
   const lastPrefetchKeyRef = useRef<string | null>(null);
 
