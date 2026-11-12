@@ -5,9 +5,10 @@ import {
   modelForecastFor,
   modelWindowEndDateForHour,
   setModelForecastDataForTests,
+  type ModelForecastData,
 } from '../model-forecast';
 import { calculateRollingStats } from '../data';
-import { providerLocalTimeToEpochMs } from '../time';
+import { addCalendarDays, providerLocalTimeToEpochMs } from '../time';
 import type { BlendedHour, DayData, Location, WindowData } from '../types';
 
 /**
@@ -24,8 +25,9 @@ import type { BlendedHour, DayData, Location, WindowData } from '../types';
  * record SLR, so every ratio consumer (hourly labels/colours, rolling
  * 24/48 h statistics) presents the model's SLR and the identity
  * snowfall / SLR = precipitation holds per hour and in aggregate.
- * Fixtures use the Palisades base point and the stored 2026-11-10 00Z
- * serving records, read back through the production resolver.
+ * Fixtures use the Palisades base point and the installed serving
+ * batch; window dates are read from the file's own rows
+ * (batch-agnostic) and SLRs come back through the production resolver.
  */
 
 const TZ = 'America/Los_Angeles';
@@ -136,7 +138,59 @@ function windowHours(days: DayData[], endDate: string): BlendedHour[] {
     .filter((h) => modelWindowEndDateForHour(h, TZ) === endDate);
 }
 
-const END = '2026-11-14';
+const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
+const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
+
+/**
+ * Controlled HRRR fixture: the real Palisades point carrying a
+ * single HRRR record on a fixed date (2026-11-15 — mid-November
+ * dates never fall on a US DST transition), injected through the
+ * test seam so the scenario is independent of the installed batch
+ * and of DST. Integration coverage of the real file's own HRRR row
+ * lives in the resolver tests.
+ */
+function injectSingleHrrrRecord(): void {
+  const synthetic = JSON.parse(JSON.stringify(modelForecastData)) as ModelForecastData;
+  const point = synthetic.points.find((p) => p.pointId === 'palisades-tahoe-base');
+  if (!point) throw new Error('fixture point missing');
+  point.forecasts = {
+    hrrr: [
+      {
+        leadDay: 2,
+        windowStartUtc: '2026-11-14T15:00:00Z',
+        windowEndUtc: '2026-11-15T15:00:00Z',
+        windowEndLocalDate: '2026-11-15',
+        modelSlr: 13.25,
+        modelSnowfallCm: 4.2,
+        kucheraSlr: 10,
+        kucheraSnowfallCm: 3,
+        liquidMm: 6,
+      },
+    ],
+  };
+  setModelForecastDataForTests(synthetic);
+}
+
+/**
+ * True when the 24 h window ending on `endDate` (Palisades local)
+ * spans a DST transition: its two calendar days are not both 24 h,
+ * so label-built fixtures (00..23) would mis-count its hours. The
+ * fixture window is selected DST-clean (Codex gate, 2026-11-12);
+ * at most one transition can fall inside a batch's 10-day horizon.
+ */
+function windowStraddlesDst(endDate: string): boolean {
+  const dayLengthH = (d: string) =>
+    (providerLocalTimeToEpochMs(`${addCalendarDays(d, 1)}T00:00`, TZ) -
+      providerLocalTimeToEpochMs(`${d}T00:00`, TZ)) / 3_600_000;
+  return dayLengthH(addCalendarDays(endDate, -1)) !== 24 || dayLengthH(endDate) !== 24;
+}
+const END = (() => {
+  for (let i = 3; i < ecmwfRows.length; i++) {
+    if (!windowStraddlesDst(ecmwfRows[i].windowEndLocalDate)) return ecmwfRows[i].windowEndLocalDate;
+  }
+  throw new Error('no DST-clean fixture window in batch');
+})();
+const PREV = addCalendarDays(END, -1);
 const record = modelForecastFor(palisades, 'ecmwf', 'min', END);
 if (!record) throw new Error('serving record missing for fixture window');
 const RECORD_SLR = record.forecast.modelSlr as number;
@@ -144,8 +198,8 @@ const RECORD_SLR = record.forecast.modelSlr as number;
 describe('model-window hour SLR (Mammoth 2:1 regression, pure-SLR semantics)', () => {
   it('model-window hours carry the record SLR and snowfall = frozen SWE x record SLR / 10, frozen SWE untouched', () => {
     const days = [
-      day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 3))),
-      day('2026-11-14', labels('2026-11-14', 0, 23).map((l) => hour(l, 3))),
+      day(PREV, labels(PREV, 0, 23).map((l) => hour(l, 3))),
+      day(END, labels(END, 0, 23).map((l) => hour(l, 3))),
     ];
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
     const hours = windowHours(out, END);
@@ -162,7 +216,7 @@ describe('model-window hour SLR (Mammoth 2:1 regression, pure-SLR semantics)', (
     }
     // The rolling statistics divide snowfall by frozen SWE: over exactly
     // this window they return the record SLR and the applied snowfall.
-    const ref = providerLocalTimeToEpochMs('2026-11-14T07:00', TZ);
+    const ref = providerLocalTimeToEpochMs(`${END}T07:00`, TZ);
     const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
     expect(stats.snow24h).toBeCloseTo(24 * applied, 6);
     expect(stats.slr24h).not.toBeNull();
@@ -170,23 +224,33 @@ describe('model-window hour SLR (Mammoth 2:1 regression, pure-SLR semantics)', (
   });
 
   it('rolling SLR across a model window and a fallback window is the frozen-weighted mean of the two -- each hour keeps its own ratio', () => {
-    // Literal hrrr: the window ending 2026-11-11 is a model window, the
-    // window ending 2026-11-12 is Kuchera fallback (substrate SLR 20).
-    const hrrrSlr = modelForecastFor(palisades, 'hrrr', 'min', '2026-11-11')?.forecast.modelSlr as number;
-    const days = ['2026-11-10', '2026-11-11', '2026-11-12'].map((d) =>
-      day(d, labels(d, 0, 23).map((l) => hour(l, 3))),
-    );
-    const out = applyModelMethodToDays(days, palisades, 'hrrr', 'min');
-    const ref = providerLocalTimeToEpochMs('2026-11-12T07:00', TZ);
-    const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
-    // 48 h = both windows, 36 mm frozen SWE each: the aggregate SLR is
-    // the frozen-weighted mean, and snowfall / SLR = precipitation holds
-    // for the aggregate exactly.
-    const expectedSnow = (36 * hrrrSlr) / 10 + (36 * 20) / 10;
-    expect(stats.snow48h).toBeCloseTo(expectedSnow, 6);
-    expect(stats.slr48h).not.toBeNull();
-    expect(stats.slr48h as number).toBeCloseTo((hrrrSlr + 20) / 2, 4);
-    expect(((stats.snow48h / (stats.slr48h as number)) * 10)).toBeCloseTo(72, 4);
+    // Literal hrrr on a controlled batch (injectSingleHrrrRecord):
+    // the window ending 2026-11-15 is a model window, the window
+    // ending the next day is Kuchera fallback (substrate SLR 20).
+    injectSingleHrrrRecord();
+    try {
+      const hrrrEnd = '2026-11-15';
+      const fallbackEnd = '2026-11-16';
+      const preDay = '2026-11-14';
+      expect(modelForecastFor(palisades, 'hrrr', 'min', fallbackEnd)).toBeNull();
+      const hrrrSlr = modelForecastFor(palisades, 'hrrr', 'min', hrrrEnd)?.forecast.modelSlr as number;
+      const days = [preDay, hrrrEnd, fallbackEnd].map((d) =>
+        day(d, labels(d, 0, 23).map((l) => hour(l, 3))),
+      );
+      const out = applyModelMethodToDays(days, palisades, 'hrrr', 'min');
+      const ref = providerLocalTimeToEpochMs(`${fallbackEnd}T07:00`, TZ);
+      const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
+      // 48 h = both windows, 36 mm frozen SWE each: the aggregate SLR is
+      // the frozen-weighted mean, and snowfall / SLR = precipitation holds
+      // for the aggregate exactly.
+      const expectedSnow = (36 * hrrrSlr) / 10 + (36 * 20) / 10;
+      expect(stats.snow48h).toBeCloseTo(expectedSnow, 6);
+      expect(stats.slr48h).not.toBeNull();
+      expect(stats.slr48h as number).toBeCloseTo((hrrrSlr + 20) / 2, 4);
+      expect(((stats.snow48h / (stats.slr48h as number)) * 10)).toBeCloseTo(72, 4);
+    } finally {
+      setModelForecastDataForTests(null);
+    }
   });
 
   it('an invalid record SLR no longer resolves: the window falls back to Kuchera, hours untouched', () => {
@@ -200,8 +264,8 @@ describe('model-window hour SLR (Mammoth 2:1 regression, pure-SLR semantics)', (
       try {
         expect(modelForecastFor(palisades, 'ecmwf', 'min', END)).toBeNull();
         const days = [
-          day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 3))),
-          day('2026-11-14', labels('2026-11-14', 0, 23).map((l) => hour(l, 3))),
+          day(PREV, labels(PREV, 0, 23).map((l) => hour(l, 3))),
+          day(END, labels(END, 0, 23).map((l) => hour(l, 3))),
         ];
         const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
         expect(out[1].modelWindow?.kind).toBe('kuchera_fallback');
@@ -231,7 +295,7 @@ describe('model-window hour SLR (Mammoth 2:1 regression, pure-SLR semantics)', (
   });
 
   it('non-model methods leave hour SLR and frozen SWE untouched', () => {
-    const days = [day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 3)))];
+    const days = [day(PREV, labels(PREV, 0, 23).map((l) => hour(l, 3)))];
     const out = applyModelMethodToDays(days, palisades, 'best_match', 'min');
     for (const h of out[0].hourly) {
       expect(h.slr).toBe(20);

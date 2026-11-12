@@ -7,6 +7,7 @@ import {
   modelForecastData,
   modelForecastFor,
 } from '../model-forecast';
+import { addCalendarDays } from '../time';
 import type { Location } from '../types';
 
 const palisades: Location = {
@@ -142,10 +143,9 @@ describe('model forecast resolution', () => {
   });
 
   it('does not fall back across sources in a literal mode', () => {
-    // Palisades base's only HRRR window in the 00Z batch ends
-    // 2026-11-11 (lead 2); the lead-3 window ending 2026-11-12 has no
-    // HRRR row: literal HRRR mode shows nothing rather than borrowing
-    // the ECMWF record.
+    // Palisades base's only HRRR window in the batch is the lead-2
+    // window; the lead-3 window has no HRRR row: literal HRRR mode
+    // shows nothing rather than borrowing the ECMWF record.
     const lead3Date = ecmwfRows[1]?.windowEndLocalDate;
     expect(modelForecastFor(palisades, 'hrrr', 'min', lead3Date)).toBeNull();
     expect(modelForecastFor(palisades, 'ecmwf', 'min', lead3Date)?.arm).toBe('ecmwf');
@@ -170,8 +170,8 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
   const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
   const hrrrRows = palisadesPoint?.forecasts.hrrr ?? [];
-  // The 00Z batch starts at lead 2: ecmwfRows[0] is the lead-2 window
-  // (ending 2026-11-11 at Palisades), the only window HRRR also holds.
+  // The batch starts at lead 2: ecmwfRows[0] is the lead-2 window,
+  // the only window HRRR also holds.
   const lead2Date = ecmwfRows[0]?.windowEndLocalDate;
   const lead3Date = ecmwfRows[1]?.windowEndLocalDate;
   const lead4Date = ecmwfRows[2]?.windowEndLocalDate;
@@ -239,6 +239,7 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
 
 describe('10-day cap and the retired Open-Meteo arm', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
+  const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
 
   it('serves no Open-Meteo records and no record beyond lead 10, anywhere', () => {
     expect(modelForecastData.openMeteoArm).toBeUndefined();
@@ -261,9 +262,12 @@ describe('10-day cap and the retired Open-Meteo arm', () => {
   });
 
   it('has no model record beyond the cap in any mode', () => {
-    // Lead 11 would end 2026-11-20 at Palisades; lead 13 on 2026-11-22
-    // (the old Open-Meteo tail's territory). No arm stores them.
-    for (const date of ['2026-11-20', '2026-11-22']) {
+    // Derived from the installed file itself (batch-agnostic): the
+    // lead-11 date is one day past the file's last stored Palisades
+    // window (lead 10); lead 13 — the old Open-Meteo tail's
+    // territory — is three days past it. No arm stores them.
+    const lastDate = ecmwfRows[ecmwfRows.length - 1]?.windowEndLocalDate as string;
+    for (const date of [addCalendarDays(lastDate, 1), addCalendarDays(lastDate, 3)]) {
       expect(modelForecastFor(palisades, 'ecmwf', 'min', date)).toBeNull();
       expect(modelForecastFor(palisades, BLEND_MODEL_ID, 'min', date)).toBeNull();
       expect(modelForecastFor(palisades, 'hrrr', 'min', date)).toBeNull();
@@ -353,10 +357,11 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
   });
 
   it('has no model record beyond the 10-day cap in any mode', () => {
-    // Lead 10 ends 2026-11-19 at Mount Rose; lead 11 would end
-    // 2026-11-20. The retired Open-Meteo tail used to serve it.
+    // One day past Mount Rose's last stored window (lead 10) is the
+    // lead-11 date. The retired Open-Meteo tail used to serve it.
+    const beyondDate = addCalendarDays(mrEcmwf[mrEcmwf.length - 1]?.windowEndLocalDate as string, 1);
     for (const mode of ['ecmwf', BLEND_MODEL_ID, 'hrrr']) {
-      expect(modelForecastFor(mountRose, mode, 'min', '2026-11-20')).toBeNull();
+      expect(modelForecastFor(mountRose, mode, 'min', beyondDate)).toBeNull();
     }
   });
 
@@ -440,9 +445,11 @@ describe('California Ikon/Epic expansion (catalogue addition, estimated geometry
     const literal = modelForecastFor(kirkwood, 'ecmwf', 'min', day2!.windowEndLocalDate);
     expect(literal?.arm).toBe('ecmwf');
     expect(literal?.forecast.modelSlr).toBe(day2!.modelSlr);
-    // Lead 11 would end 2026-11-20 at Kirkwood; the retired
-    // Open-Meteo tail used to serve it.
-    expect(modelForecastFor(kirkwood, 'ecmwf', 'min', '2026-11-20')).toBeNull();
-    expect(modelForecastFor(kirkwood, 'hrrr', 'min', '2026-11-20')).toBeNull();
+    // One day past Kirkwood's last stored window is the lead-11
+    // date; the retired Open-Meteo tail used to serve it.
+    const kirkwoodRows = point?.forecasts.ecmwf ?? [];
+    const beyondDate = addCalendarDays(kirkwoodRows[kirkwoodRows.length - 1]?.windowEndLocalDate as string, 1);
+    expect(modelForecastFor(kirkwood, 'ecmwf', 'min', beyondDate)).toBeNull();
+    expect(modelForecastFor(kirkwood, 'hrrr', 'min', beyondDate)).toBeNull();
   });
 });

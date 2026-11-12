@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyModelMethodToDays,
+  modelForecastData,
   modelForecastFor,
   modelWindowEndDateForHour,
 } from '../model-forecast';
 import { calculateRollingStats } from '../data';
-import { providerLocalTimeToEpochMs } from '../time';
+import { addCalendarDays, providerLocalTimeToEpochMs } from '../time';
 import type { BlendedHour, DayData, Location, WindowData } from '../types';
 
 /**
@@ -27,10 +28,11 @@ import type { BlendedHour, DayData, Location, WindowData } from '../types';
  * of an hour's precipitation is rain, snowfall / SLR recovers the
  * frozen part only, under ENS-EB exactly as under Kuchera.
  *
- * Fixtures use the Palisades base point and the stored 2026-11-10 00Z
- * serving records, read back through the production resolver. Substrate
- * hours carry a uniform Kuchera SLR of 20 so the pre-method series is
- * itself identity-consistent.
+ * Fixtures use the Palisades base point and the installed serving
+ * batch; window dates are read from the file's own rows
+ * (batch-agnostic) and SLRs come back through the production
+ * resolver. Substrate hours carry a uniform Kuchera SLR of 20 so the
+ * pre-method series is itself identity-consistent.
  */
 
 const TZ = 'America/Los_Angeles';
@@ -153,16 +155,38 @@ function mixedHour(label: string, liquidMM: number, frozenSweMm: number): Blende
   } as BlendedHour;
 }
 
-const END = '2026-11-14';
+const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
+const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
+
+/**
+ * True when the 24 h window ending on `endDate` (Palisades local)
+ * spans a DST transition: its two calendar days are not both 24 h,
+ * so label-built fixtures (00..23) would mis-count its hours. The
+ * fixture window is selected DST-clean (Codex gate, 2026-11-12);
+ * at most one transition can fall inside a batch's 10-day horizon.
+ */
+function windowStraddlesDst(endDate: string): boolean {
+  const dayLengthH = (d: string) =>
+    (providerLocalTimeToEpochMs(`${addCalendarDays(d, 1)}T00:00`, TZ) -
+      providerLocalTimeToEpochMs(`${d}T00:00`, TZ)) / 3_600_000;
+  return dayLengthH(addCalendarDays(endDate, -1)) !== 24 || dayLengthH(endDate) !== 24;
+}
+const END = (() => {
+  for (let i = 3; i < ecmwfRows.length; i++) {
+    if (!windowStraddlesDst(ecmwfRows[i].windowEndLocalDate)) return ecmwfRows[i].windowEndLocalDate;
+  }
+  throw new Error('no DST-clean fixture window in batch');
+})();
+const PREV = addCalendarDays(END, -1);
 const resolved = modelForecastFor(palisades, 'ecmwf', 'min', END);
 if (!resolved) throw new Error('serving record missing for fixture window');
 const RECORD_SLR = resolved.forecast.modelSlr as number;
 
-/** Two full calendar days whose hours span the windows ending 11-13, 11-14 and (afternoon) 11-15. */
+/** Two full calendar days whose hours span the windows ending PREV, END and (afternoon) END + 1. */
 function fixtureDays(): DayData[] {
   return [
-    day('2026-11-13', labels('2026-11-13', 0, 23).map((l) => hour(l, 1.5))),
-    day('2026-11-14', labels('2026-11-14', 0, 23).map((l) => hour(l, 1.5))),
+    day(PREV, labels(PREV, 0, 23).map((l) => hour(l, 1.5))),
+    day(END, labels(END, 0, 23).map((l) => hour(l, 1.5))),
   ];
 }
 
@@ -217,14 +241,14 @@ describe('precipitation invariance under ENS-EB (2026-11-11 directive)', () => {
   });
 
   it('mixed-phase and rain-only hours: total precipitation invariant, identity holds against the frozen part only', () => {
-    // Every hour of the window ending 2026-11-14: 3.0 mm total
+    // Every hour of the window ending END: 3.0 mm total
     // precipitation, of which 1.2 mm frozen (snow fraction 0.4); the
-    // window ending 2026-11-13 is rain-only (3.0 mm, none frozen).
+    // window ending PREV is rain-only (3.0 mm, none frozen).
     const days = [
-      day('2026-11-13', labels('2026-11-13', 0, 23).map((l) =>
+      day(PREV, labels(PREV, 0, 23).map((l) =>
         Number(l.slice(11, 13)) >= 8 ? mixedHour(l, 3.0, 1.2) : mixedHour(l, 3.0, 0),
       )),
-      day('2026-11-14', labels('2026-11-14', 0, 23).map((l) =>
+      day(END, labels(END, 0, 23).map((l) =>
         Number(l.slice(11, 13)) <= 7 ? mixedHour(l, 3.0, 1.2) : mixedHour(l, 3.0, 1.2),
       )),
     ];
@@ -244,11 +268,11 @@ describe('precipitation invariance under ENS-EB (2026-11-11 directive)', () => {
       expect(h.snowfall / RECORD_SLR).not.toBeCloseTo(0.3, 6);
     }
     expect(out[1].totalPrecipitation).toBe(days[1].totalPrecipitation);
-    // Rain-only hours (window ending 2026-11-13's morning side is in
-    // the previous window; the rain-only afternoon belongs to END's
-    // predecessor window ending 2026-11-13): zero frozen -> zero snow
-    // under both methods, precipitation still 3.0 mm.
-    const rainHours = windowHours(out, '2026-11-13').filter((h) => (h.frozenSweMm ?? 0) === 0);
+    // Rain-only hours (the morning side of the window ending PREV
+    // sits in the PREV calendar day; the rest of that window is in
+    // the day before the fixture): zero frozen -> zero snow under
+    // both methods, precipitation still 3.0 mm.
+    const rainHours = windowHours(out, PREV).filter((h) => (h.frozenSweMm ?? 0) === 0);
     expect(rainHours.length).toBeGreaterThan(0);
     for (const h of rainHours) {
       expect(h.snowfall).toBe(0);
@@ -259,7 +283,7 @@ describe('precipitation invariance under ENS-EB (2026-11-11 directive)', () => {
   it('identity in the rolling 24 h statistics over a model window', () => {
     const days = fixtureDays();
     const out = applyModelMethodToDays(days, palisades, 'ecmwf', 'min');
-    const ref = providerLocalTimeToEpochMs('2026-11-14T07:00', TZ);
+    const ref = providerLocalTimeToEpochMs(`${END}T07:00`, TZ);
     const stats = calculateRollingStats(out.flatMap((d) => d.hourly), ref);
     const w = windowHours(out, END);
     const frozenTotal = w.reduce((s, h) => s + (h.frozenSweMm ?? 0), 0);

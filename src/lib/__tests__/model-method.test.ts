@@ -10,6 +10,7 @@ import {
   modelWindowTrendLabel,
 } from '../model-forecast';
 import { toSlrMethod } from '../snow/slr';
+import { addCalendarDays } from '../time';
 import type { DayData, Location } from '../types';
 
 const palisades: Location = {
@@ -81,16 +82,21 @@ const mountRose: Location = {
 
 const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
 const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
-// The 00Z batch: ECMWF leads 2-10 at every point and no other arm's
+// The batch: ECMWF leads 2-10 at every point and no other arm's
 // dates exist (the Open-Meteo tail is retired), so the stored dates
-// are exactly the ECMWF window dates, 2026-11-11 .. 2026-11-19.
-// day1Date is the lead-2 window -- the only window HRRR also holds;
-// day2Date the lead-3 window; day9Date the lead-10 window (the cap).
+// are exactly the ECMWF window dates of the installed file — all
+// anchors below are read from the file itself so the suite survives
+// batch rollovers. day1Date is the lead-2 window — the only window
+// HRRR also holds; day2Date the lead-3 window; day9Date the lead-10
+// window (the cap). Dates past the cap are derived from day9Date.
 const allStoredDates = ecmwfRows.map((r) => r.windowEndLocalDate);
 const day1Date = ecmwfRows[0]?.windowEndLocalDate;
 const day2Date = ecmwfRows[1]?.windowEndLocalDate;
 const day3Date = ecmwfRows[2]?.windowEndLocalDate;
 const day9Date = ecmwfRows[8]?.windowEndLocalDate;
+const lead11Date = addCalendarDays(day9Date as string, 1);
+const beyondCapDate = addCalendarDays(day9Date as string, 3);
+const wellBeyondDate = addCalendarDays(day9Date as string, 5);
 const rowForLead = (lead: number) => ecmwfRows.find((r) => r.leadDay === lead);
 const stowePoint = modelForecastData.points.find((p) => p.pointId === 'stowe-base');
 const stoweEcmwfRows = stowePoint?.forecasts.ecmwf ?? [];
@@ -289,10 +295,11 @@ describe('ECMWF horizon under the 10-day cap', () => {
   });
 
   it('has no Palisades record beyond the cap: the lead-11 date stays Kuchera', () => {
-    // Lead 11 would end 2026-11-20 at Palisades. Before the 10-day cap
-    // the Open-Meteo tail arm served this date; it is retired, so the
-    // day now falls back to Kuchera in every mode.
-    const beyondDate = '2026-11-20';
+    // The lead-11 date is one day past the file's lead-10 window.
+    // Before the 10-day cap the Open-Meteo tail arm served this
+    // date; it is retired, so the day now falls back to Kuchera in
+    // every mode.
+    const beyondDate = lead11Date;
     expect(ecmwfRows.find((r) => r.windowEndLocalDate === beyondDate)).toBeUndefined();
     expect(modelForecastFor(palisades, 'ecmwf', 'min', beyondDate)).toBeNull();
     const out = applyModelMethodToDays([mkDay(beyondDate, 7.5)], palisades, 'ecmwf', 'min');
@@ -302,10 +309,10 @@ describe('ECMWF horizon under the 10-day cap', () => {
   });
 
   it('stays Kuchera well beyond the cap, where no arm ever held a record', () => {
-    const out = applyModelMethodToDays([mkDay('2026-11-24', 7.5)], palisades, 'ecmwf', 'min');
+    const out = applyModelMethodToDays([mkDay(wellBeyondDate, 7.5)], palisades, 'ecmwf', 'min');
     expect(out[0].totalSnowfall).toBe(7.5);
     expect(out[0].modelWindow?.kind).toBe('kuchera_fallback');
-    const outBlend = applyModelMethodToDays([mkDay('2026-11-24', 7.5)], palisades, BLEND_MODEL_ID, 'min');
+    const outBlend = applyModelMethodToDays([mkDay(wellBeyondDate, 7.5)], palisades, BLEND_MODEL_ID, 'min');
     expect(outBlend[0].modelWindow?.kind).toBe('kuchera_fallback');
   });
 
@@ -322,9 +329,8 @@ describe('ECMWF horizon under the 10-day cap', () => {
 describe('retired Open-Meteo tail under the ENS-EB menu method', () => {
   const mkDay = (dateStr: string, totalSnowfall: number): DayData =>
     ({ dateStr, totalSnowfall }) as DayData;
-  // Lead 12 would end 2026-11-22 at Palisades; the retired tail arm
-  // used to serve it.
-  const beyondCapDate = '2026-11-22';
+  // beyondCapDate (module scope) is the lead-13 date at Palisades,
+  // in the territory the retired tail arm used to serve.
 
   it('keeps beyond-cap days on Kuchera in ecmwf and blend modes (no tail records)', () => {
     for (const mode of ['ecmwf', BLEND_MODEL_ID]) {
@@ -414,7 +420,7 @@ describe('inline labelling under the ENS-EB menu method', () => {
   });
 
   it('labels a beyond-cap day with the Kuchera fallback caption', () => {
-    expect(labelFor('2026-11-22', 'ecmwf')).toBe(
+    expect(labelFor(beyondCapDate, 'ecmwf')).toBe(
       'Calendar-day snowfall · ENS-EB windows where available, Kuchera elsewhere · the 24 h window ending 07:00 local fell back to Kuchera (no ENS-EB record)',
     );
   });
