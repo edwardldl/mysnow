@@ -179,7 +179,7 @@ function injectSingleHrrrRecord(): void {
 }
 /** Window-end date of the n-th stored ECMWF row (0-based) at Palisades. */
 const ecmwfEnd = (i: number): string => ecmwfRows[i].windowEndLocalDate;
-/** The last stored ECMWF window-end date at Palisades (lead 10, the cap). */
+/** The last stored ECMWF window-end date at Palisades (the cap). */
 const lastEcmwfEnd = (): string => ecmwfRows[ecmwfRows.length - 1].windowEndLocalDate;
 
 /**
@@ -319,8 +319,8 @@ describe('applyModelMethodToDays SLR application', () => {
   });
 
   it('beyond the cap: the window ending one day past the last stored window has no record in any mode and is never converted', () => {
-    // The lead-11 date at Palisades, derived from the file: one day
-    // past its last stored window (lead 10). Before the 2026-11-10
+    // One day past Palisades' last stored window (the cap), derived
+    // from the file. Before the 2026-11-10
     // cap this window was served by the Open-Meteo tail arm; the arm
     // is retired and the window now resolves to nothing, so its
     // hours stay Kuchera.

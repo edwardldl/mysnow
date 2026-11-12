@@ -8,6 +8,11 @@ import {
   modelForecastFor,
 } from '../model-forecast';
 import { addCalendarDays } from '../time';
+import {
+  ECMWF_STEP_CEILING_HOURS,
+  expectedServedWindows,
+  HRRR_HORIZON_HOURS,
+} from './model-geometry';
 import type { Location } from '../types';
 
 const palisades: Location = {
@@ -143,12 +148,13 @@ describe('model forecast resolution', () => {
   });
 
   it('does not fall back across sources in a literal mode', () => {
-    // Palisades base's only HRRR window in the batch is the lead-2
-    // window; the lead-3 window has no HRRR row: literal HRRR mode
-    // shows nothing rather than borrowing the ECMWF record.
-    const lead3Date = ecmwfRows[1]?.windowEndLocalDate;
-    expect(modelForecastFor(palisades, 'hrrr', 'min', lead3Date)).toBeNull();
-    expect(modelForecastFor(palisades, 'ecmwf', 'min', lead3Date)?.arm).toBe('ecmwf');
+    // The second stored window has no HRRR row at Palisades in either
+    // cycle geometry (HRRR holds only the first stored window here):
+    // literal HRRR mode shows nothing rather than borrowing the ECMWF
+    // record.
+    const secondDate = ecmwfRows[1]?.windowEndLocalDate;
+    expect(modelForecastFor(palisades, 'hrrr', 'min', secondDate)).toBeNull();
+    expect(modelForecastFor(palisades, 'ecmwf', 'min', secondDate)?.arm).toBe('ecmwf');
   });
 
   it('resolves no model forecast in a non-ecmwf/hrrr mode for the same point and date', () => {
@@ -170,14 +176,18 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
   const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
   const hrrrRows = palisadesPoint?.forecasts.hrrr ?? [];
-  // The batch starts at lead 2: ecmwfRows[0] is the lead-2 window,
-  // the only window HRRR also holds.
-  const lead2Date = ecmwfRows[0]?.windowEndLocalDate;
-  const lead3Date = ecmwfRows[1]?.windowEndLocalDate;
-  const lead4Date = ecmwfRows[2]?.windowEndLocalDate;
+  // Anchors are positional, so they hold in either cycle geometry:
+  // the first stored window is the only one HRRR also holds at
+  // Palisades (lead 2 from a 00Z cycle, lead 1 from a 12Z cycle);
+  // the second stored window is the first HRRR does not hold.
+  const sharedDate = hrrrRows[0]?.windowEndLocalDate;
+  const firstEcmwfOnlyDate = ecmwfRows.find(
+    (r) => !hrrrRows.some((h) => h.windowEndLocalDate === r.windowEndLocalDate),
+  )?.windowEndLocalDate;
+  const thirdDate = ecmwfRows[2]?.windowEndLocalDate;
 
-  it('serves the HRRR arm for the lead-2 window (inside the 48 h horizon)', () => {
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead2Date);
+  it('serves the HRRR arm for the first stored window (inside the 48 h horizon)', () => {
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', sharedDate);
     expect(result?.blended).toBe(true);
     expect(result?.arm).toBe('hrrr');
     expect(result?.forecast.modelSlr).toBe(hrrrRows[0]?.modelSlr);
@@ -185,32 +195,41 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
     expect(result?.cycleUtc).toBe(modelForecastData.cycles.hrrr);
   });
 
-  it('falls back to the ECMWF arm, labelled ECMWF, when HRRR has no lead-3 record', () => {
-    // Fixture premise: Palisades base has no HRRR row for the lead-3
-    // window in the serving data (its only HRRR window is lead 2).
-    expect(hrrrRows.find((row) => row.windowEndLocalDate === lead3Date)).toBeUndefined();
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead3Date);
+  it('falls back to the ECMWF arm, labelled ECMWF, for the first window HRRR does not hold', () => {
+    // Fixture premise: Palisades base has no HRRR row for the first
+    // ECMWF-only window in the serving data (its only HRRR window is
+    // the first stored window).
+    expect(hrrrRows.find((row) => row.windowEndLocalDate === firstEcmwfOnlyDate)).toBeUndefined();
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', firstEcmwfOnlyDate ?? null);
+    const ecmwfRow = ecmwfRows.find((r) => r.windowEndLocalDate === firstEcmwfOnlyDate);
     expect(result?.arm).toBe('ecmwf');
-    expect(result?.forecast.modelSlr).toBe(ecmwfRows[1]?.modelSlr);
+    expect(result?.forecast.modelSlr).toBe(ecmwfRow?.modelSlr);
     expect(result?.cycleUtc).toBe(modelForecastData.cycles.ecmwf);
     // Same values the literal ECMWF mode shows for this window.
     expect(result?.forecast).toEqual(
-      modelForecastFor(palisades, 'ecmwf', 'min', lead3Date)?.forecast,
+      modelForecastFor(palisades, 'ecmwf', 'min', firstEcmwfOnlyDate ?? null)?.forecast,
     );
   });
 
-  it('keeps the HRRR arm on the lead-2 window where HRRR has a record (Stowe)', () => {
-    const result = modelForecastFor(stowe, BLEND_MODEL_ID, 'min', lead2Date);
+  it('keeps the HRRR arm on the first stored window where HRRR has a record (Stowe)', () => {
+    // Stowe's own first HRRR date, not Palisades' sharedDate: the two
+    // coincide in standard time, but from a 12Z cycle in daylight time
+    // Palisades' first window is lead 1 while Stowe's is lead 2 under
+    // a strict start, so borrowing the date would resolve nothing
+    // (Codex gate, 2026-11-12).
+    const stowePoint = modelForecastData.points.find((p) => p.pointId === 'stowe-base');
+    const stoweSharedDate = stowePoint?.forecasts.hrrr?.[0]?.windowEndLocalDate;
+    const result = modelForecastFor(stowe, BLEND_MODEL_ID, 'min', stoweSharedDate ?? null);
     expect(result?.arm).toBe('hrrr');
     expect(result?.point.pointId).toBe('stowe-base');
-    const stoweHrrrLead2 = modelForecastData.points
-      .find((p) => p.pointId === 'stowe-base')
-      ?.forecasts.hrrr?.find((row) => row.windowEndLocalDate === lead2Date);
-    expect(result?.forecast.modelSlr).toBe(stoweHrrrLead2?.modelSlr);
+    const stoweHrrrShared = stowePoint?.forecasts.hrrr?.find(
+      (row) => row.windowEndLocalDate === stoweSharedDate,
+    );
+    expect(result?.forecast.modelSlr).toBe(stoweHrrrShared?.modelSlr);
   });
 
-  it('serves the ECMWF arm for the lead-4 window (beyond the HRRR horizon)', () => {
-    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', lead4Date);
+  it('serves the ECMWF arm for a later stored window (beyond the HRRR horizon)', () => {
+    const result = modelForecastFor(palisades, BLEND_MODEL_ID, 'min', thirdDate);
     expect(result?.arm).toBe('ecmwf');
     expect(result?.forecast.modelSlr).toBe(ecmwfRows[2]?.modelSlr);
   });
@@ -228,7 +247,7 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
   });
 
   it('resolves no model forecast at a non-catalogue location in blend mode', () => {
-    expect(modelForecastFor(farAway, BLEND_MODEL_ID, 'avg', lead2Date)).toBeNull();
+    expect(modelForecastFor(farAway, BLEND_MODEL_ID, 'avg', sharedDate)).toBeNull();
   });
 
   it('resolves no model forecast for a date with no stored window in blend mode', () => {
@@ -240,6 +259,7 @@ describe('blend mode (hrrr_ecmwf, the app default)', () => {
 describe('10-day cap and the retired Open-Meteo arm', () => {
   const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
   const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
+  const hrrrRows = palisadesPoint?.forecasts.hrrr ?? [];
 
   it('serves no Open-Meteo records and no record beyond lead 10, anywhere', () => {
     expect(modelForecastData.openMeteoArm).toBeUndefined();
@@ -254,18 +274,25 @@ describe('10-day cap and the retired Open-Meteo arm', () => {
     }
   });
 
-  it('serves the full capped horizon at Palisades: ECMWF leads 2-10, HRRR lead 2', () => {
-    expect((palisadesPoint?.forecasts.ecmwf ?? []).map((r) => r.leadDay)).toEqual(
-      [2, 3, 4, 5, 6, 7, 8, 9, 10],
-    );
-    expect((palisadesPoint?.forecasts.hrrr ?? []).map((r) => r.leadDay)).toEqual([2]);
+  it('serves the full capped horizon at Palisades: ECMWF to the step-240 ceiling, HRRR to the 48 h horizon', () => {
+    // The expected lead sets are derived from the cycle + point (see
+    // model-geometry.ts): at a 00Z cycle ECMWF serves leads 2-10 and
+    // HRRR lead 2; at a 12Z cycle ECMWF serves leads 1-9 and HRRR
+    // lead 1 at this America/Los_Angeles point.
+    const cycle = modelForecastData.cycles;
+    expect(
+      ecmwfRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+    ).toEqual(expectedServedWindows(cycle.ecmwf, palisadesPoint!, ECMWF_STEP_CEILING_HOURS));
+    expect(
+      hrrrRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+    ).toEqual(expectedServedWindows(cycle.hrrr, palisadesPoint!, HRRR_HORIZON_HOURS));
   });
 
   it('has no model record beyond the cap in any mode', () => {
-    // Derived from the installed file itself (batch-agnostic): the
-    // lead-11 date is one day past the file's last stored Palisades
-    // window (lead 10); lead 13 — the old Open-Meteo tail's
-    // territory — is three days past it. No arm stores them.
+    // Derived from the installed file itself (batch-agnostic): one day
+    // past the file's last stored Palisades window (the cap); three
+    // days past it is the old Open-Meteo tail's territory. No arm
+    // stores them.
     const lastDate = ecmwfRows[ecmwfRows.length - 1]?.windowEndLocalDate as string;
     for (const date of [addCalendarDays(lastDate, 1), addCalendarDays(lastDate, 3)]) {
       expect(modelForecastFor(palisades, 'ecmwf', 'min', date)).toBeNull();
@@ -314,21 +341,54 @@ describe('North America catalogue (129 resorts, 387 points)', () => {
     }
   });
 
-  it('serves ECMWF leads 2-10 at every point; HRRR lead 2 at exactly the 321 in-domain points', () => {
+  it('serves the full capped horizon at every point; HRRR at exactly the 321 in-domain points', () => {
+    const cycle = modelForecastData.cycles;
     let hrrrPoints = 0;
+    const excludedPointIds = new Set<string>();
     for (const point of modelForecastData.points) {
-      expect((point.forecasts.ecmwf ?? []).map((r) => r.leadDay), point.pointId).toEqual(
-        [2, 3, 4, 5, 6, 7, 8, 9, 10],
-      );
-      const hrrrLeads = (point.forecasts.hrrr ?? []).map((r) => r.leadDay);
-      if (hrrrLeads.length > 0) {
-        expect(hrrrLeads, point.pointId).toEqual([2]);
+      expect(
+        (point.forecasts.ecmwf ?? []).map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+        point.pointId,
+      ).toEqual(expectedServedWindows(cycle.ecmwf, point, ECMWF_STEP_CEILING_HOURS));
+      const hrrrRows = point.forecasts.hrrr ?? [];
+      if (hrrrRows.length > 0) {
+        expect(
+          hrrrRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+          point.pointId,
+        ).toEqual(expectedServedWindows(cycle.hrrr, point, HRRR_HORIZON_HOURS));
         hrrrPoints += 1;
+      } else {
+        // The 48 h rule alone would serve this point, so its empty
+        // HRRR arm is the deliberate domain guard (Canadian policy /
+        // Alyeska geometry), not a geometry miss.
+        expect(expectedServedWindows(cycle.hrrr, point, HRRR_HORIZON_HOURS).length, point.pointId).toBeGreaterThan(0);
+        excludedPointIds.add(point.pointId);
       }
     }
     // 66 points are HRRR-excluded: 63 Canadian (policy) + 3 Alyeska
-    // (geometric); every US in-domain point serves lead 2.
+    // (geometric); every US in-domain point serves the 48 h horizon.
     expect(hrrrPoints).toBe(321);
+    // Identity pin for the domain guard (Codex gate, 2026-11-12): the
+    // excluded points must be exactly the three points of each of the
+    // 21 Canadian resorts in the roster plus Alyeska. The per-point
+    // geometry checks and the 321 count alone cannot catch a swapped
+    // HRRR arm between two same-timezone US points. Canadian list
+    // determined 2026-11-12 from src/data/ski-areas.json (country =
+    // Canada) cross-checked against the roster; a roster change must
+    // update this list deliberately.
+    const CANADIAN_SLUGS = [
+      'banff-sunshine', 'blue-mountain-on', 'cypress-mountain', 'fernie',
+      'grouse-mountain', 'kicking-horse', 'kimberley', 'lake-louise',
+      'le-massif', 'marmot-basin', 'mont-sainte-anne', 'mt-norquay',
+      'nakiska', 'panorama', 'red-mountain', 'revelstoke', 'silverstar',
+      'stoneham', 'sun-peaks', 'tremblant', 'whistler-blackcomb',
+    ];
+    const expectedExcluded = new Set(
+      [...CANADIAN_SLUGS, 'alyeska'].flatMap((slug) =>
+        ['base', 'mid_mountain', 'summit'].map((role) => `${slug}-${role}`),
+      ),
+    );
+    expect(excludedPointIds).toEqual(expectedExcluded);
   });
 });
 
@@ -343,9 +403,14 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
     expect(cataloguePointForLocation(mountRose, 'max')?.pointId).toBe('mount-rose-summit');
   });
 
-  it('stores GRIB leads 2-10 and the HRRR lead-2 row; no Open-Meteo records', () => {
-    expect(mrEcmwf.map((r) => r.leadDay)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    expect((mrPoint?.forecasts.hrrr ?? []).map((r) => r.leadDay)).toEqual([2]);
+  it('stores the full capped horizon at Mount Rose: ECMWF to the step-240 ceiling, HRRR to the 48 h horizon; no Open-Meteo records', () => {
+    const cycle = modelForecastData.cycles;
+    expect(
+      mrEcmwf.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+    ).toEqual(expectedServedWindows(cycle.ecmwf, mrPoint!, ECMWF_STEP_CEILING_HOURS));
+    expect(
+      (mrPoint?.forecasts.hrrr ?? []).map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+    ).toEqual(expectedServedWindows(cycle.hrrr, mrPoint!, HRRR_HORIZON_HOURS));
     expect(mrPoint?.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
   });
 
@@ -357,8 +422,8 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
   });
 
   it('has no model record beyond the 10-day cap in any mode', () => {
-    // One day past Mount Rose's last stored window (lead 10) is the
-    // lead-11 date. The retired Open-Meteo tail used to serve it.
+    // One day past Mount Rose's last stored window (the cap). The
+    // retired Open-Meteo tail used to serve it.
     const beyondDate = addCalendarDays(mrEcmwf[mrEcmwf.length - 1]?.windowEndLocalDate as string, 1);
     for (const mode of ['ecmwf', BLEND_MODEL_ID, 'hrrr']) {
       expect(modelForecastFor(mountRose, mode, 'min', beyondDate)).toBeNull();
@@ -428,12 +493,17 @@ describe('California Ikon/Epic expansion (catalogue addition, estimated geometry
     }
   });
 
-  it('stores GRIB leads 2-10 and the HRRR lead-2 row at every new base point; no Open-Meteo records', () => {
+  it('stores the full capped horizon at every new base point; no Open-Meteo records', () => {
+    const cycle = modelForecastData.cycles;
     for (const r of CA_NEW) {
       const point = modelForecastData.points.find((p) => p.pointId === `${r.slug}-base`);
       expect(point, r.slug).toBeDefined();
-      expect((point?.forecasts.ecmwf ?? []).map((x) => x.leadDay)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
-      expect((point?.forecasts.hrrr ?? []).map((x) => x.leadDay)).toEqual([2]);
+      expect(
+        (point?.forecasts.ecmwf ?? []).map((x) => ({ leadDay: x.leadDay, windowEndLocalDate: x.windowEndLocalDate })),
+      ).toEqual(expectedServedWindows(cycle.ecmwf, point!, ECMWF_STEP_CEILING_HOURS));
+      expect(
+        (point?.forecasts.hrrr ?? []).map((x) => ({ leadDay: x.leadDay, windowEndLocalDate: x.windowEndLocalDate })),
+      ).toEqual(expectedServedWindows(cycle.hrrr, point!, HRRR_HORIZON_HOURS));
       expect(point?.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
     }
   });
@@ -445,8 +515,8 @@ describe('California Ikon/Epic expansion (catalogue addition, estimated geometry
     const literal = modelForecastFor(kirkwood, 'ecmwf', 'min', day2!.windowEndLocalDate);
     expect(literal?.arm).toBe('ecmwf');
     expect(literal?.forecast.modelSlr).toBe(day2!.modelSlr);
-    // One day past Kirkwood's last stored window is the lead-11
-    // date; the retired Open-Meteo tail used to serve it.
+    // One day past Kirkwood's last stored window (the cap); the
+    // retired Open-Meteo tail used to serve it.
     const kirkwoodRows = point?.forecasts.ecmwf ?? [];
     const beyondDate = addCalendarDays(kirkwoodRows[kirkwoodRows.length - 1]?.windowEndLocalDate as string, 1);
     expect(modelForecastFor(kirkwood, 'ecmwf', 'min', beyondDate)).toBeNull();

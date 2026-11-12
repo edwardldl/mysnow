@@ -11,6 +11,10 @@ import {
 } from '../model-forecast';
 import { toSlrMethod } from '../snow/slr';
 import { addCalendarDays } from '../time';
+import {
+  ECMWF_STEP_CEILING_HOURS,
+  expectedServedWindows,
+} from './model-geometry';
 import type { DayData, Location } from '../types';
 
 const palisades: Location = {
@@ -82,21 +86,21 @@ const mountRose: Location = {
 
 const palisadesPoint = modelForecastData.points.find((p) => p.pointId === 'palisades-tahoe-base');
 const ecmwfRows = palisadesPoint?.forecasts.ecmwf ?? [];
-// The batch: ECMWF leads 2-10 at every point and no other arm's
-// dates exist (the Open-Meteo tail is retired), so the stored dates
-// are exactly the ECMWF window dates of the installed file — all
-// anchors below are read from the file itself so the suite survives
-// batch rollovers. day1Date is the lead-2 window — the only window
-// HRRR also holds; day2Date the lead-3 window; day9Date the lead-10
-// window (the cap). Dates past the cap are derived from day9Date.
+// Anchors are positional, read from the installed file itself so the
+// suite survives batch rollovers in either cycle geometry. day1Date is
+// the first stored window — the only window HRRR also holds at
+// Palisades (lead 2 from a 00Z cycle, lead 1 from a 12Z cycle);
+// day2Date the second stored window; day3Date the third; lastDate the
+// last stored window (the cap). Dates past the cap are derived from
+// lastDate. No other arm's dates exist (the Open-Meteo tail is retired).
 const allStoredDates = ecmwfRows.map((r) => r.windowEndLocalDate);
 const day1Date = ecmwfRows[0]?.windowEndLocalDate;
 const day2Date = ecmwfRows[1]?.windowEndLocalDate;
 const day3Date = ecmwfRows[2]?.windowEndLocalDate;
-const day9Date = ecmwfRows[8]?.windowEndLocalDate;
-const lead11Date = addCalendarDays(day9Date as string, 1);
-const beyondCapDate = addCalendarDays(day9Date as string, 3);
-const wellBeyondDate = addCalendarDays(day9Date as string, 5);
+const lastDate = ecmwfRows[8]?.windowEndLocalDate;
+const onePastLastDate = addCalendarDays(lastDate as string, 1);
+const beyondCapDate = addCalendarDays(lastDate as string, 3);
+const wellBeyondDate = addCalendarDays(lastDate as string, 5);
 const rowForLead = (lead: number) => ecmwfRows.find((r) => r.leadDay === lead);
 const stowePoint = modelForecastData.points.find((p) => p.pointId === 'stowe-base');
 const stoweEcmwfRows = stowePoint?.forecasts.ecmwf ?? [];
@@ -254,12 +258,21 @@ describe('ECMWF horizon under the 10-day cap', () => {
   const mkDay = (dateStr: string, totalSnowfall: number): DayData =>
     ({ dateStr, totalSnowfall }) as DayData;
 
-  it('covers lead days 2-10 at both Palisades (America/Los_Angeles) and Stowe (America/New_York)', () => {
-    // At the 00Z cycle the first complete 07:00-local window is lead 2
-    // in both timezones; the GRIB step-240 ceiling and the 10-day cap
-    // (2026-11-10) coincide at lead 10.
-    expect(ecmwfRows.map((r) => r.leadDay)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    expect(stoweEcmwfRows.map((r) => r.leadDay)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  it('covers the full capped horizon at both Palisades (America/Los_Angeles) and Stowe (America/New_York)', () => {
+    // The expected lead sets are derived from the cycle + point (see
+    // model-geometry.ts): at a 00Z cycle both points serve leads 2-10;
+    // at a 12Z cycle Palisades serves leads 1-9 (the step-240 ceiling
+    // cuts the lead-10 window, which would end 243 h out in standard
+    // time, 242 h in daylight time) while Stowe serves leads 1-10 (its
+    // lead-10 window ends exactly at step 240 in standard time, 239 h
+    // out in daylight time).
+    const cycle = modelForecastData.cycles.ecmwf;
+    expect(
+      ecmwfRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+    ).toEqual(expectedServedWindows(cycle, palisadesPoint!, ECMWF_STEP_CEILING_HOURS));
+    expect(
+      stoweEcmwfRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+    ).toEqual(expectedServedWindows(cycle, stowePoint!, ECMWF_STEP_CEILING_HOURS));
   });
 
   it('resolves the lead-5 window to the ECMWF arm in literal ecmwf mode', () => {
@@ -284,22 +297,26 @@ describe('ECMWF horizon under the 10-day cap', () => {
     }
   });
 
-  it('resolves the lead-10 window (the cap) at Palisades and at Stowe', () => {
-    const day10 = modelForecastFor(palisades, 'ecmwf', 'min', day9Date);
-    expect(day10?.forecast.leadDay).toBe(10);
-    expect(day10?.forecast.modelSlr).toBe(ecmwfRows[8]?.modelSlr);
-    const stoweDay10 = stoweEcmwfRows.find((r) => r.leadDay === 10);
-    const stoweResult = modelForecastFor(stowe, 'ecmwf', 'min', stoweDay10?.windowEndLocalDate ?? null);
-    expect(stoweResult?.forecast.leadDay).toBe(10);
-    expect(stoweResult?.forecast.modelSlr).toBe(stoweDay10?.modelSlr);
+  it('resolves the last (capped-horizon) window at Palisades and at Stowe', () => {
+    // The cap window is the last stored window at each point — lead 10
+    // at a 00Z cycle everywhere, and at a 12Z cycle only where the
+    // step-240 ceiling reaches it (Stowe); at Palisades a 12Z batch
+    // caps at lead 9.
+    const palisadesLast = ecmwfRows[ecmwfRows.length - 1];
+    const dayLast = modelForecastFor(palisades, 'ecmwf', 'min', palisadesLast?.windowEndLocalDate ?? null);
+    expect(dayLast?.forecast.leadDay).toBe(palisadesLast?.leadDay);
+    expect(dayLast?.forecast.modelSlr).toBe(palisadesLast?.modelSlr);
+    const stoweLast = stoweEcmwfRows[stoweEcmwfRows.length - 1];
+    const stoweResult = modelForecastFor(stowe, 'ecmwf', 'min', stoweLast?.windowEndLocalDate ?? null);
+    expect(stoweResult?.forecast.leadDay).toBe(stoweLast?.leadDay);
+    expect(stoweResult?.forecast.modelSlr).toBe(stoweLast?.modelSlr);
   });
 
-  it('has no Palisades record beyond the cap: the lead-11 date stays Kuchera', () => {
-    // The lead-11 date is one day past the file's lead-10 window.
-    // Before the 10-day cap the Open-Meteo tail arm served this
-    // date; it is retired, so the day now falls back to Kuchera in
-    // every mode.
-    const beyondDate = lead11Date;
+  it('has no Palisades record beyond the cap: one day past the last stored window stays Kuchera', () => {
+    // One day past the file's last stored window (the cap). Before the
+    // 10-day cap the Open-Meteo tail arm served this date; it is
+    // retired, so the day now falls back to Kuchera in every mode.
+    const beyondDate = onePastLastDate;
     expect(ecmwfRows.find((r) => r.windowEndLocalDate === beyondDate)).toBeUndefined();
     expect(modelForecastFor(palisades, 'ecmwf', 'min', beyondDate)).toBeNull();
     const out = applyModelMethodToDays([mkDay(beyondDate, 7.5)], palisades, 'ecmwf', 'min');
@@ -329,8 +346,8 @@ describe('ECMWF horizon under the 10-day cap', () => {
 describe('retired Open-Meteo tail under the ENS-EB menu method', () => {
   const mkDay = (dateStr: string, totalSnowfall: number): DayData =>
     ({ dateStr, totalSnowfall }) as DayData;
-  // beyondCapDate (module scope) is the lead-13 date at Palisades,
-  // in the territory the retired tail arm used to serve.
+  // beyondCapDate (module scope) is three days past the last stored
+  // window, in the territory the retired tail arm used to serve.
 
   it('keeps beyond-cap days on Kuchera in ecmwf and blend modes (no tail records)', () => {
     for (const mode of ['ecmwf', BLEND_MODEL_ID]) {
@@ -361,6 +378,9 @@ describe('per-window marks through the standard day path', () => {
     ).map((day) => day.modelWindow);
 
   it('blend mode: every Palisades window is a model day with truthful arms', () => {
+    // The first stored window is the only one HRRR holds at Palisades
+    // in either cycle geometry, so it is the sole HRRR mark; the rest
+    // are ECMWF.
     const marks = marksFor(allStoredDates, BLEND_MODEL_ID);
     expect(marks.map((m) => [m?.kind, m?.arm])).toEqual([
       ['model', 'hrrr'],
@@ -368,7 +388,7 @@ describe('per-window marks through the standard day path', () => {
     ]);
   });
 
-  it('literal hrrr mode: windows past the lead-2 window are marked Kuchera fallback, never silently filled', () => {
+  it('literal hrrr mode: windows past the first stored window are marked Kuchera fallback, never silently filled', () => {
     const marks = marksFor(allStoredDates, 'hrrr');
     expect(marks.map((m) => m?.kind)).toEqual([
       'model',
@@ -429,9 +449,12 @@ describe('inline labelling under the ENS-EB menu method', () => {
     // labelFor builds hourless days, so the record exists but nothing
     // of its window is in view: the label must carry both the
     // window-scoped SLR and the window-scoped not-applied disclosure
-    // (Codex gate, 2026-11-11).
+    // (Codex gate, 2026-11-11). day2Date is the second stored window,
+    // so its SLR is that row's — at a 00Z cycle that is lead 3, at a
+    // 12Z cycle lead 2, which is why the SLR comes from the row and
+    // never from a lead number.
     const label = labelFor(day2Date, 'ecmwf');
-    const slr = rowForLead(3)?.modelSlr as number;
+    const slr = ecmwfRows[1]?.modelSlr as number;
     expect(label).toContain(`window SLR ${slr.toFixed(1)}:1`);
     expect(label).toContain("no hours from this window are in view -- this window's SLR was not applied");
   });
