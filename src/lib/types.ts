@@ -67,6 +67,8 @@ export interface OpenMeteoResponse {
         requestedElevationM: number | null;
         modelGridElevationM: number | null;
         rawProfileAttached: boolean;
+        /** Age of the payload when it left the server cache (ms); 0/absent for a fresh upstream fetch. */
+        serverCacheAgeMs?: number;
     };
 }
 

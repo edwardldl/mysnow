@@ -179,6 +179,55 @@ const HISTORICAL_URL = 'https://historical-forecast-api.open-meteo.com/v1/foreca
 const ENSEMBLE_URL = 'https://ensemble-api.open-meteo.com/v1/ensemble';
 const META_BASE_URL = 'https://api.open-meteo.com/data';
 
+/**
+ * Open-Meteo calls go through the app's own caching proxy
+ * (src/app/api/open-meteo/route.ts) whenever a real browser origin is
+ * available, so the browser only talks to this origin and the server
+ * dedupes/retries/caches upstream trips. Outside a browser (tests,
+ * server-side callers) the upstream URL is used directly.
+ */
+const OPEN_METEO_PROXY_PATH = '/api/open-meteo';
+const OPEN_METEO_UPSTREAM_HOSTS = new Set([
+    'api.open-meteo.com',
+    'historical-forecast-api.open-meteo.com',
+    'ensemble-api.open-meteo.com',
+]);
+const MODEL_STATUS_TIMEOUT_MS = 8000;
+
+function proxiedOpenMeteoUrl(url: string | URL): string {
+    const upstream = url.toString();
+    let parsed: URL;
+    try {
+        parsed = new URL(upstream);
+    } catch {
+        return upstream;
+    }
+    if (!OPEN_METEO_UPSTREAM_HOSTS.has(parsed.hostname)) return upstream;
+    if (typeof window === 'undefined') return upstream;
+    const origin = window.location?.origin;
+    if (!origin || !(origin.startsWith('http://') || origin.startsWith('https://'))) return upstream;
+    return `${origin}${OPEN_METEO_PROXY_PATH}?url=${encodeURIComponent(upstream)}`;
+}
+
+async function fetchOpenMeteo(url: string | URL, init?: RequestInit): Promise<Response> {
+    const response = await fetch(proxiedOpenMeteoUrl(url), init);
+    // A STALE proxy answer is upstream data the server could only serve
+    // from its expired cache. Treat it exactly like the upstream failure
+    // it followed, so the client's own stale-if-error policy (with its
+    // own timestamps and labelling) decides what happens next, instead of
+    // the data being re-timestamped here as fresh.
+    if (response.headers.get('x-cache') === 'STALE') {
+        throw new Error('Open-Meteo proxy served stale data');
+    }
+    return response;
+}
+
+function responseAgeMs(response: Response | null): number {
+    if (!response) return 0;
+    const ageSeconds = Number(response.headers.get('age'));
+    return Number.isFinite(ageSeconds) && ageSeconds > 0 ? ageSeconds * 1000 : 0;
+}
+
 /** Mapping of internal models to Open-Meteo static metadata names */
 const MODEL_META_MAP: Record<string, string> = {
     'best_match': 'ecmwf_ifs',
@@ -289,10 +338,10 @@ async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
     if (!metaKey) return undefined;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), MODEL_STATUS_TIMEOUT_MS);
 
     try {
-        const res = await fetch(`${META_BASE_URL}/${metaKey}/static/meta.json`, { signal: controller.signal });
+        const res = await fetchOpenMeteo(`${META_BASE_URL}/${metaKey}/static/meta.json`, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (!res.ok) return undefined;
         const data: unknown = await res.json();
@@ -302,7 +351,7 @@ async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
     } catch (error: unknown) {
         clearTimeout(timeoutId);
         if (error instanceof DOMException && error.name === 'AbortError') {
-            console.warn(`Metadata fetch for ${modelKey} timed out after 2s`);
+            console.warn(`Metadata fetch for ${modelKey} timed out after ${MODEL_STATUS_TIMEOUT_MS / 1000}s`);
         }
         return undefined;
     }
@@ -403,10 +452,20 @@ function evictOldestCacheEntries(neededEntries = 5): boolean {
     }
 }
 
+function payloadDataAgeMs(data: WeatherCachePayload): number {
+    const ages = [data.ecmwfData, data.hrrrData, ...(data.ensembleMembers ?? [])]
+        .map((response) => response?.requestMetadata?.serverCacheAgeMs)
+        .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+    return ages.length > 0 ? Math.max(...ages) : 0;
+}
+
 function setCachedData(key: string, data: WeatherCachePayload): void {
     if (typeof window === 'undefined') return;
+    // Backdate by the server-cache age so a payload that spent 20 minutes
+    // in the server cache does not get a fresh 30-minute client lifetime.
+    const timestamp = Date.now() - payloadDataAgeMs(data);
     try {
-        const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
+        const item: WeatherCacheItem = { ...data, timestamp };
         localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
     } catch (error: unknown) {
         const quotaExceeded = error instanceof DOMException
@@ -416,7 +475,7 @@ function setCachedData(key: string, data: WeatherCachePayload): void {
             if (cleared) {
                 try {
                     // Try one more time after internal cleanup
-                    const item: WeatherCacheItem = { ...data, timestamp: Date.now() };
+                    const item: WeatherCacheItem = { ...data, timestamp };
                     localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
                     return;
                 } catch (retryError) {
@@ -444,7 +503,13 @@ function cachedResult(item: WeatherCacheItem, status: 'cached' | 'stale'): Weath
 }
 
 function freshResult(data: WeatherCachePayload): WeatherDataResult {
-    return { ...data, status: 'fresh', fetchedAtMs: Date.now(), cacheAgeMs: 0 };
+    const cacheAgeMs = payloadDataAgeMs(data);
+    return {
+        ...data,
+        status: cacheAgeMs > 0 ? 'cached' : 'fresh',
+        fetchedAtMs: Date.now() - cacheAgeMs,
+        cacheAgeMs,
+    };
 }
 
 interface EnsembleFetchData {
@@ -613,6 +678,7 @@ function mergeDualForcingPayload(
     requestedLatitudes: number[],
     requestedLongitudes: number[],
     requestedElevations: number[],
+    dataAgeMs: number,
 ): unknown {
     const surfaces = Array.isArray(surfacePayload) ? surfacePayload : [surfacePayload];
     const raws = Array.isArray(rawPayload) ? rawPayload : [rawPayload];
@@ -634,6 +700,7 @@ function mergeDualForcingPayload(
                 requestedElevationM: requestedElevations[index] ?? requestedElevations[0] ?? null,
                 modelGridElevationM: rawRecord && typeof rawRecord.elevation === 'number' ? rawRecord.elevation : null,
                 rawProfileAttached: rawHourly !== null,
+                serverCacheAgeMs: dataAgeMs,
             },
         };
     });
@@ -654,9 +721,9 @@ async function fetchDualForcing(url: string): Promise<Response> {
     rawUrl.searchParams.set('cell_selection', 'nearest');
     rawUrl.searchParams.delete('daily');
 
-    const surfacePromise = fetch(surfaceUrl);
+    const surfacePromise = fetchOpenMeteo(surfaceUrl);
     const rawPromise = rawVariables.length > 0
-        ? fetch(rawUrl).catch(error => {
+        ? fetchOpenMeteo(rawUrl).catch(error => {
             console.warn('Native-grid profile request failed; continuing with surface forcing only.', error);
             return null;
         })
@@ -675,6 +742,7 @@ async function fetchDualForcing(url: string): Promise<Response> {
         requestedLatitudes,
         requestedLongitudes,
         requestedElevations,
+        Math.max(responseAgeMs(surfaceResponse), responseAgeMs(rawResponse)),
     );
     return new Response(JSON.stringify(merged), {
         status: surfaceResponse.status,
