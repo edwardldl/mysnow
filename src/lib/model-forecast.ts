@@ -63,6 +63,12 @@ export interface ModelWindowForecast {
   kucheraSnowfallCm: number | null;
   liquidMm: number | null;
   /**
+   * The cycle that scored this record. Present on records from the
+   * tiered-cadence producers (2026-11-16): in a merged frontend,
+   * different windows of one arm can carry different cycles.
+   */
+  cycleUtc?: string;
+  /**
    * Present only on records the isotonic serving layer adjusted for
    * elevation ordering (2026-11-10): the record's SLR and snowfall
    * before adjustment. modelSlr/modelSnowfallCm carry the adjusted

@@ -10,6 +10,7 @@ import {
 import { addCalendarDays } from '../time';
 import {
   ECMWF_STEP_CEILING_HOURS,
+  expectedMergedWindows,
   expectedServedWindows,
   HRRR_HORIZON_HOURS,
 } from './model-geometry';
@@ -282,10 +283,10 @@ describe('10-day cap and the retired Open-Meteo arm', () => {
     const cycle = modelForecastData.cycles;
     expect(
       ecmwfRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
-    ).toEqual(expectedServedWindows(cycle.ecmwf, palisadesPoint!, ECMWF_STEP_CEILING_HOURS));
+      ).toEqual(expectedMergedWindows(ecmwfRows, cycle.ecmwf, palisadesPoint!, ECMWF_STEP_CEILING_HOURS));
     expect(
       hrrrRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
-    ).toEqual(expectedServedWindows(cycle.hrrr, palisadesPoint!, HRRR_HORIZON_HOURS));
+      ).toEqual(expectedMergedWindows(hrrrRows, cycle.hrrr, palisadesPoint!, HRRR_HORIZON_HOURS));
   });
 
   it('has no model record beyond the cap in any mode', () => {
@@ -349,13 +350,13 @@ describe('North America catalogue (129 resorts, 387 points)', () => {
       expect(
         (point.forecasts.ecmwf ?? []).map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
         point.pointId,
-      ).toEqual(expectedServedWindows(cycle.ecmwf, point, ECMWF_STEP_CEILING_HOURS));
+      ).toEqual(expectedMergedWindows((point.forecasts.ecmwf ?? []), cycle.ecmwf, point, ECMWF_STEP_CEILING_HOURS));
       const hrrrRows = point.forecasts.hrrr ?? [];
       if (hrrrRows.length > 0) {
         expect(
           hrrrRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
           point.pointId,
-        ).toEqual(expectedServedWindows(cycle.hrrr, point, HRRR_HORIZON_HOURS));
+      ).toEqual(expectedMergedWindows(hrrrRows, cycle.hrrr, point, HRRR_HORIZON_HOURS));
         hrrrPoints += 1;
       } else {
         // The 48 h rule alone would serve this point, so its empty
@@ -407,10 +408,10 @@ describe('Mount Rose (catalogue addition, estimated geometry)', () => {
     const cycle = modelForecastData.cycles;
     expect(
       mrEcmwf.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
-    ).toEqual(expectedServedWindows(cycle.ecmwf, mrPoint!, ECMWF_STEP_CEILING_HOURS));
+      ).toEqual(expectedMergedWindows(mrEcmwf, cycle.ecmwf, mrPoint!, ECMWF_STEP_CEILING_HOURS));
     expect(
       (mrPoint?.forecasts.hrrr ?? []).map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
-    ).toEqual(expectedServedWindows(cycle.hrrr, mrPoint!, HRRR_HORIZON_HOURS));
+      ).toEqual(expectedMergedWindows((mrPoint?.forecasts.hrrr ?? []), cycle.hrrr, mrPoint!, HRRR_HORIZON_HOURS));
     expect(mrPoint?.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
   });
 
@@ -499,11 +500,11 @@ describe('California Ikon/Epic expansion (catalogue addition, estimated geometry
       const point = modelForecastData.points.find((p) => p.pointId === `${r.slug}-base`);
       expect(point, r.slug).toBeDefined();
       expect(
-        (point?.forecasts.ecmwf ?? []).map((x) => ({ leadDay: x.leadDay, windowEndLocalDate: x.windowEndLocalDate })),
-      ).toEqual(expectedServedWindows(cycle.ecmwf, point!, ECMWF_STEP_CEILING_HOURS));
+        (point?.forecasts.ecmwf ?? []).map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+      ).toEqual(expectedMergedWindows((point?.forecasts.ecmwf ?? []), cycle.ecmwf, point!, ECMWF_STEP_CEILING_HOURS));
       expect(
-        (point?.forecasts.hrrr ?? []).map((x) => ({ leadDay: x.leadDay, windowEndLocalDate: x.windowEndLocalDate })),
-      ).toEqual(expectedServedWindows(cycle.hrrr, point!, HRRR_HORIZON_HOURS));
+        (point?.forecasts.hrrr ?? []).map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
+      ).toEqual(expectedMergedWindows((point?.forecasts.hrrr ?? []), cycle.hrrr, point!, HRRR_HORIZON_HOURS));
       expect(point?.forecasts.ecmwf_openmeteo ?? []).toEqual([]);
     }
   });

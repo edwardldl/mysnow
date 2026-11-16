@@ -114,3 +114,37 @@ export function expectedServedWindows(
   }
   return windows;
 }
+
+/**
+ * The served-window expectation for one arm of a possibly MERGED
+ * frontend (tiered cadence, 2026-11-16): records can carry different
+ * scoring cycles per window. Merges never add or remove windows, so
+ * the window set is the one the OLDEST contributing cycle serves;
+ * each window's lead day is the one its own record's cycle assigns.
+ * Records without per-record provenance fall back to the arm cycle,
+ * which reduces this to expectedServedWindows for a plain batch file.
+ */
+export function expectedMergedWindows(
+  rows: { leadDay: number; windowEndLocalDate: string; cycleUtc?: string }[],
+  fallbackCycleUtc: string | undefined,
+  point: { timezone: string },
+  ceilingHours: number,
+): ServedWindow[] {
+  if (rows.length === 0) return [];
+  const cycleOf = (row: { cycleUtc?: string }): string | undefined => row.cycleUtc ?? fallbackCycleUtc;
+  const cycles = [...new Set(rows.map(cycleOf))];
+  const byCycle = new Map(
+    cycles.map((cycle) => [
+      cycle,
+      new Map(expectedServedWindows(cycle, point, ceilingHours).map((w) => [w.windowEndLocalDate, w.leadDay])),
+    ]),
+  );
+  const oldest = cycles.reduce((a, b) => (a! <= b! ? a : b));
+  const leadByWindow = new Map<string, number | undefined>(
+    rows.map((row) => [row.windowEndLocalDate, byCycle.get(cycleOf(row))?.get(row.windowEndLocalDate)]),
+  );
+  return [...byCycle.get(oldest)!.keys()].sort().map((date) => ({
+    leadDay: leadByWindow.get(date) as number,
+    windowEndLocalDate: date,
+  }));
+}

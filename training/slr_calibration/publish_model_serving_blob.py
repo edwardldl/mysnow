@@ -123,7 +123,9 @@ def http_get(url: str, timeout: int = 60) -> bytes:
 
 def describe_frontend(data: dict) -> tuple[str, int, str, str]:
     cycles = data.get("cycles") or {}
-    cycle_utc = cycles.get("ecmwf") or cycles.get("hrrr")
+    # A merged frontend can carry a different cycle per arm (tiered
+    # cadence); the manifest cycleUtc is the newest contributing one.
+    cycle_utc = max(cycles.values()) if cycles else None
     if not cycle_utc:
         raise fail("frontend JSON carries no cycle timestamp")
     record_count = 0

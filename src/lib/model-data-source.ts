@@ -164,13 +164,18 @@ async function loadFromBlob(baseUrl: string): Promise<ServedModelData> {
     if (digest !== manifest.sha256) throw new Error('snapshot hash mismatch');
     const parsed: unknown = JSON.parse(bytes.toString('utf8'));
     if (!isPlausibleData(parsed)) throw new Error('implausible model-data snapshot');
-    // Manifest and snapshot must agree about the cycle they describe.
-    const snapshotCycle = parsed.cycles?.ecmwf;
-    if (snapshotCycle !== undefined && snapshotCycle !== manifest.cycleUtc) {
-        throw new Error('manifest and snapshot cycles disagree');
+    // Manifest and snapshot must agree about the cycles they describe:
+    // identical per-arm cycles where both state them, and cycleUtc
+    // equal to their maximum (a merged snapshot can carry a different
+    // cycle per arm under the tiered cadence).
+    const snapshotCycles = parsed.cycles ?? {};
+    for (const [arm, cycle] of Object.entries(snapshotCycles)) {
+        if (manifest.cycles?.[arm] !== undefined && manifest.cycles[arm] !== cycle) {
+            throw new Error('manifest and snapshot cycles disagree');
+        }
     }
-    const manifestEcmwf = manifest.cycles?.ecmwf;
-    if (manifestEcmwf !== undefined && snapshotCycle !== undefined && manifestEcmwf !== snapshotCycle) {
+    const cycleValues = Object.values(snapshotCycles);
+    if (cycleValues.length > 0 && manifest.cycleUtc !== cycleValues.reduce((a, b) => (a > b ? a : b))) {
         throw new Error('manifest and snapshot cycles disagree');
     }
     cache = { sha256: manifest.sha256, data: parsed, cycleUtc: manifest.cycleUtc, checkedAtMs: Date.now() };

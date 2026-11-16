@@ -566,6 +566,7 @@ def main() -> int:
                     "kucheraSlr": r.get("kuchera_slr"),
                     "kucheraSnowfallCm": r.get("kuchera_snowfall_cm"),
                     "liquidMm": r.get("liquid_mm"),
+                    "cycleUtc": r["cycle_utc"],
                 } for r in rows]
         frontend["points"].append(entry)
     # 10-day cap on all surfaces (user decision 2026-11-10): a serving
