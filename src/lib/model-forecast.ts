@@ -119,12 +119,19 @@ export interface ModelForecastData {
 export const modelForecastData = rawData as unknown as ModelForecastData;
 
 /**
- * Internal lookups read through this binding so tests can inject a
- * frozen serving batch (model-forecast-frozen.test.ts). Production code
- * never calls the setter; Vitest cannot intercept the JSON import in
- * this setup, hence the seam.
+ * Internal lookups read through this binding. Two callers may replace
+ * the active snapshot: tests injecting a frozen serving batch
+ * (model-forecast-frozen.test.ts — Vitest cannot intercept the JSON
+ * import in this setup, hence the seam), and the page's runtime
+ * refresh, which swaps in a newer Blob-published snapshot when one
+ * exists (lib/model-data-source.ts). The bundled import is the
+ * default and the fallback in both cases.
  */
 let activeModelForecastData: ModelForecastData = modelForecastData;
+
+export function setActiveModelForecastData(data: ModelForecastData): void {
+  activeModelForecastData = data;
+}
 
 export function setModelForecastDataForTests(data: ModelForecastData | null): void {
   activeModelForecastData = data ?? modelForecastData;

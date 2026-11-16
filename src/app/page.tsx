@@ -8,7 +8,7 @@ import ForecastDashboard from "@/components/ForecastDashboard";
 import HistorySection from "@/components/HistorySection";
 import CreditsFooter from "@/components/CreditsFooter";
 import CurrentWeatherCard from "@/components/CurrentWeatherCard";
-import { applyModelMethodToDays, ENS_EB_METHOD_ID } from "@/lib/model-forecast";
+import { applyModelMethodToDays, ENS_EB_METHOD_ID, modelForecastData, setActiveModelForecastData, type ModelForecastData } from "@/lib/model-forecast";
 import { usePhysicsPreference } from "@/lib/physics-preference";
 import ErrorBanner from "@/components/ErrorBanner";
 import { fetchWeatherData, fetchBulkWeatherData, fetchElevationTriad, hasValidCache, getLocations, saveLocation, removeLocation, getLastLocationId, setLastLocationId, MAX_FORECAST_DAYS } from "@/lib/api";
@@ -31,6 +31,36 @@ export default function Home() {
   // changes -- where ENS-EB cannot serve, Kuchera computes in its place
   // while this preference stays selected.
   const { preferenceId: algoId, setPreferenceId: setAlgoId, restored: physicsRestored } = usePhysicsPreference();
+  // Runtime model-data refresh: the deployment ships with a bundled
+  // serving snapshot; a newer one published to Blob after the build is
+  // picked up here (see lib/model-data-source.ts). The bundled copy
+  // stays in effect unless the served cycles differ from it.
+  const [modelDataVersion, setModelDataVersion] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/model-forecasts");
+        if (!res.ok) return;
+        const data = (await res.json()) as ModelForecastData;
+        if (cancelled || !data || !Array.isArray(data.points) || data.points.length === 0) return;
+        const cyclesDiffer =
+          data.cycles?.ecmwf !== modelForecastData.cycles?.ecmwf ||
+          data.cycles?.hrrr !== modelForecastData.cycles?.hrrr;
+        const notOlder =
+          (data.cycles?.ecmwf ?? "") >= (modelForecastData.cycles?.ecmwf ?? "");
+        if (cyclesDiffer && notOlder) {
+          setActiveModelForecastData(data);
+          setModelDataVersion((v) => v + 1);
+        }
+      } catch {
+        // The bundled snapshot stays in effect.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [elevationMode, setElevationMode] = useState<string>("avg");
   const [headerHeight, setHeaderHeight] = useState(120); // Default fallback
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
@@ -328,7 +358,7 @@ export default function Home() {
   const displayForecastDays = React.useMemo(() => {
     if (algoId !== ENS_EB_METHOD_ID) return forecastDays;
     return applyModelMethodToDays(forecastDays, locations[currentLocationId], modelId, elevationMode);
-  }, [forecastDays, algoId, locations, currentLocationId, modelId, elevationMode]);
+  }, [forecastDays, algoId, locations, currentLocationId, modelId, elevationMode, modelDataVersion]);
 
   const activeDays = mode === "forecast" ? displayForecastDays : historyDays;
   const activeSelectedDate = mode === "forecast" ? selectedDate : historySelectedDate;
