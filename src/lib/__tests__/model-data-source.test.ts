@@ -9,13 +9,23 @@ import { modelForecastData } from '../model-forecast';
 const BASE = 'https://store123.public.blob.vercel-storage.com';
 const MANIFEST_URL = `${BASE}/model-forecasts/manifest.json`;
 
+// The fixtures name the bundled snapshot's own cycles, so the
+// loader's per-arm floors accept them however far the installed
+// batch has advanced (a pinned 00Z fixture regressed the suite the
+// moment the bundle moved to 12Z, 2026-11-16).
+const BUNDLED_CYCLES = {
+    ecmwf: modelForecastData.cycles.ecmwf ?? '2026-11-16T00:00:00Z',
+    hrrr: modelForecastData.cycles.hrrr ?? '2026-11-16T00:00:00Z',
+};
+const BUNDLED_MAX_CYCLE = BUNDLED_CYCLES.ecmwf > BUNDLED_CYCLES.hrrr ? BUNDLED_CYCLES.ecmwf : BUNDLED_CYCLES.hrrr;
+
 const FAKE_DATA = {
     generatedAtUtc: '2026-11-16T00:00:00Z',
     modelVersion: 'test',
     modelLabel: 'ENS-EB Model (MySnow)',
     featureBuilderVersion: 'test',
     nanPolicy: 'test',
-    cycles: { ecmwf: '2026-11-16T00:00:00Z', hrrr: '2026-11-16T00:00:00Z' },
+    cycles: { ...BUNDLED_CYCLES },
     points: [{ pointId: 'fake', forecasts: { ecmwf: [], hrrr: [] } }],
 };
 const FAKE_BYTES = Buffer.from(JSON.stringify(FAKE_DATA), 'utf8');
@@ -25,8 +35,8 @@ const SNAPSHOT_URL = `${BASE}/model-forecasts/snapshots/20261116T000000Z-${FAKE_
 function manifest(overrides: Record<string, unknown> = {}): Record<string, unknown> {
     return {
         version: 1,
-        cycleUtc: '2026-11-16T00:00:00Z',
-        cycles: { ecmwf: '2026-11-16T00:00:00Z', hrrr: '2026-11-16T00:00:00Z' },
+        cycleUtc: BUNDLED_MAX_CYCLE,
+        cycles: { ...BUNDLED_CYCLES },
         sha256: FAKE_SHA,
         snapshotPathname: 'model-forecasts/snapshots/x.json',
         snapshotUrl: SNAPSHOT_URL,
@@ -83,7 +93,7 @@ describe('loadServedModelData', () => {
         const served = await loadServedModelData();
         expect(served.source).toBe('blob');
         expect(served.sha256).toBe(FAKE_SHA);
-        expect(served.cycleUtc).toBe('2026-11-16T00:00:00Z');
+        expect(served.cycleUtc).toBe(BUNDLED_MAX_CYCLE);
         expect(served.data.points).toHaveLength(1);
     });
 
