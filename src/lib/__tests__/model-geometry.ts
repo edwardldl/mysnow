@@ -121,11 +121,14 @@ export function expectedServedWindows(
  * scoring cycles per window. Merges never add or remove windows, so
  * the window set is the one the OLDEST contributing cycle serves;
  * each window's lead day is the one its own record's cycle assigns.
- * Records without per-record provenance fall back to the arm cycle,
- * which reduces this to expectedServedWindows for a plain batch file.
+ * The window set is anchored to the seed (full-batch) cycle when the
+ * document carries seedCycles; records without per-record provenance
+ * fall back to the arm cycle, which reduces this to
+ * expectedServedWindows for a plain batch file.
  */
 export function expectedMergedWindows(
   rows: { leadDay: number; windowEndLocalDate: string; cycleUtc?: string }[],
+  baselineCycleUtc: string | undefined,
   fallbackCycleUtc: string | undefined,
   point: { timezone: string },
   ceilingHours: number,
@@ -139,11 +142,24 @@ export function expectedMergedWindows(
       new Map(expectedServedWindows(cycle, point, ceilingHours).map((w) => [w.windowEndLocalDate, w.leadDay])),
     ]),
   );
-  const oldest = cycles.reduce((a, b) => (a! <= b! ? a : b));
-  const leadByWindow = new Map<string, number | undefined>(
-    rows.map((row) => [row.windowEndLocalDate, byCycle.get(cycleOf(row))?.get(row.windowEndLocalDate)]),
-  );
-  return [...byCycle.get(oldest)!.keys()].sort().map((date) => ({
+  // Coverage is anchored to the seed (full-batch) cycle when the
+  // document carries one; only without it does the oldest surviving
+  // record cycle stand in.
+  const baseline = baselineCycleUtc ?? cycles.reduce((a, b) => (a! <= b! ? a : b));
+  const baselineWindows =
+    byCycle.get(baseline) ??
+    new Map(expectedServedWindows(baseline, point, ceilingHours).map((w) => [w.windowEndLocalDate, w.leadDay]));
+  const leadByWindow = new Map<string, number>();
+  for (const row of rows) {
+    const lead = byCycle.get(cycleOf(row))?.get(row.windowEndLocalDate);
+    if (lead === undefined) {
+      throw new Error(
+        `record window ${row.windowEndLocalDate} is not served by its own cycle ${cycleOf(row) ?? 'unknown'}`,
+      );
+    }
+    leadByWindow.set(row.windowEndLocalDate, lead);
+  }
+  return [...baselineWindows.keys()].sort().map((date) => ({
     leadDay: leadByWindow.get(date) as number,
     windowEndLocalDate: date,
   }));

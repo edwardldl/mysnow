@@ -148,6 +148,64 @@ describe('loadServedModelData', () => {
         expect(served.source).toBe('bundled');
     });
 
+    it('rejects a crossed-arms snapshot: stale ECMWF behind a fresh HRRR cycle', async () => {
+        // The scalar maximum (the HRRR cycle) is newer than the
+        // bundle, but the ECMWF arm is older than the bundled ECMWF
+        // cycle: per-arm floors must refuse it.
+        const bundled = modelForecastData.cycles;
+        const shift = (iso: string, hours: number) =>
+            new Date(Date.parse(iso) + hours * 3_600_000).toISOString().replace('.000Z', 'Z');
+        const crossedCycles = {
+            ecmwf: shift(bundled.ecmwf!, -24),
+            hrrr: shift(bundled.hrrr!, 24),
+        };
+        const crossedData = { ...FAKE_DATA, cycles: crossedCycles };
+        const crossedBytes = Buffer.from(JSON.stringify(crossedData), 'utf8');
+        const crossedSha = createHash('sha256').update(crossedBytes).digest('hex');
+        const fetchFn = vi.fn(async (input: string) => {
+            if (input === MANIFEST_URL) {
+                return jsonResponse(manifest({
+                    sha256: crossedSha,
+                    cycleUtc: crossedCycles.hrrr,
+                    cycles: crossedCycles,
+                }));
+            }
+            if (input === SNAPSHOT_URL) return new Response(crossedBytes, { status: 200 });
+            throw new Error(`unexpected fetch ${input}`);
+        });
+        vi.stubGlobal('fetch', fetchFn);
+        const served = await loadServedModelData();
+        expect(served.source).toBe('bundled');
+    });
+
+    it('accepts a merged snapshot whose arms advance independently', async () => {
+        const bundled = modelForecastData.cycles;
+        const shift = (iso: string, hours: number) =>
+            new Date(Date.parse(iso) + hours * 3_600_000).toISOString().replace('.000Z', 'Z');
+        const mergedCycles = {
+            ecmwf: bundled.ecmwf!,
+            hrrr: shift(bundled.hrrr!, 6),
+        };
+        const mergedData = { ...FAKE_DATA, cycles: mergedCycles };
+        const mergedBytes = Buffer.from(JSON.stringify(mergedData), 'utf8');
+        const mergedSha = createHash('sha256').update(mergedBytes).digest('hex');
+        const fetchFn = vi.fn(async (input: string) => {
+            if (input === MANIFEST_URL) {
+                return jsonResponse(manifest({
+                    sha256: mergedSha,
+                    cycleUtc: mergedCycles.hrrr,
+                    cycles: mergedCycles,
+                }));
+            }
+            if (input === SNAPSHOT_URL) return new Response(mergedBytes, { status: 200 });
+            throw new Error(`unexpected fetch ${input}`);
+        });
+        vi.stubGlobal('fetch', fetchFn);
+        const served = await loadServedModelData();
+        expect(served.source).toBe('blob');
+        expect(served.data.cycles).toEqual(mergedCycles);
+    });
+
     it('rejects a manifest naming an older cycle than the bundled snapshot', async () => {
         const oldData = { ...FAKE_DATA, cycles: { ecmwf: '2026-11-10T00:00:00Z', hrrr: '2026-11-10T00:00:00Z' } };
         const oldBytes = Buffer.from(JSON.stringify(oldData), 'utf8');

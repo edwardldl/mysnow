@@ -95,8 +95,22 @@ function cachedResult(): ServedModelData {
     return { data: cache!.data, source: 'blob', cycleUtc: cache!.cycleUtc, sha256: cache!.sha256 };
 }
 
-function bundledCycleUtc(): string {
-    return modelForecastData.cycles?.ecmwf ?? '';
+/**
+ * Per-arm freshness: every arm cycle in the floor must be present in
+ * the candidate and no older there. A merged snapshot's arms advance
+ * independently, so a scalar-maximum comparison is not a freshness
+ * proof (a stale ECMWF arm could ride in behind a fresh HRRR cycle).
+ */
+function cyclesNotOlder(
+    candidate: Partial<Record<string, string>> | undefined,
+    floor: Partial<Record<string, string>> | undefined,
+): boolean {
+    for (const [arm, floorCycle] of Object.entries(floor ?? {})) {
+        if (!floorCycle) continue;
+        const candidateCycle = candidate?.[arm];
+        if (candidateCycle === undefined || candidateCycle < floorCycle) return false;
+    }
+    return true;
 }
 
 function isPlausibleManifest(value: unknown, baseUrl: string): value is ModelDataManifest {
@@ -147,9 +161,19 @@ async function fetchJson(url: string, timeoutMs: number): Promise<unknown> {
 async function loadFromBlob(baseUrl: string): Promise<ServedModelData> {
     const manifest = await fetchJson(`${baseUrl}/${MANIFEST_PATHNAME}`, MANIFEST_TIMEOUT_MS);
     if (!isPlausibleManifest(manifest, baseUrl)) throw new Error('implausible model-data manifest');
-    // Regression guard: never serve an older cycle than the one in effect.
-    const floor = cache ? cache.cycleUtc : bundledCycleUtc();
-    if (floor && manifest.cycleUtc < floor) throw new Error('manifest names an older cycle than the one in effect');
+    // Regression guard: never serve arm cycles older than the ones
+    // in effect (the verified cache, else the bundled snapshot).
+    const floorCycles = cache ? cache.data.cycles : modelForecastData.cycles;
+    if (manifest.cycles !== undefined) {
+        if (!cyclesNotOlder(manifest.cycles, floorCycles)) {
+            throw new Error('manifest arm cycles are older than the ones in effect');
+        }
+    } else {
+        const floorMax = Object.values(floorCycles ?? {}).reduce((a, b) => (a > b ? a : b), '');
+        if (floorMax && manifest.cycleUtc < floorMax) {
+            throw new Error('manifest names an older cycle than the one in effect');
+        }
+    }
     if (cache && cache.sha256 === manifest.sha256) {
         cache.checkedAtMs = Date.now();
         return cachedResult();
@@ -177,6 +201,11 @@ async function loadFromBlob(baseUrl: string): Promise<ServedModelData> {
     const cycleValues = Object.values(snapshotCycles);
     if (cycleValues.length > 0 && manifest.cycleUtc !== cycleValues.reduce((a, b) => (a > b ? a : b))) {
         throw new Error('manifest and snapshot cycles disagree');
+    }
+    // The snapshot's own cycles must clear the same per-arm floor
+    // (the manifest could omit cycles the snapshot carries).
+    if (!cyclesNotOlder(snapshotCycles, floorCycles)) {
+        throw new Error('snapshot arm cycles are older than the ones in effect');
     }
     cache = { sha256: manifest.sha256, data: parsed, cycleUtc: manifest.cycleUtc, checkedAtMs: Date.now() };
     return cachedResult();

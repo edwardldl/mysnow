@@ -117,6 +117,13 @@ export interface ModelForecastData {
   featureBuilderVersion: string;
   nanPolicy: string;
   cycles: Partial<Record<ModelSourceArm, string>>;
+  /**
+   * The full-batch cycles that set this document's window coverage.
+   * Present on tiered-cadence frontends (2026-11-16): in a merged
+   * document the per-record cycles can be newer than the seed, but
+   * coverage is always the seed batch's.
+   */
+  seedCycles?: Partial<Record<ModelSourceArm, string>>;
   /** Present when the serving JSON carries the Open-Meteo third arm. */
   openMeteoArm?: OpenMeteoArmMetadata;
   points: ModelForecastPoint[];

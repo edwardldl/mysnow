@@ -47,9 +47,15 @@ export default function Home() {
         const cyclesDiffer =
           data.cycles?.ecmwf !== modelForecastData.cycles?.ecmwf ||
           data.cycles?.hrrr !== modelForecastData.cycles?.hrrr;
-        const notOlder =
-          (data.cycles?.ecmwf ?? "") >= (modelForecastData.cycles?.ecmwf ?? "");
-        if (cyclesDiffer && notOlder) {
+        // A merged update can refresh windows without moving either
+        // arm's maximum cycle; the generation timestamp catches those.
+        const generatedDiffer = data.generatedAtUtc !== modelForecastData.generatedAtUtc;
+        const notOlder = (["ecmwf", "hrrr"] as const).every((arm) => {
+          const incoming = data.cycles?.[arm];
+          const current = modelForecastData.cycles?.[arm];
+          return incoming === undefined || current === undefined || incoming >= current;
+        });
+        if ((cyclesDiffer || generatedDiffer) && notOlder) {
           setActiveModelForecastData(data);
           setModelDataVersion((v) => v + 1);
         }

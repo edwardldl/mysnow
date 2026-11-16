@@ -2,44 +2,61 @@
 """Tiered-cadence merge runs for MySnow model serving (2026-11-16).
 
 The twice-daily full batches (run_model_serving.py at 00Z/12Z) remain
-the backbone: the only source of ECMWF leads 7-10 and the only data
-state that is git-committed. Between them, merge runs refresh the
-windows newer cycles can already see, layered over a persistent
-working state:
+the backbone: the only source of ECMWF leads 7-10. Between them, merge
+runs refresh the windows newer cycles can already see, layered over a
+persistent RAW working state:
 
   hrrr    hourly: score the HRRR arm from the latest posted cycle
           (48 h runs at 00/06/12/18Z, 18 h runs otherwise) and replace
           the HRRR records for the windows it covers.
   ecmwf   at 06Z/18Z: score ECMWF to its step-144 ceiling (leads ~1-6)
-          plus HRRR from the same cycle, and replace those records.
+          plus HRRR from the same cycle when available, and replace
+          those records.
+  commit-full  the full batches' install step: under the same lock,
+          adopt a validated full-batch candidate as the new state —
+          its coverage and windows, but retaining any standing record
+          whose scoring cycle is strictly newer (an hourly refresh
+          that landed while the batch was scoring is never regressed)
+          — then install and publish from that state.
 
 A merge never extends coverage (windows absent from the state are
 skipped), never moves a window backward (a record is replaced only by
-a strictly newer cycle's record), and never stacks the isotonic layer
-(the state is kept RAW; the layer is applied fresh to the merged state
-on every install). Every record carries its scoring cycle in
-``cycleUtc``; the installed frontend's ``cycles`` map reports the
-newest contributing cycle per arm.
+a strictly newer cycle's record for the same window identity), and
+never stacks the isotonic layer (the state is kept RAW; the layer is
+applied fresh to the state on every install). Every record carries
+its scoring cycle in ``cycleUtc``; the state's ``seedCycles`` records
+the full batch that set the current coverage, and the installed
+frontend's ``cycles`` map reports the newest contributing cycle per
+arm.
 
-State: data/tracking/model-serving/merge-state/state.json (raw merged
-frontend) guarded by an flock lockfile in the same directory; a run
-that finds the lock held exits 3 and changes nothing. ``reset``
-re-seeds the state from an installed full-batch frontend (used by the
-full-batch jobs after each install). Installs write
-src/data/model-forecasts.json WITHOUT committing (the next full batch
-resets the file with its own commit) and publish to Vercel Blob via
-publish_model_serving_blob.py unless --no-publish is given.
+Publication discipline (Codex gate, 2026-11-16): installs are written
+atomically (temp file + rename) from the state under an flock lock
+shared by merges, commit-full and reset. The exact bytes to publish
+are first written as an immutable artifact under the state directory
+and recorded in pending-publish.json; the publisher subprocess reads
+that artifact (never the mutable install path) and serialises
+manifest updates with its own lock. A failed publish therefore never
+loses the update: any later run (or `publish-pending`) republishes the
+pending artifact even when it has no new records of its own.
+
+State: data/tracking/model-serving/merge-state/state.json. A run that
+finds the lock held exits 3 and changes nothing. `reset` re-seeds the
+state from a full-batch frontend (bootstrap/recovery; adopt-only, no
+install or publish). `reinstall` regenerates the installed frontend
+from the state after a crash.
 """
 from __future__ import annotations
 
 import argparse
 import copy
 import fcntl
+import hashlib
 import importlib.util
 import json
 import os
 import subprocess
 import sys
+import urllib.error
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -56,7 +73,6 @@ from slr_calibration.model_serving import (  # noqa: E402
     load_catalogue,
 )
 
-ARM_CEILING_HOURS = {"ecmwf": 240, "hrrr": 48}
 DEFAULT_STATE_DIR = "data/tracking/model-serving/merge-state"
 REGISTRY = "data/tracking/registry.json"
 CHAMPION_DIR = "data/slr-training-data/screened-v2/model-v1/model-v3/champion"
@@ -80,6 +96,10 @@ class MergeError(Exception):
     pass
 
 
+class CycleUnavailable(Exception):
+    """The requested cycle's data is not (fully) posted yet."""
+
+
 @contextmanager
 def state_lock(state_dir: Path):
     state_dir.mkdir(parents=True, exist_ok=True)
@@ -100,6 +120,26 @@ def parse_iso(ts: str) -> datetime:
 
 def iso_z(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def cycle_ceiling_hours(arm: str, cycle_iso: str) -> int:
+    """The dissemination ceiling of the cycle that scored a record:
+    ECMWF runs to step 240 at 00Z/12Z and step 144 at 06Z/18Z; HRRR
+    runs 48 h on the synoptic cycles and 18 h otherwise."""
+    hour = parse_iso(cycle_iso).hour
+    if arm == "ecmwf":
+        return 240 if hour in (0, 12) else 144
+    return 48 if hour % 6 == 0 else 18
+
+
+def atomic_write_bytes(path: Path, payload: bytes) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_bytes(payload)
+    os.replace(tmp, path)
+
+
+def atomic_write_json(path: Path, doc: dict) -> None:
+    atomic_write_bytes(path, json.dumps(doc, indent=1).encode())
 
 
 # ---------------------------------------------------------------------------
@@ -153,7 +193,10 @@ def record_index(frontend: dict) -> dict[tuple[str, str, str], dict]:
     for point in frontend["points"]:
         for arm, rows in point["forecasts"].items():
             for record in rows:
-                index[(point["pointId"], arm, record["windowEndUtc"])] = record
+                key = (point["pointId"], arm, record["windowEndUtc"])
+                if key in index:
+                    raise MergeError(f"duplicate record key in frontend: {key}")
+                index[key] = record
     return index
 
 
@@ -172,13 +215,16 @@ def merge_frontend(state: dict, new_records: dict[tuple[str, str], list[dict]]) 
     (merged_state, stats); raises MergeError on any gate failure. The
     input state is mutated (callers pass a working copy)."""
     before = copy.deepcopy(state)
-    before_index = record_index(before)
     index = record_index(state)
     replaced_keys: set[tuple[str, str, str]] = set()
     stats = {"replaced": 0, "skippedAbsent": 0, "skippedStale": 0}
 
     for (point_id, arm), rows in new_records.items():
+        seen: set[str] = set()
         for record in rows:
+            if record["windowEndUtc"] in seen:
+                raise MergeError(f"duplicate scored record for {(point_id, arm, record['windowEndUtc'])}")
+            seen.add(record["windowEndUtc"])
             key = (point_id, arm, record["windowEndUtc"])
             current = index.get(key)
             if current is None:
@@ -187,6 +233,10 @@ def merge_frontend(state: dict, new_records: dict[tuple[str, str], list[dict]]) 
             if record["cycleUtc"] <= current["cycleUtc"]:
                 stats["skippedStale"] += 1
                 continue
+            # Window identity is the full interval, not just its end.
+            if (record["windowStartUtc"] != current["windowStartUtc"]
+                    or record["windowEndLocalDate"] != current["windowEndLocalDate"]):
+                raise MergeError(f"window identity mismatch for {key}")
             current.clear()
             current.update(record)
             replaced_keys.add(key)
@@ -206,10 +256,11 @@ def check_merge_gates(before: dict, after: dict, replaced_keys: set[tuple[str, s
         # G2: records outside the refresh set are bit-identical.
         if key not in replaced_keys and record != before_index[key]:
             raise MergeError(f"gate G2: untouched record changed: {key}")
-        # G4: no record reaches beyond its own cycle's arm ceiling.
+        # G4: no record reaches beyond its own cycle's dissemination
+        # ceiling (240/144 h ECMWF by cycle hour, 48/18 h HRRR).
         cycle = parse_iso(record["cycleUtc"])
         end = parse_iso(record["windowEndUtc"])
-        if (end - cycle).total_seconds() > ARM_CEILING_HOURS[key[1]] * 3600:
+        if (end - cycle).total_seconds() > cycle_ceiling_hours(key[1], record["cycleUtc"]) * 3600:
             raise MergeError(f"gate G4: record beyond its cycle ceiling: {key}")
     # G3: replaced records all carry one consistent cycle per arm.
     cycles_by_arm: dict[str, set[str]] = {}
@@ -218,6 +269,30 @@ def check_merge_gates(before: dict, after: dict, replaced_keys: set[tuple[str, s
     for arm, cycles in cycles_by_arm.items():
         if len(cycles) != 1:
             raise MergeError(f"gate G3: replaced {arm} records carry cycles {sorted(cycles)}")
+
+
+def adopt_full_frontend(old_state: dict | None, candidate: dict) -> tuple[dict, dict]:
+    """The state after a full batch: the candidate's coverage and
+    windows, retaining any standing record scored by a strictly newer
+    cycle (a refresh that landed while the batch was scoring is never
+    regressed by the batch's older cycle)."""
+    new_state = stamp_record_cycles(deraw_frontend(candidate))
+    new_state["seedCycles"] = dict(candidate["cycles"])
+    stats = {"retainedNewer": 0, "adopted": 0}
+    if old_state is None:
+        stats["adopted"] = sum(len(rows) for p in new_state["points"] for rows in p["forecasts"].values())
+        return new_state, stats
+    old_index = record_index(old_state)
+    index = record_index(new_state)
+    for key, record in index.items():
+        current = old_index.get(key)
+        if current is not None and current["cycleUtc"] > record["cycleUtc"]:
+            record.clear()
+            record.update(copy.deepcopy(current))
+            stats["retainedNewer"] += 1
+        else:
+            stats["adopted"] += 1
+    return new_state, stats
 
 
 def recompute_cycles(frontend: dict) -> dict:
@@ -235,9 +310,11 @@ def recompute_cycles(frontend: dict) -> dict:
 
 
 def finalise_frontend(state: dict) -> tuple[dict, dict]:
-    """The installable frontend for a raw state: fresh timestamp and
-    per-arm cycles, lead-cap assertion, isotonic layer applied fresh."""
+    """The installable frontend for a raw state: fresh timestamp,
+    per-arm cycles and seed cycles, lead-cap assertion, isotonic layer
+    applied fresh."""
     out = recompute_cycles(copy.deepcopy(state))
+    out["seedCycles"] = dict(state.get("seedCycles") or state["cycles"])
     out["generatedAtUtc"] = datetime.now(timezone.utc).isoformat()
     assert_frontend_within_lead_cap(out)
     adjusted, report = apply_isotonic_slr_layer_gated(out, enabled=True)
@@ -245,30 +322,88 @@ def finalise_frontend(state: dict) -> tuple[dict, dict]:
 
 
 # ---------------------------------------------------------------------------
-# State I/O
+# State I/O, artifacts, pending publication
 # ---------------------------------------------------------------------------
 
 def load_state(state_dir: Path) -> dict:
     path = state_dir / "state.json"
     if not path.is_file():
         raise MergeError(f"no merge state at {path}; run `reset` from an installed frontend first")
-    return json.loads(path.read_text())
+    state = json.loads(path.read_text())
+    state.setdefault("seedCycles", dict(state.get("cycles") or {}))
+    return state
 
 
 def save_state(state_dir: Path, state: dict) -> None:
     state_dir.mkdir(parents=True, exist_ok=True)
-    tmp = state_dir / "state.json.tmp"
-    tmp.write_text(json.dumps(state, indent=1))
-    tmp.replace(state_dir / "state.json")
+    atomic_write_json(state_dir / "state.json", state)
 
 
-def reset_state(frontend_path: Path, state_dir: Path) -> dict:
-    frontend = json.loads(frontend_path.read_text())
-    state = stamp_record_cycles(deraw_frontend(frontend))
-    recompute_cycles(state)
+def write_artifact(state_dir: Path, installed: dict) -> tuple[Path, str]:
+    payload = json.dumps(installed, indent=1).encode()
+    sha = hashlib.sha256(payload).hexdigest()
+    path = state_dir / "artifacts" / f"{sha}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        if hashlib.sha256(path.read_bytes()).hexdigest() != sha:
+            raise MergeError(f"artifact name collision with different bytes: {path}")
+    else:
+        atomic_write_bytes(path, payload)
+    return path, sha
+
+
+def set_pending(state_dir: Path, artifact: Path, sha: str) -> None:
+    atomic_write_json(state_dir / "pending-publish.json",
+                      {"artifact": artifact.name, "sha256": sha,
+                       "queuedAtUtc": datetime.now(timezone.utc).isoformat()})
+
+
+def read_pending(state_dir: Path) -> dict | None:
+    path = state_dir / "pending-publish.json"
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def publish_artifact(repo: Path, state_dir: Path, artifact: Path) -> dict:
+    result = subprocess.run(
+        [sys.executable, str(repo / PUBLISHER), "--file", str(artifact)],
+        cwd=repo, capture_output=True, text=True, timeout=900,
+    )
+    if result.returncode != 0:
+        raise MergeError(f"Blob publish failed for {artifact.name}: {result.stderr.strip()[-500:]}")
+    return json.loads(result.stdout)
+
+
+def publish_pending(repo: Path, state_dir: Path) -> dict | None:
+    """Publish the queued artifact, if any. Returns the publisher
+    receipt, or None when nothing is pending. On success the pending
+    record is cleared; on failure it stays queued for the next run."""
+    pending = read_pending(state_dir)
+    if pending is None:
+        return None
+    artifact = state_dir / "artifacts" / pending["artifact"]
+    if not artifact.is_file():
+        raise MergeError(f"pending artifact is missing: {artifact}")
+    receipt = publish_artifact(repo, state_dir, artifact)
+    (state_dir / "pending-publish.json").unlink()
+    return receipt
+
+
+def append_receipt(state_dir: Path, receipt: dict) -> None:
+    path = state_dir / "receipts.jsonl"
+    with open(path, "a") as fh:
+        fh.write(json.dumps(receipt, default=str) + "\n")
+
+
+def install_and_queue(state_dir: Path, state: dict, frontend_out: Path) -> tuple[dict, dict]:
+    """Finalise the state, install it atomically, persist the state,
+    and queue the exact installed bytes for publication. Caller holds
+    the state lock. Returns (installed, isotonic_report)."""
+    installed, report = finalise_frontend(state)
+    atomic_write_json(frontend_out, installed)
     save_state(state_dir, state)
-    return {"action": "reset", "cycles": state["cycles"],
-            "records": sum(len(rows) for p in state["points"] for rows in p["forecasts"].values())}
+    artifact, sha = write_artifact(state_dir, installed)
+    set_pending(state_dir, artifact, sha)
+    return installed, report
 
 
 # ---------------------------------------------------------------------------
@@ -300,8 +435,17 @@ def append_tracking(repo: Path, flat_records: list[dict], cycle_compact: str) ->
             fh.write(json.dumps(record) + "\n")
 
 
-def score_hrrr(rms, points, model, features, date: str, hour: int, max_step: int):
-    series, _t2m = rms.build_hrrr_series(points, date, hour, max_step=max_step)
+def build_hrrr(rms, points, date: str, hour: int, max_step: int):
+    try:
+        series, _t2m = rms.build_hrrr_series(points, date, hour, max_step=max_step)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            raise CycleUnavailable(f"HRRR {date} {hour:02d}Z not posted (HTTP 404)") from exc
+        raise
+    return series
+
+
+def score_hrrr_series(rms, points, model, features, series, date: str, hour: int):
     cycle_dt = datetime.strptime(date, "%Y%m%d").replace(hour=hour, tzinfo=timezone.utc)
     records, _feats = rms.score_arm("hrrr", SOURCE_ID_HRRR, [1, 2], cycle_dt,
                                     points, series, model, features)
@@ -317,45 +461,51 @@ def score_ecmwf(rms, points, model, features, date: str, cycle: int):
 
 
 # ---------------------------------------------------------------------------
-# Merge execution
+# Commands
 # ---------------------------------------------------------------------------
 
+def finish_run(args, receipt: dict, flat_records: list[dict], cycle_compact: str) -> dict:
+    """Shared tail of a merge/commit-full run: tracking (best effort),
+    pending publication (this run's artifact and any older queued one),
+    durable receipt."""
+    repo = Path(args.repo)
+    state_dir = repo / args.state_dir
+    if flat_records:
+        try:
+            append_tracking(repo, flat_records, cycle_compact)
+        except Exception as exc:  # tracking must never block publication
+            receipt["trackingWarning"] = str(exc)
+    published = publish_pending(repo, state_dir)
+    receipt["published"] = published is not None
+    if published is not None:
+        receipt["publishReceipt"] = published
+    append_receipt(state_dir, receipt)
+    return receipt
+
+
 def run_merge(args, new_records: dict[tuple[str, str], list[dict]],
-              flat_records: list[dict], run_cycles: dict[str, str]) -> dict:
+              flat_records: list[dict], run_cycles: dict[str, str],
+              warnings: list[str]) -> dict:
     repo = Path(args.repo)
     state_dir = repo / args.state_dir
     with state_lock(state_dir):
         state = load_state(state_dir)
         merged, stats = merge_frontend(state, new_records)
+        receipt: dict[str, Any] = {"action": "merge", "runCycles": run_cycles, **stats,
+                                   "warnings": warnings}
         if stats["replaced"] == 0:
-            raise MergeError(f"nothing newer to merge (skipped: {stats}); state and install untouched")
-        installed, isotonic_report = finalise_frontend(merged)
-        out_path = repo / args.frontend_out
-        out_path.write_text(json.dumps(installed, indent=1))
-        save_state(state_dir, merged)
+            receipt["outcome"] = "already-current"
+        else:
+            installed, isotonic_report = install_and_queue(
+                state_dir, merged, repo / args.frontend_out)
+            receipt["outcome"] = "merged"
+            receipt["recordsTotal"] = sum(
+                len(rows) for p in installed["points"] for rows in p["forecasts"].values())
+            receipt["cycles"] = installed["cycles"]
+            receipt["isotonicAdjustedWindows"] = isotonic_report.get("adjusted_windows")
     newest = max(run_cycles.values())
     cycle_compact = newest[:13].replace("-", "").replace(":", "") + "Z"
-    append_tracking(repo, flat_records, cycle_compact)
-    receipt = {
-        "action": "merge",
-        "runCycles": run_cycles,
-        **stats,
-        "recordsTotal": sum(len(rows) for p in installed["points"] for rows in p["forecasts"].values()),
-        "cycles": installed["cycles"],
-        "isotonicAdjustedWindows": isotonic_report.get("adjusted_windows"),
-        "installed": str(out_path),
-        "published": False,
-    }
-    if not args.no_publish:
-        result = subprocess.run(
-            [sys.executable, str(repo / PUBLISHER), "--file", str(out_path)],
-            cwd=repo, capture_output=True, text=True, timeout=900,
-        )
-        if result.returncode != 0:
-            raise MergeError(f"installed but Blob publish failed: {result.stderr.strip()[-500:]}")
-        receipt["published"] = True
-        receipt["publishReceipt"] = json.loads(result.stdout)
-    return receipt
+    return finish_run(args, receipt, flat_records, cycle_compact)
 
 
 def cmd_hrrr(args) -> dict:
@@ -363,19 +513,23 @@ def cmd_hrrr(args) -> dict:
     repo = Path(args.repo)
     points, model, features = load_model_and_points(repo)
     now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
-    last_error: Exception | None = None
+    rejections: list[str] = []
     for back in (1, 2, 3, 4):
         candidate = now - timedelta(hours=back)
         date, hour = candidate.strftime("%Y%m%d"), candidate.hour
         max_step = 48 if hour % 6 == 0 else 18
         try:
-            flat = score_hrrr(rms, points, model, features, date, hour, max_step)
-        except Exception as exc:  # cycle not fully posted yet; try the previous one
-            last_error = exc
+            series = build_hrrr(rms, points, date, hour, max_step)
+        except CycleUnavailable as exc:
+            rejections.append(str(exc))
             continue
-        cycle_iso = iso_z(candidate)
-        return run_merge(args, group_frontend_records(flat), flat, {"hrrr": cycle_iso})
-    raise MergeError(f"no complete HRRR cycle in the last 4 hours (last error: {last_error})")
+        flat = score_hrrr_series(rms, points, model, features, series, date, hour)
+        if not any(not r["missing"] for r in flat):
+            rejections.append(f"HRRR {date} {hour:02d}Z scored no usable records")
+            continue
+        return run_merge(args, group_frontend_records(flat), flat,
+                         {"hrrr": iso_z(candidate)}, rejections)
+    raise MergeError(f"no usable HRRR cycle in the last 4 hours: {rejections}")
 
 
 def cmd_ecmwf(args) -> dict:
@@ -385,11 +539,72 @@ def cmd_ecmwf(args) -> dict:
     repo = Path(args.repo)
     points, model, features = load_model_and_points(repo)
     flat = score_ecmwf(rms, points, model, features, args.date, args.cycle)
-    flat += score_hrrr(rms, points, model, features, args.date, args.cycle, max_step=48)
+    warnings: list[str] = []
+    try:
+        series = build_hrrr(rms, points, args.date, args.cycle, max_step=48)
+        hrrr_flat = score_hrrr_series(rms, points, model, features, series, args.date, args.cycle)
+        if any(not r["missing"] for r in hrrr_flat):
+            flat += hrrr_flat
+        else:
+            warnings.append(f"HRRR {args.date} {args.cycle:02d}Z scored no usable records; ECMWF merged alone")
+    except CycleUnavailable as exc:
+        warnings.append(f"{exc}; ECMWF merged alone")
     cycle_dt = datetime.strptime(args.date, "%Y%m%d").replace(hour=args.cycle, tzinfo=timezone.utc)
-    cycle_iso = iso_z(cycle_dt)
     return run_merge(args, group_frontend_records(flat), flat,
-                     {"ecmwf": cycle_iso, "hrrr": cycle_iso})
+                     {"ecmwf": iso_z(cycle_dt)}, warnings)
+
+
+def cmd_commit_full(args) -> dict:
+    repo = Path(args.repo)
+    state_dir = repo / args.state_dir
+    candidate_path = Path(args.candidate)
+    if not candidate_path.is_absolute():
+        candidate_path = repo / candidate_path
+    candidate = json.loads(candidate_path.read_text())
+    with state_lock(state_dir):
+        old_state = load_state(state_dir) if (state_dir / "state.json").is_file() else None
+        new_state, stats = adopt_full_frontend(old_state, candidate)
+        installed, isotonic_report = install_and_queue(
+            state_dir, new_state, repo / args.frontend_out)
+    receipt = {"action": "commit-full", "candidateCycles": candidate["cycles"], **stats,
+               "recordsTotal": sum(len(rows) for p in installed["points"] for rows in p["forecasts"].values()),
+               "cycles": installed["cycles"],
+               "isotonicAdjustedWindows": isotonic_report.get("adjusted_windows"),
+               "warnings": []}
+    return finish_run(args, receipt, [], "commit-full")
+
+
+def cmd_reset(args) -> dict:
+    repo = Path(args.repo)
+    state_dir = repo / args.state_dir
+    frontend_path = Path(args.frontend)
+    if not frontend_path.is_absolute():
+        frontend_path = repo / frontend_path
+    frontend = json.loads(frontend_path.read_text())
+    with state_lock(state_dir):
+        old_state = load_state(state_dir) if (state_dir / "state.json").is_file() else None
+        state, stats = adopt_full_frontend(old_state, frontend)
+        save_state(state_dir, state)
+    return {"action": "reset", "cycles": recompute_cycles(state)["cycles"], **stats,
+            "records": sum(len(rows) for p in state["points"] for rows in p["forecasts"].values())}
+
+
+def cmd_reinstall(args) -> dict:
+    repo = Path(args.repo)
+    state_dir = repo / args.state_dir
+    with state_lock(state_dir):
+        state = load_state(state_dir)
+        installed, _report = finalise_frontend(state)
+        atomic_write_json(repo / args.frontend_out, installed)
+    return {"action": "reinstall", "cycles": installed["cycles"]}
+
+
+def cmd_publish_pending(args) -> dict:
+    repo = Path(args.repo)
+    state_dir = repo / args.state_dir
+    published = publish_pending(repo, state_dir)
+    return {"action": "publish-pending", "published": published is not None,
+            **({"publishReceipt": published} if published else {})}
 
 
 def main() -> int:
@@ -398,7 +613,6 @@ def main() -> int:
     parser.add_argument("--repo", default=str(repo_default))
     parser.add_argument("--state-dir", default=DEFAULT_STATE_DIR)
     parser.add_argument("--frontend-out", default="src/data/model-forecasts.json")
-    parser.add_argument("--no-publish", action="store_true")
     sub = parser.add_subparsers(dest="command", required=True)
     p_reset = sub.add_parser("reset")
     p_reset.add_argument("--frontend", required=True)
@@ -406,20 +620,25 @@ def main() -> int:
     p_ecmwf = sub.add_parser("ecmwf")
     p_ecmwf.add_argument("--date", required=True)
     p_ecmwf.add_argument("--cycle", type=int, required=True)
+    p_full = sub.add_parser("commit-full")
+    p_full.add_argument("--candidate", required=True)
+    sub.add_parser("reinstall")
+    sub.add_parser("publish-pending")
     args = parser.parse_args()
 
     try:
         if args.command == "reset":
-            state_dir = Path(args.repo) / args.state_dir
-            frontend_path = Path(args.frontend)
-            if not frontend_path.is_absolute():
-                frontend_path = Path(args.repo) / frontend_path
-            with state_lock(state_dir):
-                receipt = reset_state(frontend_path, state_dir)
+            receipt = cmd_reset(args)
         elif args.command == "hrrr":
             receipt = cmd_hrrr(args)
-        else:
+        elif args.command == "ecmwf":
             receipt = cmd_ecmwf(args)
+        elif args.command == "commit-full":
+            receipt = cmd_commit_full(args)
+        elif args.command == "reinstall":
+            receipt = cmd_reinstall(args)
+        else:
+            receipt = cmd_publish_pending(args)
     except LockHeld as exc:
         print(json.dumps({"skipped": str(exc)}))
         return 3

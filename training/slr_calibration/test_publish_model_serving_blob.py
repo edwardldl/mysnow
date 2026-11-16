@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from publish_model_serving_blob import describe_frontend
+from publish_model_serving_blob import describe_frontend, regressed_arms
 
 
 def record(end: str) -> dict:
@@ -35,6 +35,28 @@ class DescribeFrontendTest(unittest.TestCase):
     def test_no_records_fails(self) -> None:
         with self.assertRaises(SystemExit):
             describe_frontend({"cycles": SAMPLE["cycles"], "points": [{"forecasts": {"ecmwf": []}}]})
+
+
+class RegressedArmsTest(unittest.TestCase):
+    def test_equal_cycles_do_not_regress(self) -> None:
+        cycles = {"ecmwf": "2026-11-16T00:00:00Z", "hrrr": "2026-11-16T00:00:00Z"}
+        self.assertEqual(regressed_arms(cycles, cycles), [])
+
+    def test_advancing_arms_do_not_regress(self) -> None:
+        existing = {"ecmwf": "2026-11-16T00:00:00Z", "hrrr": "2026-11-16T00:00:00Z"}
+        candidate = {"ecmwf": "2026-11-16T06:00:00Z", "hrrr": "2026-11-16T13:00:00Z"}
+        self.assertEqual(regressed_arms(existing, candidate), [])
+
+    def test_crossed_arms_regress_the_stale_arm(self) -> None:
+        # The Codex-gate case: a stale ECMWF arm behind a fresh HRRR
+        # cycle passes a scalar-maximum check but must be refused.
+        existing = {"ecmwf": "2026-11-16T12:00:00Z", "hrrr": "2026-11-16T12:00:00Z"}
+        candidate = {"ecmwf": "2026-11-16T06:00:00Z", "hrrr": "2026-11-16T13:00:00Z"}
+        self.assertEqual(regressed_arms(existing, candidate), ["ecmwf"])
+
+    def test_dropped_arm_regresses(self) -> None:
+        existing = {"ecmwf": "2026-11-16T00:00:00Z", "hrrr": "2026-11-16T00:00:00Z"}
+        self.assertEqual(regressed_arms(existing, {"ecmwf": "2026-11-16T06:00:00Z"}), ["hrrr"])
 
 
 if __name__ == "__main__":

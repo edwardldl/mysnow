@@ -270,10 +270,10 @@ describe('ECMWF horizon under the 10-day cap', () => {
     const cycle = modelForecastData.cycles.ecmwf;
     expect(
       ecmwfRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
-      ).toEqual(expectedMergedWindows(ecmwfRows, cycle, palisadesPoint!, ECMWF_STEP_CEILING_HOURS));
+      ).toEqual(expectedMergedWindows(ecmwfRows, modelForecastData.seedCycles?.ecmwf, cycle, palisadesPoint!, ECMWF_STEP_CEILING_HOURS));
     expect(
       stoweEcmwfRows.map((r) => ({ leadDay: r.leadDay, windowEndLocalDate: r.windowEndLocalDate })),
-      ).toEqual(expectedMergedWindows(stoweEcmwfRows, cycle, stowePoint!, ECMWF_STEP_CEILING_HOURS));
+      ).toEqual(expectedMergedWindows(stoweEcmwfRows, modelForecastData.seedCycles?.ecmwf, cycle, stowePoint!, ECMWF_STEP_CEILING_HOURS));
   });
 
   it('resolves the lead-5 window to the ECMWF arm in literal ecmwf mode', () => {

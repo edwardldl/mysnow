@@ -37,6 +37,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -146,6 +147,16 @@ def current_manifest(base_url: str) -> dict | None:
         return None
 
 
+def regressed_arms(existing_cycles: dict, candidate_cycles: dict) -> list[str]:
+    """Arms the live manifest carries that the candidate would move
+    backward (or drop). A merged frontend's arms advance independently,
+    so freshness is judged per arm: a stale ECMWF arm must not ride in
+    behind a fresh HRRR cycle, which a scalar-maximum check allows."""
+    return sorted(
+        arm for arm, cycle in (existing_cycles or {}).items()
+        if cycle and (candidate_cycles.get(arm) is None or candidate_cycles[arm] < cycle))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     repo_root = Path(__file__).resolve().parents[2]
@@ -154,7 +165,20 @@ def main() -> int:
     parser.add_argument("--env-file", type=Path, default=repo_root / ".env.local")
     parser.add_argument("--allow-regression", action="store_true",
                         help="publish even if the served manifest names a newer cycle")
+    parser.add_argument("--lock-file", type=Path, default=None,
+                        help="serialise publishers with this lock file "
+                             "(default: the merge-state publish.lock)")
     args = parser.parse_args()
+
+    # Serialise publishers: the manifest read-check-write sequence is
+    # only safe when publishers cannot interleave. The lock is held
+    # for the whole run (upload + manifest write + activation poll).
+    lock_path = args.lock_file or (
+        Path(__file__).resolve().parents[2]
+        / "data/tracking/model-serving/merge-state/publish.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_fd = open(lock_path, "a+")
+    fcntl.flock(lock_fd, fcntl.LOCK_EX)
 
     args.file = args.file.resolve()
     base_url = args.base_url.rstrip("/")
@@ -168,11 +192,12 @@ def main() -> int:
 
     existing = current_manifest(base_url)
     if existing and not args.allow_regression:
-        existing_cycle = existing.get("cycleUtc") or ""
-        if existing_cycle > cycle_utc:
+        regressions = regressed_arms(existing.get("cycles") or {}, data.get("cycles") or {})
+        if regressions:
             raise fail(
-                f"refusing to move the manifest backward: served cycle {existing_cycle} "
-                f"is newer than the candidate {cycle_utc} (pass --allow-regression to override)"
+                f"refusing to move the manifest backward: the served manifest's "
+                f"{', '.join(regressions)} cycle(s) {existing.get('cycles')} are newer "
+                f"than this candidate's {data.get('cycles')} (pass --allow-regression to override)"
             )
 
     token = load_token(args.env_file)
