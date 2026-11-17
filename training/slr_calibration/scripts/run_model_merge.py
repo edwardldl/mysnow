@@ -571,12 +571,31 @@ def arm_counts(flat_records: list[dict]) -> dict[str, dict[str, int]]:
     return counts
 
 
+def accumulate_counts(counts: dict[str, dict[str, int]], flat_records: list[dict]) -> dict[str, dict[str, int]]:
+    """Add one scoring attempt's built/usable totals into counts."""
+    for arm, c in arm_counts(flat_records).items():
+        entry = counts.setdefault(arm, {"built": 0, "usable": 0})
+        entry["built"] += c["built"]
+        entry["usable"] += c["usable"]
+    return counts
+
+
+def normalise_counts(counts: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+    """Every counted arm carries all four accounting fields, even an
+    arm that produced nothing mergeable."""
+    for entry in counts.values():
+        entry.setdefault("overlapping", 0)
+        entry.setdefault("replaced", 0)
+    return counts
+
+
 def merge_arm_outcomes(state: dict, new_records: dict[tuple[str, str], list[dict]],
                        counts: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
     """Extend attempted-arm counts with per-arm overlap/replacement
     figures, judged against the standing state with the same rules
     merge_frontend applies (absent window, stale cycle, else a
     replacement)."""
+    normalise_counts(counts)
     index = record_index(state)
     for (point_id, arm), rows in new_records.items():
         entry = counts.setdefault(arm, {"built": 0, "usable": 0})
@@ -703,7 +722,7 @@ def finish_noop(args, outcome: str, run_cycles: dict[str, str],
         state = load_state(state_dir)
         reconcile_locked(state_dir, state, repo / args.frontend_out)
         receipt: dict[str, Any] = {"action": "merge", "runCycles": run_cycles,
-                                   "outcome": outcome, "arms": counts,
+                                   "outcome": outcome, "arms": normalise_counts(counts),
                                    "warnings": warnings}
         receipt = finish_locked(args, state_dir, state, receipt)
     return receipt
@@ -728,10 +747,7 @@ def cmd_hrrr(args) -> dict:
             continue
         flat = score_hrrr_series(rms, points, model, features, series, date, hour)
         counts = arm_counts(flat)
-        for arm, c in counts.items():
-            entry = probe_counts.setdefault(arm, {"built": 0, "usable": 0})
-            entry["built"] += c["built"]
-            entry["usable"] += c["usable"]
+        accumulate_counts(probe_counts, flat)
         usable = sum(c["usable"] for c in counts.values())
         built = sum(c["built"] for c in counts.values())
         if usable > 0:
@@ -764,12 +780,9 @@ def cmd_ecmwf(args) -> dict:
     try:
         series = build_hrrr(rms, points, args.date, args.cycle, max_step=48)
         hrrr_flat = score_hrrr_series(rms, points, model, features, series, args.date, args.cycle)
+        accumulate_counts(attempted, hrrr_flat)
         if any(not r["missing"] for r in hrrr_flat):
             flat += hrrr_flat
-            for arm, c in arm_counts(hrrr_flat).items():
-                entry = attempted.setdefault(arm, {"built": 0, "usable": 0})
-                entry["built"] += c["built"]
-                entry["usable"] += c["usable"]
         else:
             warnings.append(f"HRRR {args.date} {args.cycle:02d}Z scored no usable records; ECMWF merged alone")
     except CycleUnavailable as exc:

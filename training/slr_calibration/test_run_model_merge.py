@@ -10,8 +10,11 @@ import tempfile  # noqa: E402
 import run_model_merge as rmm  # noqa: E402
 from run_model_merge import (  # noqa: E402
     MergeError,
+    accumulate_counts,
     adopt_full_frontend,
     arm_counts,
+    merge_arm_outcomes,
+    normalise_counts,
     classify_outcome,
     cycle_ceiling_hours,
     deraw_frontend,
@@ -421,6 +424,13 @@ class CommandLifecycleTest(unittest.TestCase):
         self.assertTrue(changed)
         installed = _json.loads((self.root / "out.json").read_text())
         self.assertEqual(installed["servingGeneration"], 2)
+        # ...and the fresh generation actually publishes (the publish
+        # stub stands in for Blob): pending drains, generation marked.
+        receipt, error = publish_pending_locked(self.root, self.root / "state", state)
+        self.assertIsNone(error)
+        self.assertEqual(receipt, {"ok": True})
+        self.assertEqual(load_state(self.root / "state")["publishedGeneration"], 2)
+        self.assertIsNone(read_pending(self.root / "state"))
 
 
 class PublishFailureModesTest(unittest.TestCase):
@@ -458,6 +468,49 @@ class PublishFailureModesTest(unittest.TestCase):
         self.assertIsNone(receipt)
         self.assertIn("did not complete", error)
         self.assertIsNotNone(read_pending(self.state_dir))
+
+
+class AccountingSchemaTest(unittest.TestCase):
+    """The v4 gate's accounting regressions: attempted totals and all
+    four per-arm fields survive every arm-outcome combination."""
+
+    def flat(self, source: str, usable: int, missing: int) -> list[dict]:
+        return ([{"source": source, "missing": False}] * usable
+                + [{"source": source, "missing": True}] * missing)
+
+    def attempted(self, ecmwf_flat: list[dict], hrrr_flat: list[dict]) -> dict:
+        counts = arm_counts(ecmwf_flat)
+        accumulate_counts(counts, hrrr_flat)
+        return counts
+
+    def test_usable_ecmwf_all_missing_hrrr(self) -> None:
+        counts = self.attempted(self.flat("ecmwf", 2, 0), self.flat("hrrr", 0, 3))
+        self.assertEqual(counts["hrrr"], {"built": 3, "usable": 0})
+        state = stamp_record_cycles(deraw_frontend(frontend()))
+        newer = record("2026-11-17T15:00:00Z", "2026-11-16T06:00:00Z", slr=12.0)
+        merge_arm_outcomes(state, {("pt-a", "ecmwf"): [newer]}, counts)
+        self.assertEqual(counts["hrrr"]["overlapping"], 0)
+        self.assertEqual(counts["hrrr"]["replaced"], 0)
+        self.assertEqual(counts["ecmwf"]["overlapping"], 1)
+        self.assertEqual(counts["ecmwf"]["replaced"], 1)
+
+    def test_all_missing_ecmwf_usable_hrrr(self) -> None:
+        counts = self.attempted(self.flat("ecmwf", 0, 4), self.flat("hrrr", 1, 0))
+        self.assertEqual(counts["ecmwf"], {"built": 4, "usable": 0})
+        state = stamp_record_cycles(deraw_frontend(frontend()))
+        newer = record("2026-11-17T15:00:00Z", "2026-11-16T06:00:00Z", slr=12.0, lead=1)
+        merge_arm_outcomes(state, {("pt-a", "hrrr"): [newer]}, counts)
+        self.assertEqual(counts["ecmwf"]["overlapping"], 0)
+        self.assertEqual(counts["ecmwf"]["replaced"], 0)
+        self.assertEqual(counts["hrrr"]["replaced"], 1)
+
+    def test_both_arms_all_missing_normalise(self) -> None:
+        counts = self.attempted(self.flat("ecmwf", 0, 2), self.flat("hrrr", 0, 2))
+        normalise_counts(counts)
+        for arm in ("ecmwf", "hrrr"):
+            self.assertEqual(counts[arm]["usable"], 0)
+            self.assertEqual(counts[arm]["overlapping"], 0)
+            self.assertEqual(counts[arm]["replaced"], 0)
 
 
 if __name__ == "__main__":
