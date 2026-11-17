@@ -1,0 +1,647 @@
+{
+ "afton-alps": {
+  "snocountry_id": "612002",
+  "snocountry_name": "Afton Alps",
+  "snocountry_state": "MN"
+ },
+ "alpental": {
+  "snocountry_id": "425715",
+  "snocountry_name": "Summit at Snoqualmie Alpental",
+  "snocountry_state": "WA"
+ },
+ "alpine-valley-oh": {
+  "snocountry_id": "216001",
+  "snocountry_name": "Alpine Valley",
+  "snocountry_state": "OH"
+ },
+ "alta": {
+  "snocountry_id": "801001",
+  "snocountry_name": "Alta",
+  "snocountry_state": "UT"
+ },
+ "alyeska": {
+  "snocountry_id": "907002",
+  "snocountry_name": "Alyeska Resort",
+  "snocountry_state": "AK"
+ },
+ "arapahoe-basin": {
+  "snocountry_id": "303001",
+  "snocountry_name": "Arapahoe Basin",
+  "snocountry_state": "CO"
+ },
+ "aspen": {
+  "snocountry_id": "303003",
+  "snocountry_name": "Aspen Mountain",
+  "snocountry_state": "CO"
+ },
+ "aspen-highlands": {
+  "snocountry_id": "303004",
+  "snocountry_name": "Aspen Highlands",
+  "snocountry_state": "CO"
+ },
+ "attitash": {
+  "snocountry_id": "603002",
+  "snocountry_name": "Attitash Mountain Resort",
+  "snocountry_state": "NH"
+ },
+ "banff-sunshine": {
+  "snocountry_id": "403022",
+  "snocountry_name": "Banff Sunshine",
+  "snocountry_state": "AB"
+ },
+ "bear-mountain": {
+  "snocountry_id": "909002",
+  "snocountry_name": "Bear Mountain Resort",
+  "snocountry_state": "CA"
+ },
+ "beaver-creek": {
+  "snocountry_id": "303005",
+  "snocountry_name": "Beaver Creek",
+  "snocountry_state": "CO"
+ },
+ "big-boulder": {
+  "snocountry_id": "717006",
+  "snocountry_name": "Jack Frost/Big Boulder",
+  "snocountry_state": "PA"
+ },
+ "big-sky": {
+  "snocountry_id": "406002",
+  "snocountry_name": "Big Sky Resort",
+  "snocountry_state": "MT"
+ },
+ "blue-mountain-on": {
+  "snocountry_id": "705001",
+  "snocountry_name": "Blue Mountain Resort",
+  "snocountry_state": "ON"
+ },
+ "blue-mountain-pa": {
+  "snocountry_id": "215002",
+  "snocountry_name": "Blue Mountain Resort",
+  "snocountry_state": "PA"
+ },
+ "boston-mills-brandywine": {
+  "snocountry_id": "216002",
+  "snocountry_name": "Boston Mills Brandywine Ski Resort",
+  "snocountry_state": "OH"
+ },
+ "boyne-mountain": {
+  "snocountry_id": "616003",
+  "snocountry_name": "Boyne Mountain Resort",
+  "snocountry_state": "MI"
+ },
+ "breckenridge": {
+  "snocountry_id": "303007",
+  "snocountry_name": "Breckenridge",
+  "snocountry_state": "CO"
+ },
+ "bridger-bowl": {
+  "snocountry_id": "406003",
+  "snocountry_name": "Bridger Bowl",
+  "snocountry_state": "MT"
+ },
+ "brighton": {
+  "snocountry_id": "801003",
+  "snocountry_name": "Brighton Resort",
+  "snocountry_state": "UT"
+ },
+ "buck-hill": {
+  "snocountry_id": "612004",
+  "snocountry_name": "Buck Hill",
+  "snocountry_state": "MN"
+ },
+ "buttermilk": {
+  "snocountry_id": "303027",
+  "snocountry_name": "Buttermilk",
+  "snocountry_state": "CO"
+ },
+ "camelback": {
+  "snocountry_id": "717003",
+  "snocountry_name": "Camelback Mountain",
+  "snocountry_state": "PA"
+ },
+ "cannon-mountain": {
+  "snocountry_id": "603006",
+  "snocountry_name": "Cannon Mountain",
+  "snocountry_state": "NH"
+ },
+ "copper-mountain": {
+  "snocountry_id": "303009",
+  "snocountry_name": "Copper Mountain Resort",
+  "snocountry_state": "CO"
+ },
+ "cranmore": {
+  "snocountry_id": "603007",
+  "snocountry_name": "Cranmore Mountain Resort",
+  "snocountry_state": "NH"
+ },
+ "crested-butte": {
+  "snocountry_id": "303010",
+  "snocountry_name": "Crested Butte Mountain Resort",
+  "snocountry_state": "CO"
+ },
+ "crotched-mountain": {
+  "snocountry_id": "603028",
+  "snocountry_name": "Crotched Mountain",
+  "snocountry_state": "NH"
+ },
+ "crystal-mountain": {
+  "snocountry_id": "206002",
+  "snocountry_name": "Crystal Mountain Resort",
+  "snocountry_state": "WA"
+ },
+ "cypress-mountain": {
+  "snocountry_id": "604008",
+  "snocountry_name": "Cypress Mountain Resort",
+  "snocountry_state": "BC"
+ },
+ "deer-valley": {
+  "snocountry_id": "801004",
+  "snocountry_name": "Deer Valley Resort",
+  "snocountry_state": "UT"
+ },
+ "devils-head": {
+  "snocountry_id": "608003",
+  "snocountry_name": "Devils Head Resort",
+  "snocountry_state": "WI"
+ },
+ "eldora": {
+  "snocountry_id": "303011",
+  "snocountry_name": "Eldora Mountain Resort",
+  "snocountry_state": "CO"
+ },
+ "fernie": {
+  "snocountry_id": "604010",
+  "snocountry_name": "Fernie Alpine Resort",
+  "snocountry_state": "BC"
+ },
+ "grand-targhee": {
+  "snocountry_id": "307002",
+  "snocountry_name": "Grand Targhee Resort",
+  "snocountry_state": "WY"
+ },
+ "granite-peak": {
+  "snocountry_id": "715002",
+  "snocountry_name": "Granite Peak Ski Area",
+  "snocountry_state": "WI"
+ },
+ "grouse-mountain": {
+  "snocountry_id": "604012",
+  "snocountry_name": "Grouse Mountain",
+  "snocountry_state": "BC"
+ },
+ "heavenly": {
+  "snocountry_id": "916004",
+  "snocountry_name": "Heavenly Mountain Resort",
+  "snocountry_state": "CA"
+ },
+ "hidden-valley-mo": {
+  "snocountry_id": "314001",
+  "snocountry_name": "Hidden Valley",
+  "snocountry_state": "MO"
+ },
+ "hidden-valley-pa": {
+  "snocountry_id": "814005",
+  "snocountry_name": "Hidden Valley Resort",
+  "snocountry_state": "PA"
+ },
+ "hunter-mountain": {
+  "snocountry_id": "518006",
+  "snocountry_name": "Hunter Mountain",
+  "snocountry_state": "NY"
+ },
+ "jack-frost": {
+  "snocountry_id": "717006",
+  "snocountry_name": "Jack Frost/Big Boulder",
+  "snocountry_state": "PA"
+ },
+ "jackson-hole": {
+  "snocountry_id": "307008",
+  "snocountry_name": "Jackson Hole Mountain Resort",
+  "snocountry_state": "WY"
+ },
+ "jay-peak": {
+  "snocountry_id": "802006",
+  "snocountry_name": "Jay Peak Resort",
+  "snocountry_state": "VT"
+ },
+ "jiminy-peak": {
+  "snocountry_id": "413006",
+  "snocountry_name": "Jiminy Peak Mountain Resort",
+  "snocountry_state": "MA"
+ },
+ "june-mountain": {
+  "snocountry_id": "619001",
+  "snocountry_name": "June Mountain",
+  "snocountry_state": "CA"
+ },
+ "keystone": {
+  "snocountry_id": "303014",
+  "snocountry_name": "Keystone Resort",
+  "snocountry_state": "CO"
+ },
+ "kicking-horse": {
+  "snocountry_id": "250002",
+  "snocountry_name": "Kicking Horse Resort",
+  "snocountry_state": "BC"
+ },
+ "killington": {
+  "snocountry_id": "802007",
+  "snocountry_name": "Killington Resort",
+  "snocountry_state": "VT"
+ },
+ "kimberley": {
+  "snocountry_id": "604015",
+  "snocountry_name": "Kimberley Alpine Resort",
+  "snocountry_state": "BC"
+ },
+ "kirkwood": {
+  "snocountry_id": "209004",
+  "snocountry_name": "Kirkwood Mountain Resort",
+  "snocountry_state": "CA"
+ },
+ "lake-louise": {
+  "snocountry_id": "403008",
+  "snocountry_name": "Lake Louise Ski Resort",
+  "snocountry_state": "AB"
+ },
+ "laurel-mountain": {
+  "snocountry_id": "412001",
+  "snocountry_name": "Laurel Mountain Ski Resort",
+  "snocountry_state": "PA"
+ },
+ "le-massif": {
+  "snocountry_id": "418889",
+  "snocountry_name": "Le Massif de Charlevoix",
+  "snocountry_state": "QC"
+ },
+ "liberty-mountain": {
+  "snocountry_id": "717009",
+  "snocountry_name": "Liberty Mountain Resort",
+  "snocountry_state": "PA"
+ },
+ "loon-mountain": {
+  "snocountry_id": "603014",
+  "snocountry_name": "Loon Mountain Resort",
+  "snocountry_state": "NH"
+ },
+ "loveland": {
+  "snocountry_id": "303015",
+  "snocountry_name": "Loveland Ski Area",
+  "snocountry_state": "CO"
+ },
+ "lutsen-mountains": {
+  "snocountry_id": "218003",
+  "snocountry_name": "Lutsen Mountains",
+  "snocountry_state": "MN"
+ },
+ "mad-river-glen": {
+  "snocountry_id": "802008",
+  "snocountry_name": "Mad River Glen",
+  "snocountry_state": "VT"
+ },
+ "mad-river-mountain": {
+  "snocountry_id": "513001",
+  "snocountry_name": "Mad River Mountain Resort",
+  "snocountry_state": "OH"
+ },
+ "mammoth-mountain": {
+  "snocountry_id": "619002",
+  "snocountry_name": "Mammoth Mountain",
+  "snocountry_state": "CA"
+ },
+ "marmot-basin": {
+  "snocountry_id": "403009",
+  "snocountry_name": "Marmot Basin",
+  "snocountry_state": "AB"
+ },
+ "monarch": {
+  "snocountry_id": "719002",
+  "snocountry_name": "Monarch Mountain",
+  "snocountry_state": "CO"
+ },
+ "mont-sainte-anne": {
+  "snocountry_id": "418007",
+  "snocountry_name": "Mont Sainte Anne",
+  "snocountry_state": "QC"
+ },
+ "mount-rose": {
+  "snocountry_id": "702003",
+  "snocountry_name": "Mt Rose Ski Tahoe",
+  "snocountry_state": "CA"
+ },
+ "mount-snow": {
+  "snocountry_id": "802012",
+  "snocountry_name": "Mount Snow Resort",
+  "snocountry_state": "VT"
+ },
+ "mount-sunapee": {
+  "snocountry_id": "603017",
+  "snocountry_name": "Mount Sunapee Resort",
+  "snocountry_state": "NH"
+ },
+ "mt-bachelor": {
+  "snocountry_id": "503004",
+  "snocountry_name": "Mt Bachelor",
+  "snocountry_state": "OR"
+ },
+ "mt-baker": {
+  "snocountry_id": "206003",
+  "snocountry_name": "Mt Baker Ski Area",
+  "snocountry_state": "WA"
+ },
+ "mt-brighton": {
+  "snocountry_id": "313002",
+  "snocountry_name": "Mt. Brighton",
+  "snocountry_state": "MI"
+ },
+ "mt-hood-meadows": {
+  "snocountry_id": "503006",
+  "snocountry_name": "Mt Hood Meadows Ski Resort",
+  "snocountry_state": "OR"
+ },
+ "mt-norquay": {
+  "snocountry_id": "403001",
+  "snocountry_name": "Mt Norquay Ski Resort",
+  "snocountry_state": "AB"
+ },
+ "nakiska": {
+  "snocountry_id": "403011",
+  "snocountry_name": "Nakiska Ski Area",
+  "snocountry_state": "AB"
+ },
+ "northstar": {
+  "snocountry_id": "916007",
+  "snocountry_name": "Northstar California Resort",
+  "snocountry_state": "CA"
+ },
+ "okemo": {
+  "snocountry_id": "802013",
+  "snocountry_name": "Okemo Mountain Resort",
+  "snocountry_state": "VT"
+ },
+ "palisades-tahoe": {
+  "snocountry_id": "916011",
+  "snocountry_name": "Palisades Tahoe",
+  "snocountry_state": "CA"
+ },
+ "panorama": {
+  "snocountry_id": "604025",
+  "snocountry_name": "Panorama Mountain Resort",
+  "snocountry_state": "BC"
+ },
+ "paoli-peaks": {
+  "snocountry_id": "812002",
+  "snocountry_name": "Paoli Peaks",
+  "snocountry_state": "IN"
+ },
+ "park-city": {
+  "snocountry_id": "801006",
+  "snocountry_name": "Park City Mountain Resort",
+  "snocountry_state": "UT"
+ },
+ "pico-mountain": {
+  "snocountry_id": "802014",
+  "snocountry_name": "Pico Mountain",
+  "snocountry_state": "VT"
+ },
+ "powder-mountain": {
+  "snocountry_id": "801008",
+  "snocountry_name": "Powder Mountain Resort",
+  "snocountry_state": "UT"
+ },
+ "purgatory": {
+  "snocountry_id": "303017",
+  "snocountry_name": "Purgatory Resort",
+  "snocountry_state": "CO"
+ },
+ "red-mountain": {
+  "snocountry_id": "604029",
+  "snocountry_name": "RED Mountain Resort",
+  "snocountry_state": "BC"
+ },
+ "revelstoke": {
+  "snocountry_id": "604021",
+  "snocountry_name": "Revelstoke Mountain Resort",
+  "snocountry_state": "BC"
+ },
+ "roundtop": {
+  "snocountry_id": "717015",
+  "snocountry_name": "Roundtop Mountain Resort",
+  "snocountry_state": "PA"
+ },
+ "saddleback": {
+  "snocountry_id": "207006",
+  "snocountry_name": "Saddleback Mountain Resort",
+  "snocountry_state": "ME"
+ },
+ "schweitzer": {
+  "snocountry_id": "208008",
+  "snocountry_name": "Schweitzer",
+  "snocountry_state": "ID"
+ },
+ "seven-springs": {
+  "snocountry_id": "814002",
+  "snocountry_name": "Seven Springs Mountain Resort",
+  "snocountry_state": "PA"
+ },
+ "sierra-at-tahoe": {
+  "snocountry_id": "916008",
+  "snocountry_name": "Sierra-at-Tahoe",
+  "snocountry_state": "CA"
+ },
+ "silverstar": {
+  "snocountry_id": "604033",
+  "snocountry_name": "SilverStar Mountain Resort",
+  "snocountry_state": "BC"
+ },
+ "ski-butternut": {
+  "snocountry_id": "413004",
+  "snocountry_name": "Ski Butternut",
+  "snocountry_state": "MA"
+ },
+ "snow-creek": {
+  "snocountry_id": "816001",
+  "snocountry_name": "Snow Creek Ski Area",
+  "snocountry_state": "MO"
+ },
+ "snow-summit": {
+  "snocountry_id": "909001",
+  "snocountry_name": "Snow Summit",
+  "snocountry_state": "CA"
+ },
+ "snow-valley": {
+  "snocountry_id": "909005",
+  "snocountry_name": "Snow Valley Mountain Resort",
+  "snocountry_state": "CA"
+ },
+ "snowbasin": {
+  "snocountry_id": "801009",
+  "snocountry_name": "Snowbasin Resort",
+  "snocountry_state": "UT"
+ },
+ "snowbird": {
+  "snocountry_id": "801010",
+  "snocountry_name": "Snowbird",
+  "snocountry_state": "UT"
+ },
+ "snowmass": {
+  "snocountry_id": "303020",
+  "snocountry_name": "Snowmass",
+  "snocountry_state": "CO"
+ },
+ "snowriver": {
+  "snocountry_id": "906004",
+  "snocountry_name": "Snowriver Mountain Resort",
+  "snocountry_state": "MI"
+ },
+ "snowshoe": {
+  "snocountry_id": "304001",
+  "snocountry_name": "Snowshoe Mountain Resort",
+  "snocountry_state": "WV"
+ },
+ "solitude": {
+  "snocountry_id": "801011",
+  "snocountry_name": "Solitude Mountain Resort",
+  "snocountry_state": "UT"
+ },
+ "steamboat": {
+  "snocountry_id": "303021",
+  "snocountry_name": "Steamboat",
+  "snocountry_state": "CO"
+ },
+ "stevens-pass": {
+  "snocountry_id": "206004",
+  "snocountry_name": "Stevens Pass Mountain Resort",
+  "snocountry_state": "WA"
+ },
+ "stoneham": {
+  "snocountry_id": "418009",
+  "snocountry_name": "Stoneham",
+  "snocountry_state": "QC"
+ },
+ "stowe": {
+  "snocountry_id": "802018",
+  "snocountry_name": "Stowe Mountain Resort",
+  "snocountry_state": "VT"
+ },
+ "stratton": {
+  "snocountry_id": "802019",
+  "snocountry_name": "Stratton Mountain Resort",
+  "snocountry_state": "VT"
+ },
+ "sugar-bowl": {
+  "snocountry_id": "916012",
+  "snocountry_name": "Sugar Bowl Resort",
+  "snocountry_state": "CA"
+ },
+ "sugarbush": {
+  "snocountry_id": "802023",
+  "snocountry_name": "Sugarbush Resort",
+  "snocountry_state": "VT"
+ },
+ "sugarloaf": {
+  "snocountry_id": "207008",
+  "snocountry_name": "Sugarloaf",
+  "snocountry_state": "ME"
+ },
+ "sun-peaks": {
+  "snocountry_id": "604042",
+  "snocountry_name": "Sun Peaks Resort",
+  "snocountry_state": "BC"
+ },
+ "sun-valley": {
+  "snocountry_id": "208012",
+  "snocountry_name": "Sun Valley Resort",
+  "snocountry_state": "ID"
+ },
+ "sunday-river": {
+  "snocountry_id": "207009",
+  "snocountry_name": "Sunday River",
+  "snocountry_state": "ME"
+ },
+ "tamarack": {
+  "snocountry_id": "208021",
+  "snocountry_name": "Tamarack Resort",
+  "snocountry_state": "ID"
+ },
+ "taos": {
+  "snocountry_id": "505009",
+  "snocountry_name": "Taos Ski Valley",
+  "snocountry_state": "NM"
+ },
+ "telluride": {
+  "snocountry_id": "303022",
+  "snocountry_name": "Telluride Ski Resort",
+  "snocountry_state": "CO"
+ },
+ "the-highlands": {
+  "snocountry_id": "616002",
+  "snocountry_name": "The Highlands at Harbor Springs",
+  "snocountry_state": "MI"
+ },
+ "the-summit-at-snoqualmie": {
+  "snocountry_id": "425713",
+  "snocountry_name": "Summit at Snoqualmie",
+  "snocountry_state": "WA"
+ },
+ "timberline": {
+  "snocountry_id": "503009",
+  "snocountry_name": "Timberline Lodge",
+  "snocountry_state": "OR"
+ },
+ "tremblant": {
+  "snocountry_id": "819009",
+  "snocountry_name": "Tremblant",
+  "snocountry_state": "QC"
+ },
+ "vail": {
+  "snocountry_id": "303023",
+  "snocountry_name": "Vail Mountain Resort",
+  "snocountry_state": "CO"
+ },
+ "whistler-blackcomb": {
+  "snocountry_id": "604038",
+  "snocountry_name": "Whistler Blackcomb",
+  "snocountry_state": "BC"
+ },
+ "whiteface": {
+  "snocountry_id": "518012",
+  "snocountry_name": "Whiteface Mountain",
+  "snocountry_state": "NY"
+ },
+ "whitefish": {
+  "snocountry_id": "406001",
+  "snocountry_name": "Whitefish Mountain Resort",
+  "snocountry_state": "MT"
+ },
+ "whitetail": {
+  "snocountry_id": "717013",
+  "snocountry_name": "Whitetail Resort",
+  "snocountry_state": "PA"
+ },
+ "wild-mountain": {
+  "snocountry_id": "612009",
+  "snocountry_name": "Wild Mountain Ski and Snowboard Area",
+  "snocountry_state": "MN"
+ },
+ "wildcat": {
+  "snocountry_id": "603021",
+  "snocountry_name": "Wildcat Mountain",
+  "snocountry_state": "NH"
+ },
+ "wilmot-mountain": {
+  "snocountry_id": "312001",
+  "snocountry_name": "Wilmot Mountain",
+  "snocountry_state": "WI"
+ },
+ "winter-park": {
+  "snocountry_id": "303024",
+  "snocountry_name": "Winter Park Resort",
+  "snocountry_state": "CO"
+ },
+ "wolf-creek": {
+  "snocountry_id": "303025",
+  "snocountry_name": "Wolf Creek Ski Area",
+  "snocountry_state": "CO"
+ }
+}
