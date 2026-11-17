@@ -358,10 +358,43 @@ async function fetchModelStatus(modelKey: string): Promise<number | undefined> {
 }
 
 type WeatherCachePayload = Omit<WeatherDataResult, 'status' | 'fetchedAtMs' | 'cacheAgeMs'>;
-type WeatherCacheItem = WeatherCachePayload & { timestamp: number };
+type WeatherCacheItem = WeatherCachePayload & { timestamp: number; ecmwfRunAvailabilityTime?: number };
 
 export const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutes
 export const STALE_IF_ERROR_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+/**
+ * Modes whose displayed forecast is built on the ECMWF IFS run:
+ * `ecmwf` directly; `hrrr_ecmwf`, whose ECMWF series is the spine
+ * (HRRR only substitutes individual hours into it); and `best_match`,
+ * whose run metadata is the IFS one (see MODEL_META_MAP). Cache
+ * entries for these modes record the IFS run they were fetched from
+ * (`ecmwfRunAvailabilityTime` — Open-Meteo's
+ * `last_run_availability_time` for ecmwf_ifs), and an entry from an
+ * older run is not served once a newer run is available. Without
+ * this, each mode's independent 30-minute cache can hold a different
+ * forecast vintage, so two modes silently disagree about the same
+ * model (observed 2026-11-16: blend on the fresh 00Z run while
+ * ECMWF mode still served the previous run — Friday's low for
+ * Heavenly differed by 4 degrees between the two views).
+ */
+export const ECMWF_VINTAGE_MODES: ReadonlySet<string> = new Set(['ecmwf', 'hrrr_ecmwf', 'best_match']);
+
+/**
+ * Whether a cache entry stamped with `entryRunAvailabilityTime` is
+ * known to predate the currently available ECMWF run. An unknown
+ * current run proves nothing (metadata fetch failed) and never
+ * supersedes; an unstamped entry predates vintage tracking and is
+ * treated as superseded whenever the current run is known.
+ */
+export function isCacheSupersededByNewerRun(
+    entryRunAvailabilityTime: number | undefined,
+    currentRunAvailabilityTime: number | undefined,
+): boolean {
+    if (currentRunAvailabilityTime === undefined) return false;
+    if (entryRunAvailabilityTime === undefined) return true;
+    return entryRunAvailabilityTime < currentRunAvailabilityTime;
+}
 
 /**
  * The user-visible forecast horizon, in days, on EVERY surface (user
@@ -388,7 +421,9 @@ function isWeatherCacheItem(value: unknown): value is WeatherCacheItem {
     const hasValidHrrrData = value.hrrrData === null || isOpenMeteoResponse(value.hrrrData);
     const hasValidEnsembleMembers = value.ensembleMembers === undefined
         || (Array.isArray(value.ensembleMembers) && value.ensembleMembers.every(isOpenMeteoResponse));
-    return hasValidHrrrData && hasValidEnsembleMembers;
+    const hasValidVintage = value.ecmwfRunAvailabilityTime === undefined
+        || (typeof value.ecmwfRunAvailabilityTime === 'number' && Number.isFinite(value.ecmwfRunAvailabilityTime));
+    return hasValidHrrrData && hasValidEnsembleMembers && hasValidVintage;
 }
 
 function getCachedData(key: string, maxAgeMs = CACHE_EXPIRATION_MS): WeatherCacheItem | null {
@@ -459,13 +494,27 @@ function payloadDataAgeMs(data: WeatherCachePayload): number {
     return ages.length > 0 ? Math.max(...ages) : 0;
 }
 
-function setCachedData(key: string, data: WeatherCachePayload): void {
+function setCachedData(key: string, data: WeatherCachePayload, ecmwfRunAvailabilityTime?: number): void {
     if (typeof window === 'undefined') return;
     // Backdate by the server-cache age so a payload that spent 20 minutes
     // in the server cache does not get a fresh 30-minute client lifetime.
     const timestamp = Date.now() - payloadDataAgeMs(data);
     try {
         const item: WeatherCacheItem = { ...data, timestamp };
+        // Stamp the run only when the payload can actually be that
+        // run: `timestamp` is the payload's effective fetch time
+        // (already backdated by any server-cache Age), and a payload
+        // fetched before the run became available cannot contain it.
+        // Without this proof, a refetch answered from the server
+        // cache with the previous run's payload would be stamped
+        // with the new run and the mismatch would become invisible
+        // (Codex gate finding, 2026-11-17). An unstamped entry is
+        // treated as superseded on read, so the next view retries
+        // the refetch until a provably-current payload arrives.
+        if (typeof ecmwfRunAvailabilityTime === 'number' && Number.isFinite(ecmwfRunAvailabilityTime)
+            && timestamp >= ecmwfRunAvailabilityTime * 1000) {
+            item.ecmwfRunAvailabilityTime = ecmwfRunAvailabilityTime;
+        }
         localStorage.setItem(WEATHER_CACHE_PREFIX + key, JSON.stringify(item));
     } catch (error: unknown) {
         const quotaExceeded = error instanceof DOMException
@@ -855,9 +904,24 @@ const ENSEMBLE_HOURLY_PARAMS = [
  */
 export async function fetchWeatherData(locationKey: string, modelMode = 'best_match', elevationMode = 'avg', forceRefresh = false): Promise<WeatherDataResult> {
     const cacheKey = `${locationKey}|${modelMode}|${elevationMode}`;
+    // The current ECMWF IFS run clock: consulted by the vintage
+    // guard below and stamped onto whatever this call stores. Only
+    // the ECMWF-spined modes participate; for every other mode this
+    // resolves undefined and the guard is a no-op.
+    const ecmwfRunPromise = ECMWF_VINTAGE_MODES.has(modelMode)
+        ? fetchModelStatus('ecmwf')
+        : Promise.resolve(undefined);
     if (!forceRefresh) {
         const cached = getCachedData(cacheKey);
-        if (cached) return cachedResult(cached, 'cached');
+        if (cached) {
+            const currentRun = await ecmwfRunPromise;
+            if (!isCacheSupersededByNewerRun(cached.ecmwfRunAvailabilityTime, currentRun)) {
+                return cachedResult(cached, 'cached');
+            }
+            // Superseded by a newer ECMWF run: refetch rather than
+            // serve a previous vintage. If the refetch fails, the
+            // branches below still fall back to this entry as stale.
+        }
     }
 
     const locs = getLocations();
@@ -896,7 +960,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, data);
 
             const result = freshResult({ hrrrData: null, ecmwfData: data, location: loc, mode: 'best_match' });
-            setCachedData(cacheKey, result);
+            setCachedData(cacheKey, result, await ecmwfRunPromise);
             return result;
         } catch (error) {
             console.error("Error fetching Best Match data:", error);
@@ -949,7 +1013,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
             updateCustomLocationMetadata(loc, ecmwfData);
 
             const result = freshResult({ hrrrData, ecmwfData, location: loc, mode: 'hrrr_ecmwf' });
-            setCachedData(cacheKey, result);
+            setCachedData(cacheKey, result, await ecmwfRunPromise);
             return result;
         } catch (error) {
             console.error("Error fetching weather data:", error);
@@ -993,7 +1057,7 @@ export async function fetchWeatherData(locationKey: string, modelMode = 'best_ma
                 const data = attachResponseMetadata(await res.json(), 'ecmwf', lastRunAvailabilityTime);
                 updateCustomLocationMetadata(loc, data);
                 const result = freshResult({ hrrrData: null, ecmwfData: data, location: loc, mode: 'ecmwf' });
-                setCachedData(cacheKey, result);
+                setCachedData(cacheKey, result, await ecmwfRunPromise);
                 return result;
             } catch (error) {
                 console.error("Error fetching ECMWF High-Res data:", error);
@@ -1138,13 +1202,21 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
     const locs = getLocations();
     const targets = locationIds.map(id => locs[id]).filter(Boolean);
 
-    // Filter out locations that are invalid or already have a valid cache
+    const currentEcmwfRun = ECMWF_VINTAGE_MODES.has(modelMode)
+        ? await fetchModelStatus('ecmwf')
+        : undefined;
+    // Filter out locations that are invalid or already have a valid
+    // cache — where "valid" also means "not superseded by a newer
+    // ECMWF run" for the ECMWF-spined modes.
     const toFetch = targets.filter(l => {
         const valid = isValidCoordinate(l.latitude, l.longitude);
         if (!valid) {
             console.warn(`Skipping bulk fetch for ${l.name} (${l.id}) due to invalid coordinates: ${l.latitude}, ${l.longitude}`);
+            return false;
         }
-        return valid && !hasValidCache(l.id, modelMode, elevationMode);
+        const item = getCachedData(`${l.id}|${modelMode}|${elevationMode}`);
+        if (!item) return true;
+        return isCacheSupersededByNewerRun(item.ecmwfRunAvailabilityTime, currentEcmwfRun);
     });
     if (toFetch.length === 0) return;
 
@@ -1180,7 +1252,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
                 const displayData = attachResponseMetadata(item, 'best_match', lastRunAvailabilityTime);
                 updateCustomLocationMetadata(loc, displayData);
                 const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: 'best_match' };
-                setCachedData(`${loc.id}|best_match|${elevationMode}`, result);
+                setCachedData(`${loc.id}|best_match|${elevationMode}`, result, currentEcmwfRun);
             });
         } catch (e) {
             console.error("Bulk prefetch failed:", e);
@@ -1227,7 +1299,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
 
                 updateCustomLocationMetadata(loc, displayData);
                 const result = { hrrrData: hrrrDisplayData, ecmwfData: displayData, location: loc, mode: 'hrrr_ecmwf' };
-                setCachedData(`${loc.id}|hrrr_ecmwf|${elevationMode}`, result);
+                setCachedData(`${loc.id}|hrrr_ecmwf|${elevationMode}`, result, currentEcmwfRun);
             });
         } catch (e) {
             console.error("Bulk hrrr_ecmwf prefetch failed:", e);
@@ -1270,7 +1342,7 @@ export async function fetchBulkWeatherData(locationIds: string[], modelMode = 'b
                     const displayData = attachResponseMetadata(item, 'ecmwf', lastRunAvailabilityTime);
                     updateCustomLocationMetadata(loc, displayData);
                     const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: 'ecmwf' };
-                    setCachedData(`${loc.id}|ecmwf|${elevationMode}`, result);
+                    setCachedData(`${loc.id}|ecmwf|${elevationMode}`, result, currentEcmwfRun);
                 });
                 return;
             } catch (e) {
@@ -1365,7 +1437,14 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
     if (!loc || !isValidCoordinate(loc.latitude, loc.longitude)) return;
 
     const modes = ['min', 'avg', 'max'];
-    const missingModes = modes.filter(mode => !hasValidCache(locationId, modelMode, mode));
+    const currentEcmwfRun = ECMWF_VINTAGE_MODES.has(modelMode)
+        ? await fetchModelStatus('ecmwf')
+        : undefined;
+    const missingModes = modes.filter(mode => {
+        const item = getCachedData(`${locationId}|${modelMode}|${mode}`);
+        if (!item) return true;
+        return isCacheSupersededByNewerRun(item.ecmwfRunAvailabilityTime, currentEcmwfRun);
+    });
     
     if (missingModes.length === 0) return;
 
@@ -1400,7 +1479,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                 const displayData = attachResponseMetadata(item, 'best_match', lastRunAvailabilityTime);
                 updateCustomLocationMetadata(loc, displayData);
                 const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: 'best_match' };
-                setCachedData(`${loc.id}|best_match|${mode}`, result);
+                setCachedData(`${loc.id}|best_match|${mode}`, result, currentEcmwfRun);
             });
         } catch (e) {
             console.error("Triad prefetch failed:", e);
@@ -1441,7 +1520,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                     : null;
                 updateCustomLocationMetadata(loc, displayData);
                 const result = { hrrrData: hrrrDisplayData, ecmwfData: displayData, location: loc, mode: 'hrrr_ecmwf' };
-                setCachedData(`${loc.id}|hrrr_ecmwf|${mode}`, result);
+                setCachedData(`${loc.id}|hrrr_ecmwf|${mode}`, result, currentEcmwfRun);
             });
         } catch (e) {
             console.error("Triad hrrr_ecmwf prefetch failed:", e);
@@ -1484,7 +1563,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                     const { displayData, members } = extractEnsembleMembers(locData, lastRunAvailabilityTime);
                     updateCustomLocationMetadata(loc, displayData);
                     const result = { hrrrData: null, ecmwfData: displayData, ensembleMembers: members, location: loc, mode: modelMode };
-                    setCachedData(`${loc.id}|${modelMode}|${mode}`, result);
+                    setCachedData(`${loc.id}|${modelMode}|${mode}`, result, ECMWF_VINTAGE_MODES.has(modelMode) ? currentEcmwfRun : undefined);
                 });
             } catch (e) {
                 console.error("Triad ensemble prefetch failed:", e);
@@ -1517,7 +1596,7 @@ export async function fetchElevationTriad(locationId: string, modelMode = 'best_
                     const displayData = attachResponseMetadata(item, modelMode, lastRunAvailabilityTime);
                     updateCustomLocationMetadata(loc, displayData);
                     const result = { hrrrData: null, ecmwfData: displayData, location: loc, mode: modelMode };
-                    setCachedData(`${loc.id}|${modelMode}|${mode}`, result);
+                    setCachedData(`${loc.id}|${modelMode}|${mode}`, result, ECMWF_VINTAGE_MODES.has(modelMode) ? currentEcmwfRun : undefined);
                 });
             } catch (e) {
                 console.error(`Triad ${modelMode} prefetch failed:`, e);
