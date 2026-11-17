@@ -328,5 +328,137 @@ class GenerationLifecycleTest(unittest.TestCase):
         self.assertEqual(self.state["publishedGeneration"], 0)
 
 
+def stamped_frontend(cycle: str) -> dict:
+    doc = frontend()
+    for point in doc["points"]:
+        for rows in point["forecasts"].values():
+            for rec in rows:
+                rec["cycleUtc"] = cycle
+    doc["cycles"] = {"ecmwf": cycle, "hrrr": cycle}
+    return doc
+
+
+class CommandLifecycleTest(unittest.TestCase):
+    """The command-level invariants the v3 gate found untested:
+    successive full commits, generation carry-over, reset recovery."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        (self.root / "state").mkdir()
+        self.original_publish = rmm.publish_artifact
+        rmm.publish_artifact = lambda repo, artifact: {"ok": True}
+
+    def tearDown(self) -> None:
+        rmm.publish_artifact = self.original_publish
+        self.tmp.cleanup()
+
+    def args(self, **kw):
+        from types import SimpleNamespace
+        base = {"repo": str(self.root), "state_dir": "state",
+                "frontend_out": "out.json"}
+        base.update(kw)
+        return SimpleNamespace(**base)
+
+    def write_candidate(self, name: str, cycle: str) -> str:
+        import json as _json
+        (self.root / name).write_text(_json.dumps(stamped_frontend(cycle)))
+        return name
+
+    def test_successive_full_commits_advance_the_generation(self) -> None:
+        first = rmm.cmd_commit_full(self.args(
+            candidate=self.write_candidate("a.json", "2026-11-16T12:00:00Z")))
+        self.assertEqual(first["generation"], 1)
+        self.assertEqual(first["publishStatus"], "published")
+        second = rmm.cmd_commit_full(self.args(
+            candidate=self.write_candidate("b.json", "2026-11-17T00:00:00Z")))
+        self.assertEqual(second["generation"], 2)
+        self.assertEqual(second["publishStatus"], "published")
+        state = load_state(self.root / "state")
+        self.assertEqual(state["publishedGeneration"], 2)
+
+    def test_full_merge_full_keeps_lineage_and_retention(self) -> None:
+        rmm.cmd_commit_full(self.args(
+            candidate=self.write_candidate("a.json", "2026-11-16T12:00:00Z")))
+        # An hourly refresh lands while the next batch is scoring
+        # (generation 2 via a merge install).
+        state = load_state(self.root / "state")
+        refreshed = record("2026-11-17T15:00:00Z", "2026-11-17T06:00:00Z", slr=15.0, lead=1)
+        merged, _ = merge_frontend(state, {("pt-a", "hrrr"): [refreshed]})
+        install_and_queue(self.root / "state", merged, self.root / "out.json")
+        self.assertEqual(merged["generation"], 2)
+        # The next full batch (00Z, scored before the 06Z refresh
+        # landed) adopts, retains the 06Z record, and continues the
+        # generation lineage.
+        receipt = rmm.cmd_commit_full(self.args(
+            candidate=self.write_candidate("b.json", "2026-11-17T00:00:00Z")))
+        self.assertEqual(receipt["generation"], 3)
+        self.assertEqual(receipt["retainedNewer"], 1)
+        state = load_state(self.root / "state")
+        kept = state["points"][0]["forecasts"]["hrrr"][0]
+        self.assertEqual(kept["modelSlr"], 15.0)
+
+    def test_older_seed_with_newer_cycles_is_rejected(self) -> None:
+        rmm.cmd_commit_full(self.args(
+            candidate=self.write_candidate("a.json", "2026-11-16T12:00:00Z")))
+        sneaky = stamped_frontend("2026-11-16T18:00:00Z")
+        sneaky["seedCycles"] = {"ecmwf": "2026-11-16T00:00:00Z", "hrrr": "2026-11-16T00:00:00Z"}
+        import json as _json
+        (self.root / "sneaky.json").write_text(_json.dumps(sneaky))
+        with self.assertRaises(MergeError):
+            rmm.cmd_commit_full(self.args(candidate="sneaky.json"))
+
+    def test_reset_reconcile_publishes_at_a_fresh_generation(self) -> None:
+        rmm.cmd_commit_full(self.args(
+            candidate=self.write_candidate("a.json", "2026-11-16T12:00:00Z")))
+        import json as _json
+        (self.root / "reseed.json").write_text(_json.dumps(stamped_frontend("2026-11-16T12:00:00Z")))
+        rmm.cmd_reset(self.args(frontend="reseed.json"))
+        state = load_state(self.root / "state")
+        self.assertEqual(state["generation"], 2)  # fresh, not reused 1
+        self.assertEqual(state["publishedGeneration"], 0)
+        changed = reconcile_locked(self.root / "state", state, self.root / "out.json")
+        self.assertTrue(changed)
+        installed = _json.loads((self.root / "out.json").read_text())
+        self.assertEqual(installed["servingGeneration"], 2)
+
+
+class PublishFailureModesTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state_dir = Path(self.tmp.name) / "merge-state"
+        self.state_dir.mkdir(parents=True)
+        self.frontend_out = Path(self.tmp.name) / "model-forecasts.json"
+        state = stamp_record_cycles(deraw_frontend(frontend()))
+        state["seedCycles"] = {"ecmwf": C0, "hrrr": C0}
+        state["generation"] = 0
+        state["publishedGeneration"] = 0
+        state["artifactSha256"] = None
+        self.state = state
+        install_and_queue(self.state_dir, self.state, self.frontend_out)
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_publisher_timeout_becomes_a_recorded_failure(self) -> None:
+        import subprocess as sp
+        original_run = rmm.subprocess.run
+
+        def timing_out(*a, **kw):
+            raise sp.TimeoutExpired(cmd="publisher", timeout=900)
+
+        rmm.subprocess.run = timing_out
+        try:
+            with self.assertRaises(MergeError):
+                rmm.publish_artifact(Path(self.tmp.name), self.frontend_out)
+            receipt, error = publish_pending_locked(
+                Path(self.tmp.name), self.state_dir, self.state)
+        finally:
+            rmm.subprocess.run = original_run
+        self.assertIsNone(receipt)
+        self.assertIn("did not complete", error)
+        self.assertIsNotNone(read_pending(self.state_dir))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -315,14 +315,26 @@ def adopt_full_frontend(old_state: dict | None, candidate: dict,
     record_index(new_state)  # structural validation in every path
     new_state["seedCycles"] = dict(candidate.get("seedCycles") or candidate["cycles"])
     stats = {"retainedNewer": 0, "adopted": 0}
+    if old_state is not None:
+        # The generation lineage belongs to the standing state, never
+        # to the candidate (a plain frontend carries no such fields,
+        # and restarting the counter would make the next publication
+        # collide with the generation already served).
+        new_state["generation"] = int(old_state.get("generation") or 0)
+        new_state["publishedGeneration"] = int(old_state.get("publishedGeneration") or 0)
     if old_state is not None and not allow_stale:
+        # The stale check judges the candidate's EFFECTIVE coverage
+        # anchor — its seedCycles when it carries them, else its
+        # cycles. A merged candidate whose newest cycles look fresh
+        # can still anchor older coverage, and that must not pass.
         seed = old_state.get("seedCycles") or {}
+        anchor = candidate.get("seedCycles") or candidate.get("cycles") or {}
         for arm, seed_cycle in seed.items():
-            candidate_cycle = (candidate.get("cycles") or {}).get(arm)
-            if candidate_cycle is not None and candidate_cycle < seed_cycle:
+            anchor_cycle = anchor.get(arm)
+            if anchor_cycle is None or anchor_cycle < seed_cycle:
                 raise MergeError(
-                    f"stale full-batch candidate: its {arm} cycle {candidate_cycle} "
-                    f"is older than the standing seed {seed_cycle}")
+                    f"stale full-batch candidate: its {arm} coverage anchor "
+                    f"{anchor_cycle} is older than the standing seed {seed_cycle}")
     if old_state is None:
         stats["adopted"] = sum(len(rows) for p in new_state["points"] for rows in p["forecasts"].values())
         return new_state, stats
@@ -480,13 +492,19 @@ def reconcile_locked(state_dir: Path, state: dict, frontend_out: Path) -> bool:
 
 
 def publish_artifact(repo: Path, artifact: Path) -> dict:
-    result = subprocess.run(
-        [sys.executable, str(repo / PUBLISHER), "--file", str(artifact)],
-        cwd=repo, capture_output=True, text=True, timeout=900,
-    )
+    try:
+        result = subprocess.run(
+            [sys.executable, str(repo / PUBLISHER), "--file", str(artifact)],
+            cwd=repo, capture_output=True, text=True, timeout=900,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        raise MergeError(f"Blob publish did not complete for {artifact.name}: {exc}") from exc
     if result.returncode != 0:
         raise MergeError(f"Blob publish failed for {artifact.name}: {result.stderr.strip()[-500:]}")
-    return json.loads(result.stdout)
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise MergeError(f"Blob publisher returned unparseable output for {artifact.name}: {exc}") from exc
 
 
 def publish_pending_locked(repo: Path, state_dir: Path, state: dict) -> tuple[dict | None, str | None]:
@@ -550,6 +568,27 @@ def arm_counts(flat_records: list[dict]) -> dict[str, dict[str, int]]:
         entry["built"] += 1
         if not flat["missing"]:
             entry["usable"] += 1
+    return counts
+
+
+def merge_arm_outcomes(state: dict, new_records: dict[tuple[str, str], list[dict]],
+                       counts: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+    """Extend attempted-arm counts with per-arm overlap/replacement
+    figures, judged against the standing state with the same rules
+    merge_frontend applies (absent window, stale cycle, else a
+    replacement)."""
+    index = record_index(state)
+    for (point_id, arm), rows in new_records.items():
+        entry = counts.setdefault(arm, {"built": 0, "usable": 0})
+        entry.setdefault("overlapping", 0)
+        entry.setdefault("replaced", 0)
+        for record in rows:
+            current = index.get((point_id, arm, record["windowEndUtc"]))
+            if current is None:
+                continue
+            entry["overlapping"] += 1
+            if record["cycleUtc"] > current["cycleUtc"]:
+                entry["replaced"] += 1
     return counts
 
 
@@ -621,15 +660,16 @@ def track_best_effort(args, receipt: dict, flat_records: list[dict], cycle_compa
 
 def run_merge(args, new_records: dict[tuple[str, str], list[dict]],
               flat_records: list[dict], run_cycles: dict[str, str],
-              warnings: list[str]) -> dict:
+              warnings: list[str], counts_override: dict | None = None) -> dict:
     repo = Path(args.repo)
     state_dir = repo / args.state_dir
-    counts = arm_counts(flat_records)
+    counts = counts_override if counts_override is not None else arm_counts(flat_records)
     built = sum(c["built"] for c in counts.values())
     usable = sum(c["usable"] for c in counts.values())
     with state_lock(state_dir):
         state = load_state(state_dir)
         reconcile_locked(state_dir, state, repo / args.frontend_out)
+        counts = merge_arm_outcomes(state, new_records, counts)
         merged, stats = merge_frontend(state, new_records)
         overlapping = usable - stats["skippedAbsent"]
         receipt: dict[str, Any] = {
@@ -676,6 +716,7 @@ def cmd_hrrr(args) -> dict:
     now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     rejections: list[str] = []
     saw_unusable = False
+    probe_counts: dict[str, dict[str, int]] = {}
     for back in (1, 2, 3, 4):
         candidate = now - timedelta(hours=back)
         date, hour = candidate.strftime("%Y%m%d"), candidate.hour
@@ -687,6 +728,10 @@ def cmd_hrrr(args) -> dict:
             continue
         flat = score_hrrr_series(rms, points, model, features, series, date, hour)
         counts = arm_counts(flat)
+        for arm, c in counts.items():
+            entry = probe_counts.setdefault(arm, {"built": 0, "usable": 0})
+            entry["built"] += c["built"]
+            entry["usable"] += c["usable"]
         usable = sum(c["usable"] for c in counts.values())
         built = sum(c["built"] for c in counts.values())
         if usable > 0:
@@ -700,7 +745,7 @@ def cmd_hrrr(args) -> dict:
         saw_unusable = True
         rejections.append(f"HRRR {date} {hour:02d}Z scored no usable records")
     if saw_unusable:
-        return finish_noop(args, "no-usable-data", {}, rejections, {})
+        return finish_noop(args, "no-usable-data", {}, rejections, probe_counts)
     raise MergeError(f"no HRRR cycle available in the last 4 hours: {rejections}")
 
 
@@ -711,9 +756,9 @@ def cmd_ecmwf(args) -> dict:
     repo = Path(args.repo)
     points, model, features = load_model_and_points(repo)
     flat = score_ecmwf(rms, points, model, features, args.date, args.cycle)
-    counts = arm_counts(flat)
+    attempted = arm_counts(flat)
     warnings: list[str] = []
-    if counts.get("ecmwf", {}).get("usable", 0) == 0:
+    if attempted.get("ecmwf", {}).get("usable", 0) == 0:
         warnings.append(f"ECMWF {args.date} {args.cycle:02d}Z scored no usable records")
         flat = []  # its records are all missing; drop them entirely
     try:
@@ -721,6 +766,10 @@ def cmd_ecmwf(args) -> dict:
         hrrr_flat = score_hrrr_series(rms, points, model, features, series, args.date, args.cycle)
         if any(not r["missing"] for r in hrrr_flat):
             flat += hrrr_flat
+            for arm, c in arm_counts(hrrr_flat).items():
+                entry = attempted.setdefault(arm, {"built": 0, "usable": 0})
+                entry["built"] += c["built"]
+                entry["usable"] += c["usable"]
         else:
             warnings.append(f"HRRR {args.date} {args.cycle:02d}Z scored no usable records; ECMWF merged alone")
     except CycleUnavailable as exc:
@@ -729,9 +778,9 @@ def cmd_ecmwf(args) -> dict:
     total_usable = sum(c["usable"] for c in arm_counts(flat).values())
     if total_usable == 0:
         return finish_noop(args, "no-usable-data", {"ecmwf": iso_z(cycle_dt)},
-                           warnings, arm_counts(flat))
+                           warnings, attempted)
     return run_merge(args, group_frontend_records(flat), flat,
-                     {"ecmwf": iso_z(cycle_dt)}, warnings)
+                     {"ecmwf": iso_z(cycle_dt)}, warnings, counts_override=attempted)
 
 
 def cmd_commit_full(args) -> dict:
@@ -766,10 +815,12 @@ def cmd_reset(args) -> dict:
     with state_lock(state_dir):
         old_state = load_state(state_dir) if (state_dir / "state.json").is_file() else None
         state, stats = adopt_full_frontend(old_state, frontend, allow_stale=True)
-        # A reset re-seeds: generation bookkeeping restarts from the
-        # standing lineage, and no artifact is claimed for the new
-        # state until the next install finalises one.
-        state["generation"] = int((old_state or {}).get("generation") or 0)
+        # A reset re-seeds under a FRESH generation: the standing
+        # generation may already be published, and reusing it for the
+        # reset state's different bytes would be refused at publish
+        # time. No artifact is claimed until the next install or
+        # reconcile finalises one at the new generation.
+        state["generation"] = int((old_state or {}).get("generation") or 0) + 1
         state["publishedGeneration"] = 0
         state["artifactSha256"] = None
         save_state(state_dir, state)
