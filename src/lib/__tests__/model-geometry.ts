@@ -133,22 +133,20 @@ export function expectedMergedWindows(
   point: { timezone: string },
   ceilingHours: number,
 ): ServedWindow[] {
-  if (rows.length === 0) return [];
   const cycleOf = (row: { cycleUtc?: string }): string | undefined => row.cycleUtc ?? fallbackCycleUtc;
   const cycles = [...new Set(rows.map(cycleOf))];
+  // Coverage is anchored to the seed (full-batch) cycle when the
+  // document carries one; only without it does the oldest surviving
+  // record cycle stand in. With neither, nothing is expected.
+  const baseline = baselineCycleUtc ?? (cycles.length > 0 ? cycles.reduce((a, b) => (a! <= b! ? a : b)) : undefined);
+  if (baseline === undefined) return [];
+  const baselineWindows = expectedServedWindows(baseline, point, ceilingHours);
   const byCycle = new Map(
     cycles.map((cycle) => [
       cycle,
       new Map(expectedServedWindows(cycle, point, ceilingHours).map((w) => [w.windowEndLocalDate, w.leadDay])),
     ]),
   );
-  // Coverage is anchored to the seed (full-batch) cycle when the
-  // document carries one; only without it does the oldest surviving
-  // record cycle stand in.
-  const baseline = baselineCycleUtc ?? cycles.reduce((a, b) => (a! <= b! ? a : b));
-  const baselineWindows =
-    byCycle.get(baseline) ??
-    new Map(expectedServedWindows(baseline, point, ceilingHours).map((w) => [w.windowEndLocalDate, w.leadDay]));
   const leadByWindow = new Map<string, number>();
   for (const row of rows) {
     const lead = byCycle.get(cycleOf(row))?.get(row.windowEndLocalDate);
@@ -159,8 +157,15 @@ export function expectedMergedWindows(
     }
     leadByWindow.set(row.windowEndLocalDate, lead);
   }
-  return [...baselineWindows.keys()].sort().map((date) => ({
-    leadDay: leadByWindow.get(date) as number,
-    windowEndLocalDate: date,
-  }));
+  // Every baseline window must have a record: a missing one is a
+  // coverage loss, not an expectation to derive around.
+  return baselineWindows
+    .map((w) => {
+      const leadDay = leadByWindow.get(w.windowEndLocalDate);
+      if (leadDay === undefined) {
+        throw new Error(`expected window ${w.windowEndLocalDate} (seed cycle ${baseline}) has no record`);
+      }
+      return { leadDay, windowEndLocalDate: w.windowEndLocalDate };
+    })
+    .sort((a, b) => (a.windowEndLocalDate < b.windowEndLocalDate ? -1 : 1));
 }

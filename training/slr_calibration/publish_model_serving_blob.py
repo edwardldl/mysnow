@@ -157,6 +157,49 @@ def regressed_arms(existing_cycles: dict, candidate_cycles: dict) -> list[str]:
         if cycle and (candidate_cycles.get(arm) is None or candidate_cycles[arm] < cycle))
 
 
+def publication_refusal(existing: dict, data: dict, sha256: str, cycle_utc: str) -> str | None:
+    """Why publishing this candidate over the live manifest would move
+    serving backwards, or None when it may proceed. Freshness is
+    judged per arm when both sides carry cycles (a merged frontend's
+    arms advance independently); otherwise the scalar cycleUtc guard
+    applies. A tiered-cadence candidate also carries a monotonically
+    increasing servingGeneration: an older generation never
+    overwrites a newer one, and different bytes at the same
+    generation are a stale publisher, not a retry (a true retry has
+    identical bytes and hash)."""
+    if existing.get("cycles") and data.get("cycles"):
+        regressions = regressed_arms(existing.get("cycles") or {}, data.get("cycles") or {})
+        if regressions:
+            return (
+                f"refusing to move the manifest backward: the served manifest's "
+                f"{', '.join(regressions)} cycle(s) {existing.get('cycles')} are newer "
+                f"than this candidate's {data.get('cycles')} (pass --allow-regression to override)"
+            )
+    else:
+        existing_cycle = existing.get("cycleUtc") or ""
+        if existing_cycle > cycle_utc:
+            return (
+                f"refusing to move the manifest backward: served cycle {existing_cycle} "
+                f"is newer than the candidate {cycle_utc} (pass --allow-regression to override)"
+            )
+    existing_generation = existing.get("generation")
+    candidate_generation = data.get("servingGeneration")
+    if isinstance(existing_generation, int) and isinstance(candidate_generation, int):
+        if candidate_generation < existing_generation:
+            return (
+                f"refusing to publish generation {candidate_generation}: the served "
+                f"manifest is already at generation {existing_generation} "
+                f"(pass --allow-regression to override)"
+            )
+        if candidate_generation == existing_generation and existing.get("sha256") != sha256:
+            return (
+                f"refusing to publish different bytes at generation "
+                f"{candidate_generation}: the served manifest's hash differs "
+                f"(pass --allow-regression to override)"
+            )
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     repo_root = Path(__file__).resolve().parents[2]
@@ -192,13 +235,9 @@ def main() -> int:
 
     existing = current_manifest(base_url)
     if existing and not args.allow_regression:
-        regressions = regressed_arms(existing.get("cycles") or {}, data.get("cycles") or {})
-        if regressions:
-            raise fail(
-                f"refusing to move the manifest backward: the served manifest's "
-                f"{', '.join(regressions)} cycle(s) {existing.get('cycles')} are newer "
-                f"than this candidate's {data.get('cycles')} (pass --allow-regression to override)"
-            )
+        refusal = publication_refusal(existing, data, sha256, cycle_utc)
+        if refusal:
+            raise fail(refusal)
 
     token = load_token(args.env_file)
     vercel = vercel_bin()
@@ -220,6 +259,8 @@ def main() -> int:
         "version": 1,
         "cycleUtc": cycle_utc,
         "cycles": data.get("cycles") or {},
+        **({"generation": data["servingGeneration"]}
+           if isinstance(data.get("servingGeneration"), int) else {}),
         "sha256": sha256,
         "snapshotPathname": snapshot_pathname,
         "snapshotUrl": snapshot_url,

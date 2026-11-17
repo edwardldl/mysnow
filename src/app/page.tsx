@@ -53,7 +53,7 @@ export default function Home() {
         const notOlder = (["ecmwf", "hrrr"] as const).every((arm) => {
           const incoming = data.cycles?.[arm];
           const current = modelForecastData.cycles?.[arm];
-          return incoming === undefined || current === undefined || incoming >= current;
+          return current === undefined || (incoming !== undefined && incoming >= current);
         });
         if ((cyclesDiffer || generatedDiffer) && notOlder) {
           setActiveModelForecastData(data);

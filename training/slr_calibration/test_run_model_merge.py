@@ -5,15 +5,26 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[0] / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[0] / "src"))
 
+import tempfile  # noqa: E402
+
+import run_model_merge as rmm  # noqa: E402
 from run_model_merge import (  # noqa: E402
     MergeError,
     adopt_full_frontend,
+    arm_counts,
+    classify_outcome,
     cycle_ceiling_hours,
     deraw_frontend,
     finalise_frontend,
     frontend_record,
+    install_and_queue,
+    load_state,
     merge_frontend,
+    publish_pending_locked,
+    read_pending,
+    reconcile_locked,
     recompute_cycles,
+    save_state,
     stamp_record_cycles,
 )
 
@@ -189,6 +200,132 @@ class FrontendRecordTest(unittest.TestCase):
         self.assertEqual(rec["cycleUtc"], "2026-11-16T06:00:00Z")
         self.assertEqual(rec["leadDay"], 3)
         self.assertEqual(rec["liquidMm"], 20.0)
+
+
+class AdoptGuardTest(unittest.TestCase):
+    def test_stale_candidate_is_rejected(self) -> None:
+        state = frontend()
+        state["seedCycles"] = {"ecmwf": "2026-11-16T12:00:00Z", "hrrr": "2026-11-16T12:00:00Z"}
+        with self.assertRaises(MergeError):
+            adopt_full_frontend(state, frontend())  # candidate cycles are 00Z
+
+    def test_reset_may_adopt_stale_with_allow_stale(self) -> None:
+        state = frontend()
+        state["seedCycles"] = {"ecmwf": "2026-11-16T12:00:00Z", "hrrr": "2026-11-16T12:00:00Z"}
+        new_state, _stats = adopt_full_frontend(state, frontend(), allow_stale=True)
+        self.assertEqual(new_state["seedCycles"]["ecmwf"], C0)
+
+    def test_candidate_seed_cycles_are_preserved(self) -> None:
+        candidate = frontend()
+        candidate["seedCycles"] = {"ecmwf": "2026-11-15T12:00:00Z", "hrrr": "2026-11-15T12:00:00Z"}
+        new_state, _stats = adopt_full_frontend(None, candidate)
+        self.assertEqual(new_state["seedCycles"]["ecmwf"], "2026-11-15T12:00:00Z")
+
+    def test_retention_requires_matching_window_identity(self) -> None:
+        state = frontend()
+        # A newer standing record whose window START differs from the
+        # candidate's record for the same end must not be retained.
+        odd = record("2026-11-17T15:00:00Z", "2026-11-16T22:00:00Z", slr=15.0, lead=1,
+                     start="2026-11-16T14:00:00Z")
+        state["points"][0]["forecasts"]["hrrr"][0] = odd
+        candidate = frontend()
+        for point in candidate["points"]:
+            for rows in point["forecasts"].values():
+                for rec in rows:
+                    rec["cycleUtc"] = "2026-11-16T12:00:00Z"
+        candidate["cycles"] = {"ecmwf": "2026-11-16T12:00:00Z", "hrrr": "2026-11-16T12:00:00Z"}
+        new_state, stats = adopt_full_frontend(state, candidate)
+        self.assertEqual(stats["retainedNewer"], 0)
+        self.assertEqual(new_state["points"][0]["forecasts"]["hrrr"][0]["modelSlr"], 10.0)
+
+
+class OutcomeTest(unittest.TestCase):
+    def test_taxonomy(self) -> None:
+        self.assertEqual(classify_outcome(10, 8, 5, 2), "merged")
+        self.assertEqual(classify_outcome(10, 8, 5, 0), "already-current")
+        self.assertEqual(classify_outcome(10, 8, 0, 0), "no-covered-windows")
+        self.assertEqual(classify_outcome(10, 0, 0, 0), "no-usable-data")
+        self.assertEqual(classify_outcome(0, 0, 0, 0), "no-eligible-windows")
+
+    def test_arm_counts(self) -> None:
+        flat = [
+            {"source": "hrrr", "missing": False},
+            {"source": "hrrr", "missing": True},
+            {"source": "ecmwf", "missing": False},
+        ]
+        counts = arm_counts(flat)
+        self.assertEqual(counts["hrrr"], {"built": 2, "usable": 1})
+        self.assertEqual(counts["ecmwf"], {"built": 1, "usable": 1})
+
+
+class GenerationLifecycleTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state_dir = Path(self.tmp.name) / "merge-state"
+        self.state_dir.mkdir(parents=True)
+        self.frontend_out = Path(self.tmp.name) / "model-forecasts.json"
+        state = stamp_record_cycles(deraw_frontend(frontend()))
+        state["seedCycles"] = {"ecmwf": C0, "hrrr": C0}
+        state["generation"] = 0
+        state["publishedGeneration"] = 0
+        state["artifactSha256"] = None
+        self.state = state
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_install_increments_generation_and_stamps_frontend(self) -> None:
+        installed, _report = install_and_queue(self.state_dir, self.state, self.frontend_out)
+        self.assertEqual(installed["servingGeneration"], 1)
+        self.assertEqual(self.state["generation"], 1)
+        pending = read_pending(self.state_dir)
+        self.assertEqual(pending["generation"], 1)
+        self.assertEqual(pending["sha256"], self.state["artifactSha256"])
+
+    def test_reconcile_repairs_install_and_requeues(self) -> None:
+        install_and_queue(self.state_dir, self.state, self.frontend_out)
+        # Simulate a crash after the state write: corrupt the install
+        # and drop the pending record.
+        self.frontend_out.write_text("{}")
+        (self.state_dir / "pending-publish.json").unlink()
+        changed = reconcile_locked(self.state_dir, self.state, self.frontend_out)
+        self.assertTrue(changed)
+        import hashlib as hl
+        self.assertEqual(hl.sha256(self.frontend_out.read_bytes()).hexdigest(),
+                         self.state["artifactSha256"])
+        self.assertIsNotNone(read_pending(self.state_dir))
+
+    def test_publish_marks_generation_and_clears_pending(self) -> None:
+        install_and_queue(self.state_dir, self.state, self.frontend_out)
+        original = rmm.publish_artifact
+        rmm.publish_artifact = lambda repo, artifact: {"ok": True}
+        try:
+            receipt, error = publish_pending_locked(Path(self.tmp.name), self.state_dir, self.state)
+        finally:
+            rmm.publish_artifact = original
+        self.assertIsNone(error)
+        self.assertEqual(receipt, {"ok": True})
+        self.assertEqual(self.state["publishedGeneration"], 1)
+        self.assertIsNone(read_pending(self.state_dir))
+        saved = load_state(self.state_dir)
+        self.assertEqual(saved["publishedGeneration"], 1)
+
+    def test_failed_publish_keeps_pending(self) -> None:
+        install_and_queue(self.state_dir, self.state, self.frontend_out)
+        original = rmm.publish_artifact
+
+        def boom(repo, artifact):
+            raise MergeError("blob down")
+
+        rmm.publish_artifact = boom
+        try:
+            receipt, error = publish_pending_locked(Path(self.tmp.name), self.state_dir, self.state)
+        finally:
+            rmm.publish_artifact = original
+        self.assertIsNone(receipt)
+        self.assertIn("blob down", error)
+        self.assertIsNotNone(read_pending(self.state_dir))
+        self.assertEqual(self.state["publishedGeneration"], 0)
 
 
 if __name__ == "__main__":

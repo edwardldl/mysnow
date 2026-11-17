@@ -17,7 +17,10 @@ persistent RAW working state:
           its coverage and windows, but retaining any standing record
           whose scoring cycle is strictly newer (an hourly refresh
           that landed while the batch was scoring is never regressed)
-          — then install and publish from that state.
+          — then install and publish from that state. A candidate
+          whose cycles are older than the standing seed is rejected:
+          a late-finishing older batch can never move coverage or
+          seedCycles backwards.
 
 A merge never extends coverage (windows absent from the state are
 skipped), never moves a window backward (a record is replaced only by
@@ -29,21 +32,43 @@ the full batch that set the current coverage, and the installed
 frontend's ``cycles`` map reports the newest contributing cycle per
 arm.
 
-Publication discipline (Codex gate, 2026-11-16): installs are written
-atomically (temp file + rename) from the state under an flock lock
-shared by merges, commit-full and reset. The exact bytes to publish
-are first written as an immutable artifact under the state directory
-and recorded in pending-publish.json; the publisher subprocess reads
-that artifact (never the mutable install path) and serialises
-manifest updates with its own lock. A failed publish therefore never
-loses the update: any later run (or `publish-pending`) republishes the
-pending artifact even when it has no new records of its own.
+Publication discipline (Codex gates, 2026-11-16): installs are
+written atomically (temp file + rename) from the state under an flock
+lock shared by merges, commit-full and reset, and publication happens
+INSIDE that lock, so the queue lifecycle can never interleave with an
+install. The state carries a monotonically increasing ``generation``;
+every install increments it, stamps it into the frontend as
+``servingGeneration``, writes the exact installed bytes as an
+immutable content-addressed artifact, and queues that artifact in
+pending-publish.json with its generation. The publisher refuses to
+move the live manifest to an older generation, or to different bytes
+at the same generation, so a stale publisher can never overwrite a
+newer snapshot even when their cycle maxima tie. On success the run
+records ``publishedGeneration`` in the state and clears the pending
+record only if it still names the artifact just published.
+
+Crash recovery is replay, not repair-by-hand: the write order inside
+an install is artifact -> state -> install -> pending, and every
+locked run first reconciles the install path and the pending record
+against the authoritative state (a generation whose published
+generation lags is re-queued automatically). The run receipt —
+including the publication outcome — is appended before the command
+reports failure, so an installed update always has its disposition
+recorded.
+
+Run outcomes are classified, because an hourly HRRR cycle often
+legitimately replaces nothing: ``merged`` (records replaced),
+``already-current`` (usable records overlap standing coverage and are
+equal or newer), ``no-covered-windows`` (usable records reach no
+standing window), ``no-eligible-windows`` (the cycle's horizon
+reaches no window at all) and ``no-usable-data`` (windows were
+expected but scoring produced nothing usable; exit code 4).
 
 State: data/tracking/model-serving/merge-state/state.json. A run that
 finds the lock held exits 3 and changes nothing. `reset` re-seeds the
 state from a full-batch frontend (bootstrap/recovery; adopt-only, no
-install or publish). `reinstall` regenerates the installed frontend
-from the state after a crash.
+install or publish). `reinstall` reconciles the installed frontend
+against the state after a crash.
 """
 from __future__ import annotations
 
@@ -151,6 +176,7 @@ def deraw_frontend(frontend: dict) -> dict:
     its provenance, returning the raw frontend the layer was applied to."""
     out = copy.deepcopy(frontend)
     out.pop("consistencyAdjustment", None)
+    out.pop("servingGeneration", None)
     for point in out["points"]:
         for rows in point["forecasts"].values():
             for record in rows:
@@ -271,14 +297,32 @@ def check_merge_gates(before: dict, after: dict, replaced_keys: set[tuple[str, s
             raise MergeError(f"gate G3: replaced {arm} records carry cycles {sorted(cycles)}")
 
 
-def adopt_full_frontend(old_state: dict | None, candidate: dict) -> tuple[dict, dict]:
+def adopt_full_frontend(old_state: dict | None, candidate: dict,
+                        allow_stale: bool = False) -> tuple[dict, dict]:
     """The state after a full batch: the candidate's coverage and
     windows, retaining any standing record scored by a strictly newer
-    cycle (a refresh that landed while the batch was scoring is never
-    regressed by the batch's older cycle)."""
+    cycle whose window identity matches the candidate's record for
+    that window (a refresh that landed while the batch was scoring is
+    never regressed by the batch's older cycle).
+
+    Unless allow_stale (the operator's `reset`), a candidate whose
+    cycles are older than the standing seed is rejected outright: a
+    late-finishing older batch must not move coverage or seedCycles
+    backwards. The seed is the candidate's own seedCycles when it
+    carries one (restoring a merged snapshot keeps its coverage
+    anchor), else its cycles."""
     new_state = stamp_record_cycles(deraw_frontend(candidate))
-    new_state["seedCycles"] = dict(candidate["cycles"])
+    record_index(new_state)  # structural validation in every path
+    new_state["seedCycles"] = dict(candidate.get("seedCycles") or candidate["cycles"])
     stats = {"retainedNewer": 0, "adopted": 0}
+    if old_state is not None and not allow_stale:
+        seed = old_state.get("seedCycles") or {}
+        for arm, seed_cycle in seed.items():
+            candidate_cycle = (candidate.get("cycles") or {}).get(arm)
+            if candidate_cycle is not None and candidate_cycle < seed_cycle:
+                raise MergeError(
+                    f"stale full-batch candidate: its {arm} cycle {candidate_cycle} "
+                    f"is older than the standing seed {seed_cycle}")
     if old_state is None:
         stats["adopted"] = sum(len(rows) for p in new_state["points"] for rows in p["forecasts"].values())
         return new_state, stats
@@ -286,7 +330,9 @@ def adopt_full_frontend(old_state: dict | None, candidate: dict) -> tuple[dict, 
     index = record_index(new_state)
     for key, record in index.items():
         current = old_index.get(key)
-        if current is not None and current["cycleUtc"] > record["cycleUtc"]:
+        if (current is not None and current["cycleUtc"] > record["cycleUtc"]
+                and current["windowStartUtc"] == record["windowStartUtc"]
+                and current["windowEndLocalDate"] == record["windowEndLocalDate"]):
             record.clear()
             record.update(copy.deepcopy(current))
             stats["retainedNewer"] += 1
@@ -309,16 +355,31 @@ def recompute_cycles(frontend: dict) -> dict:
     return frontend
 
 
-def finalise_frontend(state: dict) -> tuple[dict, dict]:
+def finalise_frontend(state: dict, generation: int | None = None) -> tuple[dict, dict]:
     """The installable frontend for a raw state: fresh timestamp,
-    per-arm cycles and seed cycles, lead-cap assertion, isotonic layer
-    applied fresh."""
+    per-arm cycles and seed cycles, the serving generation stamped,
+    lead-cap assertion, isotonic layer applied fresh."""
     out = recompute_cycles(copy.deepcopy(state))
+    for key in ("generation", "publishedGeneration", "artifactSha256"):
+        out.pop(key, None)
     out["seedCycles"] = dict(state.get("seedCycles") or state["cycles"])
+    if generation is not None:
+        out["servingGeneration"] = generation
     out["generatedAtUtc"] = datetime.now(timezone.utc).isoformat()
     assert_frontend_within_lead_cap(out)
     adjusted, report = apply_isotonic_slr_layer_gated(out, enabled=True)
     return adjusted, report
+
+
+def classify_outcome(built: int, usable: int, overlapping: int, replaced: int) -> str:
+    """The run-outcome taxonomy (see module docstring)."""
+    if replaced > 0:
+        return "merged"
+    if usable == 0:
+        return "no-usable-data" if built > 0 else "no-eligible-windows"
+    if overlapping == 0:
+        return "no-covered-windows"
+    return "already-current"
 
 
 # ---------------------------------------------------------------------------
@@ -331,6 +392,9 @@ def load_state(state_dir: Path) -> dict:
         raise MergeError(f"no merge state at {path}; run `reset` from an installed frontend first")
     state = json.loads(path.read_text())
     state.setdefault("seedCycles", dict(state.get("cycles") or {}))
+    state.setdefault("generation", 0)
+    state.setdefault("publishedGeneration", 0)
+    state.setdefault("artifactSha256", None)
     return state
 
 
@@ -352,9 +416,10 @@ def write_artifact(state_dir: Path, installed: dict) -> tuple[Path, str]:
     return path, sha
 
 
-def set_pending(state_dir: Path, artifact: Path, sha: str) -> None:
+def set_pending(state_dir: Path, artifact: Path, sha: str, generation: int) -> None:
     atomic_write_json(state_dir / "pending-publish.json",
                       {"artifact": artifact.name, "sha256": sha,
+                       "generation": generation,
                        "queuedAtUtc": datetime.now(timezone.utc).isoformat()})
 
 
@@ -363,7 +428,58 @@ def read_pending(state_dir: Path) -> dict | None:
     return json.loads(path.read_text()) if path.is_file() else None
 
 
-def publish_artifact(repo: Path, state_dir: Path, artifact: Path) -> dict:
+def install_and_queue(state_dir: Path, state: dict, frontend_out: Path) -> tuple[dict, dict]:
+    """Advance the state to a new generation and install it. Write
+    order is artifact -> state -> install -> pending, so a crash at
+    any boundary leaves the authoritative state able to replay the
+    rest (see reconcile_locked). Caller holds the state lock. The
+    state dict is mutated with the new generation bookkeeping.
+    Returns (installed, isotonic_report)."""
+    generation = int(state.get("generation") or 0) + 1
+    installed, report = finalise_frontend(state, generation)
+    artifact, sha = write_artifact(state_dir, installed)
+    state["generation"] = generation
+    state["artifactSha256"] = sha
+    save_state(state_dir, state)
+    atomic_write_json(frontend_out, installed)
+    set_pending(state_dir, artifact, sha, generation)
+    return installed, report
+
+
+def reconcile_locked(state_dir: Path, state: dict, frontend_out: Path) -> bool:
+    """Replay any incomplete installation from the authoritative
+    state: restore the install path from the current artifact, and
+    re-queue publication when the state's generation has not been
+    published. Returns True when anything was repaired. Caller holds
+    the state lock."""
+    changed = False
+    sha = state.get("artifactSha256")
+    if not sha:
+        # No artifact was ever recorded for this state (a reset, or a
+        # crash before the first install completed): finalise now.
+        if int(state.get("generation") or 0) == 0:
+            state["generation"] = 1
+        installed, _report = finalise_frontend(state, int(state["generation"]))
+        artifact, sha = write_artifact(state_dir, installed)
+        state["artifactSha256"] = sha
+        save_state(state_dir, state)
+        changed = True
+    artifact = state_dir / "artifacts" / f"{sha}.json"
+    if not artifact.is_file():
+        raise MergeError(f"state names artifact {sha} but it is missing")
+    if (not frontend_out.is_file()
+            or hashlib.sha256(frontend_out.read_bytes()).hexdigest() != sha):
+        atomic_write_bytes(frontend_out, artifact.read_bytes())
+        changed = True
+    if int(state.get("publishedGeneration") or 0) < int(state.get("generation") or 0):
+        pending = read_pending(state_dir)
+        if not pending or pending.get("sha256") != sha:
+            set_pending(state_dir, artifact, sha, int(state["generation"]))
+            changed = True
+    return changed
+
+
+def publish_artifact(repo: Path, artifact: Path) -> dict:
     result = subprocess.run(
         [sys.executable, str(repo / PUBLISHER), "--file", str(artifact)],
         cwd=repo, capture_output=True, text=True, timeout=900,
@@ -373,37 +489,37 @@ def publish_artifact(repo: Path, state_dir: Path, artifact: Path) -> dict:
     return json.loads(result.stdout)
 
 
-def publish_pending(repo: Path, state_dir: Path) -> dict | None:
-    """Publish the queued artifact, if any. Returns the publisher
-    receipt, or None when nothing is pending. On success the pending
-    record is cleared; on failure it stays queued for the next run."""
+def publish_pending_locked(repo: Path, state_dir: Path, state: dict) -> tuple[dict | None, str | None]:
+    """Publish the queued artifact. Caller holds the state lock, so
+    the queue cannot change underneath the drain. Returns (receipt,
+    error): exactly one is non-None when something was pending. On
+    success the state's publishedGeneration advances and the pending
+    record is cleared only if it still names the published artifact."""
     pending = read_pending(state_dir)
     if pending is None:
-        return None
+        return None, None
     artifact = state_dir / "artifacts" / pending["artifact"]
     if not artifact.is_file():
-        raise MergeError(f"pending artifact is missing: {artifact}")
-    receipt = publish_artifact(repo, state_dir, artifact)
-    (state_dir / "pending-publish.json").unlink()
-    return receipt
+        return None, f"pending artifact is missing: {artifact}"
+    try:
+        receipt = publish_artifact(repo, artifact)
+    except MergeError as exc:
+        return None, str(exc)
+    if pending.get("generation") is not None:
+        state["publishedGeneration"] = max(
+            int(state.get("publishedGeneration") or 0), int(pending["generation"]))
+        if "points" in state:  # never persist a synthetic state
+            save_state(state_dir, state)
+    current = read_pending(state_dir)
+    if current and current.get("artifact") == pending["artifact"]:
+        (state_dir / "pending-publish.json").unlink()
+    return receipt, None
 
 
 def append_receipt(state_dir: Path, receipt: dict) -> None:
     path = state_dir / "receipts.jsonl"
     with open(path, "a") as fh:
         fh.write(json.dumps(receipt, default=str) + "\n")
-
-
-def install_and_queue(state_dir: Path, state: dict, frontend_out: Path) -> tuple[dict, dict]:
-    """Finalise the state, install it atomically, persist the state,
-    and queue the exact installed bytes for publication. Caller holds
-    the state lock. Returns (installed, isotonic_report)."""
-    installed, report = finalise_frontend(state)
-    atomic_write_json(frontend_out, installed)
-    save_state(state_dir, state)
-    artifact, sha = write_artifact(state_dir, installed)
-    set_pending(state_dir, artifact, sha)
-    return installed, report
 
 
 # ---------------------------------------------------------------------------
@@ -425,6 +541,16 @@ def group_frontend_records(flat_records: list[dict]) -> dict[tuple[str, str], li
             continue
         grouped.setdefault((flat["point_id"], flat["source"]), []).append(frontend_record(flat))
     return grouped
+
+
+def arm_counts(flat_records: list[dict]) -> dict[str, dict[str, int]]:
+    counts: dict[str, dict[str, int]] = {}
+    for flat in flat_records:
+        entry = counts.setdefault(flat["source"], {"built": 0, "usable": 0})
+        entry["built"] += 1
+        if not flat["missing"]:
+            entry["usable"] += 1
+    return counts
 
 
 def append_tracking(repo: Path, flat_records: list[dict], cycle_compact: str) -> None:
@@ -464,23 +590,33 @@ def score_ecmwf(rms, points, model, features, date: str, cycle: int):
 # Commands
 # ---------------------------------------------------------------------------
 
-def finish_run(args, receipt: dict, flat_records: list[dict], cycle_compact: str) -> dict:
-    """Shared tail of a merge/commit-full run: tracking (best effort),
-    pending publication (this run's artifact and any older queued one),
-    durable receipt."""
+def finish_locked(args, state_dir: Path, state: dict, receipt: dict) -> dict:
+    """Publish any pending artifact and append the durable receipt,
+    both inside the state lock and both before the command reports
+    its outcome: an installed update always has its disposition —
+    including a publication failure — recorded. Caller holds the
+    lock and passes the (possibly updated) state."""
     repo = Path(args.repo)
-    state_dir = repo / args.state_dir
-    if flat_records:
-        try:
-            append_tracking(repo, flat_records, cycle_compact)
-        except Exception as exc:  # tracking must never block publication
-            receipt["trackingWarning"] = str(exc)
-    published = publish_pending(repo, state_dir)
-    receipt["published"] = published is not None
+    published, error = publish_pending_locked(repo, state_dir, state)
     if published is not None:
+        receipt["publishStatus"] = "published"
         receipt["publishReceipt"] = published
+    elif error is not None:
+        receipt["publishStatus"] = "failed"
+        receipt["publishError"] = error
+    else:
+        receipt["publishStatus"] = "none-pending"
     append_receipt(state_dir, receipt)
     return receipt
+
+
+def track_best_effort(args, receipt: dict, flat_records: list[dict], cycle_compact: str) -> None:
+    if not flat_records:
+        return
+    try:
+        append_tracking(Path(args.repo), flat_records, cycle_compact)
+    except Exception as exc:  # tracking must never block publication
+        receipt["trackingWarning"] = str(exc)
 
 
 def run_merge(args, new_records: dict[tuple[str, str], list[dict]],
@@ -488,24 +624,49 @@ def run_merge(args, new_records: dict[tuple[str, str], list[dict]],
               warnings: list[str]) -> dict:
     repo = Path(args.repo)
     state_dir = repo / args.state_dir
+    counts = arm_counts(flat_records)
+    built = sum(c["built"] for c in counts.values())
+    usable = sum(c["usable"] for c in counts.values())
     with state_lock(state_dir):
         state = load_state(state_dir)
+        reconcile_locked(state_dir, state, repo / args.frontend_out)
         merged, stats = merge_frontend(state, new_records)
-        receipt: dict[str, Any] = {"action": "merge", "runCycles": run_cycles, **stats,
-                                   "warnings": warnings}
-        if stats["replaced"] == 0:
-            receipt["outcome"] = "already-current"
-        else:
+        overlapping = usable - stats["skippedAbsent"]
+        receipt: dict[str, Any] = {
+            "action": "merge", "runCycles": run_cycles, **stats,
+            "arms": counts, "overlapping": overlapping,
+            "outcome": classify_outcome(built, usable, overlapping, stats["replaced"]),
+            "warnings": warnings,
+        }
+        if stats["replaced"] > 0:
             installed, isotonic_report = install_and_queue(
                 state_dir, merged, repo / args.frontend_out)
-            receipt["outcome"] = "merged"
             receipt["recordsTotal"] = sum(
                 len(rows) for p in installed["points"] for rows in p["forecasts"].values())
             receipt["cycles"] = installed["cycles"]
+            receipt["generation"] = installed.get("servingGeneration")
             receipt["isotonicAdjustedWindows"] = isotonic_report.get("adjusted_windows")
+        receipt = finish_locked(args, state_dir, state, receipt)
     newest = max(run_cycles.values())
     cycle_compact = newest[:13].replace("-", "").replace(":", "") + "Z"
-    return finish_run(args, receipt, flat_records, cycle_compact)
+    track_best_effort(args, receipt, flat_records, cycle_compact)
+    return receipt
+
+
+def finish_noop(args, outcome: str, run_cycles: dict[str, str],
+                warnings: list[str], counts: dict) -> dict:
+    """A run that scored nothing it could install: still reconcile,
+    drain any pending publication, and record the receipt."""
+    repo = Path(args.repo)
+    state_dir = repo / args.state_dir
+    with state_lock(state_dir):
+        state = load_state(state_dir)
+        reconcile_locked(state_dir, state, repo / args.frontend_out)
+        receipt: dict[str, Any] = {"action": "merge", "runCycles": run_cycles,
+                                   "outcome": outcome, "arms": counts,
+                                   "warnings": warnings}
+        receipt = finish_locked(args, state_dir, state, receipt)
+    return receipt
 
 
 def cmd_hrrr(args) -> dict:
@@ -514,6 +675,7 @@ def cmd_hrrr(args) -> dict:
     points, model, features = load_model_and_points(repo)
     now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     rejections: list[str] = []
+    saw_unusable = False
     for back in (1, 2, 3, 4):
         candidate = now - timedelta(hours=back)
         date, hour = candidate.strftime("%Y%m%d"), candidate.hour
@@ -524,12 +686,22 @@ def cmd_hrrr(args) -> dict:
             rejections.append(str(exc))
             continue
         flat = score_hrrr_series(rms, points, model, features, series, date, hour)
-        if not any(not r["missing"] for r in flat):
-            rejections.append(f"HRRR {date} {hour:02d}Z scored no usable records")
-            continue
-        return run_merge(args, group_frontend_records(flat), flat,
-                         {"hrrr": iso_z(candidate)}, rejections)
-    raise MergeError(f"no usable HRRR cycle in the last 4 hours: {rejections}")
+        counts = arm_counts(flat)
+        usable = sum(c["usable"] for c in counts.values())
+        built = sum(c["built"] for c in counts.values())
+        if usable > 0:
+            return run_merge(args, group_frontend_records(flat), flat,
+                             {"hrrr": iso_z(candidate)}, rejections)
+        if built == 0:
+            # The cycle's horizon reaches no standing window at all;
+            # older cycles reach strictly less, so probing stops here.
+            return finish_noop(args, "no-eligible-windows",
+                               {"hrrr": iso_z(candidate)}, rejections, counts)
+        saw_unusable = True
+        rejections.append(f"HRRR {date} {hour:02d}Z scored no usable records")
+    if saw_unusable:
+        return finish_noop(args, "no-usable-data", {}, rejections, {})
+    raise MergeError(f"no HRRR cycle available in the last 4 hours: {rejections}")
 
 
 def cmd_ecmwf(args) -> dict:
@@ -539,7 +711,11 @@ def cmd_ecmwf(args) -> dict:
     repo = Path(args.repo)
     points, model, features = load_model_and_points(repo)
     flat = score_ecmwf(rms, points, model, features, args.date, args.cycle)
+    counts = arm_counts(flat)
     warnings: list[str] = []
+    if counts.get("ecmwf", {}).get("usable", 0) == 0:
+        warnings.append(f"ECMWF {args.date} {args.cycle:02d}Z scored no usable records")
+        flat = []  # its records are all missing; drop them entirely
     try:
         series = build_hrrr(rms, points, args.date, args.cycle, max_step=48)
         hrrr_flat = score_hrrr_series(rms, points, model, features, series, args.date, args.cycle)
@@ -550,6 +726,10 @@ def cmd_ecmwf(args) -> dict:
     except CycleUnavailable as exc:
         warnings.append(f"{exc}; ECMWF merged alone")
     cycle_dt = datetime.strptime(args.date, "%Y%m%d").replace(hour=args.cycle, tzinfo=timezone.utc)
+    total_usable = sum(c["usable"] for c in arm_counts(flat).values())
+    if total_usable == 0:
+        return finish_noop(args, "no-usable-data", {"ecmwf": iso_z(cycle_dt)},
+                           warnings, arm_counts(flat))
     return run_merge(args, group_frontend_records(flat), flat,
                      {"ecmwf": iso_z(cycle_dt)}, warnings)
 
@@ -566,12 +746,14 @@ def cmd_commit_full(args) -> dict:
         new_state, stats = adopt_full_frontend(old_state, candidate)
         installed, isotonic_report = install_and_queue(
             state_dir, new_state, repo / args.frontend_out)
-    receipt = {"action": "commit-full", "candidateCycles": candidate["cycles"], **stats,
-               "recordsTotal": sum(len(rows) for p in installed["points"] for rows in p["forecasts"].values()),
-               "cycles": installed["cycles"],
-               "isotonicAdjustedWindows": isotonic_report.get("adjusted_windows"),
-               "warnings": []}
-    return finish_run(args, receipt, [], "commit-full")
+        receipt = {"action": "commit-full", "candidateCycles": candidate["cycles"], **stats,
+                   "recordsTotal": sum(len(rows) for p in installed["points"] for rows in p["forecasts"].values()),
+                   "cycles": installed["cycles"],
+                   "generation": installed.get("servingGeneration"),
+                   "isotonicAdjustedWindows": isotonic_report.get("adjusted_windows"),
+                   "warnings": []}
+        receipt = finish_locked(args, state_dir, new_state, receipt)
+    return receipt
 
 
 def cmd_reset(args) -> dict:
@@ -583,7 +765,13 @@ def cmd_reset(args) -> dict:
     frontend = json.loads(frontend_path.read_text())
     with state_lock(state_dir):
         old_state = load_state(state_dir) if (state_dir / "state.json").is_file() else None
-        state, stats = adopt_full_frontend(old_state, frontend)
+        state, stats = adopt_full_frontend(old_state, frontend, allow_stale=True)
+        # A reset re-seeds: generation bookkeeping restarts from the
+        # standing lineage, and no artifact is claimed for the new
+        # state until the next install finalises one.
+        state["generation"] = int((old_state or {}).get("generation") or 0)
+        state["publishedGeneration"] = 0
+        state["artifactSha256"] = None
         save_state(state_dir, state)
     return {"action": "reset", "cycles": recompute_cycles(state)["cycles"], **stats,
             "records": sum(len(rows) for p in state["points"] for rows in p["forecasts"].values())}
@@ -594,17 +782,23 @@ def cmd_reinstall(args) -> dict:
     state_dir = repo / args.state_dir
     with state_lock(state_dir):
         state = load_state(state_dir)
-        installed, _report = finalise_frontend(state)
-        atomic_write_json(repo / args.frontend_out, installed)
-    return {"action": "reinstall", "cycles": installed["cycles"]}
+        changed = reconcile_locked(state_dir, state, repo / args.frontend_out)
+    return {"action": "reinstall", "repaired": changed,
+            "cycles": state["cycles"], "generation": state.get("generation")}
 
 
 def cmd_publish_pending(args) -> dict:
     repo = Path(args.repo)
     state_dir = repo / args.state_dir
-    published = publish_pending(repo, state_dir)
-    return {"action": "publish-pending", "published": published is not None,
-            **({"publishReceipt": published} if published else {})}
+    with state_lock(state_dir):
+        if (state_dir / "state.json").is_file():
+            state = load_state(state_dir)
+            reconcile_locked(state_dir, state, repo / args.frontend_out)
+        else:
+            state = {"generation": 0, "publishedGeneration": 0}
+        receipt: dict[str, Any] = {"action": "publish-pending", "warnings": []}
+        receipt = finish_locked(args, state_dir, state, receipt)
+    return receipt
 
 
 def main() -> int:
@@ -646,6 +840,10 @@ def main() -> int:
         print(f"merge failed: {exc}", file=sys.stderr)
         return 1
     print(json.dumps(receipt, indent=1, default=str))
+    if receipt.get("publishStatus") == "failed":
+        return 2
+    if receipt.get("outcome") == "no-usable-data":
+        return 4
     return 0
 
 
