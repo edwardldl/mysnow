@@ -10,6 +10,14 @@ requires-python = ">=3.11"
 dependencies = [
   "h3==4.3.1",
   "pyarrow==25.0.1",
+  # The CLI's import chain (cli -> gold_model and the track-*
+  # commands) needs the numerical stack unconditionally; declaring
+  # it only under extras left a clean `pip install -e .` — exactly
+  # what CI does — unable to import the package at all.
+  "numpy==2.5.4",
+  "pandas==3.0.6",
+  "scipy==1.18.1",
+  "scikit-learn==1.9.1",
 ]
 
 # NOAA HRRR GRIB2 extraction prototype (slr_calibration.noaa_hrrr):
