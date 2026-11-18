@@ -23,7 +23,14 @@ jobs:
     if: github.event.schedule == '30 12 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.TRACKING_APP_ID }}
+          private-key: ${{ secrets.TRACKING_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -35,8 +42,8 @@ jobs:
         run: mysnow-slr-calibration track-run
       - name: Commit tracking data
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git config user.email "${{ vars.TRACKING_APP_ID }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
           git add data/tracking
           if git diff --cached --quiet; then
             echo "No tracking changes to commit."
@@ -49,7 +56,14 @@ jobs:
     if: github.event.schedule == '45 13 * * 1' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.TRACKING_APP_ID }}
+          private-key: ${{ secrets.TRACKING_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -63,8 +77,8 @@ jobs:
         run: mysnow-slr-calibration track-report
       - name: Commit artifacts and reports
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git config user.email "${{ vars.TRACKING_APP_ID }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
           git pull --rebase origin main
           git add data/tracking
           if git diff --cached --quiet; then
