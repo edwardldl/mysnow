@@ -1,11 +1,11 @@
 {
   "direct": {
-    "acceptedEventCount": 38,
-    "inputRowCount": 660,
+    "acceptedEventCount": 42,
+    "inputRowCount": 707,
     "resorts": {
       "aspen": {
-        "acceptedEventCount": 38,
-        "inputRowCount": 660,
+        "acceptedEventCount": 42,
+        "inputRowCount": 707,
         "rejectedReasons": [
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
@@ -301,6 +301,23 @@
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
           "INSUFFICIENT_NEW_SNOW",
           "INVALID_DIRECT_PAIR",
           "INSUFFICIENT_NEW_SNOW",
@@ -620,6 +637,32 @@
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INSUFFICIENT_NEW_SNOW",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INSUFFICIENT_NEW_SNOW",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INSUFFICIENT_FRESH_SWE",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
@@ -630,24 +673,24 @@
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR"
         ],
-        "rejectedRowCount": 622,
+        "rejectedRowCount": 665,
         "rejectionCounts": {
-          "INSUFFICIENT_FRESH_SWE": 4,
-          "INSUFFICIENT_NEW_SNOW": 8,
-          "INVALID_DIRECT_PAIR": 610
+          "INSUFFICIENT_FRESH_SWE": 5,
+          "INSUFFICIENT_NEW_SNOW": 10,
+          "INVALID_DIRECT_PAIR": 650
         }
       }
     }
   },
-  "eventCount": 166,
+  "eventCount": 174,
   "eventsPath": "data/tracking/events/events.csv",
   "labelQualityCounts": {
-    "direct": 38,
-    "weak_snotel_diff": 128
+    "direct": 42,
+    "weak_snotel_diff": 132
   },
   "weakSnotelDiff": {
-    "acceptedEventCount": 128,
-    "candidateCount": 2660,
+    "acceptedEventCount": 132,
+    "candidateCount": 2751,
     "gates": {
       "maxTavgC": 0.5,
       "maxTmaxC": 1.5,
@@ -655,16 +698,17 @@
       "minSweGainMm": 5.0,
       "precipExcessMm": 2.0
     },
-    "inputRowCount": 2667,
+    "inputRowCount": 2758,
     "qcWeight": 0.25,
-    "rejectedCandidateCount": 2532,
+    "rejectedCandidateCount": 2619,
     "rejectionCounts": {
-      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 722,
+      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 735,
       "INSUFFICIENT_DEPTH_GAIN": 44,
-      "INSUFFICIENT_SWE_GAIN": 1632,
+      "INSUFFICIENT_SWE_GAIN": 1692,
       "MISSING_MEASUREMENT": 3,
-      "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 61,
-      "RAIN_PHASE_SUSPECTED_TMAX": 41,
+      "NON_CONSECUTIVE_DAYS": 7,
+      "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 62,
+      "RAIN_PHASE_SUSPECTED_TMAX": 47,
       "SLR_OUT_OF_RANGE": 4,
       "WARM_DAY": 25
     }

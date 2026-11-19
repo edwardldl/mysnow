@@ -1,38 +1,38 @@
 # MySnow SLR tracking status
 
-Generated for 2026-10-18.
+Generated for 2026-11-19.
 
 ## Coverage
 
 - Pilot resorts: 10 (30 forecast points)
 - Resorts with a SNOTEL station within 40 km: 7
 - Resorts with GHCN paired stations within 40 km: 1 (2 stations)
-- SNOTEL daily rows: 2667 across 7 stations
-- GHCN daily rows: 660 across 2 stations
+- SNOTEL daily rows: 2758 across 7 stations
+- GHCN daily rows: 707 across 2 stations
 
 ## Recent observations (last 3 days)
 
-- SNOTEL 1308:UT:SNTL: latest 2026-10-16
-- SNOTEL 1326:CO:SNTL: latest 2026-10-16
-- SNOTEL 590:MT:SNTL: latest 2026-10-16
-- SNOTEL 689:WY:SNTL: latest 2026-10-16
-- SNOTEL 784:CA:SNTL: latest 2026-10-16
-- SNOTEL 791:WA:SNTL: latest 2026-10-16
-- SNOTEL 909:WA:SNTL: latest 2026-10-16
+- SNOTEL 1308:UT:SNTL: latest 2026-11-18
+- SNOTEL 1326:CO:SNTL: latest 2026-11-18
+- SNOTEL 590:MT:SNTL: latest 2026-11-18
+- SNOTEL 689:WY:SNTL: latest 2026-11-18
+- SNOTEL 784:CA:SNTL: latest 2026-11-18
+- SNOTEL 791:WA:SNTL: latest 2026-11-18
+- SNOTEL 909:WA:SNTL: latest 2026-11-18
 
 ## Forecast snapshots
 
-- Snapshots stored: 60 over 1 day(s)
+- Snapshots stored: 120 over 2 day(s)
 - Models: ecmwf_ifs, gfs_seamless
 
 ## Events
 
-- Total events: 166 (2025-10-14 .. 2026-05-27)
-- label_quality=direct: 38
-- label_quality=weak_snotel_diff: 128
-- region continental_mountain: 116
+- Total events: 174 (2025-10-14 .. 2026-11-18)
+- label_quality=direct: 42
+- label_quality=weak_snotel_diff: 132
+- region continental_mountain: 121
 - region pnw_maritime_mountain: 32
-- region sierra_maritime_mountain: 18
+- region sierra_maritime_mountain: 21
 
 ## Alignment and training
 
