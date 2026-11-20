@@ -682,15 +682,15 @@
       }
     }
   },
-  "eventCount": 174,
+  "eventCount": 177,
   "eventsPath": "data/tracking/events/events.csv",
   "labelQualityCounts": {
     "direct": 42,
-    "weak_snotel_diff": 132
+    "weak_snotel_diff": 135
   },
   "weakSnotelDiff": {
-    "acceptedEventCount": 132,
-    "candidateCount": 2751,
+    "acceptedEventCount": 135,
+    "candidateCount": 2758,
     "gates": {
       "maxTavgC": 0.5,
       "maxTmaxC": 1.5,
@@ -698,13 +698,13 @@
       "minSweGainMm": 5.0,
       "precipExcessMm": 2.0
     },
-    "inputRowCount": 2758,
+    "inputRowCount": 2765,
     "qcWeight": 0.25,
-    "rejectedCandidateCount": 2619,
+    "rejectedCandidateCount": 2623,
     "rejectionCounts": {
       "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 735,
       "INSUFFICIENT_DEPTH_GAIN": 44,
-      "INSUFFICIENT_SWE_GAIN": 1692,
+      "INSUFFICIENT_SWE_GAIN": 1696,
       "MISSING_MEASUREMENT": 3,
       "NON_CONSECUTIVE_DAYS": 7,
       "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 62,
