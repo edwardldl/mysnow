@@ -251,25 +251,25 @@
   },
   "events": {
     "byClimateRegime": {
-      "continental_mountain": 123,
+      "continental_mountain": 126,
       "pnw_maritime_mountain": 32,
       "sierra_maritime_mountain": 22
     },
     "byLabelQuality": {
       "direct": 42,
-      "weak_snotel_diff": 135
+      "weak_snotel_diff": 138
     },
     "bySource": {
       "NOAA GHCN-Daily direct SNOW+WESF": 42,
-      "SNOTEL daily total-pack differencing (weak label; NOT a snow-board fresh-snow measurement)": 135
+      "SNOTEL daily total-pack differencing (weak label; NOT a snow-board fresh-snow measurement)": 138
     },
     "dateRange": [
       "2025-10-14",
-      "2026-11-19"
+      "2026-11-20"
     ],
-    "eventCount": 177
+    "eventCount": 180
   },
-  "generatedForDate": "2026-11-20",
+  "generatedForDate": "2026-11-21",
   "observations": {
     "ghcnDailyRowCount": 707,
     "ghcnStationCount": 2,
@@ -277,37 +277,37 @@
       "ghcn": [],
       "snotel": [
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "1308:UT:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "1326:CO:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "590:MT:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "689:WY:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "784:CA:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "791:WA:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-19",
+          "latestObservationDate": "2026-11-20",
           "station": "909:WA:SNTL"
         }
       ],
       "windowDays": 3
     },
-    "snotelDailyRowCount": 2765,
+    "snotelDailyRowCount": 2772,
     "snotelStationCount": 7
   },
   "productionGates": {
@@ -325,17 +325,18 @@
     "resortsWithSnotel": 7
   },
   "snapshots": {
-    "dayCount": 3,
+    "dayCount": 4,
     "daysCollected": [
       "2026-10-18",
       "2026-11-19",
-      "2026-11-20"
+      "2026-11-20",
+      "2026-11-21"
     ],
     "models": [
       "ecmwf_ifs",
       "gfs_seamless"
     ],
-    "snapshotCount": 179
+    "snapshotCount": 239
   },
   "training": {
     "acceptedEventCount": 140,

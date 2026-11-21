@@ -682,15 +682,15 @@
       }
     }
   },
-  "eventCount": 177,
+  "eventCount": 180,
   "eventsPath": "data/tracking/events/events.csv",
   "labelQualityCounts": {
     "direct": 42,
-    "weak_snotel_diff": 135
+    "weak_snotel_diff": 138
   },
   "weakSnotelDiff": {
-    "acceptedEventCount": 135,
-    "candidateCount": 2758,
+    "acceptedEventCount": 138,
+    "candidateCount": 2765,
     "gates": {
       "maxTavgC": 0.5,
       "maxTmaxC": 1.5,
@@ -698,16 +698,16 @@
       "minSweGainMm": 5.0,
       "precipExcessMm": 2.0
     },
-    "inputRowCount": 2765,
+    "inputRowCount": 2772,
     "qcWeight": 0.25,
-    "rejectedCandidateCount": 2623,
+    "rejectedCandidateCount": 2627,
     "rejectionCounts": {
       "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 735,
-      "INSUFFICIENT_DEPTH_GAIN": 44,
-      "INSUFFICIENT_SWE_GAIN": 1696,
+      "INSUFFICIENT_DEPTH_GAIN": 45,
+      "INSUFFICIENT_SWE_GAIN": 1698,
       "MISSING_MEASUREMENT": 3,
       "NON_CONSECUTIVE_DAYS": 7,
-      "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 62,
+      "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 63,
       "RAIN_PHASE_SUSPECTED_TMAX": 47,
       "SLR_OUT_OF_RANGE": 4,
       "WARM_DAY": 25
