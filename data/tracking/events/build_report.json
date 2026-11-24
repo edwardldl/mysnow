@@ -1,11 +1,11 @@
 {
   "direct": {
-    "acceptedEventCount": 42,
-    "inputRowCount": 707,
+    "acceptedEventCount": 43,
+    "inputRowCount": 712,
     "resorts": {
       "aspen": {
-        "acceptedEventCount": 42,
-        "inputRowCount": 707,
+        "acceptedEventCount": 43,
+        "inputRowCount": 712,
         "rejectedReasons": [
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
@@ -318,6 +318,8 @@
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
           "INSUFFICIENT_NEW_SNOW",
           "INVALID_DIRECT_PAIR",
           "INSUFFICIENT_NEW_SNOW",
@@ -663,6 +665,8 @@
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INSUFFICIENT_FRESH_SWE",
+          "INVALID_DIRECT_PAIR",
+          "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR",
@@ -673,24 +677,24 @@
           "INVALID_DIRECT_PAIR",
           "INVALID_DIRECT_PAIR"
         ],
-        "rejectedRowCount": 665,
+        "rejectedRowCount": 669,
         "rejectionCounts": {
           "INSUFFICIENT_FRESH_SWE": 5,
           "INSUFFICIENT_NEW_SNOW": 10,
-          "INVALID_DIRECT_PAIR": 650
+          "INVALID_DIRECT_PAIR": 654
         }
       }
     }
   },
-  "eventCount": 183,
+  "eventCount": 185,
   "eventsPath": "data/tracking/events/events.csv",
   "labelQualityCounts": {
-    "direct": 42,
-    "weak_snotel_diff": 141
+    "direct": 43,
+    "weak_snotel_diff": 142
   },
   "weakSnotelDiff": {
-    "acceptedEventCount": 141,
-    "candidateCount": 2772,
+    "acceptedEventCount": 142,
+    "candidateCount": 2786,
     "gates": {
       "maxTavgC": 0.5,
       "maxTmaxC": 1.5,
@@ -698,13 +702,13 @@
       "minSweGainMm": 5.0,
       "precipExcessMm": 2.0
     },
-    "inputRowCount": 2779,
+    "inputRowCount": 2793,
     "qcWeight": 0.25,
-    "rejectedCandidateCount": 2631,
+    "rejectedCandidateCount": 2644,
     "rejectionCounts": {
-      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 736,
-      "INSUFFICIENT_DEPTH_GAIN": 46,
-      "INSUFFICIENT_SWE_GAIN": 1700,
+      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 744,
+      "INSUFFICIENT_DEPTH_GAIN": 47,
+      "INSUFFICIENT_SWE_GAIN": 1704,
       "MISSING_MEASUREMENT": 3,
       "NON_CONSECUTIVE_DAYS": 7,
       "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 63,
