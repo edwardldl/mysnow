@@ -694,7 +694,7 @@
   },
   "weakSnotelDiff": {
     "acceptedEventCount": 142,
-    "candidateCount": 2786,
+    "candidateCount": 2793,
     "gates": {
       "maxTavgC": 0.5,
       "maxTmaxC": 1.5,
@@ -702,19 +702,19 @@
       "minSweGainMm": 5.0,
       "precipExcessMm": 2.0
     },
-    "inputRowCount": 2793,
+    "inputRowCount": 2800,
     "qcWeight": 0.25,
-    "rejectedCandidateCount": 2644,
+    "rejectedCandidateCount": 2651,
     "rejectionCounts": {
-      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 744,
+      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 747,
       "INSUFFICIENT_DEPTH_GAIN": 47,
-      "INSUFFICIENT_SWE_GAIN": 1704,
+      "INSUFFICIENT_SWE_GAIN": 1707,
       "MISSING_MEASUREMENT": 3,
       "NON_CONSECUTIVE_DAYS": 7,
       "RAIN_PHASE_SUSPECTED_PRECIP_EXCESS": 63,
       "RAIN_PHASE_SUSPECTED_TMAX": 47,
       "SLR_OUT_OF_RANGE": 4,
-      "WARM_DAY": 25
+      "WARM_DAY": 26
     }
   }
 }
