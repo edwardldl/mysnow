@@ -694,7 +694,7 @@
   },
   "weakSnotelDiff": {
     "acceptedEventCount": 142,
-    "candidateCount": 2793,
+    "candidateCount": 2800,
     "gates": {
       "maxTavgC": 0.5,
       "maxTmaxC": 1.5,
@@ -702,12 +702,12 @@
       "minSweGainMm": 5.0,
       "precipExcessMm": 2.0
     },
-    "inputRowCount": 2800,
+    "inputRowCount": 2807,
     "qcWeight": 0.25,
-    "rejectedCandidateCount": 2651,
+    "rejectedCandidateCount": 2658,
     "rejectionCounts": {
-      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 747,
-      "INSUFFICIENT_DEPTH_GAIN": 47,
+      "DEPTH_DECREASED_MELT_OR_SETTLEMENT": 753,
+      "INSUFFICIENT_DEPTH_GAIN": 48,
       "INSUFFICIENT_SWE_GAIN": 1707,
       "MISSING_MEASUREMENT": 3,
       "NON_CONSECUTIVE_DAYS": 7,
