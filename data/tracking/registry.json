@@ -1,7 +1,7 @@
 {
   "active_snotel_station_count": 919,
   "awdb_stations_url": "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations",
-  "generated_for_date": "2026-11-26",
+  "generated_for_date": "2026-11-27",
   "resorts": [
     {
       "catalog_name": "Palisades Tahoe (app default location, src/lib/api.ts)",

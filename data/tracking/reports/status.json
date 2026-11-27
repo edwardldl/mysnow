@@ -269,7 +269,7 @@
     ],
     "eventCount": 185
   },
-  "generatedForDate": "2026-11-26",
+  "generatedForDate": "2026-11-27",
   "observations": {
     "ghcnDailyRowCount": 712,
     "ghcnStationCount": 2,
@@ -277,37 +277,37 @@
       "ghcn": [],
       "snotel": [
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "1308:UT:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "1326:CO:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "590:MT:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "689:WY:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "784:CA:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "791:WA:SNTL"
         },
         {
-          "latestObservationDate": "2026-11-25",
+          "latestObservationDate": "2026-11-26",
           "station": "909:WA:SNTL"
         }
       ],
       "windowDays": 3
     },
-    "snotelDailyRowCount": 2807,
+    "snotelDailyRowCount": 2814,
     "snotelStationCount": 7
   },
   "productionGates": {
@@ -325,7 +325,7 @@
     "resortsWithSnotel": 7
   },
   "snapshots": {
-    "dayCount": 8,
+    "dayCount": 9,
     "daysCollected": [
       "2026-10-18",
       "2026-11-19",
@@ -334,13 +334,14 @@
       "2026-11-22",
       "2026-11-24",
       "2026-11-25",
-      "2026-11-26"
+      "2026-11-26",
+      "2026-11-27"
     ],
     "models": [
       "ecmwf_ifs",
       "gfs_seamless"
     ],
-    "snapshotCount": 479
+    "snapshotCount": 539
   },
   "training": {
     "acceptedEventCount": 140,
